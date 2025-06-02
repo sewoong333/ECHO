@@ -87,6 +87,30 @@ const CardWrap = styled.div`
   position: relative;
 `;
 
+// 민트 그린 컬러 팔레트
+const colors = {
+  bg: '#e0f7f3',
+  card: '#fff',
+  border: '#b2f0e6',
+  shadow: 'rgba(46,216,182,0.08)',
+  accent: '#2ed8b6',
+  accentLight: '#b2f0e6',
+  text: '#1a4740',
+  sub: '#3bbfa6',
+  time: '#7ad9c2',
+};
+
+// 썸네일 매핑 함수 (Unsplash 등 무료 이미지)
+function getThumbnail(title) {
+  if (title.includes('기타')) return 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80';
+  if (title.includes('피아노')) return 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80';
+  if (title.includes('드럼')) return 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80';
+  if (title.includes('바이올린')) return 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80';
+  if (title.includes('플룻')) return 'https://images.unsplash.com/photo-1513883049090-d0b7439799bf?auto=format&fit=crop&w=400&q=80';
+  // 기본 이미지
+  return 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80';
+}
+
 export default function Home() {
   const navigate = useNavigate();
   const { products, likes, toggleLike } = useContext(ProductContext);
@@ -117,7 +141,7 @@ export default function Home() {
             {likes.includes(product.id) ? <FaHeart /> : <FaRegHeart />}
           </LikeBtn>
           <Card onClick={() => navigate(`/product/${product.id}`)}>
-            <Img src={product.image} alt={product.title} />
+            <Img src={getThumbnail(product.title)} alt={product.title} />
             <Info>
               <div>
                 <Title>{product.title}</Title>

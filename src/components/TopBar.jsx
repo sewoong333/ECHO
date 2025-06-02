@@ -9,8 +9,8 @@ const Bar = styled.header`
   max-width: 480px;
   margin: 0 auto;
   height: 52px;
-  background: #fff;
-  border-bottom: 1px solid #eee;
+  background: #e0f7f3;
+  border-bottom: 1px solid #2ed8b6;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -20,13 +20,13 @@ const Bar = styled.header`
 const Title = styled.div`
   font-size: 20px;
   font-weight: 700;
-  color: #222;
+  color: #2ed8b6;
 `;
 const IconBtn = styled.button`
   background: none;
   border: none;
   margin-left: 12px;
-  color: #888;
+  color: #2ed8b6;
   font-size: 18px;
   cursor: pointer;
 `;
@@ -34,7 +34,7 @@ const IconBtn = styled.button`
 export default function TopBar() {
   return (
     <Bar>
-      <Title>내 동네</Title>
+      <Title>ECHO</Title>
       <div>
         <IconBtn><FaSearch size={18} /></IconBtn>
         <IconBtn><FaBell size={18} /></IconBtn>
