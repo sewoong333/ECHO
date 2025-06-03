@@ -3,73 +3,122 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '../components/TopBar';
 import { ProductContext } from '../store/ProductContext';
-import { FaHeart, FaRegHeart } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaClock, FaRegCommentDots } from 'react-icons/fa';
+
+const colors = {
+  bg: '#f8f9fa',
+  border: '#ddd',
+  text: '#222',
+  sub: '#888',
+  accent: '#ff7e36',
+  shadow: '0 1px 4px rgba(0,0,0,0.03)',
+  accentLight: '0 2px 12px rgba(255,126,54,0.2)',
+  time: '#bbb',
+  card: '#fff'
+};
 
 const ListWrapper = styled.div`
-  max-width: 480px;
-  margin: 0 auto;
-  padding-bottom: 60px;
-  background: #f8f9fa;
+  width: 100vw;
   min-height: 100vh;
+  background: #f8f9fa;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 const SearchBox = styled.div`
-  padding: 16px 16px 0 16px;
-  background: #f8f9fa;
+  padding: 18px 18px 0 18px;
+  background: ${colors.bg};
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  @media (max-width: 480px) {
+    padding: 14px 10px 0 10px;
+  }
 `;
 const SearchInput = styled.input`
   width: 100%;
-  padding: 10px 14px;
-  font-size: 16px;
+  padding: 14px 18px;
+  font-size: 17px;
   border-radius: 16px;
-  border: 1px solid #ddd;
-  margin-bottom: 8px;
+  border: 1.5px solid ${colors.border};
+  margin-bottom: 10px;
+  background: #fff;
+  box-sizing: border-box;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+  font-weight: 500;
+  color: ${colors.text};
+  box-shadow: 0 1px 6px ${colors.shadow};
+  &:focus {
+    border: 1.5px solid ${colors.accent};
+    box-shadow: 0 2px 12px ${colors.accentLight};
+  }
+  @media (max-width: 480px) {
+    font-size: 15px;
+    padding: 12px 12px;
+  }
 `;
 const Card = styled.div`
   display: flex;
+  align-items: center;
   background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid #eee;
-  margin-bottom: 12px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  border-bottom: 1px solid #eee;
+  padding: 16px 0 16px 16px;
+  width: 100%;
+  box-sizing: border-box;
   cursor: pointer;
-  transition: box-shadow 0.15s;
-  &:active { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  transition: background 0.12s;
+  &:active { background: #f2f2f2; }
 `;
 const Img = styled.img`
-  width: 110px;
-  height: 110px;
+  width: 80px;
+  height: 80px;
   object-fit: cover;
   background: #eee;
+  border-radius: 12px;
+  flex-shrink: 0;
 `;
 const Info = styled.div`
   flex: 1;
-  padding: 16px 16px 12px 16px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
+  margin-left: 14px;
 `;
 const Title = styled.h2`
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 700;
   color: #222;
-  line-height: 1.3;
+  margin: 0 0 4px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 const Meta = styled.div`
-  font-size: 14px;
+  font-size: 13px;
   color: #888;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 `;
 const Price = styled.div`
   font-size: 16px;
   font-weight: 700;
-  color: #ff7e36;
+  color: #222;
+  margin-top: 2px;
 `;
-const Time = styled.div`
+const CardBottom = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+`;
+const Stat = styled.span`
+  display: flex;
+  align-items: center;
   font-size: 13px;
   color: #bbb;
-  margin-top: 8px;
+  gap: 3px;
 `;
 const LikeBtn = styled.button`
   background: none;
@@ -79,42 +128,60 @@ const LikeBtn = styled.button`
   top: 10px;
   right: 10px;
   z-index: 2;
-  font-size: 22px;
-  color: ${props => props.liked ? '#ff7e36' : '#bbb'};
+  font-size: 20px;
+  color: ${props => props.$liked ? colors.accent : colors.sub};
   cursor: pointer;
+  touch-action: manipulation;
+  transition: color 0.18s, transform 0.13s;
+  &:active {
+    transform: scale(1.18);
+    color: ${colors.accent};
+  }
+  @media (max-width: 480px) {
+    font-size: 17px;
+    top: 7px;
+    right: 7px;
+  }
 `;
 const CardWrap = styled.div`
   position: relative;
+  user-select: none;
+  -webkit-tap-highlight-color: rgba(0,0,0,0.05);
 `;
-
-// 민트 그린 컬러 팔레트
-const colors = {
-  bg: '#e0f7f3',
-  card: '#fff',
-  border: '#b2f0e6',
-  shadow: 'rgba(46,216,182,0.08)',
-  accent: '#2ed8b6',
-  accentLight: '#b2f0e6',
-  text: '#1a4740',
-  sub: '#3bbfa6',
-  time: '#7ad9c2',
-};
-
-// 썸네일 매핑 함수 (Unsplash 등 무료 이미지)
-function getThumbnail(title) {
-  if (title.includes('기타')) return 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80';
-  if (title.includes('피아노')) return 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80';
-  if (title.includes('드럼')) return 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80';
-  if (title.includes('바이올린')) return 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80';
-  if (title.includes('플룻')) return 'https://images.unsplash.com/photo-1513883049090-d0b7439799bf?auto=format&fit=crop&w=400&q=80';
-  // 기본 이미지
-  return 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80';
-}
+const EmptyMsg = styled.div`
+  color: ${colors.sub};
+  text-align: center;
+  margin-top: 60px;
+  font-size: 16px;
+  font-weight: 500;
+  @media (max-width: 480px) {
+    font-size: 14px;
+    margin-top: 40px;
+  }
+`;
+const SortSelect = styled.select`
+  height: 32px;
+  border-radius: 7px;
+  border: 1.5px solid #b2f0e6;
+  background: #fff;
+  color: #1a4740;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 0 10px;
+  margin-left: 8px;
+  outline: none;
+  box-shadow: 0 1px 4px #b2f0e6;
+  transition: border 0.15s;
+  &:focus {
+    border: 1.5px solid #2ed8b6;
+  }
+`;
 
 export default function Home() {
   const navigate = useNavigate();
   const { products, likes, toggleLike } = useContext(ProductContext);
   const [search, setSearch] = useState('');
+  const [sort, setSort] = useState('latest');
   const filtered = products.filter(product => {
     const q = search.toLowerCase();
     return (
@@ -124,36 +191,47 @@ export default function Home() {
       (product.location && product.location.toLowerCase().includes(q))
     );
   });
+  const sorted = [...filtered].sort((a, b) => {
+    if (sort === 'latest') return b.id - a.id;
+    if (sort === 'price') return (b.price || 0) - (a.price || 0);
+    return 0;
+  });
   return (
     <ListWrapper>
       <TopBar />
-      <SearchBox>
-        <SearchInput
-          type="text"
-          placeholder="검색어를 입력하세요 (제목, 설명, 카테고리, 위치)"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-      </SearchBox>
-      {filtered.map(product => (
-        <CardWrap key={product.id}>
-          <LikeBtn liked={likes.includes(product.id)} onClick={e => { e.stopPropagation(); toggleLike(product.id); }} aria-label="찜">
-            {likes.includes(product.id) ? <FaHeart /> : <FaRegHeart />}
-          </LikeBtn>
-          <Card onClick={() => navigate(`/product/${product.id}`)}>
-            <Img src={getThumbnail(product.title)} alt={product.title} />
-            <Info>
-              <div>
+      <div style={{ width: '100%', maxWidth: 480, margin: '0 auto' }}>
+        <SearchBox>
+          <SearchInput
+            type="text"
+            placeholder="검색어를 입력하세요 (제목, 설명, 카테고리, 위치)"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', marginTop: 6 }}>
+            <SortSelect value={sort} onChange={e => setSort(e.target.value)}>
+              <option value="latest">최신순</option>
+              <option value="price">가격순</option>
+            </SortSelect>
+          </div>
+        </SearchBox>
+        {sorted.map(product => (
+          <CardWrap key={product.id}>
+            <Card onClick={() => navigate(`/product/${product.id}`)}>
+              <Img src={product.image} alt={product.title} />
+              <Info>
                 <Title>{product.title}</Title>
                 <Meta>{product.location}</Meta>
                 <Price>{product.price}</Price>
-              </div>
-              <Time>{product.time}</Time>
-            </Info>
-          </Card>
-        </CardWrap>
-      ))}
-      {filtered.length === 0 && <div style={{ color: '#888', textAlign: 'center', marginTop: 40 }}>검색 결과가 없습니다.</div>}
+                <CardBottom>
+                  <Stat><FaRegCommentDots size={15} /> {product.views || 0}</Stat>
+                  <Stat><FaHeart size={14} /> {likes.filter(id => id === product.id).length}</Stat>
+                </CardBottom>
+              </Info>
+            </Card>
+          </CardWrap>
+        ))}
+        {sorted.length === 0 && <EmptyMsg>검색 결과가 없습니다.</EmptyMsg>}
+      </div>
     </ListWrapper>
   );
 } 

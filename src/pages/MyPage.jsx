@@ -19,7 +19,7 @@ export default function MyPage() {
     navigate('/');
   };
   return (
-    <div style={{ maxWidth: 480, margin: '0 auto', padding: 0, background: '#e0f7f3', minHeight: '100vh' }}>
+    <div style={{ maxWidth: 480, margin: '0 auto', padding: 0, background: '#f8f9fa', minHeight: '100vh' }}>
       <TopBar />
       <div style={{ padding: 24 }}>
         <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 24, color: '#2ed8b6' }}>마이페이지</h1>

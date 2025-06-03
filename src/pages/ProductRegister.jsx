@@ -44,6 +44,12 @@ export default function ProductRegister() {
             <label>사진<br />
               <input type="file" name="image" onChange={handleChange} style={{ width: '100%' }} />
             </label>
+            {form.image && (
+              <div style={{ marginTop: 12, textAlign: 'center' }}>
+                <img src={form.image} alt="미리보기" style={{ maxWidth: 220, maxHeight: 220, borderRadius: 12, border: '2px solid #b2f0e6', boxShadow: '0 2px 8px #b2f0e6', background: '#fff' }} />
+                <div style={{ color: '#3bbfa6', fontSize: 14, marginTop: 4 }}>이미지 미리보기</div>
+              </div>
+            )}
           </div>
           <div style={{ marginBottom: 16 }}>
             <label>제목<br />

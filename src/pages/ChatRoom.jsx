@@ -31,7 +31,7 @@ export default function ChatRoom() {
   }, [messages]);
 
   return (
-    <div style={{ maxWidth: 500, margin: '0 auto', padding: 0, background: '#e0f7f3', minHeight: '100vh' }}>
+    <div style={{ maxWidth: 500, margin: '0 auto', padding: 0, background: '#f8f9fa', minHeight: '100vh' }}>
       <TopBar />
       <button onClick={() => navigate(-1)} style={{ position: 'absolute', top: 60, left: 16, background: '#e0f7f3', border: '1.5px solid #2ed8b6', borderRadius: 20, width: 36, height: 36, fontSize: 20, color: '#2ed8b6', zIndex: 102 }}>←</button>
       <div style={{ padding: 24, paddingBottom: 80 }}>

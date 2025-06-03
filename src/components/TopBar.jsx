@@ -3,42 +3,72 @@ import styled from 'styled-components';
 import { FaSearch, FaBell } from 'react-icons/fa';
 
 const Bar = styled.header`
-  position: sticky;
-  top: 0;
-  left: 0; right: 0;
+  width: 100%;
+  height: 56px;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-sizing: border-box;
+  z-index: 101;
+`;
+const BarInner = styled.div`
+  width: 100%;
   max-width: 480px;
   margin: 0 auto;
-  height: 52px;
-  background: #e0f7f3;
-  border-bottom: 1px solid #2ed8b6;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  z-index: 101;
+  height: 100%;
 `;
 const Title = styled.div`
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
-  color: #2ed8b6;
+  color: #222;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+const Dropdown = styled.span`
+  font-size: 18px;
+  color: #888;
+  margin-left: 2px;
 `;
 const IconBtn = styled.button`
   background: none;
   border: none;
-  margin-left: 12px;
-  color: #2ed8b6;
-  font-size: 18px;
+  margin-left: 16px;
+  color: #222;
+  font-size: 20px;
   cursor: pointer;
+  position: relative;
+`;
+const Badge = styled.span`
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  background: #ff7e36;
+  border-radius: 50%;
 `;
 
 export default function TopBar() {
   return (
     <Bar>
-      <Title>ECHO</Title>
-      <div>
-        <IconBtn><FaSearch size={18} /></IconBtn>
-        <IconBtn><FaBell size={18} /></IconBtn>
-      </div>
+      <BarInner>
+        <Title>
+          구로동 <Dropdown>▼</Dropdown>
+        </Title>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <IconBtn><svg width="22" height="22" fill="none" stroke="#222" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></IconBtn>
+          <IconBtn><FaSearch size={20} /></IconBtn>
+          <IconBtn style={{ position: 'relative' }}><FaBell size={20} /><Badge /></IconBtn>
+        </div>
+      </BarInner>
     </Bar>
   );
 } 

@@ -8,6 +8,7 @@ import ProductRegister from '../pages/ProductRegister';
 import ProductDetail from '../pages/ProductDetail';
 import ChatRoom from '../pages/ChatRoom';
 import MyPage from '../pages/MyPage';
+import MusicLife from '../pages/MusicLife';
 
 export default function AppRouter() {
   return (
@@ -20,6 +21,7 @@ export default function AppRouter() {
       <Route path="/product/:id" element={<ProductDetail />} />
       <Route path="/chat/:id" element={<ChatRoom />} />
       <Route path="/mypage" element={<MyPage />} />
+      <Route path="/musiclife" element={<MusicLife />} />
     </Routes>
   );
 } 
