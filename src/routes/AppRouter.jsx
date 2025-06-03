@@ -10,6 +10,8 @@ import ChatRoom from '../pages/ChatRoom';
 import MyPage from '../pages/MyPage';
 import MusicLife from '../pages/MusicLife';
 import MusicLifeDetail from '../pages/MusicLifeDetail';
+import MapPage from '../pages/Map';
+import ChatList from '../pages/ChatList';
 
 export default function AppRouter() {
   return (
@@ -21,9 +23,11 @@ export default function AppRouter() {
       <Route path="/register" element={<ProductRegister />} />
       <Route path="/product/:id" element={<ProductDetail />} />
       <Route path="/chat/:id" element={<ChatRoom />} />
+      <Route path="/chat" element={<ChatList />} />
       <Route path="/mypage" element={<MyPage />} />
       <Route path="/musiclife" element={<MusicLife />} />
       <Route path="/musiclife/:id" element={<MusicLifeDetail />} />
+      <Route path="/map" element={<MapPage />} />
     </Routes>
   );
 } 

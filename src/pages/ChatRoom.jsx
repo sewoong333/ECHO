@@ -31,11 +31,11 @@ export default function ChatRoom() {
   }, [messages]);
 
   return (
-    <div style={{ maxWidth: 500, margin: '0 auto', padding: 0, background: '#f8f9fa', minHeight: '100vh' }}>
+    <div style={{ width: '100vw', minHeight: '100vh', background: '#f8f9fa', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <TopBar />
       <button onClick={() => navigate(-1)} style={{ position: 'absolute', top: 60, left: 16, background: '#e0f7f3', border: '1.5px solid #2ed8b6', borderRadius: 20, width: 36, height: 36, fontSize: 20, color: '#2ed8b6', zIndex: 102 }}>←</button>
-      <div style={{ padding: 24, paddingBottom: 80 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 16, color: '#2ed8b6' }}>채팅방</h1>
+      <div style={{ width: '100%', maxWidth: 500, margin: '0 auto', padding: 0 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 16, color: '#2ed8b6', textAlign: 'center' }}>채팅방</h1>
         <div style={{ minHeight: 200, marginBottom: 16 }}>
           {messages.map(msg => (
             <div key={msg.id} style={{ textAlign: msg.sender === (user.nickname || '나') ? 'right' : 'left', margin: '8px 0' }}>

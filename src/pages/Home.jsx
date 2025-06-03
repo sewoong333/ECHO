@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '../components/TopBar';
 import { ProductContext } from '../store/ProductContext';
-import { FaHeart, FaRegHeart, FaClock, FaRegCommentDots } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaClock, FaRegCommentDots, FaCheckCircle } from 'react-icons/fa';
 
 const colors = {
   bg: '#f8f9fa',
@@ -216,7 +216,7 @@ export default function Home() {
         </SearchBox>
         {sorted.map(product => (
           <CardWrap key={product.id}>
-            <Card onClick={() => navigate(`/product/${product.id}`)}>
+            <Card onClick={() => navigate(`/product/${product.id}`)} style={{ position: 'relative' }}>
               <Img src={product.image} alt={product.title} />
               <Info>
                 <Title>{product.title}</Title>
@@ -227,6 +227,11 @@ export default function Home() {
                   <Stat><FaHeart size={14} /> {likes.filter(id => id === product.id).length}</Stat>
                 </CardBottom>
               </Info>
+              {product.title.includes('커즈와일 신디사이저') && (
+                <span style={{ position: 'absolute', top: 14, right: 18, display: 'inline-flex', alignItems: 'center', color: '#2ed8b6', fontSize: 14, fontWeight: 700, background: '#fff', borderRadius: 12, boxShadow: '0 1px 4px #b2f0e6', padding: '2px 10px', zIndex: 3 }}>
+                  <FaCheckCircle style={{ marginRight: 3, color: '#2ed8b6', fontSize: 15 }} />ECHO 인증
+                </span>
+              )}
             </Card>
           </CardWrap>
         ))}
