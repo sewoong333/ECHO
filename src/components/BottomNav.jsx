@@ -51,7 +51,7 @@ export default function BottomNav() {
         <Item active={pathname === '/musiclife'} onClick={() => navigate('/musiclife')}> <FaMusic size={22} /> <span>음악생활</span> </Item>
         <Item active={pathname === '/map'} onClick={() => navigate('/map')}> <FaUser size={22} /> <span>동네지도</span> </Item>
         <Item active={pathname.startsWith('/chat')} onClick={() => navigate('/chat')}> <FaRegCommentDots size={22} /> <span>채팅</span> </Item>
-        <Item active={pathname === '/mypage'} onClick={() => navigate('/mypage')}> <FaUser size={22} /> <span>나의 당근</span> </Item>
+        <Item active={pathname === '/mypage'} onClick={() => navigate('/mypage')}> <FaUser size={22} /> <span>나의 에코</span> </Item>
       </BarInner>
     </Bar>
   );

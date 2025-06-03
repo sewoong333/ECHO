@@ -87,6 +87,12 @@ const Info = styled.div`
   justify-content: center;
   margin-left: 14px;
 `;
+const TitleRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+`;
 const Title = styled.h2`
   font-size: 16px;
   font-weight: 700;
@@ -250,7 +256,14 @@ export default function Home() {
             <Card onClick={() => navigate(`/product/${product.id}`)} style={{ position: 'relative' }}>
               <Img src={getInstrumentImage(product.title)} alt={product.title} />
               <Info>
-                <Title>{product.title}</Title>
+                <TitleRow>
+                  <Title>{product.title}</Title>
+                  {(product.title.includes('커즈와일 신디사이저') || product.title.includes('프리소너스 오디오 인터페이스')) && (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', color: '#2ed8b6', fontSize: 13, fontWeight: 700, background: '#fff', borderRadius: 10, boxShadow: '0 1px 4px #b2f0e6', padding: '1.5px 7px', marginLeft: 2, height: 20 }}>
+                      <FaCheckCircle style={{ marginRight: 2, color: '#2ed8b6', fontSize: 14 }} />ECHO 인증
+                    </span>
+                  )}
+                </TitleRow>
                 <Meta>{product.location}</Meta>
                 <Price>{product.price}</Price>
                 <CardBottom>
@@ -258,14 +271,6 @@ export default function Home() {
                   <Stat><FaHeart size={14} /> {likes.filter(id => id === product.id).length}</Stat>
                 </CardBottom>
               </Info>
-              {(
-                product.title.includes('커즈와일 신디사이저') ||
-                product.title.includes('프리소너스 오디오 인터페이스')
-              ) && (
-                <span style={{ position: 'absolute', top: 14, right: 18, display: 'inline-flex', alignItems: 'center', color: '#2ed8b6', fontSize: 14, fontWeight: 700, background: '#fff', borderRadius: 12, boxShadow: '0 1px 4px #b2f0e6', padding: '2px 10px', zIndex: 3 }}>
-                  <FaCheckCircle style={{ marginRight: 3, color: '#2ed8b6', fontSize: 15 }} />ECHO 인증
-                </span>
-              )}
             </Card>
           </CardWrap>
         ))}
