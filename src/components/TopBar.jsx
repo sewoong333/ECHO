@@ -55,14 +55,25 @@ const Badge = styled.span`
   background: #ff7e36;
   border-radius: 50%;
 `;
+const Logo = styled.span`
+  font-size: 25px;
+  font-weight: 900;
+  color: #2ed8b6;
+  letter-spacing: 1.5px;
+  margin-right: 16px;
+  font-family: 'Montserrat', 'Pretendard', sans-serif;
+`;
 
 export default function TopBar() {
   return (
     <Bar>
       <BarInner>
-        <Title>
-          구로동 <Dropdown>▼</Dropdown>
-        </Title>
+        <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+          <Logo>ECHO</Logo>
+          <Title>
+            구로동 <Dropdown>▼</Dropdown>
+          </Title>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <IconBtn><svg width="22" height="22" fill="none" stroke="#222" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></IconBtn>
           <IconBtn><FaSearch size={20} /></IconBtn>

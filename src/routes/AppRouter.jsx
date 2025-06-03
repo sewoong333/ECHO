@@ -9,6 +9,7 @@ import ProductDetail from '../pages/ProductDetail';
 import ChatRoom from '../pages/ChatRoom';
 import MyPage from '../pages/MyPage';
 import MusicLife from '../pages/MusicLife';
+import MusicLifeDetail from '../pages/MusicLifeDetail';
 
 export default function AppRouter() {
   return (
@@ -22,6 +23,7 @@ export default function AppRouter() {
       <Route path="/chat/:id" element={<ChatRoom />} />
       <Route path="/mypage" element={<MyPage />} />
       <Route path="/musiclife" element={<MusicLife />} />
+      <Route path="/musiclife/:id" element={<MusicLifeDetail />} />
     </Routes>
   );
 } 

@@ -1,5 +1,6 @@
 import React from 'react';
 import TopBar from '../components/TopBar';
+import { useNavigate } from 'react-router-dom';
 
 const posts = [
   {
@@ -29,6 +30,7 @@ const posts = [
 ];
 
 export default function MusicLife() {
+  const navigate = useNavigate();
   return (
     <div style={{ width: '100vw', minHeight: '100vh', background: '#f8f9fa', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <TopBar />
@@ -36,10 +38,10 @@ export default function MusicLife() {
         <h1 style={{ fontSize: 24, fontWeight: 700, padding: '24px 0 12px 20px', color: '#2ed8b6' }}>음악생활</h1>
         <div style={{ padding: '0 12px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {posts.map(post => (
-            <div key={post.id} style={{ width: '100%', maxWidth: 420, background: '#fff', borderRadius: 10, boxShadow: '0 1px 4px rgba(46,216,182,0.06)', marginBottom: 16, padding: '18px 16px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 6 }}>{post.title}</div>
+            <div key={post.id} onClick={() => navigate(`/musiclife/${post.id}`)} style={{ width: '100%', maxWidth: 420, background: '#fff', borderRadius: 10, boxShadow: '0 1px 4px rgba(46,216,182,0.06)', marginBottom: 16, padding: '18px 16px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', cursor: 'pointer', transition: 'box-shadow 0.15s', boxSizing: 'border-box' }}>
+              <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 6, color: '#1a4740', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{post.title}</div>
               <div style={{ fontSize: 13, color: '#888', marginBottom: 4 }}>{post.author} · {post.time}</div>
-              <div style={{ fontSize: 15, color: '#222', marginBottom: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.content}</div>
+              <div style={{ fontSize: 15, color: '#222', marginBottom: 8, width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', boxSizing: 'border-box' }}>{post.content}</div>
               <div style={{ fontSize: 13, color: '#bbb' }}>댓글 {post.comments}</div>
             </div>
           ))}
