@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '../components/TopBar';
@@ -177,11 +177,25 @@ const SortSelect = styled.select`
   }
 `;
 
+function getInstrumentImage(title) {
+  if (title.includes('기타')) return 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?auto=format&fit=crop&w=400&q=80';
+  if (title.includes('신디사이저')) return 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80';
+  if (title.includes('피아노')) return 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80';
+  if (title.includes('드럼')) return 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80';
+  if (title.includes('색소폰')) return 'https://images.unsplash.com/photo-1513883049090-d0b7439799bf?auto=format&fit=crop&w=400&q=80';
+  if (title.includes('플룻')) return 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80';
+  if (title.includes('오디오 인터페이스')) return 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80';
+  return 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80';
+}
+
 export default function Home() {
   const navigate = useNavigate();
   const { products, likes, toggleLike } = useContext(ProductContext);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('latest');
+  const [visibleCount, setVisibleCount] = useState(10);
+  const loaderRef = useRef(null);
+
   const filtered = products.filter(product => {
     const q = search.toLowerCase();
     return (
@@ -196,6 +210,23 @@ export default function Home() {
     if (sort === 'price') return (b.price || 0) - (a.price || 0);
     return 0;
   });
+  const visible = sorted.slice(0, visibleCount);
+
+  useEffect(() => {
+    setVisibleCount(10); // 검색/정렬 바뀌면 초기화
+  }, [search, sort]);
+
+  useEffect(() => {
+    if (!loaderRef.current) return;
+    const observer = new window.IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && visible.length < sorted.length) {
+        setVisibleCount(v => Math.min(v + 10, sorted.length));
+      }
+    }, { threshold: 1 });
+    observer.observe(loaderRef.current);
+    return () => observer.disconnect();
+  }, [visible.length, sorted.length]);
+
   return (
     <ListWrapper>
       <TopBar />
@@ -214,10 +245,10 @@ export default function Home() {
             </SortSelect>
           </div>
         </SearchBox>
-        {sorted.map(product => (
+        {visible.map(product => (
           <CardWrap key={product.id}>
             <Card onClick={() => navigate(`/product/${product.id}`)} style={{ position: 'relative' }}>
-              <Img src={product.image} alt={product.title} />
+              <Img src={getInstrumentImage(product.title)} alt={product.title} />
               <Info>
                 <Title>{product.title}</Title>
                 <Meta>{product.location}</Meta>
@@ -227,7 +258,10 @@ export default function Home() {
                   <Stat><FaHeart size={14} /> {likes.filter(id => id === product.id).length}</Stat>
                 </CardBottom>
               </Info>
-              {product.title.includes('커즈와일 신디사이저') && (
+              {(
+                product.title.includes('커즈와일 신디사이저') ||
+                product.title.includes('프리소너스 오디오 인터페이스')
+              ) && (
                 <span style={{ position: 'absolute', top: 14, right: 18, display: 'inline-flex', alignItems: 'center', color: '#2ed8b6', fontSize: 14, fontWeight: 700, background: '#fff', borderRadius: 12, boxShadow: '0 1px 4px #b2f0e6', padding: '2px 10px', zIndex: 3 }}>
                   <FaCheckCircle style={{ marginRight: 3, color: '#2ed8b6', fontSize: 15 }} />ECHO 인증
                 </span>
@@ -235,6 +269,7 @@ export default function Home() {
             </Card>
           </CardWrap>
         ))}
+        <div ref={loaderRef} style={{ height: 30 }} />
         {sorted.length === 0 && <EmptyMsg>검색 결과가 없습니다.</EmptyMsg>}
       </div>
     </ListWrapper>

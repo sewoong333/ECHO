@@ -24,7 +24,7 @@ export default function MapPage() {
         <h1 style={{ fontSize: 24, fontWeight: 700, padding: '24px 0 12px 20px', color: '#2ed8b6' }}>동네지도</h1>
         <div style={{ width: '100%', height: '60vh', borderRadius: 16, boxShadow: '0 2px 12px #b2f0e6', marginBottom: 24, background: '#eee', position: 'relative', overflow: 'hidden' }}>
           {/* 더미 지도 이미지 */}
-          <img src="https://maps.googleapis.com/maps/api/staticmap?center=37.485,126.901&zoom=13&size=480x320&maptype=roadmap&markers=color:blue%7C37.485,126.901" alt="dummy-map" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(0.1) brightness(1.08)' }} />
+          <img src="/assets/kakaomap-dummy.png" alt="dummy-map" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(0.1) brightness(1.08)' }} />
           {/* 게시물 마커 더미 렌더링 */}
           {posts.map(post => (
             <div key={post.id} style={{ position: 'absolute', left: post.x, top: post.y, transform: 'translate(-50%, -100%)', zIndex: 2, cursor: 'pointer' }} onClick={() => window.location.href = `/product/${post.id}`}>

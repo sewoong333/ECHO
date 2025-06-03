@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { FaSearch, FaBell } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const Bar = styled.header`
   width: 100%;
@@ -65,14 +66,12 @@ const Logo = styled.span`
 `;
 
 export default function TopBar() {
+  const navigate = useNavigate();
   return (
     <Bar>
       <BarInner>
         <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
-          <Logo>ECHO</Logo>
-          <Title>
-            구로동 <Dropdown>▼</Dropdown>
-          </Title>
+          <Logo style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>ECHO</Logo>
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <IconBtn><svg width="22" height="22" fill="none" stroke="#222" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></IconBtn>
