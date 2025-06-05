@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 import { FaSearch, FaBell } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { UserContext } from '../store/UserContext';
 
 const Bar = styled.header`
   width: 100%;
@@ -67,6 +68,12 @@ const Logo = styled.span`
 
 export default function TopBar() {
   const navigate = useNavigate();
+  const { user, logout } = useContext(UserContext);
+  const handleLogin = () => navigate('/login');
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
   return (
     <Bar>
       <BarInner>
@@ -77,6 +84,11 @@ export default function TopBar() {
           <IconBtn><svg width="22" height="22" fill="none" stroke="#222" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></IconBtn>
           <IconBtn><FaSearch size={20} /></IconBtn>
           <IconBtn style={{ position: 'relative' }}><FaBell size={20} /><Badge /></IconBtn>
+          {user.isLoggedIn ? (
+            <button onClick={handleLogout} style={{ marginLeft: 16, padding: '6px 14px', background: '#2ed8b6', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 600, cursor: 'pointer' }}>로그아웃</button>
+          ) : (
+            <button onClick={handleLogin} style={{ marginLeft: 16, padding: '6px 14px', background: '#ff7e36', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 600, cursor: 'pointer' }}>로그인</button>
+          )}
         </div>
       </BarInner>
     </Bar>

@@ -3,6 +3,7 @@ import TopBar from '../components/TopBar';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ProductContext } from '../store/ProductContext';
 import { FaHeart, FaRegCommentDots, FaUserCircle, FaArrowLeft } from 'react-icons/fa';
+import getInstrumentImage from '../utils/getInstrumentImage';
 
 export default function ProductDetail() {
   const navigate = useNavigate();
@@ -10,17 +11,6 @@ export default function ProductDetail() {
   const { products } = useContext(ProductContext);
   const product = products.find(p => String(p.id) === String(id));
   if (!product) return <div style={{ padding: 32 }}>상품을 찾을 수 없습니다.</div>;
-
-  // 썸네일 매핑 함수 (제목에 맞는 실제 악기 Unsplash 이미지)
-  function getThumbnail(title) {
-    if (title.includes('기타')) return 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?auto=format&fit=crop&w=400&q=80'; // 기타
-    if (title.includes('피아노')) return 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80'; // 피아노
-    if (title.includes('드럼')) return 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80'; // 드럼
-    if (title.includes('바이올린')) return 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80'; // 바이올린
-    if (title.includes('플룻')) return 'https://images.unsplash.com/photo-1513883049090-d0b7439799bf?auto=format&fit=crop&w=400&q=80'; // 플룻
-    // 기본 이미지(중고거래/악기)
-    return 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80';
-  }
 
   return (
     <div style={{ width: '100vw', minHeight: '100vh', background: '#f8f9fa', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -31,7 +21,7 @@ export default function ProductDetail() {
           <button onClick={() => navigate(-1)} style={{ position: 'absolute', top: 16, left: 16, background: 'rgba(255,255,255,0.85)', border: '1.5px solid #b2f0e6', borderRadius: 20, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: '#2ed8b6', zIndex: 102, boxShadow: '0 1px 4px #b2f0e6', padding: 0 }}>
             <FaArrowLeft style={{ margin: 0, fontSize: 18 }} />
           </button>
-          <img src={getThumbnail(product.title)} alt={product.title} style={{ width: '100%', height: 240, objectFit: 'cover', borderRadius: '14px 14px 0 0', borderBottom: '1.5px solid #b2f0e6' }} />
+          <img src={getInstrumentImage(product.title)} alt={product.title} style={{ width: '100%', height: 240, objectFit: 'cover', borderRadius: '14px 14px 0 0', borderBottom: '1.5px solid #b2f0e6' }} />
           <div style={{ width: '100%', padding: '22px 20px 18px 20px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingBottom: 32, wordBreak: 'break-all', overflowWrap: 'break-word', boxSizing: 'border-box' }}>
             <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1a4740', margin: 0, marginBottom: 8 }}>{product.title}</h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: '#888', marginBottom: 6 }}>

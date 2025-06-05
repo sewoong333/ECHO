@@ -33,7 +33,7 @@ const Item = styled.button`
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: ${props => props.active ? '#2ed8b6' : '#888'};
+  color: ${props => props.$active ? '#2ed8b6' : '#888'};
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -47,11 +47,11 @@ export default function BottomNav() {
   return (
     <Bar>
       <BarInner>
-        <Item active={pathname === '/'} onClick={() => navigate('/')}> <FaHome size={22} /> <span>홈</span> </Item>
-        <Item active={pathname === '/musiclife'} onClick={() => navigate('/musiclife')}> <FaMusic size={22} /> <span>음악생활</span> </Item>
-        <Item active={pathname === '/map'} onClick={() => navigate('/map')}> <FaUser size={22} /> <span>동네지도</span> </Item>
-        <Item active={pathname.startsWith('/chat')} onClick={() => navigate('/chat')}> <FaRegCommentDots size={22} /> <span>채팅</span> </Item>
-        <Item active={pathname === '/mypage'} onClick={() => navigate('/mypage')}> <FaUser size={22} /> <span>나의 에코</span> </Item>
+        <Item $active={pathname === '/'} onClick={() => navigate('/')}> <FaHome size={22} /> <span>홈</span> </Item>
+        <Item $active={pathname === '/musiclife'} onClick={() => navigate('/musiclife')}> <FaMusic size={22} /> <span>음악생활</span> </Item>
+        <Item $active={pathname === '/map'} onClick={() => navigate('/map')}> <FaUser size={22} /> <span>동네지도</span> </Item>
+        <Item $active={pathname.startsWith('/chat')} onClick={() => navigate('/chat')}> <FaRegCommentDots size={22} /> <span>채팅</span> </Item>
+        <Item $active={pathname === '/mypage'} onClick={() => navigate('/mypage')}> <FaUser size={22} /> <span>나의에코</span> </Item>
       </BarInner>
     </Bar>
   );
