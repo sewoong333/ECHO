@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375px, initial-scale=1.0">
+<title>ECHO - 악기의 모든 것</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+body { font-family: 'Noto Sans KR', sans-serif; }
+</style>
+<script>
+tailwind.config = {
+theme: {
+extend: {
+colors: {
+primary: '#004D40',
+secondary: '#F5A623'
+},
+borderRadius: {
+'none': '0px',
+'sm': '4px',
+DEFAULT: '8px',
+'md': '12px',
+'lg': '16px',
+'xl': '20px',
+'2xl': '24px',
+'3xl': '32px',
+'full': '9999px',
+'button': '8px'
+}
+}
+}
+}
+</script>
+</head>
+<body class="bg-white w-[375px] min-h-[762px] mx-auto relative">
+<nav class="fixed top-0 w-full bg-white z-50 border-b">
+<div class="flex items-center justify-between px-4 h-14">
+<div class="flex items-center">
+<div class="font-bold text-2xl text-primary tracking-tight">ECHO</div>
+</div>
+<button class="w-8 h-8 flex items-center justify-center">
+<i class="ri-menu-line text-xl"></i>
+</button>
+</div>
+</nav>
+<main class="pt-14 pb-16">
+<section class="relative h-[400px] overflow-hidden">
+<img src="https://public.readdy.ai/ai/img_res/14e852398f91d47eb2ce1483e7c30af1.jpg"
+class="w-full h-full object-cover" alt="악기 이미지">
+<div class="absolute inset-0 bg-black bg-opacity-40 flex flex-col justify-center items-center text-white text-center px-6">
+<h1 class="text-4xl font-bold mb-4">ECHO</h1>
+<h2 class="text-xl mb-2">악기의 모든 것</h2>
+<p class="text-lg leading-relaxed">
+ECHO에서 악기 생활을<br>
+쉽고 편하고 즐겁게
+</p>
+</div>
+</section>
+<section class="px-6 py-12 bg-gray-50">
+<div class="text-center space-y-4">
+<p class="text-lg">당연해진 불편을 개선하고</p>
+<p class="text-lg">새로운 편안함을 더합니다.</p>
+<p class="text-lg font-medium mt-6">
+ECHO와 함께라면<br>
+당신의 악기 라이프스타일이 새로워질 거예요.
+</p>
+</div>
+</section>
+<section class="px-6 py-12">
+<div class="relative">
+<span class="text-8xl font-bold text-gray-100 absolute -top-6 -left-2">01</span>
+<div class="relative">
+<h3 class="text-2xl font-bold mb-4">악기 상태검진</h3>
+<p class="text-gray-600 mb-2">악기를 안전히, 오래 사용하고 싶다면</p>
+<p class="text-primary font-medium">내 악기를 위한 상태검진을 받아보세요.</p>
+</div>
+</div>
+<div class="mt-8 space-y-6">
+<div class="bg-white rounded-lg shadow-lg p-6">
+<h4 class="text-lg font-medium mb-4">정밀검사로 눈보다 확실하게,<br>마음이 든든해지는 악기 상태진단</h4>
+<p class="text-gray-600 text-sm leading-relaxed">
+나도 모르는 사이, 소중한 내 악기가 문제를 겪고 있는 건 아닐까요?
+특히 오래된 빈티지 악기나 고가의 악기라면 미세한 균열이나 내부 손상이 있는 건 아닌지 불안하죠.
+</p>
+</div>
+<div class="bg-primary/5 rounded-lg p-6">
+<p class="text-primary font-medium mb-4">ECHO는 생각했어요.</p>
+<p class="text-sm leading-relaxed">
+"사람이 건강검진 때 X-ray나 MRI를 통해 몸속 상태를 확인하듯,
+악기도 전문 장비를 활용해 내부 상태를 진단해보자!"
+</p>
+</div>
+</div>
+<div class="mt-12 grid grid-cols-2 gap-4">
+<div class="bg-white rounded-lg shadow p-4 text-center">
+<div class="w-16 h-16 mx-auto mb-3">
+<img src="https://public.readdy.ai/ai/img_res/178ae96b022e00f615053879e050f080.jpg"
+class="w-full h-full object-contain" alt="치명적 크랙">
+</div>
+<h5 class="font-medium">치명적 크랙</h5>
+</div>
+<div class="bg-white rounded-lg shadow p-4 text-center">
+<div class="w-16 h-16 mx-auto mb-3">
+<img src="https://public.readdy.ai/ai/img_res/8f7fec35d055f37eaa1887dd32fb5f10.jpg"
+class="w-full h-full object-contain" alt="단순 흠집">
+</div>
+<h5 class="font-medium">단순 흠집</h5>
+</div>
+</div>
+<div class="mt-12 flex justify-between bg-gray-50 rounded-lg p-6">
+<div class="text-center">
+<div class="text-2xl font-bold text-primary">105</div>
+<div class="text-sm text-gray-600">검사한 브랜드</div>
+</div>
+<div class="text-center">
+<div class="text-2xl font-bold text-primary">8,483</div>
+<div class="text-sm text-gray-600">검사한 악기</div>
+</div>
+</div>
+</section>
+<section class="px-6 py-12">
+<div class="relative">
+<span class="text-8xl font-bold text-gray-100 absolute -top-6 -left-2">02</span>
+<div class="relative">
+<h3 class="text-2xl font-bold mb-4">중고거래에 안심을 더하다</h3>
+<p class="text-gray-600 mb-2">연주와 직결되지만 고장여부, 수리이력도 쉽게 알 수 없는 중고 악기 거래,</p>
+<p class="text-primary font-medium">불안할 필요 없어요.</p>
+</div>
+</div>
+<div class="mt-8 space-y-6">
+<div class="bg-white rounded-lg shadow-lg p-6">
+<p class="text-gray-600 text-sm leading-relaxed">
+거래자는 연락두절 되기 일쑤, 실제로 보면 사진과 다른 악기 상태, 상식 없는 할인 요구에 크랙이나 수리 이력은 확인 불가능한 상황까지.
+</p>
+</div>
+<div class="bg-primary/5 rounded-lg p-6">
+<p class="font-medium mb-4">특히 고가의 악기일수록<br>불편함과 불안함이 더 커지기 마련입니다.</p>
+<p class="text-sm leading-relaxed">
+그래서 ECHO가 이런 불편, 불안, 불신을<br>
+없애는 방법을 생각했어요.
+</p>
+</div>
+<div class="bg-gray-50 rounded-lg p-6 text-center">
+<p class="text-lg italic text-gray-600">
+"연주할 시간도 부족한데, 중고 악기 거래는 너무 어렵고 품이 많이 든다."
+</p>
+</div>
+</div>
+<div class="mt-12 bg-primary text-white rounded-lg p-6">
+<h4 class="text-xl font-bold mb-4">ECHO 인증 중고악기</h4>
+<p class="mb-4">그래서 만들었어요. 여러분은 그저 연주에 집중하세요.<br>악기는 ECHO가 책임질 테니까요.</p>
+<p class="text-sm">
+2025년, ECHO는 국내 최초로<br>
+프리미엄 악기를 위한 인증 중고 서비스로 중고 악기 시장에 '인증' 시대를 열었어요.
+</p>
+</div>
+<div class="mt-8 grid grid-cols-2 gap-4">
+<div class="bg-white rounded-lg shadow p-4">
+<div class="w-12 h-12 mb-3 flex items-center justify-center">
+<i class="ri-search-eye-line text-2xl text-primary"></i>
+</div>
+<h5 class="font-medium text-sm mb-2">정밀검사 기반<br>내부 손상 체크</h5>
+</div>
+<div class="bg-white rounded-lg shadow p-4">
+<div class="w-12 h-12 mb-3 flex items-center justify-center">
+<i class="ri-tools-line text-2xl text-primary"></i>
+</div>
+<h5 class="font-medium text-sm mb-2">전문 미캐닉(리페어) 팀의<br>다각도 성능 진단</h5>
+</div>
+<div class="bg-white rounded-lg shadow p-4">
+<div class="w-12 h-12 mb-3 flex items-center justify-center">
+<i class="ri-money-dollar-circle-line text-2xl text-primary"></i>
+</div>
+<h5 class="font-medium text-sm mb-2">성능 평가 기반<br>적정가격 산정</h5>
+</div>
+<div class="bg-white rounded-lg shadow p-4">
+<div class="w-12 h-12 mb-3 flex items-center justify-center">
+<i class="ri-shield-check-line text-2xl text-primary"></i>
+</div>
+<h5 class="font-medium text-sm mb-2">90일 애프터케어<br>주요 부품 보증 등</h5>
+</div>
+</div>
+<div class="mt-8 bg-gray-50 rounded-lg p-6 text-center">
+<p class="text-lg font-medium text-primary mb-2">새것 같은 ECHO 인증 중고악기를 소유하고</p>
+<p class="text-gray-600">새 악기 살 때보다 더 세심한 케어를 경험해 보세요.</p>
+</div>
+</section>
+<section class="px-6 py-12">
+<div class="relative">
+<span class="text-8xl font-bold text-gray-100 absolute -top-6 -left-2">03</span>
+<div class="relative">
+<h3 class="text-2xl font-bold mb-4">중고악기에 가치를 더하다</h3>
+<p class="text-gray-600 mb-2">연주하는 기쁨을 선사하는 건 '새' 악기만이 아닙니다.</p>
+<p class="text-primary font-medium">그저 '새로운 악기'면 충분합니다.</p>
+</div>
+</div>
+<div class="mt-8 bg-primary/5 rounded-lg p-6">
+<p class="text-sm leading-relaxed">
+"누군가 아끼고 사랑했던 중고악기를 선택하는 것만으로도 새로운 악기 생산에 따른 자원 낭비와 탄소 배출을 줄이고, 환경 보호에 기여할 수 있는데, 이를 알려 더 많은 중고 소비를 유도할 순 없을까?"
+</p>
+</div>
+<div class="mt-6 bg-white rounded-lg shadow-lg p-6">
+<p class="text-gray-600 text-sm leading-relaxed">
+중고 소비가 지구에 어떻게 기여하는지 체감할 수 있도록 데이터를 수치화해 보고, 기후행동에 대한 리워드를 만들었어요.
+</p>
+</div>
+<div class="mt-12">
+<div class="bg-primary text-white rounded-lg p-6">
+<h4 class="text-xl font-bold mb-4">악기 탄소계산기</h4>
+<p class="mb-4">악기 업계 최초로 중고악기를 통한 탄소배출 저감량을 계산하게 되었어요.</p>
+</div>
+<div class="mt-8 bg-white rounded-lg shadow-lg p-6">
+<h5 class="text-lg font-medium mb-4">지속 가능한 소비를 위한<br>탄소계산기</h5>
+<div class="bg-gray-50 rounded-lg p-4 text-center my-4">
+<p class="text-primary font-medium">
+"이 악기를 중고로 사면<br>
+약 100.2KG의 탄소배출이 줄어듭니다."
+</p>
+</div>
+</div>
+<div class="mt-8">
+<h5 class="text-lg font-medium mb-4">탄소 절감량 계산은 어떻게 할까요?</h5>
+<div class="space-y-4">
+<div class="bg-white rounded-lg shadow p-4">
+<div class="w-12 h-12 mb-3 flex items-center justify-center">
+<i class="ri-calculator-line text-2xl text-primary"></i>
+</div>
+<p class="text-sm">악기 제작 시 발생하는 자원·에너지 사용량을 기준으로 중고 거래 시 절감되는 탄소량을 추산</p>
+</div>
+<div class="bg-white rounded-lg shadow p-4">
+<div class="w-12 h-12 mb-3 flex items-center justify-center">
+<i class="ri-coin-line text-2xl text-primary"></i>
+</div>
+<p class="text-sm">ECHO는 이를 '탄소 절감 포인트'로 환산해, 친환경 소비에 동참한 사용자에게 보상 제공</p>
+</div>
+<div class="bg-white rounded-lg shadow p-4">
+<div class="w-12 h-12 mb-3 flex items-center justify-center">
+<i class="ri-medal-line text-2xl text-primary"></i>
+</div>
+<p class="text-sm">2026년 악기 탄소계산기 런칭, 특허등록 목표</p>
+</div>
+</div>
+</div>
+<div class="mt-8 bg-primary/5 rounded-lg p-6 text-center">
+<h5 class="font-medium mb-4">악기 업계 최초 중고악기 탄소저감량 계산 적용</h5>
+<p class="text-sm text-gray-600">ECHO 앱 내 거래 시 탄소저감 포인트 제공</p>
+</div>
+</div>
+</section>
+<section class="px-6 py-12">
+<div class="relative">
+<span class="text-8xl font-bold text-gray-100 absolute -top-6 -left-2">04</span>
+<div class="relative">
+<h3 class="text-2xl font-bold mb-4">악기의 모든 것을 한곳에서 편하게</h3>
+<p class="text-gray-600 mb-6">ECHO 인증 중고, 개인 중고 뿐 아니라<br>다양한 브랜드 신제품까지</p>
+<p class="text-primary font-medium">모든 종류의 악기와 액세서리, 관련 서비스를<br>할부, 렌털 등으로 이용할 수 있는 곳,<br>오직 ECHO뿐입니다.</p>
+</div>
+</div>
+<div class="mt-12 grid grid-cols-2 gap-6">
+<div class="bg-white rounded-lg shadow p-6 text-center">
+<div class="flex justify-between items-center mb-2">
+<div class="text-sm text-gray-600">입점 파트너사</div>
+<div class="text-2xl font-bold text-primary">5</div>
+</div>
+<div class="flex justify-between items-center">
+<div class="text-sm text-gray-600">유통 브랜드 수</div>
+<div class="text-2xl font-bold text-primary">42</div>
+</div>
+</div>
+<div class="bg-white rounded-lg shadow p-6 text-center">
+<div class="text-sm text-gray-600 mb-2">누적 거래액</div>
+<div class="text-2xl font-bold text-primary">47억원</div>
+</div>
+</div>
+</section>
+<section class="px-6 py-12">
+<div class="relative">
+<span class="text-8xl font-bold text-gray-100 absolute -top-6 -left-2">05</span>
+<div class="relative">
+<h3 class="text-2xl font-bold mb-4">금융의 혁신</h3>
+<p class="text-gray-600 mb-2">악기는 왜 자동차나 휴대폰처럼<br>쓰다가 반납하는 금융상품이 없을까요?</p>
+</div>
+</div>
+<div class="mt-8 grid grid-cols-1 gap-6">
+<div class="bg-white rounded-lg shadow-lg p-6">
+<div class="flex items-center mb-4">
+<i class="ri-car-line text-2xl text-primary mr-3"></i>
+<h4 class="text-lg font-medium">새 악기 리스</h4>
+</div>
+<p class="text-sm text-gray-600">2025년 악기 업계 최초<br>인수·반납 선택형 리스 상품 XX캐피탈과 런칭</p>
+</div>
+<div class="bg-white rounded-lg shadow-lg p-6">
+<div class="flex items-center mb-4">
+<i class="ri-shopping-bag-line text-2xl text-primary mr-3"></i>
+<h4 class="text-lg font-medium">새 악기 렌털</h4>
+</div>
+<p class="text-sm text-gray-600">인수형 장기 렌털 상품 XX렌털과 협업</p>
+</div>
+<div class="bg-white rounded-lg shadow-lg p-6">
+<div class="flex items-center mb-4">
+<i class="ri-recycle-line text-2xl text-primary mr-3"></i>
+<h4 class="text-lg font-medium">중고악기 렌털</h4>
+</div>
+<p class="text-sm text-gray-600">2025년 악기 업계 최초 중고악기 장기 렌털 상품 론칭</p>
+</div>
+<div class="bg-white rounded-lg shadow-lg p-6">
+<div class="flex items-center mb-4">
+<i class="ri-box-3-line text-2xl text-primary mr-3"></i>
+<h4 class="text-lg font-medium">액세서리 렌털</h4>
+</div>
+<p class="text-sm text-gray-600">2025년 업계 최초 액세서리 렌털 상품 XX렌탈과 런칭</p>
+</div>
+</div>
+</section>
+<section class="px-6 py-12">
+<div class="relative">
+<span class="text-8xl font-bold text-gray-100 absolute -top-6 -left-2">06</span>
+<div class="relative">
+<h3 class="text-2xl font-bold mb-4">보험의 혁신</h3>
+<p class="text-gray-600 mb-2">악기는 왜 자동차나 휴대폰처럼<br>내 실수로 인한 내 물건 보상 보장이 안될까요?</p>
+</div>
+</div>
+<div class="mt-8 bg-white rounded-lg shadow-lg p-6">
+<h4 class="text-xl font-bold text-primary mb-4">ECHO Care</h4>
+<p class="text-gray-600 text-sm leading-relaxed mb-4">
+갑작스러운 사고로 인한 손해를 혼자 감당해야 했나요?<br>
+순간적 실수로 발생한 수리비가 부담스러워 걱정하며 연주하셨나요?<br>
+내 실수로 인한 내 악기 파손은 보상받을 길이 없어 속상하셨지요?
+</p>
+<div class="bg-primary/5 rounded-lg p-4 text-center">
+<p class="font-medium text-primary">이제 ECHO Care 안심보장으로<br>악기 걱정, 그만!</p>
+</div>
+</div>
+<div class="mt-8 grid grid-cols-1 gap-4">
+<div class="bg-white rounded-lg shadow p-4">
+<div class="w-12 h-12 mb-3 flex items-center justify-center">
+<i class="ri-tools-fill text-2xl text-primary"></i>
+</div>
+<h5 class="font-medium mb-2">악기 파손, 수리비 부담을 지원</h5>
+</div>
+<div class="bg-white rounded-lg shadow p-4">
+<div class="w-12 h-12 mb-3 flex items-center justify-center">
+<i class="ri-timer-flash-line text-2xl text-primary"></i>
+</div>
+<h5 class="font-medium mb-2">ECHO 전문 리페어팀의<br>빠른 수리 및 점검</h5>
+</div>
+<div class="bg-white rounded-lg shadow p-4">
+<div class="w-12 h-12 mb-3 flex items-center justify-center">
+<i class="ri-heart-fill text-2xl text-primary"></i>
+</div>
+<h5 class="font-medium mb-2">악기 타는(연주하는) 마음을 잘 아는<br>ECHO만의 안심보장/케어 서비스</h5>
+</div>
+</div>
+<div class="mt-8 bg-primary text-white rounded-lg p-6 text-center">
+<p class="text-lg font-medium">안심하고 연주하세요!</p>
+</div>
+</section>
+<section class="px-6 py-12">
+<div class="relative">
+<span class="text-8xl font-bold text-gray-100 absolute -top-6 -left-2">07</span>
+<div class="relative">
+<h3 class="text-2xl font-bold mb-4">악기를 치는 가치의 재해석</h3>
+<p class="text-gray-600 mb-2">자동차도, 항공사도 마일리지가 있는데<br>악기는 왜 없을까?</p>
+</div>
+</div>
+<div class="mt-8 bg-white rounded-lg shadow-lg p-6">
+<h4 class="text-xl font-bold text-primary mb-4">SweetSound Point</h4>
+<p class="text-gray-600 mb-4">연주로 건강도 챙기고,<br>환경도 살리고, 혜택도 쌓이는 ECHO의 포인트 제도</p>
+<div class="bg-primary/5 rounded-lg p-4 text-center mb-4">
+<p class="font-medium text-primary">악기 중심 앱테크:<br>악기를 연주해 소리를 기록하면<br>일정 포인트 적립!</p>
+</div>
+</div>
+<div class="mt-8 space-y-4">
+<div class="bg-white rounded-lg shadow p-6">
+<h5 class="font-medium mb-3">개인·단체 모두 '친환경 악기 사용'에 기여할 수 있어요</h5>
+<p class="text-sm text-gray-600">
+사용자의 악기 사용 시간을 기록, 새 제품 생산 대비 절감되는 자원(탄소발자국) 산정
+</p>
+</div>
+<div class="bg-white rounded-lg shadow p-6">
+<h5 class="font-medium mb-3">자발적 탄소배출권 거래</h5>
+<p class="text-sm text-gray-600">
+개인의 악기 연주 정보 + 중고악기 사용 현황 =<br>
+교통수단이나 대체 자원의 절감 효과로 연결
+</p>
+</div>
+</div>
+<div class="mt-8 bg-primary text-white rounded-lg p-6">
+<p class="text-lg mb-4">"악기 친환경 활동,<br>손쉽게 참여해 보세요!"</p>
+<p class="text-sm">
+이제 ECHO가 악기 생활의 모든 것을 바꿔 드립니다.<br>
+중고악기 거래의 불편·불안·불신을 없애고,<br>
+악기 상태검진부터 인증 중고, 렌털/리스, 케어(보험)까지<br>
+한곳에서 편하게 이용하세요.
+</p>
+</div>
+<div class="mt-8 bg-gray-50 rounded-lg p-6 text-center">
+<h4 class="text-xl font-bold text-primary mb-4">ECHO</h4>
+<p class="text-gray-600">
+악기를 사랑하는 사람들에게 꼭 필요한 서비스를 제공하는,<br>
+혁신적인 중고악기 통합 솔루션
+</p>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 w-full bg-white border-t">
+<div class="grid grid-cols-4 h-16">
+<a href="#" class="flex flex-col items-center justify-center text-primary">
+<i class="ri-home-line text-xl"></i>
+<span class="text-xs mt-1">홈</span>
+</a>
+<a href="#" class="flex flex-col items-center justify-center text-gray-400">
+<i class="ri-search-line text-xl"></i>
+<span class="text-xs mt-1">검색</span>
+</a>
+<a href="#" class="flex flex-col items-center justify-center text-gray-400">
+<i class="ri-heart-line text-xl"></i>
+<span class="text-xs mt-1">찜</span>
+</a>
+<a href="#" class="flex flex-col items-center justify-center text-gray-400">
+<i class="ri-user-line text-xl"></i>
+<span class="text-xs mt-1">마이</span>
+</a>
+</div>
+</nav>
+</body>
+</html>
