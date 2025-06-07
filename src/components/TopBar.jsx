@@ -65,6 +65,25 @@ const Logo = styled.span`
   margin-right: 16px;
   font-family: 'Montserrat', 'Pretendard', sans-serif;
 `;
+const LoginBtn = styled.button`
+  margin-left: 16px;
+  padding: 6px 14px;
+  background: #ff7e36;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 16px;
+  white-space: nowrap;
+  @media (max-width: 480px) {
+    font-size: 14px;
+    padding: 6px 10px;
+  }
+`;
+const LogoutBtn = styled(LoginBtn)`
+  background: #2ed8b6;
+`;
 
 export default function TopBar() {
   const navigate = useNavigate();
@@ -107,9 +126,9 @@ export default function TopBar() {
           <IconBtn><FaSearch size={20} /></IconBtn>
           <IconBtn style={{ position: 'relative' }}><FaBell size={20} /><Badge /></IconBtn>
           {user.isLoggedIn ? (
-            <button onClick={handleLogout} style={{ marginLeft: 16, padding: '6px 14px', background: '#2ed8b6', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 600, cursor: 'pointer' }}>로그아웃</button>
+            <LogoutBtn onClick={handleLogout}>로그아웃</LogoutBtn>
           ) : (
-            <button onClick={handleLogin} style={{ marginLeft: 16, padding: '6px 14px', background: '#ff7e36', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 600, cursor: 'pointer' }}>로그인</button>
+            <LoginBtn onClick={handleLogin}>로그인</LoginBtn>
           )}
         </div>
       </BarInner>
