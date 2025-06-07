@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { FaSearch, FaBell } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
@@ -69,6 +69,20 @@ const Logo = styled.span`
 export default function TopBar() {
   const navigate = useNavigate();
   const { user, logout } = useContext(UserContext);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuBtnRef = useRef(null);
+  const [dropdownPos, setDropdownPos] = useState({ top: 44, right: 0 });
+
+  useEffect(() => {
+    if (menuOpen && menuBtnRef.current) {
+      const rect = menuBtnRef.current.getBoundingClientRect();
+      setDropdownPos({
+        top: rect.bottom + 4,
+        right: window.innerWidth - rect.right
+      });
+    }
+  }, [menuOpen]);
+
   const handleLogin = () => navigate('/login');
   const handleLogout = () => {
     logout();
@@ -80,8 +94,16 @@ export default function TopBar() {
         <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
           <Logo style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>ECHO</Logo>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <IconBtn><svg width="22" height="22" fill="none" stroke="#222" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></IconBtn>
+        <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+          <IconBtn ref={menuBtnRef} onClick={() => setMenuOpen(v => !v)} aria-label="메뉴 열기/닫기">
+            <svg width="22" height="22" fill="none" stroke="#222" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </IconBtn>
+          {menuOpen && (
+            <div style={{ position: 'fixed', top: dropdownPos.top, right: dropdownPos.right, background: '#fff', border: '1.5px solid #eee', borderRadius: 10, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', zIndex: 200, minWidth: 140, padding: '8px 0', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
+              <button style={{ padding: '10px 18px', background: 'none', border: 'none', color: '#1a4740', fontWeight: 600, fontSize: 16, textAlign: 'left', cursor: 'pointer' }} onClick={() => { setMenuOpen(false); navigate('/tuner/guitar'); }}>🎸 기타 튜너</button>
+              <button style={{ padding: '10px 18px', background: 'none', border: 'none', color: '#1a4740', fontWeight: 600, fontSize: 16, textAlign: 'left', cursor: 'pointer' }} onClick={() => { setMenuOpen(false); navigate('/tuner/bass'); }}>🎸 베이스 튜너</button>
+            </div>
+          )}
           <IconBtn><FaSearch size={20} /></IconBtn>
           <IconBtn style={{ position: 'relative' }}><FaBell size={20} /><Badge /></IconBtn>
           {user.isLoggedIn ? (

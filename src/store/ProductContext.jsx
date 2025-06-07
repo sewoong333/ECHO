@@ -1,29 +1,82 @@
 import React, { createContext, useState } from 'react';
 
-const initialProducts = [
-  { id: 1, title: '야마하 어쿠스틱 기타', price: '300,000원', location: '서울 강남구', time: '1시간 전', author: '나' },
-  { id: 2, title: '커즈와일 신디사이저', price: '1,200,000원', location: '서울 마포구', time: '30분 전', author: '나' },
-  { id: 3, title: '야마하 디지털 피아노', price: '800,000원', location: '서울 송파구', time: '2시간 전', author: '나' },
-  { id: 4, title: '펜더 일렉 기타', price: '950,000원', location: '서울 구로구', time: '3시간 전', author: '나' },
-  { id: 5, title: '롤랜드 전자 드럼', price: '1,500,000원', location: '서울 동작구', time: '4시간 전', author: '나' },
-  { id: 6, title: '셀마 알토 색소폰', price: '2,000,000원', location: '서울 서초구', time: '5시간 전', author: '나' },
-  { id: 7, title: '야마하 플룻', price: '400,000원', location: '서울 은평구', time: '6시간 전', author: '나' },
-  { id: 8, title: '깁슨 레스폴', price: '2,500,000원', location: '서울 강서구', time: '7시간 전', author: '나' },
-  { id: 9, title: '야마하 업라이트 피아노', price: '1,800,000원', location: '서울 종로구', time: '8시간 전', author: '나' },
-  { id: 10, title: '마틴 통기타', price: '1,100,000원', location: '서울 노원구', time: '9시간 전', author: '나' },
-  { id: 11, title: '야마하 베이스 기타', price: '600,000원', location: '서울 성동구', time: '10시간 전', author: '나' },
-  { id: 12, title: '프리소너스 오디오 인터페이스', price: '350,000원', location: '서울 용산구', time: '11시간 전', author: '나' },
+// 더미 유저 닉네임(유저컨텍스트와 동일하게)
+const dummyNicknames = [
+  '음악왕', '기타소년', '피아노소녀', '드럼짱', '베이스킹', '색소폰러버', '플룻마스터', '신디장인', '보컬리더', '밴드캡틴',
+  '재즈러버', '락스타', '힙합보이', '클래식걸', 'EDM매니아', '트로트신', '포크싱어', '뮤지션A', '뮤지션B', '뮤지션C'
 ];
+
+// 더미 상품 데이터(모델/상품명에 맞는 실제 악기/음향기기 사진 매칭, 1~3장)
+const dummyProducts = [
+  {
+    title: '야마하 FG800 통기타',
+    model: 'FG800',
+    description: '2021년 구매, 집에서만 연습용으로 사용했습니다. 생활기스 약간 있지만 소리 깨끗합니다. 오리지널 소프트케이스 포함, 직거래만 원해요.',
+    price: 230000,
+    location: '서울 마포구',
+    images: [
+      'https://m.media-amazon.com/images/I/41fGV5DxOcL._AC_.jpg',
+      'https://peacemusic.kr/web/product/big/202104/3875_shop1_161845.jpg'
+    ]
+  },
+  {
+    title: '롤랜드 TD-1K 전자드럼',
+    model: 'TD-1K',
+    description: '2020년 구매, 연습용으로만 사용. 패드 반응 좋고 소음 적음. 스틱/의자 포함, 직거래만.',
+    price: 410000,
+    location: '서울 구로구',
+    images: [
+      'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80'
+    ]
+  },
+  {
+    title: '롤랜드 TD-1KV 전자드럼 세트',
+    model: 'TD-1KV',
+    description: '2021년 구매, 집에서 연습용으로만 사용한 롤랜드 TD-1KV 전자드럼입니다. 모든 패드 정상 작동, 킥 페달 부드럽게 잘 됩니다. 드럼 스틱, 헤드폰 포함. 인천 부평역 근처 직거래.',
+    price: 420000,
+    location: '인천 부평구',
+    images: [
+      'https://static.roland.com/assets/images/products/gallery/td-1kv_angle_gal.jpg'
+    ]
+  },
+  {
+    title: '펜더 Player 텔레캐스터 일렉기타',
+    model: 'Player Telecaster',
+    description: '2020년 구매, 펜더 Player 텔레캐스터 일렉기타입니다. 바디에 미세한 스크래치 있으나 연주에는 문제 없습니다. 오리지널 소프트케이스 포함, 부산 서면 직거래.',
+    price: 750000,
+    location: '부산 부산진구',
+    images: [
+      'https://www.fmicassets.com/Damroot/ZoomJpg/10001/0145212500_gtr_frt_001_rr.jpg'
+    ]
+  }
+];
+
+// 유저별로 1개씩만 등록, 중복 없이
+const initialProducts = dummyProducts.map((base, i) => ({
+  ...base,
+  id: Date.now() + Math.random(),
+  author: dummyNicknames[i],
+  time: `${Math.floor(Math.random()*12)+1}시간 전`,
+  views: Math.floor(Math.random()*100),
+  image: base.images[0], // 대표사진
+}));
 
 export const ProductContext = createContext();
 
 export function ProductProvider({ children }) {
   const [products, setProducts] = useState(initialProducts);
   const [likes, setLikes] = useState([]); // 관심 상품 id 배열
+  const [chatRooms, setChatRooms] = useState({}); // { [productId]: [chatRoomId, ...] }
   const addProduct = product => setProducts(prev => [{ ...product, author: product.author || '나' }, ...prev]);
   const toggleLike = id => setLikes(prev => prev.includes(id) ? prev.filter(lid => lid !== id) : [...prev, id]);
+  const addChatRoom = (productId, chatRoomId) => {
+    setChatRooms(prev => ({
+      ...prev,
+      [productId]: [...(prev[productId] || []), chatRoomId]
+    }));
+  };
   return (
-    <ProductContext.Provider value={{ products, addProduct, likes, toggleLike }}>
+    <ProductContext.Provider value={{ products, setProducts, addProduct, likes, toggleLike, chatRooms, addChatRoom }}>
       {children}
     </ProductContext.Provider>
   );

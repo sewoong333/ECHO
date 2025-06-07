@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '../components/TopBar';
 import { ProductContext } from '../store/ProductContext';
-import { FaHeart, FaRegHeart, FaClock, FaRegCommentDots, FaCheckCircle } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaClock, FaRegCommentDots, FaCheckCircle, FaPlus, FaEllipsisV } from 'react-icons/fa';
 import getInstrumentImage from '../utils/getInstrumentImage';
 
 const colors = {
@@ -180,11 +180,13 @@ const SortSelect = styled.select`
 
 export default function Home() {
   const navigate = useNavigate();
-  const { products, likes, toggleLike } = useContext(ProductContext);
+  const { products, likes, toggleLike, chatRooms } = useContext(ProductContext);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('latest');
   const [visibleCount, setVisibleCount] = useState(10);
   const loaderRef = useRef(null);
+  const [hiddenIds, setHiddenIds] = useState([]);
+  const [menuOpenId, setMenuOpenId] = useState(null);
 
   const filtered = products.filter(product => {
     const q = search.toLowerCase();
@@ -200,7 +202,7 @@ export default function Home() {
     if (sort === 'price') return (b.price || 0) - (a.price || 0);
     return 0;
   });
-  const visible = sorted.slice(0, visibleCount);
+  const visible = sorted.filter(p => !hiddenIds.includes(p.id)).slice(0, visibleCount);
 
   useEffect(() => {
     setVisibleCount(10); // 검색/정렬 바뀌면 초기화
@@ -225,7 +227,7 @@ export default function Home() {
   return (
     <ListWrapper>
       <TopBar />
-      <div style={{ width: '100%', maxWidth: 480, margin: '0 auto' }}>
+      <div style={{ width: '100%', maxWidth: 480, margin: '0 auto', position: 'relative', minHeight: '80vh' }}>
         <SearchBox>
           <SearchInput
             type="text"
@@ -243,14 +245,29 @@ export default function Home() {
         {visible.map(product => (
           <CardWrap key={product.id}>
             <Card onClick={() => navigate(`/product/${product.id}`)} style={{ position: 'relative' }}>
-              <Img src={getInstrumentImage(product.title)} alt={product.title} />
+              <Img src={product.image || getInstrumentImage(product.title)} alt={product.title} />
+              <button
+                style={{ position: 'absolute', top: 12, right: 12, background: 'none', border: 'none', cursor: 'pointer', zIndex: 10, padding: 4 }}
+                onClick={e => { e.stopPropagation(); setMenuOpenId(product.id === menuOpenId ? null : product.id); }}
+                aria-label="더보기"
+              >
+                <FaEllipsisV size={18} color="#bbb" />
+              </button>
+              {menuOpenId === product.id && (
+                <div style={{ position: 'absolute', top: 38, right: 12, background: '#fff', border: '1.5px solid #eee', borderRadius: 10, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', zIndex: 20, minWidth: 120 }} onClick={e => e.stopPropagation()}>
+                  <button style={{ width: '100%', padding: '12px 0', border: 'none', background: 'none', color: '#222', fontWeight: 600, fontSize: 15, cursor: 'pointer', borderBottom: '1px solid #f2f2f2' }} onClick={() => { setHiddenIds(ids => [...ids, product.id]); setMenuOpenId(null); }}>이 글 숨기기</button>
+                  <button style={{ width: '100%', padding: '12px 0', border: 'none', background: 'none', color: '#ff7e36', fontWeight: 600, fontSize: 15, cursor: 'pointer', borderBottom: '1px solid #f2f2f2' }} onClick={() => { alert('신고가 접수되었습니다.'); setMenuOpenId(null); }}>신고하기</button>
+                  <button style={{ width: '100%', padding: '12px 0', border: 'none', background: 'none', color: '#888', fontWeight: 500, fontSize: 15, cursor: 'pointer' }} onClick={() => setMenuOpenId(null)}>닫기</button>
+                </div>
+              )}
               <Info>
                 <Title>{product.title}</Title>
                 <Meta>{product.location}</Meta>
-                <Price>{product.price}</Price>
+                <Price>판매가격: {Number(product.price).toLocaleString()}원</Price>
                 <CardBottom>
-                  <Stat><FaRegCommentDots size={15} /> {product.views || 0}</Stat>
+                  <Stat><FaRegCommentDots size={15} /> {chatRooms?.[product.id]?.length || 0}</Stat>
                   <Stat><FaHeart size={14} /> {likes.filter(id => id === product.id).length}</Stat>
+                  <Stat>👁 {product.views || 0}</Stat>
                 </CardBottom>
               </Info>
               {(
@@ -266,6 +283,37 @@ export default function Home() {
         ))}
         <div ref={loaderRef} style={{ height: 30 }} />
         {sorted.length === 0 && <EmptyMsg>검색 결과가 없습니다.</EmptyMsg>}
+        <button
+          onClick={() => navigate('/add')}
+          style={{
+            position: 'fixed',
+            left: '50%',
+            transform: 'translateX(160px)',
+            bottom: 80,
+            zIndex: 200,
+            width: 56,
+            height: 56,
+            borderRadius: '50%',
+            background: '#2ed8b6',
+            color: '#fff',
+            border: 'none',
+            boxShadow: '0 4px 16px rgba(46,216,182,0.18)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 28,
+            fontWeight: 900,
+            cursor: 'pointer',
+            padding: 0,
+            minWidth: 56,
+            minHeight: 56,
+            maxWidth: 56,
+            maxHeight: 56,
+          }}
+          aria-label="상품 등록"
+        >
+          <FaPlus style={{fontSize:28, fontWeight:900}} />
+        </button>
       </div>
     </ListWrapper>
   );
