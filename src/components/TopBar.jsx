@@ -6,6 +6,8 @@ import { UserContext } from '../store/UserContext';
 
 const Bar = styled.header`
   width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
   height: 56px;
   background: #fff;
   border-bottom: 1px solid #eee;

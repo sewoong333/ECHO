@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FaHome, FaRegCommentDots, FaUser, FaPlusCircle, FaMusic } from 'react-icons/fa';
+import { FaHome, FaRegCommentDots, FaUser, FaPlusCircle, FaMusic, FaShareAlt } from 'react-icons/fa';
 
 const Bar = styled.nav`
   position: fixed;
@@ -51,6 +51,7 @@ export default function BottomNav() {
         <Item $active={pathname === '/musiclife'} onClick={() => navigate('/musiclife')}> <FaMusic size={22} /> <span>음악생활</span> </Item>
         <Item $active={pathname === '/map'} onClick={() => navigate('/map')}> <FaUser size={22} /> <span>동네지도</span> </Item>
         <Item $active={pathname.startsWith('/chat')} onClick={() => navigate('/chat')}> <FaRegCommentDots size={22} /> <span>채팅</span> </Item>
+        <Item $active={pathname === '/echo-share'} onClick={() => navigate('/echo-share')}> <FaShareAlt size={22} /> <span>에코쉐어</span> </Item>
         <Item $active={pathname === '/mypage'} onClick={() => navigate('/mypage')}> <FaUser size={22} /> <span>나의에코</span> </Item>
       </BarInner>
     </Bar>
