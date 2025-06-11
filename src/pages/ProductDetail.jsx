@@ -2,26 +2,70 @@ import React, { useContext, useState, useEffect } from 'react';
 import TopBar from '../components/TopBar';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ProductContext } from '../store/ProductContext';
+import { UserContext } from '../store/UserContext';
 import { FaHeart, FaRegCommentDots, FaUserCircle, FaArrowLeft, FaRegHeart } from 'react-icons/fa';
+import { doc, updateDoc, increment } from 'firebase/firestore';
+import { db } from '../utils/firebase';
 import getInstrumentImage from '../utils/getInstrumentImage';
 
 export default function ProductDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { products, setProducts, likes, chatRooms } = useContext(ProductContext);
+  const { products, setProducts, likes, toggleLike, chatRooms } = useContext(ProductContext);
+  const { user } = useContext(UserContext);
   const product = products.find(p => String(p.id) === String(id));
   const [showSlide, setShowSlide] = useState(false);
   const [slideIdx, setSlideIdx] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  // 조회수 증가
   useEffect(() => {
     if (!product) return;
-    setProducts(prev => prev.map(p => p.id === product.id ? { ...p, views: (p.views || 0) + 1 } : p));
-    // eslint-disable-next-line
+    
+    const updateViews = async () => {
+      try {
+        const productRef = doc(db, 'products', product.id);
+        await updateDoc(productRef, {
+          views: increment(1)
+        });
+        setProducts(prev => prev.map(p => 
+          p.id === product.id 
+            ? { ...p, views: (p.views || 0) + 1 }
+            : p
+        ));
+      } catch (err) {
+        console.error('조회수 업데이트 실패:', err);
+      }
+    };
+
+    updateViews();
   }, [product?.id]);
+
   if (!product) return <div style={{ padding: 32 }}>상품을 찾을 수 없습니다.</div>;
+
   const chatCount = chatRooms[product.id]?.length || 0;
   const likeCount = likes.filter(lid => lid === product.id).length;
   const viewCount = product.views || 0;
   const images = product.images && product.images.length ? product.images : [product.image];
+
+  const handleLike = async (e) => {
+    e.stopPropagation();
+    if (!user.isLoggedIn) {
+      alert('로그인이 필요합니다.');
+      navigate('/login');
+      return;
+    }
+    setLoading(true);
+    try {
+      await toggleLike(product.id);
+    } catch (err) {
+      console.error('관심 상품 토글 실패:', err);
+      alert('관심 상품 등록에 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div style={{ width: '100vw', minHeight: '100vh', background: '#f8f9fa', display: 'flex', flexDirection: 'column', alignItems: 'center', position:'relative' }}>
       <TopBar />

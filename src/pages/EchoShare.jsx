@@ -2,203 +2,205 @@ import React from 'react';
 import styled from 'styled-components';
 import TopBar from '../components/TopBar';
 
+const MAX_WIDTH = '480px';
+const SIDE_PADDING = '18px';
+
+const Wrapper = styled.div`
+  width: 100vw;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e0f7fa 100%);
+  display: flex;
+  flex-direction: column;
+`;
+
 const Container = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   width: 100%;
-  max-width: 480px;
+  max-width: 600px;
   margin: 0 auto;
-  min-height: calc(100vh - 56px);
+  padding: 32px 12px 100px 12px;
+  box-sizing: border-box;
+`;
+
+const Hero = styled.section`
+  width: 100%;
+  max-width: ${MAX_WIDTH};
+  background: linear-gradient(120deg, #2ed8b6 60%, #ff7e36 100%);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(46,216,182,0.10);
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #fff;
-  padding: 0 1rem;
-  box-sizing: border-box;
-`;
-
-const Header = styled.header`
-  width: 100%;
-  box-sizing: border-box;
-  padding: 1.5rem;
-  text-align: center;
-  margin-bottom: 1.5rem;
-`;
-
-const Title = styled.h1`
-  font-size: 2.25rem;
-  font-weight: 900;
-  color: #212529;
-  margin-bottom: 0.75rem;
-  line-height: 1.2;
-`;
-
-const Subtitle = styled.p`
-  font-size: 1.25rem;
-  color: #6c757d;
-`;
-
-const HeroImage = styled.div`
-  width: 100%;
+  padding: 1.5rem ${SIDE_PADDING};
   margin-bottom: 2.5rem;
-  border-radius: 0.75rem;
+  position: relative;
   overflow: hidden;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  
-  img {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-    aspect-ratio: 16/9;
-    border-radius: 0.75rem;
-    display: block;
-  }
+  margin-left: auto;
+  margin-right: auto;
+`;
+
+const HeroImage = styled.img`
+  width: 90%;
+  max-width: 340px;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  margin-bottom: 1.5rem;
+  object-fit: cover;
+`;
+
+const HeroTitle = styled.h1`
+  font-size: 2rem;
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 0.7rem;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  text-align: center;
+  line-height: 1.3;
+  word-break: keep-all;
+  white-space: normal;
+`;
+
+const HeroSubtitle = styled.p`
+  font-size: 1.08rem;
+  color: #f8fafc;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+  word-break: keep-all;
+  white-space: normal;
 `;
 
 const Section = styled.section`
   width: 100%;
-  max-width: 420px;
-  box-sizing: border-box;
+  max-width: ${MAX_WIDTH};
   margin: 0 auto 2.5rem auto;
-  padding-bottom: 2.5rem;
-  border-bottom: 1px solid #f3f4f6;
-  text-align: center;
-`;
-
-const SectionTitle = styled.h2`
-  font-size: 1.875rem;
-  font-weight: 800;
-  text-align: center;
-  color: #212529;
-  margin-bottom: 2rem;
-`;
-
-const BenefitCard = styled.div`
-  width: 100%;
-  max-width: 420px;
-  margin: 0 auto 1rem auto;
-  background: #fff;
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-  box-sizing: border-box;
+  padding-left: ${SIDE_PADDING};
+  padding-right: ${SIDE_PADDING};
   display: flex;
   flex-direction: column;
+  gap: 1.5rem;
+  margin-left: auto;
+  margin-right: auto;
+`;
+
+const Card = styled.div`
+  width: 100%;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 16px rgba(46,216,182,0.08);
+  padding: 1.5rem 0;
+  display: flex;
   align-items: flex-start;
-  padding: 1.25rem;
-  text-align: left;
+  gap: 1.2rem;
+  transition: box-shadow 0.2s;
+  margin-left: auto;
+  margin-right: auto;
   &:hover {
-    transform: scale(1.02);
+    box-shadow: 0 6px 24px rgba(46,216,182,0.16);
   }
 `;
 
-const Icon = styled.i`
-  color: #0066ff;
-  font-size: 1.875rem;
-  margin-right: 1.25rem;
+const CardIcon = styled.div`
+  font-size: 2.1rem;
+  color: #2ed8b6;
+  flex-shrink: 0;
 `;
 
-const BenefitContent = styled.div`
-  h3 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #1f2937;
-    margin-bottom: 0.25rem;
-  }
-  
-  p {
-    color: #495057;
-    line-height: 1.6;
-  }
-`;
-
-const StepCard = styled.div`
-  width: 100%;
-  max-width: 420px;
-  margin: 0 auto 1rem auto;
-  background: #fff;
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #0066ff;
-  box-sizing: border-box;
+const CardContent = styled.div`
+  flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  padding: 1.25rem;
-  text-align: left;
+  gap: 0.3rem;
+`;
+
+const CardTitle = styled.h3`
+  font-size: 1.13rem;
+  font-weight: 700;
+  color: #1a4740;
+`;
+
+const CardDesc = styled.p`
+  font-size: 1rem;
+  color: #444;
+  line-height: 1.5;
+`;
+
+const StepSection = styled(Section)`
+  gap: 1.2rem;
+`;
+
+const StepCard = styled(Card)`
+  border-left: 5px solid #2ed8b6;
+  background: #f8fafc;
 `;
 
 const StepNumber = styled.div`
-  flex-shrink: 0;
-  width: 2rem;
-  height: 2rem;
+  width: 2.2rem;
+  height: 2.2rem;
+  background: #ff7e36;
+  color: #fff;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0066ff;
-  color: white;
-  border-radius: 9999px;
-  font-size: 1.125rem;
-  font-weight: 700;
+  font-size: 1.1rem;
+  font-weight: 800;
   margin-right: 1rem;
 `;
 
-const PromiseSection = styled.div`
-  background: #fff3cd;
-  border: 1px solid #ffeeba;
-  border-radius: 0.75rem;
-  padding: 2rem;
-  text-align: center;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+const PromiseSection = styled(Section)`
+  background: #f8f9fa;
+  border-radius: 18px;
+  box-shadow: 0 2px 10px rgba(46,216,182,0.07);
+  padding: 1.3rem 0;
+  margin-bottom: 2.5rem;
 `;
 
 const PromiseTitle = styled.h3`
-  font-size: 1.875rem;
-  font-weight: 800;
-  color: #664d03;
-  margin-bottom: 1.25rem;
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #1a4740;
+  margin-bottom: 0.7rem;
 `;
 
 const PromiseList = styled.ul`
-  color: #664d03;
-  font-size: 1.125rem;
-  
+  padding-left: 1.1rem;
   li {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 0.75rem;
-    
-    i {
-      margin-right: 0.75rem;
-      font-size: 1.5rem;
-    }
+    font-size: 0.98rem;
+    color: #444;
+    margin-bottom: 0.5rem;
+    list-style: disc inside;
   }
 `;
 
 const CTAButton = styled.a`
   display: block;
   width: 100%;
-  padding: 1.25rem;
-  background: #0066ff;
-  color: white;
-  font-weight: 700;
-  font-size: 1.25rem;
-  border-radius: 0.75rem;
+  max-width: 320px;
+  margin: 2.5rem auto 0 auto;
+  background: linear-gradient(90deg, #2ed8b6 60%, #ff7e36 100%);
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 800;
   text-align: center;
+  border-radius: 14px;
+  padding: 1.1rem 0;
+  box-shadow: 0 2px 10px rgba(46,216,182,0.13);
   text-decoration: none;
-  transition: all 0.3s ease;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  
-  &:hover {
-    transform: scale(1.02);
-    background: #0047b3;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  }
-  
+  letter-spacing: 0.01em;
+  transition: background 0.18s, transform 0.13s;
   &:active {
+    background: #2ed8b6;
     transform: scale(0.98);
+  }
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(46,216,182,0.2);
   }
 `;
 
@@ -211,116 +213,79 @@ const Footer = styled.footer`
   margin-top: 2.5rem;
 `;
 
-function EchoShare() {
+export default function EchoShare() {
   return (
-    <>
+    <Wrapper>
       <TopBar />
       <Container>
-        <Header>
-          <Title>🎸 잠자는 악기를 수익으로!</Title>
-          <Subtitle>ECHO의 새로운 '수익 공유' 프로그램</Subtitle>
-        </Header>
-
-        <HeroImage>
-          <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80" alt="다양한 악기 이미지" />
-        </HeroImage>
+        <Hero>
+          <HeroImage src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80" alt="기타와 앰프가 놓인 음악 스튜디오" />
+          <HeroTitle>악기 공유, 새로운 수익의 시작</HeroTitle>
+          <HeroSubtitle>기타, 피아노, 드럼 등 다양한 악기를 쉽고 안전하게 공유하세요!</HeroSubtitle>
+        </Hero>
 
         <Section>
-          <SectionTitle>✔️ 악기 판매자님, 이런 혜택을 놓치지 마세요!</SectionTitle>
-          <BenefitCard>
-            <Icon className="fas fa-money-bill-wave" />
-            <BenefitContent>
-              <h3>💰 추가 수익 발생</h3>
-              <p>판매를 기다리는 동안, 내 악기가 스스로 돈을 벌어옵니다. 매월 정산되는 렌털 수익으로 쏠쏠한 추가 수입을 만들어보세요.</p>
-            </BenefitContent>
-          </BenefitCard>
-          <BenefitCard>
-            <Icon className="fas fa-rocket" />
-            <BenefitContent>
-              <h3>🚀 더 빠른 판매 기회</h3>
-              <p>"일단 써보고 결정하자!" 렌털을 통해 당신의 악기를 체험한 고객은 가장 확실한 구매자가 됩니다. 판매 성공 확률이 훌쩍 올라갑니다.</p>
-            </BenefitContent>
-          </BenefitCard>
-          <BenefitCard>
-            <Icon className="fas fa-shield-alt" />
-            <BenefitContent>
-              <h3>🛡️ 완벽한 케어와 관리</h3>
-              <p>렌털 전후로 ECHO의 전문 리페어팀이 내 악기의 컨디션을 최상으로 점검하고 관리합니다. 이제 악기 관리는 ECHO에 맡기세요.</p>
-            </BenefitContent>
-          </BenefitCard>
+          <Card>
+            <CardIcon>🎸</CardIcon>
+            <CardContent>
+              <CardTitle>다양한 악기 공유</CardTitle>
+              <CardDesc>기타, 피아노, 드럼 등 다양한 악기를 쉽고 빠르게 공유하고 대여할 수 있습니다.</CardDesc>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardIcon>💰</CardIcon>
+            <CardContent>
+              <CardTitle>수익 창출</CardTitle>
+              <CardDesc>사용하지 않는 악기를 통해 추가 수익을 창출해보세요.</CardDesc>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardIcon>🤝</CardIcon>
+            <CardContent>
+              <CardTitle>안전한 거래</CardTitle>
+              <CardDesc>검증된 사용자와 안전하게 거래할 수 있습니다.</CardDesc>
+            </CardContent>
+          </Card>
         </Section>
 
-        <Section>
-          <SectionTitle>✔️ 악기 구매자님, 후회 없는 선택을 경험하세요!</SectionTitle>
-          <BenefitCard>
-            <Icon className="fas fa-music" />
-            <BenefitContent>
-              <h3>🎶 사기 전, 마음껏 연주하고 결정!</h3>
-              <p>사진만 보고 덜컥 구매하기 불안하셨죠? 이제 ECHO에서 원하는 악기를 충분히 렌털하고 체험한 뒤, 확신을 갖고 구매하세요.</p>
-            </BenefitContent>
-          </BenefitCard>
-          <BenefitCard>
-            <Icon className="fas fa-check-circle" />
-            <BenefitContent>
-              <h3>✅ 렌털비가 구매 할인으로!</h3>
-              <p>체험에 사용된 렌털 비용의 일부를 구매 시 할인해 드립니다. 합리적인 가격으로 최고의 만족을 누리세요.</p>
-            </BenefitContent>
-          </BenefitCard>
-          <BenefitCard>
-            <Icon className="fas fa-certificate" />
-            <BenefitContent>
-              <h3>🎓 전문가 인증은 기본</h3>
-              <p>모든 악기는 ECHO의 비파괴 정밀 검사를 통과한 '인증 중고 악기'입니다. 최상의 퀄리티를 보장합니다.</p>
-            </BenefitContent>
-          </BenefitCard>
-        </Section>
-
-        <Section>
-          <SectionTitle>🤔 어떻게 이용하나요? 아주 간단합니다!</SectionTitle>
+        <StepSection>
           <StepCard>
             <StepNumber>1</StepNumber>
-            <BenefitContent>
-              <h4>위탁 신청 및 동의</h4>
-              <p>내 악기를 ECHO에 위탁하며 '판매 연계 렌털 서비스'에 동의해 주세요.</p>
-            </BenefitContent>
+            <CardContent>
+              <CardTitle>악기 등록</CardTitle>
+              <CardDesc>공유하고 싶은 악기를 사진과 함께 등록하세요.</CardDesc>
+            </CardContent>
           </StepCard>
           <StepCard>
             <StepNumber>2</StepNumber>
-            <BenefitContent>
-              <h4>ECHO의 진단 및 리스팅</h4>
-              <p>전문가가 악기를 진단/평가하고, 판매와 렌털이 모두 가능하도록 등록합니다.</p>
-            </BenefitContent>
+            <CardContent>
+              <CardTitle>대여 요청 수락</CardTitle>
+              <CardDesc>대여 요청을 확인하고 수락하세요.</CardDesc>
+            </CardContent>
           </StepCard>
           <StepCard>
             <StepNumber>3</StepNumber>
-            <BenefitContent>
-              <h4>수익 발생 및 판매</h4>
-              <p>렌털 수익은 매월 정산! 악기가 판매되면 안전하게 거래를 마무리합니다.</p>
-            </BenefitContent>
+            <CardContent>
+              <CardTitle>수익 창출</CardTitle>
+              <CardDesc>악기 대여를 통해 수익을 창출하세요.</CardDesc>
+            </CardContent>
           </StepCard>
-        </Section>
+        </StepSection>
 
-        <Section>
-          <PromiseSection>
-            <PromiseTitle>ECHO의 약속: 안심하세요, 저희가 책임집니다!</PromiseTitle>
-            <PromiseList>
-              <li><i className="fas fa-handshake" /> 렌털 중 파손/분실 보험 적용</li>
-              <li><i className="fas fa-handshake" /> 렌털 이용 시 안전 보증금 제도 운영</li>
-              <li><i className="fas fa-handshake" /> 전문 리페어팀의 꼼꼼한 악기 관리</li>
-            </PromiseList>
-          </PromiseSection>
-        </Section>
+        <PromiseSection>
+          <PromiseTitle>ECHO SHARE의 약속</PromiseTitle>
+          <PromiseList>
+            <li>모든 악기는 검증된 사용자만 등록할 수 있습니다.</li>
+            <li>안전한 거래를 위한 보증 시스템을 제공합니다.</li>
+            <li>24시간 고객 지원 서비스를 제공합니다.</li>
+          </PromiseList>
+        </PromiseSection>
 
-        <CTAButton href="#">
-          ➡️ 내 악기 수익 잠재력 확인하기
-        </CTAButton>
-
+        <CTAButton href="/product-register">지금 시작하기</CTAButton>
         <Footer>
           <p>&copy; 2025 Puregold. All rights reserved.</p>
         </Footer>
       </Container>
-    </>
+    </Wrapper>
   );
 }
-
-export default EchoShare; 

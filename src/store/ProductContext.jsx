@@ -1,4 +1,7 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
+import { db, storage, auth } from '../utils/firebase';
+import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, updateDoc, where } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 // 더미 유저 닉네임(유저컨텍스트와 동일하게)
 const dummyNicknames = [
@@ -64,19 +67,147 @@ const initialProducts = dummyProducts.map((base, i) => ({
 export const ProductContext = createContext();
 
 export function ProductProvider({ children }) {
-  const [products, setProducts] = useState(initialProducts);
-  const [likes, setLikes] = useState([]); // 관심 상품 id 배열
-  const [chatRooms, setChatRooms] = useState({}); // { [productId]: [chatRoomId, ...] }
-  const addProduct = product => setProducts(prev => [{ ...product, author: product.author || '나' }, ...prev]);
-  const toggleLike = id => setLikes(prev => prev.includes(id) ? prev.filter(lid => lid !== id) : [...prev, id]);
-  const addChatRoom = (productId, chatRoomId) => {
-    setChatRooms(prev => ({
-      ...prev,
-      [productId]: [...(prev[productId] || []), chatRoomId]
-    }));
+  const [products, setProducts] = useState([]);
+  const [likes, setLikes] = useState([]);
+  const [chatRooms, setChatRooms] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  // 상품 목록 불러오기
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
+        const querySnapshot = await getDocs(q);
+        const productList = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setProducts(productList);
+      } catch (err) {
+        console.error('상품 목록 불러오기 실패:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  // 상품 추가
+  const addProduct = async (product) => {
+    try {
+      // 이미지가 base64인 경우 Storage에 업로드
+      let imageUrls = [];
+      if (product.images && product.images.length > 0) {
+        imageUrls = await Promise.all(
+          product.images.map(async (img) => {
+            if (img.startsWith('data:')) {
+              try {
+                const imageRef = ref(storage, `products/${Date.now()}_${Math.random().toString(36).substring(7)}`);
+                const response = await fetch(img);
+                const blob = await response.blob();
+                await uploadBytes(imageRef, blob);
+                return await getDownloadURL(imageRef);
+              } catch (err) {
+                console.error('이미지 업로드 실패:', err);
+                throw new Error('이미지 업로드에 실패했습니다.');
+              }
+            }
+            return img;
+          })
+        );
+      }
+
+      const productData = {
+        ...product,
+        images: imageUrls,
+        image: imageUrls[0] || '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      const docRef = await addDoc(collection(db, 'products'), productData);
+      setProducts(prev => [{ ...productData, id: docRef.id }, ...prev]);
+      return docRef.id;
+    } catch (err) {
+      console.error('상품 추가 실패:', err);
+      throw err;
+    }
   };
+
+  // 상품 삭제
+  const deleteProduct = async (id) => {
+    try {
+      await deleteDoc(doc(db, 'products', id));
+      setProducts(prev => prev.filter(p => p.id !== id));
+    } catch (err) {
+      console.error('상품 삭제 실패:', err);
+      throw err;
+    }
+  };
+
+  // 상품 수정
+  const updateProduct = async (id, updates) => {
+    try {
+      const productRef = doc(db, 'products', id);
+      await updateDoc(productRef, {
+        ...updates,
+        updatedAt: new Date().toISOString()
+      });
+      setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+    } catch (err) {
+      console.error('상품 수정 실패:', err);
+      throw err;
+    }
+  };
+
+  // 관심 상품 토글
+  const toggleLike = async (id) => {
+    try {
+      const newLikes = likes.includes(id) 
+        ? likes.filter(lid => lid !== id)
+        : [...likes, id];
+      setLikes(newLikes);
+      
+      // Firestore에 likes 컬렉션 업데이트
+      const likesRef = doc(db, 'likes', auth.currentUser.uid);
+      await updateDoc(likesRef, { productIds: newLikes });
+    } catch (err) {
+      console.error('관심 상품 토글 실패:', err);
+      throw err;
+    }
+  };
+
+  // 채팅방 추가
+  const addChatRoom = async (productId, chatRoomId) => {
+    try {
+      const newChatRooms = {
+        ...chatRooms,
+        [productId]: [...(chatRooms[productId] || []), chatRoomId]
+      };
+      setChatRooms(newChatRooms);
+      
+      // Firestore에 chatRooms 컬렉션 업데이트
+      const chatRoomsRef = doc(db, 'chatRooms', auth.currentUser.uid);
+      await updateDoc(chatRoomsRef, { [productId]: newChatRooms[productId] });
+    } catch (err) {
+      console.error('채팅방 추가 실패:', err);
+      throw err;
+    }
+  };
+
   return (
-    <ProductContext.Provider value={{ products, setProducts, addProduct, likes, toggleLike, chatRooms, addChatRoom }}>
+    <ProductContext.Provider value={{ 
+      products, 
+      setProducts, 
+      addProduct, 
+      deleteProduct, 
+      updateProduct,
+      likes, 
+      toggleLike, 
+      chatRooms, 
+      addChatRoom,
+      loading 
+    }}>
       {children}
     </ProductContext.Provider>
   );

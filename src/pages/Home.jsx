@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '../components/TopBar';
 import { ProductContext } from '../store/ProductContext';
-import { FaHeart, FaRegHeart, FaClock, FaRegCommentDots, FaCheckCircle, FaPlus, FaEllipsisV } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaClock, FaRegCommentDots, FaCheckCircle, FaPlus, FaEllipsisV, FaPen, FaEdit } from 'react-icons/fa';
 import getInstrumentImage from '../utils/getInstrumentImage';
 
 const colors = {
@@ -312,7 +312,7 @@ export default function Home() {
           }}
           aria-label="상품 등록"
         >
-          <FaPlus style={{fontSize:28, fontWeight:900}} />
+          <FaPen style={{fontSize:28, fontWeight:900}} />
         </button>
       </div>
     </ListWrapper>

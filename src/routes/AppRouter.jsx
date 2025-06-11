@@ -7,7 +7,7 @@ import SetLocation from '../pages/SetLocation';
 import ProductRegister from '../pages/ProductRegister';
 import ProductDetail from '../pages/ProductDetail';
 import ChatRoom from '../pages/ChatRoom';
-import MyEcho from '../pages/MyEcho';
+import MyPage from '../pages/MyPage';
 import MusicLife from '../pages/MusicLife';
 import MusicLifeDetail from '../pages/MusicLifeDetail';
 import MapPage from '../pages/Map';
@@ -16,6 +16,7 @@ import AddProduct from '../pages/AddProduct';
 import GuitarTuner from '../pages/GuitarTuner';
 import BassTuner from '../pages/BassTuner';
 import SalesHistory from '../pages/SalesHistory';
+import EchoShare from '../pages/EchoShare';
 
 export default function AppRouter() {
   return (
@@ -28,7 +29,7 @@ export default function AppRouter() {
       <Route path="/product/:id" element={<ProductDetail />} />
       <Route path="/chat/:id" element={<ChatRoom />} />
       <Route path="/chat" element={<ChatList />} />
-      <Route path="/mypage" element={<MyEcho />} />
+      <Route path="/mypage" element={<MyPage />} />
       <Route path="/mypage/sales" element={<SalesHistory />} />
       <Route path="/musiclife" element={<MusicLife />} />
       <Route path="/musiclife/:id" element={<MusicLifeDetail />} />
@@ -36,6 +37,7 @@ export default function AppRouter() {
       <Route path="/add" element={<AddProduct />} />
       <Route path="/tuner/guitar" element={<GuitarTuner />} />
       <Route path="/tuner/bass" element={<BassTuner />} />
+      <Route path="/echo-share" element={<EchoShare />} />
     </Routes>
   );
 } 

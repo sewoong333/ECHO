@@ -12,7 +12,7 @@ import {
 export const UserContext = createContext();
 
 export function UserProvider({ children }) {
-  const [user, setUser] = useState({ nickname: '', email: '', isLoggedIn: false, loading: true });
+  const [user, setUser] = useState({ nickname: '', email: '', uid: '', isLoggedIn: false, loading: true });
 
   // Firebase 인증 상태 동기화
   useEffect(() => {
@@ -21,12 +21,13 @@ export function UserProvider({ children }) {
         setUser({
           nickname: firebaseUser.displayName || '',
           email: firebaseUser.email,
+          uid: firebaseUser.uid,
           isLoggedIn: true,
           loading: false,
           emailVerified: firebaseUser.emailVerified,
         });
       } else {
-        setUser({ nickname: '', email: '', isLoggedIn: false, loading: false });
+        setUser({ nickname: '', email: '', uid: '', isLoggedIn: false, loading: false });
       }
     });
     return () => unsubscribe();
@@ -35,9 +36,7 @@ export function UserProvider({ children }) {
   // 구글 로그인
   const loginWithGoogle = async () => {
     try {
-      const { GoogleAuthProvider, signInWithPopup } = await import('firebase/auth');
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      await signInWithPopup(auth, googleProvider);
     } catch (err) {
       alert('구글 로그인 에러: ' + (err && err.message ? err.message : JSON.stringify(err)));
       throw err;

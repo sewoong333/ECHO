@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { FaHome, FaPlus, FaUser, FaShareAlt } from 'react-icons/fa';
+import { FaHome, FaPlus, FaUser, FaShareAlt, FaPen, FaEdit } from 'react-icons/fa';
 
 const BottomBarContainer = styled.div`
   position: fixed;
@@ -39,8 +39,8 @@ function BottomBar() {
         <FaHome />
         홈
       </MenuItem>
-      <MenuItem to="/post" active={location.pathname === '/post' ? 1 : 0}>
-        <FaPlus />
+      <MenuItem to="/add" active={location.pathname === '/add' ? 1 : 0}>
+        <FaPen />
         등록
       </MenuItem>
       <MenuItem to="/echo-share" active={location.pathname === '/echo-share' ? 1 : 0}>

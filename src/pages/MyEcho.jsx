@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FiBookmark, FiShoppingBag, FiHeart, FiTag, FiStar, FiChevronRight, FiSettings, FiHome, FiMessageSquare, FiMapPin, FiUsers, FiUser } from 'react-icons/fi';
 import TopBar from '../components/TopBar';
 import { useNavigate } from 'react-router-dom';
-import { useContext } from 'react';
 import { UserContext } from '../store/UserContext';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '../utils/firebase';
 
 const Wrapper = styled.div`
   width: 100vw;
@@ -210,22 +212,70 @@ export default function MyEcho() {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
   const defaultImg = 'https://i.ibb.co/3y0Qw1K/profile-demo.jpg';
-  const [editOpen, setEditOpen] = React.useState(false);
-  const [profileImg, setProfileImg] = React.useState(user.photoURL || defaultImg);
-  const [nickname, setNickname] = React.useState(user.nickname || '');
+  const [editOpen, setEditOpen] = useState(false);
+  const [profileImg, setProfileImg] = useState(user.photoURL || defaultImg);
+  const [nickname, setNickname] = useState(user.nickname || '');
+  const [loading, setLoading] = useState(false);
   const fileInputRef = React.useRef();
 
-  const handleImgChange = e => {
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user.isLoggedIn) return;
+
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userRef);
+        
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setProfileImg(userData.photoURL || defaultImg);
+          setNickname(userData.nickname || '');
+        }
+      } catch (err) {
+        console.error('프로필 불러오기 실패:', err);
+      }
+    };
+
+    fetchUserProfile();
+  }, [user]);
+
+  const handleImgChange = async e => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => setProfileImg(ev.target.result);
-    reader.readAsDataURL(file);
+
+    try {
+      setLoading(true);
+      // Storage에 이미지 업로드
+      const imageRef = ref(storage, `profiles/${user.uid}_${Date.now()}`);
+      await uploadBytes(imageRef, file);
+      const downloadURL = await getDownloadURL(imageRef);
+      setProfileImg(downloadURL);
+    } catch (err) {
+      console.error('프로필 이미지 업로드 실패:', err);
+      alert('프로필 이미지 업로드에 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleEditSave = () => {
-    setEditOpen(false);
-    // 실제로는 서버에 저장 필요, 여기선 local state만 변경
+  const handleEditSave = async () => {
+    if (!user.isLoggedIn) return;
+
+    try {
+      setLoading(true);
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, {
+        nickname,
+        photoURL: profileImg,
+        updatedAt: new Date().toISOString()
+      });
+      setEditOpen(false);
+    } catch (err) {
+      console.error('프로필 업데이트 실패:', err);
+      alert('프로필 업데이트에 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -245,12 +295,35 @@ export default function MyEcho() {
             <ModalBox>
               <ModalTitle>프로필 편집</ModalTitle>
               <ModalImg src={profileImg} alt="프로필 미리보기" />
-              <ModalBtn style={{background:'#e0e2e6',color:'#222',marginBottom:12}} onClick={()=>fileInputRef.current.click()}>프로필 사진 변경</ModalBtn>
-              <input type="file" accept="image/*" style={{display:'none'}} ref={fileInputRef} onChange={handleImgChange} />
-              <ModalInput value={nickname} onChange={e=>setNickname(e.target.value)} maxLength={16} placeholder="닉네임 입력" />
+              <ModalBtn 
+                style={{background:'#e0e2e6',color:'#222',marginBottom:12}}
+                onClick={() => fileInputRef.current.click()}
+                disabled={loading}
+              >
+                {loading ? '업로드중...' : '프로필 사진 변경'}
+              </ModalBtn>
+              <input 
+                type="file" 
+                accept="image/*" 
+                style={{display:'none'}} 
+                ref={fileInputRef} 
+                onChange={handleImgChange}
+                disabled={loading}
+              />
+              <ModalInput 
+                value={nickname} 
+                onChange={e => setNickname(e.target.value)} 
+                maxLength={16} 
+                placeholder="닉네임 입력"
+                disabled={loading}
+              />
               <ModalBtnRow>
-                <ModalBtn onClick={handleEditSave}>저장</ModalBtn>
-                <ModalCancelBtn onClick={()=>setEditOpen(false)}>취소</ModalCancelBtn>
+                <ModalBtn onClick={handleEditSave} disabled={loading}>
+                  {loading ? '저장중...' : '저장'}
+                </ModalBtn>
+                <ModalCancelBtn onClick={() => setEditOpen(false)} disabled={loading}>
+                  취소
+                </ModalCancelBtn>
               </ModalBtnRow>
             </ModalBox>
           </ModalOverlay>
@@ -262,7 +335,7 @@ export default function MyEcho() {
               <MenuLeft><FiBookmark size={22} /><MenuText>판매내역</MenuText></MenuLeft>
               <FiChevronRight size={22} color="#bbb" />
             </MenuItem>
-            <MenuItem>
+            <MenuItem onClick={() => navigate('/mypage/purchases')}>
               <MenuLeft><FiShoppingBag size={22} /><MenuText>구매내역</MenuText></MenuLeft>
               <FiChevronRight size={22} color="#bbb" />
             </MenuItem>

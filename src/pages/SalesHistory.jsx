@@ -1,9 +1,12 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { ProductContext } from '../store/ProductContext';
 import { UserContext } from '../store/UserContext';
 import { useNavigate } from 'react-router-dom';
 import { FiChevronLeft, FiMoreHorizontal, FiHeart, FiMessageCircle } from 'react-icons/fi';
+import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { db } from '../utils/firebase';
+import TopBar from '../components/TopBar';
 
 const dummyUser = {
   profile: 'https://i.ibb.co/3y0Qw1K/profile-demo.jpg',
@@ -44,7 +47,7 @@ const Wrapper = styled.div`
   align-items: center;
   padding-bottom: 24px;
 `;
-const TopBar = styled.div`
+const StyledTopBar = styled.div`
   width: 100%;
   max-width: 480px;
   margin: 0 auto;
@@ -202,50 +205,86 @@ const MoreBtn = styled(ActionBtn)`
   align-items: center;
   justify-content: center;
 `;
+const FilterBtn = styled.button`
+  background: ${({ $active }) => ($active ? '#222' : 'none')};
+  color: ${({ $active }) => ($active ? '#fff' : '#222')};
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 18px;
+  margin: 0;
+  cursor: pointer;
+  align-self: flex-start;
+`;
 
 export default function SalesHistory() {
-  const { products, likes, toggleLike, chatRooms } = useContext(ProductContext);
-  const { user } = useContext(UserContext);
   const navigate = useNavigate();
-  const [tab, setTab] = useState(0);
-  const [filter, setFilter] = useState(false);
-  const myProducts = products.filter(p => p.author === user.nickname);
-  const saleList = myProducts.filter(p => !p.sold && !p.hidden);
-  const doneList = myProducts.filter(p => p.sold);
-  const hiddenList = myProducts.filter(p => p.hidden);
-  const list = tab === 0 ? saleList : tab === 1 ? doneList : hiddenList;
-  const profileImg = user.photoURL || 'https://i.ibb.co/3y0Qw1K/profile-demo.jpg';
+  const { user } = useContext(UserContext);
+  const { likes, chatRooms } = useContext(ProductContext);
+  const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all');
+
+  useEffect(() => {
+    const fetchSalesHistory = async () => {
+      try {
+        const q = query(
+          collection(db, 'products'),
+          where('author', '==', user.nickname),
+          orderBy('createdAt', 'desc')
+        );
+        const querySnapshot = await getDocs(q);
+        const salesList = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setList(salesList);
+      } catch (err) {
+        console.error('판매내역 불러오기 실패:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user.isLoggedIn) {
+      fetchSalesHistory();
+    }
+  }, [user]);
+
+  const filteredList = list.filter(item => {
+    if (filter === 'all') return true;
+    if (filter === 'active') return !item.sold;
+    if (filter === 'sold') return item.sold;
+    return true;
+  });
+
+  if (loading) {
+    return (
+      <Wrapper>
+        <TopBar />
+        <div style={{ textAlign: 'center', padding: '40px 0' }}>로딩중...</div>
+      </Wrapper>
+    );
+  }
 
   return (
     <Wrapper>
-      <TopBar>
-        <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
-          <BackBtn onClick={() => navigate(-1)}><FiChevronLeft /></BackBtn>
-          <Title>나의 판매내역</Title>
-        </div>
-        <ProfileImg src={profileImg} alt="프로필" />
-      </TopBar>
-      <div style={{ width: '100%', maxWidth: 480, display: 'flex', alignItems: 'center', marginTop: 10, marginBottom: 0 }}>
-        <WriteBtn>글쓰기</WriteBtn>
-      </div>
-      <Tabs>
-        <Tab $active={tab === 0} onClick={() => setTab(0)}>
-          판매중 <span style={{ fontWeight: 400, fontSize: 15, marginLeft: 2 }}>{saleList.length}</span>
-        </Tab>
-        <Tab $active={tab === 1} onClick={() => setTab(1)}>
-          거래완료 <span style={{ fontWeight: 400, fontSize: 15, marginLeft: 2 }}>{doneList.length}</span>
-        </Tab>
-        <Tab $active={tab === 2} onClick={() => setTab(2)}>
-          숨김 <span style={{ fontWeight: 400, fontSize: 15, marginLeft: 2 }}>{hiddenList.length}</span>
-        </Tab>
-      </Tabs>
+      <StyledTopBar>
+        <BackBtn onClick={() => navigate(-1)}>
+          <FiChevronLeft />
+        </BackBtn>
+        <Title>판매내역</Title>
+        <ProfileImg src={dummyUser.profile} alt="profile" />
+      </StyledTopBar>
       <FilterRow>
-        <Checkbox type="checkbox" id="filter" checked={filter} onChange={e => setFilter(e.target.checked)} />
-        <FilterLabel htmlFor="filter">홍보가능만 보기</FilterLabel>
+        <FilterBtn $active={filter === 'all'} onClick={() => setFilter('all')}>전체</FilterBtn>
+        <FilterBtn $active={filter === 'active'} onClick={() => setFilter('active')}>판매중</FilterBtn>
+        <FilterBtn $active={filter === 'sold'} onClick={() => setFilter('sold')}>판매완료</FilterBtn>
       </FilterRow>
       <List>
-        {list.length === 0 && <div style={{color:'#bbb',textAlign:'center',marginTop:40}}>상품이 없습니다.</div>}
-        {list.map((item, i) => (
+        {filteredList.length === 0 && <div style={{color:'#bbb',textAlign:'center',marginTop:40}}>상품이 없습니다.</div>}
+        {filteredList.map((item, i) => (
           <div key={i}>
             <Item>
               <Thumb src={item.image || 'https://via.placeholder.com/90'} alt="썸네일" />
