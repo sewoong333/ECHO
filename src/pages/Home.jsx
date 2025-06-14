@@ -26,6 +26,7 @@ const ListWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow-x: hidden;
 `;
 const SearchBox = styled.div`
   padding: 18px 18px 0 18px;

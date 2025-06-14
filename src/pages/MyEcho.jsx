@@ -17,6 +17,7 @@ const Wrapper = styled.div`
   align-items: center;
   padding-top: 56px;
   padding-bottom: 80px;
+  overflow-x: hidden;
 `;
 const TopBarWrap = styled.div`
   width: 100%;
@@ -36,8 +37,7 @@ const Title = styled.h1`
   text-align: left;
 `;
 const Section = styled.div`
-  width: 100%;
-  max-width: 480px;
+  width: 100vw;
   background: #fff;
   border-radius: 18px;
   margin: 16px 0 0 0;
@@ -97,8 +97,7 @@ const NavItem = styled.div`
   &.active { color: #1976d2; }
 `;
 const ProfileSection = styled.div`
-  width: 100%;
-  max-width: 480px;
+  width: 100vw;
   margin: 0 auto 18px auto;
   display: flex;
   align-items: center;
