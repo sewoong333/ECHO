@@ -8,12 +8,17 @@ const BottomBarContainer = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
+  width: 100vw;
+  max-width: 100vw;
+  min-width: 0;
   background: white;
   display: flex;
   justify-content: space-around;
   padding: 10px 0;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+  box-sizing: border-box;
+  overflow-x: auto;
 `;
 
 const MenuItem = styled(Link)`
@@ -23,10 +28,16 @@ const MenuItem = styled(Link)`
   text-decoration: none;
   color: ${props => props.active ? '#ff7e36' : '#666'};
   font-size: 0.8rem;
+  min-width: 0;
+  box-sizing: border-box;
   
   svg {
     font-size: 1.2rem;
     margin-bottom: 4px;
+  }
+  @media (max-width: 480px) {
+    font-size: 0.7rem;
+    svg { font-size: 1rem; }
   }
 `;
 

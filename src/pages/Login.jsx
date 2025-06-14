@@ -311,7 +311,8 @@ export default function Login() {
       console.log('Google login successful:', result);
       
       if (result.user) {
-        navigate('/', { replace: true });
+        console.log('Redirecting to main page...');
+        window.location.href = '/';  // 강제 리다이렉트
       }
     } catch (error) {
       console.error('Google login error:', error);
@@ -339,7 +340,8 @@ export default function Login() {
 
     try {
       await loginWithEmail(formData);
-      navigate('/', { replace: true });
+      console.log('Email login successful, redirecting...');
+      window.location.href = '/';  // 강제 리다이렉트
     } catch (error) {
       console.error('Login error:', error);
       setError('로그인에 실패했습니다: ' + error.message);

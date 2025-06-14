@@ -5,8 +5,9 @@ import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../store/UserContext';
 
 const Bar = styled.header`
-  width: 100%;
-  max-width: 480px;
+  width: 100vw;
+  max-width: 100vw;
+  min-width: 0;
   margin: 0 auto;
   height: 56px;
   background: #fff;
@@ -19,14 +20,15 @@ const Bar = styled.header`
   z-index: 101;
 `;
 const BarInner = styled.div`
-  width: 100%;
+  width: 100vw;
   max-width: 480px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding: 0 8px;
   height: 100%;
+  box-sizing: border-box;
 `;
 const Title = styled.div`
   font-size: 22px;
@@ -66,6 +68,11 @@ const Logo = styled.span`
   letter-spacing: 1.5px;
   margin-right: 16px;
   font-family: 'Montserrat', 'Pretendard', sans-serif;
+  user-select: none;
+  @media (max-width: 480px) {
+    font-size: 20px;
+    margin-right: 8px;
+  }
 `;
 const LoginBtn = styled.button`
   margin-left: 16px;

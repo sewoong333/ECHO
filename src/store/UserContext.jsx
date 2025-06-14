@@ -35,6 +35,7 @@ export function UserProvider({ children }) {
         try {
           if (firebaseUser) {
             // 사용자가 로그인한 경우
+            console.log('User authenticated:', firebaseUser);
             setUser({
               nickname: firebaseUser.displayName || '',
               email: firebaseUser.email || '',
@@ -43,8 +44,14 @@ export function UserProvider({ children }) {
               loading: false,
               emailVerified: firebaseUser.emailVerified
             });
+            
+            // 현재 URL이 로그인 페이지인 경우 메인 페이지로 리다이렉트
+            if (window.location.pathname === '/login') {
+              window.location.href = '/';
+            }
           } else {
             // 사용자가 로그아웃한 경우
+            console.log('User signed out');
             setUser({
               nickname: '',
               email: '',

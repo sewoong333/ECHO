@@ -6,7 +6,9 @@ import { FaHome, FaRegCommentDots, FaUser, FaPlusCircle, FaMusic, FaShareAlt } f
 const Bar = styled.nav`
   position: fixed;
   left: 0; right: 0; bottom: 0;
-  width: 100%;
+  width: 100vw;
+  max-width: 100vw;
+  min-width: 0;
   height: 64px;
   background: #fff;
   border-top: 1px solid #eee;
@@ -15,9 +17,11 @@ const Bar = styled.nav`
   align-items: center;
   z-index: 100;
   box-shadow: 0 -1px 8px rgba(0,0,0,0.04);
+  box-sizing: border-box;
+  overflow-x: auto;
 `;
 const BarInner = styled.div`
-  width: 100%;
+  width: 100vw;
   max-width: 480px;
   margin: 0 auto;
   display: flex;
@@ -25,6 +29,7 @@ const BarInner = styled.div`
   align-items: center;
   height: 100%;
   position: relative;
+  box-sizing: border-box;
 `;
 const Item = styled.button`
   background: none;
@@ -39,6 +44,12 @@ const Item = styled.button`
   cursor: pointer;
   flex: 1;
   padding: 0;
+  min-width: 0;
+  box-sizing: border-box;
+  @media (max-width: 480px) {
+    font-size: 11px;
+    svg { font-size: 18px; }
+  }
 `;
 
 export default function BottomNav() {
