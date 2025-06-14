@@ -6,60 +6,139 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  sendEmailVerification
+  sendEmailVerification,
+  onIdTokenChanged
 } from 'firebase/auth';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../utils/firebase';
 
 export const UserContext = createContext();
 
 export function UserProvider({ children }) {
-  const [user, setUser] = useState({ nickname: '', email: '', uid: '', isLoggedIn: false, loading: true });
+  const [user, setUser] = useState({
+    nickname: '',
+    email: '',
+    uid: '',
+    isLoggedIn: false,
+    loading: true,
+    emailVerified: false
+  });
+  const [authError, setAuthError] = useState(null);
 
-  // Firebase 인증 상태 동기화
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        setUser({
-          nickname: firebaseUser.displayName || '',
-          email: firebaseUser.email,
-          uid: firebaseUser.uid,
-          isLoggedIn: true,
-          loading: false,
-          emailVerified: firebaseUser.emailVerified,
-        });
-      } else {
-        setUser({ nickname: '', email: '', uid: '', isLoggedIn: false, loading: false });
-      }
-    });
-    return () => unsubscribe();
+    let unsubscribeAuth = null;
+    let unsubscribeToken = null;
+
+    const setupAuthListeners = () => {
+      // 인증 상태 변경 리스너
+      unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
+        try {
+          if (firebaseUser) {
+            // 사용자가 로그인한 경우
+            setUser({
+              nickname: firebaseUser.displayName || '',
+              email: firebaseUser.email || '',
+              uid: firebaseUser.uid,
+              isLoggedIn: true,
+              loading: false,
+              emailVerified: firebaseUser.emailVerified
+            });
+          } else {
+            // 사용자가 로그아웃한 경우
+            setUser({
+              nickname: '',
+              email: '',
+              uid: '',
+              isLoggedIn: false,
+              loading: false,
+              emailVerified: false
+            });
+          }
+        } catch (error) {
+          console.error('Auth state change error:', error);
+          setAuthError(error);
+          setUser(prev => ({ ...prev, loading: false }));
+        }
+      });
+
+      // 토큰 갱신 리스너
+      unsubscribeToken = onIdTokenChanged(auth, async (firebaseUser) => {
+        if (firebaseUser) {
+          try {
+            const token = await firebaseUser.getIdToken(true);
+            console.log('Token refreshed successfully');
+          } catch (error) {
+            console.error('Token refresh error:', error);
+            setAuthError(error);
+          }
+        }
+      });
+    };
+
+    setupAuthListeners();
+
+    // 클린업 함수
+    return () => {
+      if (unsubscribeAuth) unsubscribeAuth();
+      if (unsubscribeToken) unsubscribeToken();
+    };
   }, []);
 
-  // 구글 로그인
   const loginWithGoogle = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (err) {
-      alert('구글 로그인 에러: ' + (err && err.message ? err.message : JSON.stringify(err)));
-      throw err;
+      const result = await signInWithPopup(auth, googleProvider);
+      return result.user;
+    } catch (error) {
+      console.error('Google login error:', error);
+      throw error;
     }
   };
 
-  // 이메일 로그인
   const loginWithEmail = async ({ email, password }) => {
-    await signInWithEmailAndPassword(auth, email, password);
-  };
-
-  // 이메일 회원가입 + 인증메일 발송
-  const signupWithEmail = async ({ email, password, nickname }) => {
-    const result = await createUserWithEmailAndPassword(auth, email, password);
-    if (result.user) {
-      await sendEmailVerification(result.user);
-      // displayName 업데이트는 별도 필요
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      return userCredential.user;
+    } catch (error) {
+      console.error('Email login error:', error);
+      throw error;
     }
   };
 
-  // 로그아웃
+  const signupWithEmail = async ({ email, password, nickname, phone }) => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      if (userCredential.user) {
+        await sendEmailVerification(userCredential.user);
+      }
+      
+      // 사용자 프로필 업데이트
+      await userCredential.user.updateProfile({
+        displayName: nickname
+      });
+
+      // Firestore에 추가 정보 저장
+      const userDoc = doc(db, 'users', userCredential.user.uid);
+      await setDoc(userDoc, {
+        nickname,
+        phone,
+        email,
+        createdAt: serverTimestamp()
+      });
+
+      return userCredential.user;
+    } catch (error) {
+      console.error('Signup error:', error);
+      throw error;
+    }
+  };
+
   const logout = async () => {
-    await signOut(auth);
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error('Logout error:', error);
+      throw error;
+    }
   };
 
   // 더미 유저 20명 생성
@@ -73,8 +152,18 @@ export function UserProvider({ children }) {
     password: `testpw${i+1}`
   }));
 
+  const value = {
+    user,
+    authError,
+    users,
+    loginWithGoogle,
+    loginWithEmail,
+    signupWithEmail,
+    logout
+  };
+
   return (
-    <UserContext.Provider value={{ user, users, loginWithGoogle, loginWithEmail, signupWithEmail, logout }}>
+    <UserContext.Provider value={value}>
       {children}
     </UserContext.Provider>
   );

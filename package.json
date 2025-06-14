@@ -5,19 +5,21 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:clean": "kill-port 5173 && vite",
     "build": "vite build",
-    "lint": "eslint .",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
   "dependencies": {
     "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
     "express": "^5.1.0",
     "firebase": "^11.8.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.6.1",
-    "styled-components": "^6.1.18"
+    "styled-components": "^6.1.19"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
@@ -29,6 +31,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
+    "kill-port": "^2.0.1",
     "postcss": "^8.5.4",
     "tailwindcss": "^4.1.8",
     "vite": "^6.3.5"

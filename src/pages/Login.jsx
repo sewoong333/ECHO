@@ -1,11 +1,13 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { UserContext } from '../store/UserContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import { SiKakaotalk } from 'react-icons/si';
 import { FaN } from 'react-icons/fa6';
+import { signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth';
+import { auth, googleProvider } from '../utils/firebase';
 
 const Container = styled.div`
   width: 100%;
@@ -216,28 +218,148 @@ const SignupLink = styled.p`
   }
 `;
 
+const ErrorMessage = styled.p`
+  color: red;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 1em;
+`;
+
+const LoadingText = styled.div`
+  font-size: 18px;
+  font-weight: 700;
+  color: #222;
+  margin-top: 2em;
+`;
+
 export default function Login() {
-  const { loginWithGoogle } = useContext(UserContext);
+  const { user, loginWithEmail } = useContext(UserContext);
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
+    setError('');
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // TODO: Implement email/password login
-    console.log('Login attempt with:', formData);
+  // 리다이렉트 결과 확인
+  useEffect(() => {
+    const checkRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result?.user) {
+          console.log('Redirect login successful:', result.user);
+          navigate('/', { replace: true });
+        }
+      } catch (error) {
+        console.error('Redirect login error:', error);
+        handleAuthError(error);
+      }
+    };
+
+    checkRedirectResult();
+  }, [navigate]);
+
+  // 로그인 상태 체크
+  useEffect(() => {
+    if (!user.loading && user.isLoggedIn) {
+      navigate('/', { replace: true });
+    }
+  }, [user.loading, user.isLoggedIn, navigate]);
+
+  const handleAuthError = (error) => {
+    console.error('Auth error details:', {
+      code: error.code,
+      message: error.message,
+      email: error.email,
+      credential: error.credential
+    });
+
+    switch (error.code) {
+      case 'auth/popup-blocked':
+        alert('팝업이 차단되어 구글 로그인을 진행할 수 없습니다. 브라우저의 팝업 차단을 해제해 주세요.');
+        break;
+      case 'auth/cancelled-popup-request':
+      case 'auth/popup-closed-by-user':
+        console.log('Login popup was cancelled by user');
+        break;
+      case 'auth/unauthorized-domain':
+        alert('현재 도메인에서 구글 로그인이 허용되지 않았습니다. 개발자에게 문의해주세요.');
+        break;
+      default:
+        alert(`구글 로그인 중 오류가 발생했습니다. (${error.code})`);
+    }
   };
+
+  const handleGoogleLogin = async (e) => {
+    e.preventDefault();
+    if (isLoading) return;
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      console.log('Starting Google login...');
+      const result = await signInWithPopup(auth, googleProvider);
+      console.log('Google login successful:', result);
+      
+      if (result.user) {
+        navigate('/', { replace: true });
+      }
+    } catch (error) {
+      console.error('Google login error:', error);
+      
+      if (error.code === 'auth/popup-blocked') {
+        alert('팝업이 차단되어 구글 로그인을 진행할 수 없습니다. 브라우저의 팝업 차단을 해제해 주세요.');
+      } else if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user') {
+        console.log('Login popup was cancelled by user');
+      } else if (error.code === 'auth/unauthorized-domain') {
+        alert('현재 도메인에서 구글 로그인이 허용되지 않았습니다. 개발자에게 문의해주세요.');
+      } else {
+        alert(`구글 로그인 중 오류가 발생했습니다. (${error.code})`);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (isLoading) return;
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      await loginWithEmail(formData);
+      navigate('/', { replace: true });
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('로그인에 실패했습니다: ' + error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (user.loading) {
+    return (
+      <Container>
+        <Logo>ECHO</Logo>
+        <LoadingText>로딩중...</LoadingText>
+      </Container>
+    );
+  }
+
+  if (user.isLoggedIn) {
+    return null;
+  }
 
   return (
     <Container>
@@ -254,7 +376,7 @@ export default function Login() {
             placeholder="이메일"
             value={formData.email}
             onChange={handleChange}
-            required
+            disabled={isLoading}
           />
         </InputGroup>
         <InputGroup>
@@ -262,12 +384,12 @@ export default function Login() {
             <FiLock size={20} />
           </IconWrapper>
           <Input
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             name="password"
             placeholder="비밀번호"
             value={formData.password}
             onChange={handleChange}
-            required
+            disabled={isLoading}
           />
           <PasswordToggle
             type="button"
@@ -276,28 +398,32 @@ export default function Login() {
             {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
           </PasswordToggle>
         </InputGroup>
-        <LoginButton type="submit">로그인</LoginButton>
+        {error && <ErrorMessage>{error}</ErrorMessage>}
+        <LoginButton type="submit" disabled={isLoading}>
+          {isLoading ? '로그인 중...' : '로그인'}
+        </LoginButton>
       </Form>
 
-      <Divider>
-        <span>소셜 계정으로 로그인</span>
-      </Divider>
+      <Divider><span>또는</span></Divider>
 
-      <SocialLoginButton className="google" onClick={loginWithGoogle}>
+      <SocialLoginButton className="google" onClick={handleGoogleLogin}>
         <FcGoogle size={24} />
-        Google로 계속하기
+        Google로 로그인
       </SocialLoginButton>
-      <SocialLoginButton className="kakao" onClick={() => console.log('Kakao login')}>
+
+      <SocialLoginButton className="kakao">
         <SiKakaotalk size={24} />
-        Kakao로 계속하기
+        카카오로 로그인
       </SocialLoginButton>
-      <SocialLoginButton className="naver" onClick={() => console.log('Naver login')}>
+
+      <SocialLoginButton className="naver">
         <FaN size={24} />
-        Naver로 계속하기
+        네이버로 로그인
       </SocialLoginButton>
 
       <SignupLink>
-        계정이 없으신가요?<a href="/signup">회원가입</a>
+        계정이 없으신가요?
+        <Link to="/signup">회원가입</Link>
       </SignupLink>
     </Container>
   );

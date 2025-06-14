@@ -1,6 +1,17 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { db, storage, auth } from '../utils/firebase';
-import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, updateDoc, where } from 'firebase/firestore';
+import { db, storage, auth, isConnected } from '../utils/firebase';
+import { 
+  collection, 
+  addDoc, 
+  getDocs, 
+  query, 
+  orderBy, 
+  deleteDoc, 
+  doc, 
+  updateDoc, 
+  where,
+  onSnapshot
+} from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 // 더미 유저 닉네임(유저컨텍스트와 동일하게)
@@ -66,35 +77,82 @@ const initialProducts = dummyProducts.map((base, i) => ({
 
 export const ProductContext = createContext();
 
+const RETRY_DELAY = 5000; // 5초
+const MAX_RETRIES = 3;
+
 export function ProductProvider({ children }) {
   const [products, setProducts] = useState([]);
   const [likes, setLikes] = useState([]);
   const [chatRooms, setChatRooms] = useState({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // 상품 목록 불러오기
+  // 상품 목록 불러오기 (with 재시도 로직)
+  const fetchProducts = async (retryCount = 0) => {
+    try {
+      const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+      const productList = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setProducts(productList);
+      setError(null);
+    } catch (err) {
+      console.error('상품 목록 불러오기 실패:', err);
+      setError(err.message);
+      
+      // 재시도 로직
+      if (retryCount < MAX_RETRIES && !isConnected) {
+        console.log(`Retrying in ${RETRY_DELAY/1000} seconds... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
+        setTimeout(() => fetchProducts(retryCount + 1), RETRY_DELAY);
+      }
+    } finally {
+      if (retryCount === 0) setLoading(false);
+    }
+  };
+
+  // 실시간 업데이트 설정
   useEffect(() => {
-    const fetchProducts = async () => {
+    let unsubscribe;
+
+    const setupRealtimeProducts = () => {
       try {
         const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
-        const querySnapshot = await getDocs(q);
-        const productList = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setProducts(productList);
+        unsubscribe = onSnapshot(q, 
+          (snapshot) => {
+            const productList = snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data()
+            }));
+            setProducts(productList);
+            setError(null);
+          },
+          (err) => {
+            console.error('실시간 업데이트 에러:', err);
+            setError(err.message);
+            // 연결이 끊어진 경우 재시도
+            if (!isConnected) {
+              setTimeout(setupRealtimeProducts, RETRY_DELAY);
+            }
+          }
+        );
       } catch (err) {
-        console.error('상품 목록 불러오기 실패:', err);
-      } finally {
-        setLoading(false);
+        console.error('실시간 업데이트 설정 실패:', err);
+        setError(err.message);
       }
     };
-    fetchProducts();
+
+    setupRealtimeProducts();
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   // 상품 추가
   const addProduct = async (product) => {
     try {
+      setError(null);
       // 이미지가 base64인 경우 Storage에 업로드
       let imageUrls = [];
       if (product.images && product.images.length > 0) {
@@ -130,6 +188,7 @@ export function ProductProvider({ children }) {
       return docRef.id;
     } catch (err) {
       console.error('상품 추가 실패:', err);
+      setError(err.message);
       throw err;
     }
   };
@@ -137,10 +196,12 @@ export function ProductProvider({ children }) {
   // 상품 삭제
   const deleteProduct = async (id) => {
     try {
+      setError(null);
       await deleteDoc(doc(db, 'products', id));
       setProducts(prev => prev.filter(p => p.id !== id));
     } catch (err) {
       console.error('상품 삭제 실패:', err);
+      setError(err.message);
       throw err;
     }
   };
@@ -148,6 +209,7 @@ export function ProductProvider({ children }) {
   // 상품 수정
   const updateProduct = async (id, updates) => {
     try {
+      setError(null);
       const productRef = doc(db, 'products', id);
       await updateDoc(productRef, {
         ...updates,
@@ -156,41 +218,7 @@ export function ProductProvider({ children }) {
       setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
     } catch (err) {
       console.error('상품 수정 실패:', err);
-      throw err;
-    }
-  };
-
-  // 관심 상품 토글
-  const toggleLike = async (id) => {
-    try {
-      const newLikes = likes.includes(id) 
-        ? likes.filter(lid => lid !== id)
-        : [...likes, id];
-      setLikes(newLikes);
-      
-      // Firestore에 likes 컬렉션 업데이트
-      const likesRef = doc(db, 'likes', auth.currentUser.uid);
-      await updateDoc(likesRef, { productIds: newLikes });
-    } catch (err) {
-      console.error('관심 상품 토글 실패:', err);
-      throw err;
-    }
-  };
-
-  // 채팅방 추가
-  const addChatRoom = async (productId, chatRoomId) => {
-    try {
-      const newChatRooms = {
-        ...chatRooms,
-        [productId]: [...(chatRooms[productId] || []), chatRoomId]
-      };
-      setChatRooms(newChatRooms);
-      
-      // Firestore에 chatRooms 컬렉션 업데이트
-      const chatRoomsRef = doc(db, 'chatRooms', auth.currentUser.uid);
-      await updateDoc(chatRoomsRef, { [productId]: newChatRooms[productId] });
-    } catch (err) {
-      console.error('채팅방 추가 실패:', err);
+      setError(err.message);
       throw err;
     }
   };
@@ -203,10 +231,44 @@ export function ProductProvider({ children }) {
       deleteProduct, 
       updateProduct,
       likes, 
-      toggleLike, 
+      toggleLike: async (id) => {
+        try {
+          setError(null);
+          const newLikes = likes.includes(id) 
+            ? likes.filter(lid => lid !== id)
+            : [...likes, id];
+          setLikes(newLikes);
+          
+          // Firestore에 likes 컬렉션 업데이트
+          const likesRef = doc(db, 'likes', auth.currentUser.uid);
+          await updateDoc(likesRef, { productIds: newLikes });
+        } catch (err) {
+          console.error('관심 상품 토글 실패:', err);
+          setError(err.message);
+          throw err;
+        }
+      }, 
       chatRooms, 
-      addChatRoom,
-      loading 
+      addChatRoom: async (productId, chatRoomId) => {
+        try {
+          setError(null);
+          const newChatRooms = {
+            ...chatRooms,
+            [productId]: [...(chatRooms[productId] || []), chatRoomId]
+          };
+          setChatRooms(newChatRooms);
+          
+          // Firestore에 chatRooms 컬렉션 업데이트
+          const chatRoomsRef = doc(db, 'chatRooms', auth.currentUser.uid);
+          await updateDoc(chatRoomsRef, { [productId]: newChatRooms[productId] });
+        } catch (err) {
+          console.error('채팅방 추가 실패:', err);
+          setError(err.message);
+          throw err;
+        }
+      },
+      loading,
+      error 
     }}>
       {children}
     </ProductContext.Provider>
