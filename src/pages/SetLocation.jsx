@@ -3,7 +3,7 @@ import TopBar from '../components/TopBar';
 
 export default function SetLocation() {
   return (
-    <div style={{ maxWidth: 480, margin: '0 auto', padding: 0, background: '#f8f9fa', minHeight: '100vh' }}>
+    <div style={{ width: '100vw', padding: 0, background: '#f8f9fa', minHeight: '100vh' }}>
       <TopBar />
       <div style={{ padding: 32 }}>
         <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 24 }}>동네 설정</h1>

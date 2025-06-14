@@ -60,7 +60,7 @@ export default function WishList() {
   }
 
   return (
-    <div style={{padding:24, maxWidth:480, margin:'0 auto'}}>
+    <div style={{padding:24, width:'100vw'}}>
       <TopBar />
       <h2 style={{fontSize:22, fontWeight:700, marginBottom:18}}>관심목록</h2>
       {wishList.length === 0 && <div style={{color:'#bbb'}}>관심 상품이 없습니다.</div>}

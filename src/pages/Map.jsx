@@ -20,7 +20,7 @@ export default function MapPage() {
   return (
     <div style={{ width: '100vw', minHeight: '100vh', background: '#f8f9fa', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <TopBar />
-      <div style={{ width: '100%', maxWidth: 480, margin: '0 auto', flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ width: '100vw', flex: 1, display: 'flex', flexDirection: 'column' }}>
         <h1 style={{ fontSize: 24, fontWeight: 700, padding: '24px 0 12px 20px', color: '#2ed8b6' }}>동네지도</h1>
         <div style={{ width: '100%', height: '60vh', borderRadius: 16, boxShadow: '0 2px 12px #b2f0e6', marginBottom: 24, background: '#eee', position: 'relative', overflow: 'hidden' }}>
           {/* 더미 지도 이미지 */}

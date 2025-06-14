@@ -228,7 +228,7 @@ export default function Home() {
   return (
     <ListWrapper>
       <TopBar />
-      <div style={{ width: '100%', maxWidth: 480, margin: '0 auto', position: 'relative', minHeight: '80vh' }}>
+      <div style={{ width: '100vw', position: 'relative', minHeight: '80vh' }}>
         <SearchBox>
           <SearchInput
             type="text"
