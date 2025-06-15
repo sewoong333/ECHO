@@ -182,6 +182,32 @@ const SortSelect = styled.select`
   }
 `;
 
+const FloatingAddButton = styled.button`
+  position: fixed;
+  right: 16px;
+  bottom: 80px;
+  width: 56px;
+  height: 56px;
+  border-radius: 28px;
+  background: #2ed8b6;
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(46,216,182,0.2);
+  z-index: 100;
+  flex-shrink: 0;
+  @media (max-width: 480px) {
+    right: 12px;
+    bottom: 76px;
+    width: 52px;
+    height: 52px;
+    border-radius: 26px;
+  }
+`;
+
 export default function Home() {
   const navigate = useNavigate();
   const { products, likes, toggleLike, chatRooms } = useContext(ProductContext);
@@ -287,37 +313,9 @@ export default function Home() {
         ))}
         <div ref={loaderRef} style={{ height: 30 }} />
         {sorted.length === 0 && <EmptyMsg>검색 결과가 없습니다.</EmptyMsg>}
-        <button
-          onClick={() => navigate('/add')}
-          style={{
-            position: 'fixed',
-            left: '50%',
-            transform: 'translateX(160px)',
-            bottom: 80,
-            zIndex: 200,
-            width: 56,
-            height: 56,
-            borderRadius: '50%',
-            background: '#2ed8b6',
-            color: '#fff',
-            border: 'none',
-            boxShadow: '0 4px 16px rgba(46,216,182,0.18)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 28,
-            fontWeight: 900,
-            cursor: 'pointer',
-            padding: 0,
-            minWidth: 56,
-            minHeight: 56,
-            maxWidth: 56,
-            maxHeight: 56,
-          }}
-          aria-label="상품 등록"
-        >
+        <FloatingAddButton onClick={() => navigate('/add')} aria-label="상품 등록">
           <FaPen style={{fontSize:28, fontWeight:900}} />
-        </button>
+        </FloatingAddButton>
       </div>
     </ListWrapper>
   );

@@ -32,8 +32,9 @@ const BarInner = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 8px;
+  padding: 0 16px;
   height: 100%;
+  position: relative;
 `;
 const Title = styled.div`
   font-size: 22px;
@@ -51,11 +52,16 @@ const Dropdown = styled.span`
 const IconBtn = styled.button`
   background: none;
   border: none;
-  margin-left: 16px;
+  margin-left: 12px;
   color: #222;
   font-size: 20px;
   cursor: pointer;
   position: relative;
+  flex-shrink: 0;
+  @media (max-width: 480px) {
+    margin-left: 8px;
+    font-size: 18px;
+  }
 `;
 const Badge = styled.span`
   position: absolute;
@@ -81,19 +87,24 @@ const Logo = styled.span`
   }
 `;
 const LoginBtn = styled.button`
-  margin-left: 16px;
-  padding: 6px 14px;
+  margin-left: 12px;
+  padding: 6px 16px;
   background: #ff7e36;
   color: #fff;
   border: none;
   border-radius: 6px;
   font-weight: 600;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 15px;
   white-space: nowrap;
+  min-width: 70px;
+  box-sizing: border-box;
+  flex-shrink: 0;
   @media (max-width: 480px) {
     font-size: 14px;
-    padding: 6px 10px;
+    padding: 6px 12px;
+    min-width: 60px;
+    margin-left: 8px;
   }
 `;
 const LogoutBtn = styled(LoginBtn)`
