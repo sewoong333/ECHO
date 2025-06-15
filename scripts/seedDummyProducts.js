@@ -1,6 +1,12 @@
-import React, { createContext, useState } from 'react';
+const admin = require('firebase-admin');
+const serviceAccount = require('./serviceAccountKey.json'); // 서비스 계정 키 파일 필요
 
-// 더미 상품 데이터(실제 모델명/사진 포함)
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+const db = admin.firestore();
+
 const dummyProducts = [
   {
     title: '야마하 FG800 통기타',
@@ -11,14 +17,7 @@ const dummyProducts = [
     images: [
       'https://m.media-amazon.com/images/I/41fGV5DxOcL._AC_.jpg',
       'https://peacemusic.kr/web/product/big/202104/3875_shop1_161845.jpg'
-    ],
-    id: 'dummy-1',
-    author: '관리자',
-    time: '방금 전',
-    views: 12,
-    image: 'https://m.media-amazon.com/images/I/41fGV5DxOcL._AC_.jpg',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    ]
   },
   {
     title: '롤랜드 TD-1K 전자드럼',
@@ -28,14 +27,7 @@ const dummyProducts = [
     location: '서울 구로구',
     images: [
       'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80'
-    ],
-    id: 'dummy-2',
-    author: '관리자',
-    time: '방금 전',
-    views: 8,
-    image: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    ]
   },
   {
     title: '롤랜드 TD-1KV 전자드럼 세트',
@@ -45,14 +37,7 @@ const dummyProducts = [
     location: '인천 부평구',
     images: [
       'https://static.roland.com/assets/images/products/gallery/td-1kv_angle_gal.jpg'
-    ],
-    id: 'dummy-3',
-    author: '관리자',
-    time: '방금 전',
-    views: 5,
-    image: 'https://static.roland.com/assets/images/products/gallery/td-1kv_angle_gal.jpg',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    ]
   },
   {
     title: '펜더 Player 텔레캐스터 일렉기타',
@@ -62,14 +47,7 @@ const dummyProducts = [
     location: '부산 부산진구',
     images: [
       'https://www.fmicassets.com/Damroot/ZoomJpg/10001/0145212500_gtr_frt_001_rr.jpg'
-    ],
-    id: 'dummy-4',
-    author: '관리자',
-    time: '방금 전',
-    views: 3,
-    image: 'https://www.fmicassets.com/Damroot/ZoomJpg/10001/0145212500_gtr_frt_001_rr.jpg',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    ]
   },
   {
     title: '커즈와일 SP6-7 스테이지 피아노',
@@ -79,14 +57,7 @@ const dummyProducts = [
     location: '서울 강남구',
     images: [
       'https://kurzweil.com/wp-content/uploads/2021/03/SP6-7_Black_Angle_1.jpg'
-    ],
-    id: 'dummy-5',
-    author: '관리자',
-    time: '방금 전',
-    views: 7,
-    image: 'https://kurzweil.com/wp-content/uploads/2021/03/SP6-7_Black_Angle_1.jpg',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    ]
   },
   {
     title: '프리소너스 오디오 인터페이스',
@@ -96,51 +67,29 @@ const dummyProducts = [
     location: '서울 마포구',
     images: [
       'https://www.presonus.com/uploads/products/1/images/Studio-24c_angle_1.jpg'
-    ],
-    id: 'dummy-6',
-    author: '관리자',
-    time: '방금 전',
-    views: 4,
-    image: 'https://www.presonus.com/uploads/products/1/images/Studio-24c_angle_1.jpg',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    ]
   }
 ];
 
-export const ProductContext = createContext();
-
-export function ProductProvider({ children }) {
-  // 더미 상품 + 사용자가 등록한 상품을 모두 포함하는 상태
-  const [products, setProducts] = useState([...dummyProducts]);
-  const [likes, setLikes] = useState([]);
-  const [chatRooms, setChatRooms] = useState({});
-
-  // 상품 추가: 새 상품을 products 배열에 추가
-  const addProduct = async (product) => {
-    const newProduct = {
-      ...product,
-      id: `user-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
-      time: '방금 전',
+async function seed() {
+  for (const base of dummyProducts) {
+    const productData = {
+      ...base,
+      image: base.images[0],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      views: 0,
-      image: product.images && product.images[0] ? product.images[0] : '',
+      author: '관리자',
+      time: '방금 전',
+      views: Math.floor(Math.random()*100),
     };
-    setProducts(prev => [newProduct, ...prev]);
-    return newProduct.id;
-  };
+    await db.collection('products').add(productData);
+    console.log(`등록 완료: ${productData.title}`);
+  }
+  console.log('모든 더미 상품 등록 완료!');
+  process.exit(0);
+}
 
-  // 상품 삭제/수정 등은 필요시 추가
-
-  return (
-    <ProductContext.Provider value={{
-      products,
-      setProducts,
-      addProduct,
-      likes,
-      chatRooms,
-    }}>
-      {children}
-    </ProductContext.Provider>
-  );
-} 
+seed().catch(err => {
+  console.error('더미 상품 등록 실패:', err);
+  process.exit(1);
+}); 
