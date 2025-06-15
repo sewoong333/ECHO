@@ -169,14 +169,15 @@ export function ProductProvider({ children }) {
     };
   }, []);
 
-  // Firestore에 상품이 없으면 더미 상품 자동 업로드
+  // Firestore에 상품이 없으면 더미 상품 자동 업로드 (최초 1회만)
   useEffect(() => {
     async function seedDummyProducts() {
       try {
+        // 이미 더미 상품을 업로드한 적이 있으면 실행하지 않음
+        if (localStorage.getItem('dummyProductsSeeded') === 'true') return;
         const q = query(collection(db, 'products'));
         const querySnapshot = await getDocs(q);
         if (querySnapshot.empty) {
-          // Firestore에 아무 상품도 없을 때만 더미 상품 업로드
           for (const base of dummyProducts) {
             const productData = {
               ...base,
@@ -190,7 +191,7 @@ export function ProductProvider({ children }) {
             };
             await addDoc(collection(db, 'products'), productData);
           }
-          // 업로드 후 목록 새로고침
+          localStorage.setItem('dummyProductsSeeded', 'true');
           fetchProducts();
         }
       } catch (err) {
