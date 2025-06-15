@@ -174,6 +174,7 @@ export default function MusicLife() {
           borderRadius: '50%',
           width: 52,
           height: 52,
+          padding: 0,
           boxShadow: '0 4px 16px rgba(46,216,182,0.18)',
           fontSize: 28,
           fontWeight: 900,
@@ -181,6 +182,7 @@ export default function MusicLife() {
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
+          aspectRatio: '1/1', // 강제 정사각형
         }}
         aria-label="글쓰기"
       >
