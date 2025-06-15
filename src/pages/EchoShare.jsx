@@ -41,7 +41,7 @@ const Hero = styled.section`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1.5rem 16px;
+  padding: 1.5rem 10px;
   margin-bottom: 2.5rem;
   position: relative;
   overflow: hidden;
@@ -89,8 +89,8 @@ const Section = styled.section`
   max-width: 480px;
   min-width: 0;
   margin: 0 auto 2.5rem auto;
-  padding-left: 16px;
-  padding-right: 16px;
+  padding-left: 10px;
+  padding-right: 10px;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -108,7 +108,7 @@ const Card = styled.div`
   background: #fff;
   border-radius: 18px;
   box-shadow: 0 2px 16px rgba(46,216,182,0.08);
-  padding: 1.5rem 16px;
+  padding: 1.2rem 10px;
   display: flex;
   align-items: flex-start;
   gap: 1.2rem;
