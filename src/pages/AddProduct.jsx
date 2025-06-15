@@ -212,7 +212,7 @@ const PlaceInput = styled(Input)`
 const SubmitBtn = styled.button`
   width: 100%;
   max-width: 480px;
-  padding: 18px 0 18px 0;
+  padding: 18px 0;
   background: #2ed8b6;
   color: #fff;
   font-size: 18px;
@@ -225,6 +225,17 @@ const SubmitBtn = styled.button`
   pointer-events: ${props => props.disabled ? 'none' : 'auto'};
   box-shadow: 0 4px 16px rgba(46,216,182,0.12);
   transition: opacity 0.2s, background 0.18s;
+  cursor: pointer;
+  position: relative;
+  z-index: 10;
+
+  &:hover {
+    background: #26c4a5;
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
 `;
 const ErrorMsg = styled.div`
   color: #ff4d4f;

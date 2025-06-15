@@ -62,6 +62,26 @@ const dummyProducts = [
     images: [
       'https://www.fmicassets.com/Damroot/ZoomJpg/10001/0145212500_gtr_frt_001_rr.jpg'
     ]
+  },
+  {
+    title: '커즈와일 SP6-7 스테이지 피아노',
+    model: 'SP6-7',
+    description: '2022년 구매, 전문 연주용 스테이지 피아노입니다. 건반 터치감이 뛰어나고 내장 스피커 음질이 좋습니다. 스탠드, 페달, 케이블 포함. 서울 강남 직거래.',
+    price: 1200000,
+    location: '서울 강남구',
+    images: [
+      'https://kurzweil.com/wp-content/uploads/2021/03/SP6-7_Black_Angle_1.jpg'
+    ]
+  },
+  {
+    title: '프리소너스 오디오 인터페이스',
+    model: 'Studio 24c',
+    description: '2021년 구매, 프리소너스 Studio 24c 오디오 인터페이스입니다. 24비트/192kHz 고음질 녹음 가능, USB-C 연결. 원박스, 케이블 포함. 서울 홍대 직거래.',
+    price: 280000,
+    location: '서울 마포구',
+    images: [
+      'https://www.presonus.com/uploads/products/1/images/Studio-24c_angle_1.jpg'
+    ]
   }
 ];
 
