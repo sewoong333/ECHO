@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import TopBar from '../components/TopBar';
 import { useNavigate } from 'react-router-dom';
 
-const posts = [
+const dummyPosts = [
   {
     id: 1,
     title: '세션 구합니다 (기타)',
@@ -103,9 +103,14 @@ const posts = [
 
 export default function MusicLife() {
   const navigate = useNavigate();
+  const [posts, setPosts] = useState([...dummyPosts]);
   const [visibleCount, setVisibleCount] = useState(5);
   const loaderRef = useRef(null);
   const visiblePosts = posts.slice(0, visibleCount);
+
+  // 글쓰기 모달 상태
+  const [writeOpen, setWriteOpen] = useState(false);
+  const [form, setForm] = useState({ title: '', content: '' });
 
   useEffect(() => {
     if (!loaderRef.current) return;
@@ -116,10 +121,30 @@ export default function MusicLife() {
     }, { threshold: 1 });
     observer.observe(loaderRef.current);
     return () => observer.disconnect();
-  }, [visibleCount]);
+  }, [visibleCount, posts.length]);
+
+  // 글 등록 핸들러
+  const handleWrite = e => {
+    e.preventDefault();
+    if (!form.title.trim() || !form.content.trim()) return;
+    setPosts(prev => [
+      {
+        id: Date.now(),
+        title: form.title,
+        author: '나',
+        time: '방금 전',
+        content: form.content,
+        comments: 0
+      },
+      ...prev
+    ]);
+    setForm({ title: '', content: '' });
+    setWriteOpen(false);
+    setVisibleCount(v => v + 1); // 새 글 바로 보이게
+  };
 
   return (
-    <div style={{ width: '100vw', minHeight: '100vh', background: '#f8f9fa', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <div style={{ width: '100vw', minHeight: '100vh', background: '#f8f9fa', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
       <TopBar />
       <div style={{ width: '100vw', padding: 0 }}>
         <h1 style={{ fontSize: 24, fontWeight: 700, padding: '24px 0 12px 20px', color: '#2ed8b6' }}>음악생활</h1>
@@ -135,6 +160,64 @@ export default function MusicLife() {
           <div ref={loaderRef} style={{ height: 30 }} />
         </div>
       </div>
+      {/* 플로팅 글쓰기 버튼 */}
+      <button
+        onClick={() => setWriteOpen(true)}
+        style={{
+          position: 'fixed',
+          right: 22,
+          bottom: 28,
+          zIndex: 100,
+          background: '#2ed8b6',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '50%',
+          width: 60,
+          height: 60,
+          boxShadow: '0 4px 16px rgba(46,216,182,0.18)',
+          fontSize: 32,
+          fontWeight: 900,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+        }}
+        aria-label="글쓰기"
+      >
+        +
+      </button>
+      {/* 글쓰기 모달 */}
+      {writeOpen && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 200,
+          background: 'rgba(0,0,0,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <form onSubmit={handleWrite} style={{ background: '#fff', borderRadius: 18, padding: 28, minWidth: 320, maxWidth: 400, boxShadow: '0 4px 24px rgba(46,216,182,0.10)', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ fontWeight: 700, fontSize: 19, marginBottom: 8, color: '#2ed8b6' }}>글쓰기</div>
+            <input
+              type="text"
+              placeholder="제목을 입력하세요"
+              value={form.title}
+              onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+              style={{ padding: 10, fontSize: 16, borderRadius: 8, border: '1.5px solid #b2f0e6', marginBottom: 8 }}
+              maxLength={40}
+              required
+            />
+            <textarea
+              placeholder="내용을 입력하세요"
+              value={form.content}
+              onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
+              style={{ padding: 10, fontSize: 15, borderRadius: 8, border: '1.5px solid #b2f0e6', minHeight: 90, resize: 'vertical' }}
+              maxLength={1000}
+              required
+            />
+            <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+              <button type="button" onClick={() => setWriteOpen(false)} style={{ flex: 1, padding: '10px 0', background: '#eee', color: '#222', border: 'none', borderRadius: 8, fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>취소</button>
+              <button type="submit" style={{ flex: 1, padding: '10px 0', background: '#2ed8b6', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 16, cursor: 'pointer' }}>등록</button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 } 
