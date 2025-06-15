@@ -8,6 +8,9 @@ const Bar = styled.header`
   width: 100vw;
   max-width: 100vw;
   min-width: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  flex-shrink: 0;
   margin: 0 auto;
   height: 56px;
   background: #fff;
@@ -16,19 +19,21 @@ const Bar = styled.header`
   align-items: center;
   justify-content: center;
   padding: 0;
-  box-sizing: border-box;
   z-index: 101;
 `;
 const BarInner = styled.div`
   width: 100vw;
-  max-width: 480px;
+  max-width: 100vw;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  flex-shrink: 0;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 8px;
   height: 100%;
-  box-sizing: border-box;
 `;
 const Title = styled.div`
   font-size: 22px;
@@ -69,6 +74,7 @@ const Logo = styled.span`
   margin-right: 16px;
   font-family: 'Montserrat', 'Pretendard', sans-serif;
   user-select: none;
+  flex-shrink: 0;
   @media (max-width: 480px) {
     font-size: 20px;
     margin-right: 8px;

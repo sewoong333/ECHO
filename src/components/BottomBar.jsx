@@ -18,7 +18,8 @@ const BottomBarContainer = styled.div`
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   box-sizing: border-box;
-  overflow-x: auto;
+  overflow-x: hidden;
+  flex-shrink: 0;
 `;
 
 const MenuItem = styled(Link)`
@@ -30,6 +31,7 @@ const MenuItem = styled(Link)`
   font-size: 0.8rem;
   min-width: 0;
   box-sizing: border-box;
+  flex-shrink: 0;
   
   svg {
     font-size: 1.2rem;

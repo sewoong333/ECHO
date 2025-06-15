@@ -20,6 +20,8 @@ const colors = {
 
 const ListWrapper = styled.div`
   width: 100vw;
+  max-width: 100vw;
+  min-width: 0;
   min-height: 100vh;
   background: #f8f9fa;
   box-sizing: border-box;
@@ -27,6 +29,7 @@ const ListWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   overflow-x: hidden;
+  flex-shrink: 0;
 `;
 const SearchBox = styled.div`
   padding: 18px 18px 0 18px;

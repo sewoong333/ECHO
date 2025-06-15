@@ -21,13 +21,19 @@ const Container = styled.div`
   justify-content: center;
   align-items: center;
   width: 100vw;
+  max-width: 100vw;
+  min-width: 0;
   margin: 0 auto;
   padding: 32px 12px 100px 12px;
   box-sizing: border-box;
+  overflow-x: hidden;
+  flex-shrink: 0;
 `;
 
 const Hero = styled.section`
   width: 100vw;
+  max-width: 100vw;
+  min-width: 0;
   background: linear-gradient(120deg, #2ed8b6 60%, #ff7e36 100%);
   border-radius: 24px;
   box-shadow: 0 8px 32px rgba(46,216,182,0.10);
@@ -40,6 +46,8 @@ const Hero = styled.section`
   overflow: hidden;
   margin-left: auto;
   margin-right: auto;
+  box-sizing: border-box;
+  flex-shrink: 0;
 `;
 
 const HeroImage = styled.img`
@@ -76,6 +84,8 @@ const HeroSubtitle = styled.p`
 
 const Section = styled.section`
   width: 100vw;
+  max-width: 100vw;
+  min-width: 0;
   margin: 0 auto 2.5rem auto;
   padding-left: 12px;
   padding-right: 12px;
@@ -84,10 +94,15 @@ const Section = styled.section`
   gap: 1.5rem;
   margin-left: auto;
   margin-right: auto;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  flex-shrink: 0;
 `;
 
 const Card = styled.div`
   width: 100vw;
+  max-width: 100vw;
+  min-width: 0;
   background: #fff;
   border-radius: 18px;
   box-shadow: 0 2px 16px rgba(46,216,182,0.08);
@@ -98,6 +113,9 @@ const Card = styled.div`
   transition: box-shadow 0.2s;
   margin-left: auto;
   margin-right: auto;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  flex-shrink: 0;
   &:hover {
     box-shadow: 0 6px 24px rgba(46,216,182,0.16);
   }

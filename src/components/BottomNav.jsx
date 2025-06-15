@@ -18,11 +18,13 @@ const Bar = styled.nav`
   z-index: 100;
   box-shadow: 0 -1px 8px rgba(0,0,0,0.04);
   box-sizing: border-box;
-  overflow-x: auto;
+  overflow-x: hidden;
+  flex-shrink: 0;
 `;
 const BarInner = styled.div`
   width: 100vw;
-  max-width: 480px;
+  max-width: 100vw;
+  min-width: 0;
   margin: 0 auto;
   display: flex;
   justify-content: space-around;
@@ -30,6 +32,8 @@ const BarInner = styled.div`
   height: 100%;
   position: relative;
   box-sizing: border-box;
+  overflow-x: hidden;
+  flex-shrink: 0;
 `;
 const Item = styled.button`
   background: none;
@@ -46,6 +50,7 @@ const Item = styled.button`
   padding: 0;
   min-width: 0;
   box-sizing: border-box;
+  flex-shrink: 0;
   @media (max-width: 480px) {
     font-size: 11px;
     svg { font-size: 18px; }
