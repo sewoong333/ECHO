@@ -12,6 +12,7 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  box-sizing: border-box;
 `;
 
 const Container = styled.div`
@@ -20,7 +21,7 @@ const Container = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 100vw;
+  width: 100%;
   max-width: 100vw;
   min-width: 0;
   margin: 0 auto;
@@ -31,7 +32,7 @@ const Container = styled.div`
 `;
 
 const Hero = styled.section`
-  width: 100vw;
+  width: 100%;
   max-width: 100vw;
   min-width: 0;
   background: linear-gradient(120deg, #2ed8b6 60%, #ff7e36 100%);
@@ -51,12 +52,13 @@ const Hero = styled.section`
 `;
 
 const HeroImage = styled.img`
-  width: 90%;
+  width: 100%;
   max-width: 340px;
   border-radius: 18px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.10);
   margin-bottom: 1.5rem;
   object-fit: cover;
+  display: block;
 `;
 
 const HeroTitle = styled.h1`
@@ -83,7 +85,7 @@ const HeroSubtitle = styled.p`
 `;
 
 const Section = styled.section`
-  width: 100vw;
+  width: 100%;
   max-width: 100vw;
   min-width: 0;
   margin: 0 auto 2.5rem auto;
@@ -100,7 +102,7 @@ const Section = styled.section`
 `;
 
 const Card = styled.div`
-  width: 100vw;
+  width: 100%;
   max-width: 100vw;
   min-width: 0;
   background: #fff;

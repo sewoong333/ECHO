@@ -144,7 +144,7 @@ export default function MusicLife() {
   };
 
   return (
-    <div style={{ width: '100vw', minHeight: '100vh', background: '#f8f9fa', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+    <div style={{ width: '100vw', minHeight: '100vh', background: '#f8f9fa', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', overflowX: 'hidden' }}>
       <TopBar />
       <div style={{ width: '100vw', padding: 0 }}>
         <h1 style={{ fontSize: 24, fontWeight: 700, padding: '24px 0 12px 20px', color: '#2ed8b6' }}>음악생활</h1>
@@ -165,7 +165,7 @@ export default function MusicLife() {
         onClick={() => setWriteOpen(true)}
         style={{
           position: 'fixed',
-          right: 22,
+          right: 16,
           bottom: 80,
           zIndex: 100,
           background: '#2ed8b6',
@@ -194,7 +194,7 @@ export default function MusicLife() {
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 200,
           background: 'rgba(0,0,0,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center'
         }}>
-          <form onSubmit={handleWrite} style={{ background: '#fff', borderRadius: 18, padding: 28, minWidth: 320, maxWidth: 400, boxShadow: '0 4px 24px rgba(46,216,182,0.10)', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <form onSubmit={handleWrite} style={{ background: '#fff', borderRadius: 18, padding: 28, minWidth: 320, maxWidth: '95vw', boxShadow: '0 4px 24px rgba(46,216,182,0.10)', display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={{ fontWeight: 700, fontSize: 19, marginBottom: 8, color: '#2ed8b6' }}>글쓰기</div>
             <input
               type="text"
