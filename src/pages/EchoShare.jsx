@@ -63,12 +63,9 @@ const Badge = styled.span`
 const HeroTitle = styled.h1`
   font-size: 2.4rem;
   font-weight: 900;
-  background: linear-gradient(90deg, #ffe082 30%, #2ed8b6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-fill-color: transparent;
-  text-shadow: 0 4px 16px rgba(46,216,182,0.13);
+  color: #222;
+  background: none;
+  text-shadow: 0 2px 8px rgba(34,34,34,0.10), 0 0px 0px #fff;
   margin-bottom: 0.7rem;
   text-align: center;
   line-height: 1.3;
