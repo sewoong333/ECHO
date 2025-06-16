@@ -92,7 +92,19 @@ module.exports = async function handler(req, res) {
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
-  const { instrument, brand, model, condition } = req.body;
+  let body = req.body;
+  if (!body || typeof body === 'string') {
+    try {
+      body = JSON.parse(body);
+    } catch (e) {
+      body = {};
+    }
+  }
+  const { instrument, brand, model, condition } = body;
+  if (!instrument || !brand || !model) {
+    res.status(400).json({ error: 'Missing required fields' });
+    return;
+  }
   // condition은 무시하고 instrument/brand/model만 매칭
   let found = USED_PRICES.find(d => d.instrument === instrument && d.brand === brand && d.model === model);
   if (!found) found = USED_PRICES.find(d => d.instrument === instrument && d.brand === brand);
