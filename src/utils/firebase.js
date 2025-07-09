@@ -485,21 +485,19 @@ export const imageService = {
       if (file.size > 5 * 1024 * 1024) {
         throw new Error('이미지 크기는 5MB 이하여야 합니다.');
       }
-
       if (!file.type.startsWith('image/')) {
         throw new Error('이미지 파일만 업로드 가능합니다.');
       }
-
-      const compressedFile = await this.compressImage(file);
-      
+      // 10초 타임아웃 적용
+      const compressPromise = this.compressImage(file);
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('이미지 업로드가 너무 오래 걸립니다.')), 10000));
+      const compressedFile = await Promise.race([compressPromise, timeoutPromise]);
       const timestamp = Date.now();
       const fileName = `${userId}_${timestamp}_${file.name}`;
       const path = productId ? `products/${productId}/${fileName}` : `products/temp/${fileName}`;
       const storageRef = ref(storage, path);
-      
       const snapshot = await uploadBytes(storageRef, compressedFile);
       const downloadURL = await getDownloadURL(snapshot.ref);
-      
       return {
         url: downloadURL,
         path: path,
@@ -513,20 +511,32 @@ export const imageService = {
   },
 
   async compressImage(file, maxWidth = 800, quality = 0.8) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       const img = new Image();
-      
+      let timeoutId;
       img.onload = function() {
         const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
         canvas.width = img.width * ratio;
         canvas.height = img.height * ratio;
-        
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        canvas.toBlob(resolve, file.type, quality);
+        if (!canvas.toBlob) {
+          reject(new Error('이미지 압축을 지원하지 않는 브라우저입니다.'));
+          return;
+        }
+        timeoutId = setTimeout(() => {
+          reject(new Error('이미지 압축이 너무 오래 걸립니다.'));
+        }, 10000); // 10초 타임아웃
+        canvas.toBlob(blob => {
+          clearTimeout(timeoutId);
+          if (!blob) reject(new Error('이미지 압축 실패'));
+          else resolve(blob);
+        }, file.type, quality);
       };
-      
+      img.onerror = function() {
+        reject(new Error('이미지 로드 실패'));
+      };
       img.src = URL.createObjectURL(file);
     });
   },
