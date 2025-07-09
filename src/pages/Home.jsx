@@ -368,21 +368,37 @@ export default function Home() {
     }
   }, [location.state]);
 
-  // 무한스크롤: 스크롤 하단 도달 시 loadMoreProducts 자동 호출, 더보기 버튼 제거
+  // 상품 리스트 상태
+  const [displayedProducts, setDisplayedProducts] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const ITEMS_PER_LOAD = 10;
+  const listEndRef = useRef(null);
+
+  // 상품 데이터 불러오기 후 초기 10개만 표시
+  useEffect(() => {
+    if (products && products.length > 0) {
+      setDisplayedProducts(products.slice(0, ITEMS_PER_LOAD));
+      setCurrentIndex(ITEMS_PER_LOAD);
+    }
+  }, [products]);
+
+  // 스크롤 하단 도달 시 10개씩 추가
   useEffect(() => {
     const handleScroll = () => {
       if (
         window.innerHeight + document.documentElement.scrollTop >=
         document.documentElement.offsetHeight - 200
       ) {
-        if (!loading && hasMore) {
-          loadMoreProducts();
+        if (currentIndex < products.length) {
+          const nextIndex = Math.min(currentIndex + ITEMS_PER_LOAD, products.length);
+          setDisplayedProducts(products.slice(0, nextIndex));
+          setCurrentIndex(nextIndex);
         }
       }
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [loading, hasMore, loadMoreProducts]);
+  }, [currentIndex, products]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -633,10 +649,10 @@ export default function Home() {
         ) : (
           <>
             <ProductGrid>
-              {products.map((product, index) => (
+              {displayedProducts.map((product, idx) => (
                 <ProductCard
                   key={product.id}
-                  ref={index === products.length - 1 ? lastProductElementRef : null}
+                  ref={idx === displayedProducts.length - 1 ? lastProductElementRef : null}
                   onClick={() => handleProductClick(product)}
                 >
                   <ProductImageContainer>
