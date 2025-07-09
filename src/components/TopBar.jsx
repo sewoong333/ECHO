@@ -140,9 +140,7 @@ export default function TopBar() {
           <Logo style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>ECHO</Logo>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
-          <IconBtn onClick={() => navigate('/register')} aria-label="상품등록">
-            <svg width="22" height="22" fill="none" stroke="#222" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-          </IconBtn>
+          {/* 상품등록 버튼 제거 */}
           <IconBtn ref={menuBtnRef} onClick={() => setMenuOpen(v => !v)} aria-label="메뉴 열기/닫기">
             <svg width="22" height="22" fill="none" stroke="#222" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
           </IconBtn>

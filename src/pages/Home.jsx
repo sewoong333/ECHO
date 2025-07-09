@@ -5,7 +5,7 @@ import TopBar from '../components/TopBar';
 import { ProductContext } from '../store/ProductContext';
 import { UserContext } from '../store/UserContext';
 import { INSTRUMENT_CATEGORIES, REGIONS } from '../utils/firebase';
-import { FaHeart, FaRegHeart, FaEye, FaMapMarkerAlt, FaFilter, FaSort, FaSearch } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaEye, FaMapMarkerAlt, FaFilter, FaSort, FaSearch, FaPlus } from 'react-icons/fa';
 
 const Container = styled.div`
   width: 100vw;
@@ -368,6 +368,22 @@ export default function Home() {
     }
   }, [location.state]);
 
+  // 무한스크롤: 스크롤 하단 도달 시 loadMoreProducts 자동 호출, 더보기 버튼 제거
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + document.documentElement.scrollTop >=
+        document.documentElement.offsetHeight - 200
+      ) {
+        if (!loading && hasMore) {
+          loadMoreProducts();
+        }
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [loading, hasMore, loadMoreProducts]);
+
   const handleSearch = (e) => {
     e.preventDefault();
     searchProducts(searchInput.trim());
@@ -718,6 +734,31 @@ export default function Home() {
           </>
         )}
       </ContentContainer>
+      <button
+        onClick={() => navigate('/register')}
+        style={{
+          position: 'fixed',
+          bottom: 32,
+          right: 32,
+          width: 56,
+          height: 56,
+          borderRadius: '50%',
+          background: '#2ed8b6',
+          color: '#fff',
+          border: 'none',
+          fontSize: 28,
+          boxShadow: '0 4px 16px rgba(46,216,182,0.18)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          cursor: 'pointer',
+          transition: 'all 0.2s',
+        }}
+        aria-label="상품 등록"
+      >
+        <FaPlus />
+      </button>
     </Container>
   );
 }
