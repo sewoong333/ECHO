@@ -17,11 +17,22 @@ export default function ProductDetail() {
   const [showSlide, setShowSlide] = useState(false);
   const [slideIdx, setSlideIdx] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
+
+  // 비로그인 사용자는 상세페이지 접근 불가
+  useEffect(() => {
+    if (!user || !user.uid) {
+      setRedirecting(true);
+      setTimeout(() => {
+        navigate('/login', { state: { message: '로그인 후 상품 상세를 볼 수 있습니다.' } });
+      }, 1800);
+    }
+  }, [user, navigate]);
 
   // 조회수 증가
   useEffect(() => {
     if (!product) return;
-    
+    if (!user || !user.uid) return;
     const updateViews = async () => {
       try {
         const productRef = doc(db, 'products', product.id);
@@ -37,9 +48,17 @@ export default function ProductDetail() {
         console.error('조회수 업데이트 실패:', err);
       }
     };
-
     updateViews();
-  }, [product?.id]);
+  }, [product?.id, user, setProducts]);
+
+  if (!user || !user.uid) {
+    return (
+      <div style={{ padding: 48, textAlign: 'center', color: '#2ed8b6', fontWeight: 700, fontSize: 20 }}>
+        상품 상세는 로그인 후 이용 가능합니다.<br />
+        <span style={{ color: '#888', fontSize: 15, fontWeight: 400 }}>로그인 페이지로 이동합니다...</span>
+      </div>
+    );
+  }
 
   if (!product) return <div style={{ padding: 32 }}>상품을 찾을 수 없습니다.</div>;
 

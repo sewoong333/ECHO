@@ -1,0 +1,203 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 사용자 인증 함수
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // 사용자 소유자 확인 함수
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // 사용자 프로필 규칙
+    match /users/{userId} {
+      // 읽기: 인증된 사용자는 모든 사용자 프로필 조회 가능 (거래 신뢰성을 위해)
+      allow read: if isAuthenticated();
+      
+      // 쓰기: 본인의 프로필만 생성/수정 가능
+      allow create, update: if isOwner(userId) && validateUserData();
+      
+      // 삭제: 본인의 프로필만 삭제 가능
+      allow delete: if isOwner(userId);
+      
+      // 사용자 데이터 유효성 검사
+      function validateUserData() {
+        let data = request.resource.data;
+        return data.keys().hasAll(['nickname', 'email']) &&
+               data.nickname is string &&
+               data.nickname.size() <= 50 &&
+               data.email is string &&
+               data.email.matches('.*@.*\\..*');
+      }
+      
+      // 사용자의 찜 목록
+      match /likes/{likeId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      // 사용자의 구매/판매 이력
+      match /transactions/{transactionId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+    
+    // 상품 규칙
+    match /products/{productId} {
+      // 읽기: 모든 사용자가 활성 상품 조회 가능
+      allow read: if resource.data.status == 'active' || 
+                     isOwner(resource.data.sellerId);
+      
+      // 생성: 인증된 사용자만 상품 등록 가능
+      allow create: if isAuthenticated() && 
+                       validateProductData() && 
+                       request.resource.data.sellerId == request.auth.uid;
+      
+      // 수정: 상품 소유자만 수정 가능
+      allow update: if isOwner(resource.data.sellerId) && 
+                       validateProductUpdate();
+      
+      // 삭제: 상품 소유자만 삭제 가능 (실제로는 상태만 변경)
+      allow delete: if isOwner(resource.data.sellerId);
+      
+      // 상품 데이터 유효성 검사
+      function validateProductData() {
+        let data = request.resource.data;
+        return data.keys().hasAll([
+          'title', 'description', 'price', 'category', 
+          'condition', 'sellerId', 'status', 'createdAt'
+        ]) &&
+        // 제목 검증
+        data.title is string &&
+        data.title.size() >= 5 && data.title.size() <= 100 &&
+        
+        // 설명 검증
+        data.description is string &&
+        data.description.size() >= 10 && data.description.size() <= 2000 &&
+        
+        // 가격 검증
+        data.price is number &&
+        data.price >= 1000 && data.price <= 100000000 &&
+        
+        // 카테고리 검증
+        data.category is string &&
+        data.category in ['guitar', 'piano', 'drums', 'wind', 'string', 'audio', 'other'] &&
+        
+        // 상태 검증
+        data.condition is string &&
+        data.condition in ['최상', '상', '중', '하'] &&
+        
+        // 상품 상태 검증
+        data.status is string &&
+        data.status in ['active', 'sold', 'reserved', 'deleted', 'suspended'] &&
+        
+        // 판매자 ID 검증
+        data.sellerId is string &&
+        data.sellerId == request.auth.uid;
+      }
+      
+      // 상품 수정 유효성 검사
+      function validateProductUpdate() {
+        let data = request.resource.data;
+        let prevData = resource.data;
+        
+        // 판매자 ID는 변경 불가
+        return data.sellerId == prevData.sellerId &&
+        
+        // 가격 변경 시 유효성 검사
+        (!data.diff(prevData).affectedKeys().hasAny(['price']) ||
+         (data.price is number && data.price >= 1000 && data.price <= 100000000)) &&
+        
+        // 상태 변경 유효성 검사
+        (!data.diff(prevData).affectedKeys().hasAny(['status']) ||
+         validateStatusTransition(prevData.status, data.status));
+      }
+      
+      // 상태 전환 유효성 검사
+      function validateStatusTransition(oldStatus, newStatus) {
+        return (oldStatus == 'active' && newStatus in ['sold', 'reserved', 'deleted']) ||
+               (oldStatus == 'reserved' && newStatus in ['active', 'sold', 'deleted']) ||
+               (oldStatus == 'sold' && newStatus == 'active') ||
+               (oldStatus == 'deleted' && newStatus == 'active');
+      }
+    }
+    
+    // 채팅 규칙
+    match /chats/{chatId} {
+      // 읽기/쓰기: 채팅 참여자만 가능
+      allow read, write: if isAuthenticated() && 
+                            (request.auth.uid in resource.data.participants ||
+                             request.auth.uid in request.resource.data.participants);
+      
+      // 채팅 메시지
+      match /messages/{messageId} {
+        allow read, write: if isAuthenticated() && 
+                              request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+      }
+    }
+    
+    // 리뷰 규칙
+    match /reviews/{reviewId} {
+      // 읽기: 모든 사용자가 조회 가능
+      allow read: if true;
+      
+      // 생성: 인증된 사용자만 리뷰 작성 가능
+      allow create: if isAuthenticated() && 
+                       validateReviewData() &&
+                       request.resource.data.reviewerId == request.auth.uid;
+      
+      // 수정/삭제: 리뷰 작성자만 가능
+      allow update, delete: if isOwner(resource.data.reviewerId);
+      
+      function validateReviewData() {
+        let data = request.resource.data;
+        return data.keys().hasAll(['rating', 'comment', 'reviewerId', 'revieweeId', 'transactionId']) &&
+               data.rating is number &&
+               data.rating >= 1 && data.rating <= 5 &&
+               data.comment is string &&
+               data.comment.size() <= 500 &&
+               data.reviewerId != data.revieweeId;
+      }
+    }
+    
+    // 신고 규칙
+    match /reports/{reportId} {
+      // 읽기: 관리자만 가능 (실제 구현에서는 커스텀 클레임 사용)
+      allow read: if isAuthenticated();
+      
+      // 생성: 인증된 사용자만 신고 가능
+      allow create: if isAuthenticated() && 
+                       validateReportData() &&
+                       request.resource.data.reporterId == request.auth.uid;
+      
+      function validateReportData() {
+        let data = request.resource.data;
+        return data.keys().hasAll(['reason', 'reporterId', 'targetType', 'targetId']) &&
+               data.reason is string &&
+               data.reason in ['spam', 'inappropriate', 'fake', 'fraud', 'other'] &&
+               data.targetType in ['product', 'user', 'chat'];
+      }
+    }
+    
+    // 알림 규칙
+    match /notifications/{notificationId} {
+      // 읽기/쓰기: 알림 수신자만 가능
+      allow read, write: if isOwner(resource.data.userId);
+    }
+    
+    // 관리자 전용 컬렉션
+    match /admin/{document=**} {
+      // 관리자만 접근 가능 (실제 구현에서는 커스텀 클레임 사용)
+      allow read, write: if isAuthenticated() && 
+                            request.auth.token.admin == true;
+    }
+    
+    // 통계 및 분석 데이터 (읽기 전용)
+    match /analytics/{document=**} {
+      allow read: if isAuthenticated();
+      allow write: if false; // 서버 측에서만 업데이트
+    }
+  }
+}

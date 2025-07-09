@@ -652,24 +652,24 @@ export default function EchoShare() {
         <Section>
           <SectionTitle>진행 절차</SectionTitle>
           <StepRow>
-            <StepCard>
-              <StepNumber>1</StepNumber>
+          <StepCard>
+            <StepNumber>1</StepNumber>
               <div>
                 <b>악기 등록</b> <br />사진·정보 입력, 실명 인증
               </div>
-            </StepCard>
-            <StepCard>
-              <StepNumber>2</StepNumber>
+          </StepCard>
+          <StepCard>
+            <StepNumber>2</StepNumber>
               <div>
                 <b>ECHO 검증</b> <br />관리자 확인 및 인증마크 부여
               </div>
-            </StepCard>
-            <StepCard>
-              <StepNumber>3</StepNumber>
+          </StepCard>
+          <StepCard>
+            <StepNumber>3</StepNumber>
               <div>
                 <b>공유/판매/임대 시작</b> <br />검증 완료 후 안전하게 진행
               </div>
-            </StepCard>
+          </StepCard>
           </StepRow>
         </Section>
 

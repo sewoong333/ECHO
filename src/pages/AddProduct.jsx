@@ -1,10 +1,10 @@
 import React, { useState, useRef, useContext } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { FaTimes, FaCamera } from 'react-icons/fa';
+import { FaTimes, FaCamera, FaChevronDown, FaDragHandle } from 'react-icons/fa';
 import { ProductContext } from '../store/ProductContext';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../utils/firebase';
+import { UserContext } from '../store/UserContext';
+import { INSTRUMENT_CATEGORIES, REGIONS } from '../utils/firebase';
 
 const Wrapper = styled.div`
   width: 100vw;
@@ -50,49 +50,13 @@ const TempSave = styled.div`
   font-weight: 600;
   font-size: 15px;
   margin-right: 16px;
+  cursor: pointer;
+  
+  &:hover {
+    color: #2ed8b6;
+  }
 `;
-const AIToggleWrap = styled.div`
-  background: #f6f3ff;
-  padding: 16px 18px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border-radius: 12px;
-  margin: 18px 18px 0 18px;
-`;
-const AIToggleLabel = styled.span`
-  font-weight: 700;
-  color: #7c4dff;
-  font-size: 15px;
-`;
-const AIToggleDesc = styled.span`
-  font-size: 14px;
-  color: #7c4dff;
-  margin-left: 8px;
-`;
-const Switch = styled.label`
-  margin-left: auto;
-  display: inline-block;
-  width: 38px;
-  height: 22px;
-  background: ${props => props.checked ? '#7c4dff' : '#ddd'};
-  border-radius: 12px;
-  position: relative;
-  vertical-align: middle;
-  transition: background 0.2s;
-  input { width: 0; height: 0; opacity: 0; }
-`;
-const SwitchCircle = styled.span`
-  position: absolute;
-  left: ${props => props.checked ? '18px' : '2px'};
-  top: 2px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 4px #bbb;
-  transition: left 0.2s;
-`;
+
 const Form = styled.form`
   padding: 28px 18px 0 18px;
   background: #fff;
@@ -104,10 +68,13 @@ const ImgUploadBox = styled.div`
   display: flex;
   gap: 10px;
   margin-bottom: 28px;
+  overflow-x: auto;
+  padding-bottom: 8px;
 `;
 const ImgPreview = styled.div`
-  width: 64px;
-  height: 64px;
+  min-width: 80px;
+  width: 80px;
+  height: 80px;
   background: #f2f2f2;
   border-radius: 10px;
   display: flex;
@@ -115,6 +82,7 @@ const ImgPreview = styled.div`
   justify-content: center;
   position: relative;
   overflow: hidden;
+  cursor: move;
 `;
 const Img = styled.img`
   width: 100%;
@@ -122,8 +90,9 @@ const Img = styled.img`
   object-fit: cover;
 `;
 const ImgAddBtn = styled.label`
-  width: 64px;
-  height: 64px;
+  min-width: 80px;
+  width: 80px;
+  height: 80px;
   background: #fafafa;
   border: 1.5px dashed #bbb;
   border-radius: 10px;
@@ -136,7 +105,7 @@ const ImgAddBtn = styled.label`
   flex-direction: column;
 `;
 const ImgCount = styled.div`
-  font-size: 13px;
+  font-size: 12px;
   margin-top: 2px;
 `;
 const Label = styled.label`
@@ -146,6 +115,11 @@ const Label = styled.label`
   margin-bottom: 8px;
   display: block;
   letter-spacing: -0.5px;
+`;
+
+const RequiredMark = styled.span`
+  color: #ff4d4f;
+  margin-left: 4px;
 `;
 const Input = styled.input`
   width: 100%;
@@ -157,16 +131,42 @@ const Input = styled.input`
   background: #fafafa;
   box-sizing: border-box;
   color: #222;
+  
   &:focus {
     border: 1.5px solid #ff7e36;
     background: #fff;
+    outline: none;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 16px;
+    padding: 12px;
+  }
+`;
+
+const Select = styled.select`
+  width: 100%;
+  padding: 13px 14px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: 1.5px solid #eee;
+  margin-bottom: 16px;
+  background: #fafafa;
+  box-sizing: border-box;
+  color: #222;
+  cursor: pointer;
+  
+  &:focus {
+    border: 1.5px solid #ff7e36;
+    background: #fff;
+    outline: none;
   }
 `;
 const Textarea = styled.textarea`
   width: 100%;
   min-height: 90px;
   padding: 13px 14px;
-  font-size: 15px;
+  font-size: 16px;
   border-radius: 10px;
   border: 1.5px solid #eee;
   margin-bottom: 16px;
@@ -174,13 +174,30 @@ const Textarea = styled.textarea`
   box-sizing: border-box;
   resize: vertical;
   color: #222;
+  
   &:focus {
     border: 1.5px solid #ff7e36;
     background: #fff;
+    outline: none;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 16px;
+    padding: 12px;
+    min-height: 80px;
   }
 `;
 const Row = styled.div`
   margin-bottom: 26px;
+`;
+
+const FlexRow = styled.div`
+  display: flex;
+  gap: 12px;
+  
+  > * {
+    flex: 1;
+  }
 `;
 const TradeTypeWrap = styled.div`
   display: flex;
@@ -189,31 +206,55 @@ const TradeTypeWrap = styled.div`
 `;
 const TradeTypeBtn = styled.button`
   flex: 1;
-  padding: 10px 0;
+  padding: 12px 0;
   border-radius: 8px;
-  border: 1.5px solid ${props => props.$active ? '#222' : '#eee'};
-  background: ${props => props.$active ? '#222' : '#fafafa'};
+  border: 1.5px solid ${props => props.$active ? '#2ed8b6' : '#eee'};
+  background: ${props => props.$active ? '#2ed8b6' : '#fafafa'};
   color: ${props => props.$active ? '#fff' : '#888'};
   font-weight: 700;
   font-size: 15px;
   cursor: pointer;
+  transition: all 0.2s;
+`;
+
+const ConditionWrap = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+`;
+
+const ConditionBtn = styled.button`
+  flex: 1;
+  padding: 10px 0;
+  border-radius: 8px;
+  border: 1.5px solid ${props => props.$active ? '#2ed8b6' : '#eee'};
+  background: ${props => props.$active ? '#2ed8b6' : '#fafafa'};
+  color: ${props => props.$active ? '#fff' : '#666'};
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
 `;
 const CheckboxLabel = styled.label`
   display: flex;
   align-items: center;
   font-size: 15px;
-  gap: 7px;
+  gap: 8px;
   margin-bottom: 12px;
   cursor: pointer;
+  
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #2ed8b6;
+  }
 `;
-const PlaceInput = styled(Input)`
-  margin-bottom: 0;
-`;
+
 const SubmitBtn = styled.button`
   width: 100%;
   max-width: 480px;
   padding: 18px 0;
-  background: #2ed8b6;
+  background: ${props => props.disabled ? '#ccc' : '#2ed8b6'};
   color: #fff;
   font-size: 18px;
   font-weight: 700;
@@ -221,20 +262,26 @@ const SubmitBtn = styled.button`
   border-radius: 16px;
   margin: 32px auto 0 auto;
   display: block;
-  opacity: ${props => props.disabled ? 0.5 : 1};
-  pointer-events: ${props => props.disabled ? 'none' : 'auto'};
+  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
   box-shadow: 0 4px 16px rgba(46,216,182,0.12);
-  transition: opacity 0.2s, background 0.18s;
-  cursor: pointer;
+  transition: all 0.2s;
   position: relative;
   z-index: 10;
+  min-height: 48px;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: #26c4a5;
+    transform: translateY(-1px);
   }
 
-  &:active {
+  &:active:not(:disabled) {
     transform: translateY(1px);
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 16px;
+    padding: 16px 0;
+    margin: 24px auto 0 auto;
   }
 `;
 const ErrorMsg = styled.div`
@@ -242,73 +289,193 @@ const ErrorMsg = styled.div`
   font-size: 13px;
   margin: 4px 0 0 2px;
 `;
-const FrequentBtn = styled.button`
-  margin-top: 0;
-  margin-bottom: 18px;
-  padding: 7px 14px;
-  border: 1.5px solid #e0e2e6;
+
+const SuccessMsg = styled.div`
+  color: #52c41a;
+  font-size: 13px;
+  margin: 4px 0 0 2px;
+`;
+
+const InfoText = styled.div`
+  color: #666;
+  font-size: 12px;
+  margin-top: 4px;
+  line-height: 1.4;
+`;
+
+const PriceHelp = styled.div`
+  background: #f0f9ff;
+  border: 1px solid #e1f5fe;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #0277bd;
+`;
+
+const TagInput = styled.div`
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1.5px solid #eee;
+  border-radius: 10px;
+  background: #fafafa;
+  margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  
+  &:focus-within {
+    border-color: #ff7e36;
+    background: #fff;
+  }
+`;
+
+const Tag = styled.span`
+  background: #2ed8b6;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+const TagDeleteBtn = styled.button`
+  background: none;
+  border: none;
+  color: white;
+  font-size: 10px;
+  cursor: pointer;
+`;
+
+const TagInputField = styled.input`
+  border: none;
+  background: none;
+  flex: 1;
+  min-width: 80px;
+  padding: 4px;
+  font-size: 14px;
+  
+  &:focus {
+    outline: none;
+  }
+`;
+
+const Modal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+`;
+
+const ModalContent = styled.div`
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 400px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+`;
+
+const ModalTitle = styled.h3`
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 700;
+`;
+
+const ModalButton = styled.button`
+  width: 100%;
+  padding: 12px;
+  margin: 4px 0;
+  border: 1px solid #eee;
   border-radius: 8px;
   background: #fff;
-  font-weight: 600;
-  font-size: 14px;
-  color: #222;
+  text-align: left;
   cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: #f8f9fa;
+    border-color: #2ed8b6;
+  }
 `;
-const PlaceRow = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 18px;
-`;
-const PlaceDeleteBtn = styled.button`
-  background: none;
+
+const CloseModalBtn = styled.button`
+  width: 100%;
+  padding: 12px;
+  background: #2ed8b6;
+  color: white;
   border: none;
-  color: #bbb;
-  font-size: 18px;
+  border-radius: 8px;
+  margin-top: 16px;
   cursor: pointer;
-`;
-const LinkBtn = styled.button`
-  background: none;
-  border: none;
-  color: #2ed8b6;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-left: 4px;
-`;
-const EchoAuthLabel = styled.label`
-  display: flex;
-  align-items: center;
-  font-size: 15px;
-  gap: 7px;
-  margin-bottom: 12px;
-  cursor: pointer;
-  color: #2ed8b6;
   font-weight: 600;
 `;
 
 export default function AddProduct() {
   const navigate = useNavigate();
   const { addProduct } = useContext(ProductContext);
-  const [images, setImages] = useState([]);
+  const { user } = useContext(UserContext);
+  const fileInput = useRef();
+  
+  // 기본 상품 정보
   const [title, setTitle] = useState('');
-  const [desc, setDesc] = useState('');
+  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('');
+  const [subcategory, setSubcategory] = useState('');
+  const [brand, setBrand] = useState('');
+  const [model, setModel] = useState('');
+  const [condition, setCondition] = useState('상');
+  const [conditionDescription, setConditionDescription] = useState('');
+  const [yearOfManufacture, setYearOfManufacture] = useState('');
+  
+  // 가격 및 거래 정보
   const [tradeType, setTradeType] = useState('sell');
   const [price, setPrice] = useState('');
-  const [allowOffer, setAllowOffer] = useState(true);
-  const [place, setPlace] = useState('');
+  const [originalPrice, setOriginalPrice] = useState('');
+  const [isPriceNegotiable, setIsPriceNegotiable] = useState(true);
+  const [isDeliveryAvailable, setIsDeliveryAvailable] = useState(false);
+  const [deliveryFee, setDeliveryFee] = useState('');
+  const [preferredTransactionType, setPreferredTransactionType] = useState('direct');
+  
+  // 위치 정보
+  const [region, setRegion] = useState('');
+  const [district, setDistrict] = useState('');
+  
+  // 추가 정보
+  const [accessories, setAccessories] = useState([]);
+  const [defects, setDefects] = useState([]);
+  const [tags, setTags] = useState([]);
+  const [tagInput, setTagInput] = useState('');
+  const [isUrgent, setIsUrgent] = useState(false);
+  
+  // 이미지
+  const [images, setImages] = useState([]);
+  const [imageUrl, setImageUrl] = useState('');
+  
+  // UI 상태
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [touched, setTouched] = useState({});
-  const fileInput = useRef();
-  const [aiWrite, setAiWrite] = useState(false);
-  const [echoAuthRequested, setEchoAuthRequested] = useState(false);
-  const [selectedNeighborhood, setSelectedNeighborhood] = useState('');
-  const [neighborhoodModalOpen, setNeighborhoodModalOpen] = useState(false);
-  const [searchInput, setSearchInput] = useState('');
-  const [suggestedNeighborhood, setSuggestedNeighborhood] = useState('');
-  const dummyNeighborhoods = [
-    '구로동', '신도림동', '가산동', '대림동', '구로디지털단지', '구로시장', '구로아트밸리', '구로역', '신도림역', '롯데백화점 구로점'
-  ];
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [showRegionModal, setShowRegionModal] = useState(false);
+  
+  // 카테고리 데이터
+  const categories = Object.values(INSTRUMENT_CATEGORIES);
+  const regions = Object.values(REGIONS);
 
+  // 이미지 관리
   const handleImageChange = e => {
     const files = Array.from(e.target.files).slice(0, 10 - images.length);
     const readers = files.map(file => {
@@ -321,80 +488,208 @@ export default function AddProduct() {
     Promise.all(readers).then(newImgs => setImages([...images, ...newImgs]));
     fileInput.current.value = '';
   };
+
+  // 임시저장 기능
+  const handleTempSave = () => {
+    const tempData = {
+      title, description, category, subcategory, brand, model,
+      condition, conditionDescription, yearOfManufacture,
+      tradeType, price, originalPrice, isPriceNegotiable,
+      region, district, accessories, defects, tags,
+      isUrgent, isDeliveryAvailable, deliveryFee
+    };
+    
+    localStorage.setItem('echo_temp_product', JSON.stringify(tempData));
+    setSuccess('임시저장되었습니다.');
+    setTimeout(() => setSuccess(''), 2000);
+  };
+
+  // 임시저장 데이터 불러오기
+  React.useEffect(() => {
+    const tempData = localStorage.getItem('echo_temp_product');
+    if (tempData) {
+      try {
+        const parsed = JSON.parse(tempData);
+        setTitle(parsed.title || '');
+        setDescription(parsed.description || '');
+        setCategory(parsed.category || '');
+        setSubcategory(parsed.subcategory || '');
+        setBrand(parsed.brand || '');
+        setModel(parsed.model || '');
+        setCondition(parsed.condition || '상');
+        setConditionDescription(parsed.conditionDescription || '');
+        setYearOfManufacture(parsed.yearOfManufacture || '');
+        setTradeType(parsed.tradeType || 'sell');
+        setPrice(parsed.price || '');
+        setOriginalPrice(parsed.originalPrice || '');
+        setIsPriceNegotiable(parsed.isPriceNegotiable ?? true);
+        setRegion(parsed.region || '');
+        setDistrict(parsed.district || '');
+        setAccessories(parsed.accessories || []);
+        setDefects(parsed.defects || []);
+        setTags(parsed.tags || []);
+        setIsUrgent(parsed.isUrgent || false);
+        setIsDeliveryAvailable(parsed.isDeliveryAvailable || false);
+        setDeliveryFee(parsed.deliveryFee || '');
+      } catch (error) {
+        console.error('임시저장 데이터 복원 실패:', error);
+      }
+    }
+  }, []);
+
   const removeImage = idx => {
     setImages(images.filter((_, i) => i !== idx));
   };
 
-  const isValid = title && desc && (tradeType === 'give' || price) && images.length > 0;
+  const addImageFromUrl = () => {
+    if (imageUrl && images.length < 10) {
+      const newImage = { url: imageUrl, file: null };
+      setImages([...images, newImage]);
+      setImageUrl('');
+    }
+  };
+
+  // 태그 관리
+  const addTag = (tag) => {
+    if (tag && !tags.includes(tag) && tags.length < 10) {
+      setTags([...tags, tag]);
+    }
+  };
+
+  const removeTag = (tagToRemove) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
+  };
+
+  const handleTagInputKeyDown = (e) => {
+    if (e.key === 'Enter' && tagInput.trim()) {
+      e.preventDefault();
+      addTag(tagInput.trim());
+      setTagInput('');
+    }
+  };
+
+  // 폼 검증
+  const isValid = () => {
+    const isTitleValid = title && title.trim().length >= 2;
+    const isDescValid = description && description.trim().length >= 10;
+    const isCategoryValid = category;
+    const isPriceValid = tradeType === 'give' || (price && parseInt(price) > 0);
+    const isLocationValid = region && district;
+    
+    return isTitleValid && isDescValid && isCategoryValid && isPriceValid && isLocationValid;
+  };
 
   const handleBlur = e => {
     setTouched(t => ({ ...t, [e.target.name]: true }));
   };
 
-  const handleNeighborhoodModalOpen = () => {
-    setNeighborhoodModalOpen(true);
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        pos => {
-          // 실제 서비스에서는 좌표 → 동네명 변환 API 필요
-          // 1차는 더미로 '구로동' 추천
-          setSuggestedNeighborhood('구로동');
-        },
-        err => setSuggestedNeighborhood('위치 권한 거부됨')
-      );
-    } else {
-      setSuggestedNeighborhood('위치 기능 미지원');
-    }
+  // 서브카테고리 업데이트
+  const handleCategoryChange = (selectedCategory) => {
+    setCategory(selectedCategory);
+    setSubcategory(''); // 카테고리 변경 시 서브카테고리 초기화
+    setShowCategoryModal(false);
   };
 
-  const handleSubmit = async e => {
+  // 지역 선택 처리
+  const handleRegionChange = (selectedRegion) => {
+    setRegion(selectedRegion);
+    setDistrict(''); // 지역 변경 시 구 초기화
+  };
+
+  // 상품 등록 처리
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isValid) {
-      setTouched({ title: true, desc: true, price: true, images: true });
+    if (!isValid()) {
+      setTouched({ 
+        title: true, 
+        description: true, 
+        category: true, 
+        price: true,
+        region: true,
+        district: true 
+      });
+      
+      if (!title || title.trim().length < 2) {
+        setError('제목을 2글자 이상 입력해주세요.');
+      } else if (!description || description.trim().length < 10) {
+        setError('상세설명을 10글자 이상 입력해주세요.');
+      } else if (!category) {
+        setError('카테고리를 선택해주세요.');
+      } else if (tradeType === 'sell' && (!price || parseInt(price) <= 0)) {
+        setError('올바른 가격을 입력해주세요.');
+      } else if (!region || !district) {
+        setError('거래 지역을 선택해주세요.');
+      }
       return;
     }
 
+    if (!user || !user.uid) {
+      setError('로그인이 필요합니다.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
     try {
+      // 이미지 처리 (간소화된 버전)
+      let imageUrls = images.map(img => img.url).filter(url => url);
+      if (imageUrls.length === 0) {
+        imageUrls = ['https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80'];
+      }
+
+      // 상품 데이터 구성 (기존 구조와 호환)
       const productData = {
-        title,
-        description: desc,
-        price: tradeType === 'sell' ? price : '나눔',
-        allowOffer,
+        title: title.trim(),
+        description: description.trim(),
+        category,
+        subcategory,
+        brand: brand.trim(),
+        model: model.trim(),
+        condition,
+        conditionDescription: conditionDescription.trim(),
+        yearOfManufacture: yearOfManufacture ? parseInt(yearOfManufacture) : null,
+        price: tradeType === 'sell' ? parseInt(price) : 0,
+        originalPrice: originalPrice ? parseInt(originalPrice) : null,
+        isPriceNegotiable,
+        images: imageUrls,
+        region,
+        district,
+        isDeliveryAvailable,
+        deliveryFee: deliveryFee ? parseInt(deliveryFee) : 0,
+        isUrgent,
         tradeType,
-        place,
-        images: images.map(img => img.url),
-        location: place,
-        neighborhood: selectedNeighborhood,
+        // 기존 필드들과의 호환성
+        allowOffer: isPriceNegotiable,
+        place: `${region} ${district}`,
+        location: `${region} ${district}`,
         time: '방금 전',
-        author: '나', // TODO: 실제 유저 닉네임
-        echoAuthRequested,
+        author: user.nickname || user.displayName || '나',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
 
       await addProduct(productData);
-      navigate('/');
+      
+      setSuccess('상품이 성공적으로 등록되었습니다!');
+      setError('');
+      
+      setTimeout(() => {
+        navigate('/', { 
+          state: { 
+            message: '상품이 성공적으로 등록되었습니다!',
+            type: 'success'
+          }
+        });
+      }, 1500);
+      
     } catch (err) {
       console.error('상품 등록 실패:', err);
-      alert('상품 등록에 실패했습니다. 다시 시도해주세요.');
-    }
-  };
-
-  // AI로 작성하기 동작: 토글 ON 시 상세설명 안내문구 입력 (수동 입력 시에는 덮어쓰지 않음)
-  React.useEffect(() => {
-    if (aiWrite && !desc) {
-      setDesc('AI 기능은 준비중입니다. 곧 로컬 LLM 기반으로 제공될 예정입니다.');
-    }
-  }, [aiWrite]);
-
-  // 상세설명 입력 시작 시 안내/AI 텍스트 자동 삭제
-  const handleDescFocus = () => {
-    if (
-      desc === 'AI 기능은 준비중입니다. 곧 로컬 LLM 기반으로 제공될 예정입니다.' ||
-      desc.startsWith('이 악기는 사용감이 적고 상태가 매우 좋습니다.') ||
-      desc.startsWith('상세설명에 채울 게시글 내용을 작성해 주세요')
-    ) {
-      setDesc('');
+      setError('상품 등록에 실패했습니다. 다시 시도해주세요.');
+      setSuccess('');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -402,115 +697,436 @@ export default function AddProduct() {
     <Wrapper>
       <Inner>
         <TopBar>
-          <CloseBtn onClick={() => navigate(-1)} aria-label="닫기"><FaTimes /></CloseBtn>
-          <Title>내 물건 팔기</Title>
-          <TempSave>임시저장</TempSave>
+          <CloseBtn onClick={() => navigate(-1)} aria-label="닫기">
+            <FaTimes />
+          </CloseBtn>
+          <Title>상품 등록</Title>
+          <TempSave onClick={handleTempSave}>임시저장</TempSave>
         </TopBar>
-        <AIToggleWrap>
-          <AIToggleLabel><span style={{border:'1px solid #b39ddb',borderRadius:6,padding:'2px 7px',fontSize:13,marginRight:6,background:'#ede7f6'}}>Beta</span>AI로 작성하기</AIToggleLabel>
-          <AIToggleDesc>AI가 게시글을 대신 작성해줘요</AIToggleDesc>
-          <Switch checked={aiWrite}>
-            <input type="checkbox" checked={aiWrite} onChange={e=>setAiWrite(e.target.checked)} />
-            <SwitchCircle checked={aiWrite} />
-          </Switch>
-        </AIToggleWrap>
-        {neighborhoodModalOpen && (
-          <div style={{
-            position:'fixed',top:0,left:0,right:0,bottom:0,zIndex:1000,background:'rgba(0,0,0,0.18)',display:'flex',alignItems:'center',justifyContent:'center'
-          }}>
-            <div style={{
-              background:'#fff',borderRadius:16,padding:24,minWidth:320,maxWidth:400,boxShadow:'0 4px 24px rgba(46,216,182,0.10)'
-            }}>
-              <div style={{fontWeight:700,fontSize:17,marginBottom:12}}>동네 선택</div>
-              <div style={{marginBottom:10,color:'#2ed8b6',fontWeight:600}}>
-                {suggestedNeighborhood && (
-                  <div>
-                    <span>현재 위치 추천: </span>
-                    <button style={{color:'#2ed8b6',fontWeight:700}} onClick={()=>{
-                      setSelectedNeighborhood(suggestedNeighborhood);
-                      setNeighborhoodModalOpen(false);
-                    }}>{suggestedNeighborhood}</button>
-                  </div>
-                )}
-              </div>
-              <input
-                type="text"
-                placeholder="동네, 주소, 건물명 검색"
-                value={searchInput}
-                onChange={e=>setSearchInput(e.target.value)}
-                style={{width:'100%',padding:8,marginBottom:10,border:'1.5px solid #e0e2e6',borderRadius:8}}
-              />
-              <div style={{maxHeight:180,overflowY:'auto'}}>
-                {dummyNeighborhoods.filter(n=>n.includes(searchInput)).map(n=>(
-                  <div key={n} style={{padding:'8px 0',cursor:'pointer',color:'#222'}} onClick={()=>{
-                    setSelectedNeighborhood(n);
-                    setNeighborhoodModalOpen(false);
-                  }}>{n}</div>
-                ))}
-              </div>
-              <button style={{marginTop:12,padding:'7px 18px',background:'#2ed8b6',color:'#fff',border:'none',borderRadius:8,fontWeight:700}} onClick={()=>setNeighborhoodModalOpen(false)}>닫기</button>
-            </div>
-          </div>
-        )}
+
         <Form onSubmit={handleSubmit}>
-          <ImgUploadBox>
-            {images.map((img, i) => (
-              <ImgPreview key={i} style={{boxShadow:'0 2px 8px #eee',position:'relative'}}>
-                <Img src={img.url} alt="preview" />
-                {i === 0 && (
-                  <span style={{position:'absolute',bottom:4,left:4,background:'#2ed8b6',color:'#fff',fontSize:12,padding:'2px 8px',borderRadius:7,fontWeight:700,boxShadow:'0 1px 4px #bbb'}}>대표사진</span>
-                )}
-                <CloseBtn style={{position:'absolute',top:3,left:3,fontSize:13,background:'#fff',borderRadius:'50%',boxShadow:'0 1px 4px #bbb',width:22,height:22,display:'flex',alignItems:'center',justifyContent:'center',padding:0}} type="button" onClick={()=>removeImage(i)} aria-label="사진 삭제"><FaTimes /></CloseBtn>
-              </ImgPreview>
-            ))}
-            {images.length < 10 && (
-              <ImgAddBtn>
-                <input type="file" accept="image/*" multiple hidden ref={fileInput} onChange={handleImageChange} />
-                <FaCamera />
-                <ImgCount>{images.length}/10</ImgCount>
-              </ImgAddBtn>
+          {/* 이미지 업로드 섹션 */}
+          <Row>
+            <Label>
+              상품 사진<RequiredMark>*</RequiredMark>
+            </Label>
+            <ImgUploadBox>
+              {images.map((img, i) => (
+                <ImgPreview key={i} style={{position: 'relative'}}>
+                  <Img src={img.url} alt="preview" />
+                  {i === 0 && (
+                    <span style={{
+                      position: 'absolute',
+                      bottom: 4,
+                      left: 4,
+                      background: '#2ed8b6',
+                      color: '#fff',
+                      fontSize: 11,
+                      padding: '2px 6px',
+                      borderRadius: 4,
+                      fontWeight: 600
+                    }}>대표</span>
+                  )}
+                  <CloseBtn 
+                    style={{
+                      position: 'absolute',
+                      top: 4,
+                      right: 4,
+                      fontSize: 12,
+                      background: 'rgba(0,0,0,0.6)',
+                      color: 'white',
+                      borderRadius: '50%',
+                      width: 20,
+                      height: 20,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: 0,
+                      margin: 0
+                    }} 
+                    type="button" 
+                    onClick={() => removeImage(i)} 
+                    aria-label="사진 삭제"
+                  >
+                    <FaTimes />
+                  </CloseBtn>
+                </ImgPreview>
+              ))}
+              {images.length < 10 && (
+                <ImgAddBtn>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    multiple 
+                    hidden 
+                    ref={fileInput} 
+                    onChange={handleImageChange} 
+                  />
+                  <FaCamera />
+                  <ImgCount>{images.length}/10</ImgCount>
+                </ImgAddBtn>
+              )}
+            </ImgUploadBox>
+            
+            {/* URL 이미지 추가 */}
+            <Label>이미지 URL 직접 입력 (선택사항)</Label>
+            <FlexRow>
+              <Input 
+                type="url" 
+                placeholder="https://example.com/image.jpg" 
+                value={imageUrl}
+                onChange={e => setImageUrl(e.target.value)}
+              />
+              <button 
+                type="button" 
+                onClick={addImageFromUrl}
+                disabled={!imageUrl || images.length >= 10}
+                style={{
+                  padding: '12px 16px',
+                  background: imageUrl && images.length < 10 ? '#2ed8b6' : '#ccc',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontWeight: 600,
+                  cursor: imageUrl && images.length < 10 ? 'pointer' : 'not-allowed',
+                  minWidth: 80
+                }}
+              >
+                추가
+              </button>
+            </FlexRow>
+            <InfoText>
+              첫 번째 사진이 대표 사진으로 설정됩니다. 최대 10장까지 등록 가능합니다.
+            </InfoText>
+          </Row>
+
+          {/* 카테고리 선택 */}
+          <Row>
+            <Label>
+              카테고리<RequiredMark>*</RequiredMark>
+            </Label>
+            <Select 
+              value={category} 
+              onChange={e => handleCategoryChange(e.target.value)}
+              name="category"
+              onBlur={handleBlur}
+              style={{
+                borderColor: touched.category && !category ? '#ff4d4f' : '#eee'
+              }}
+            >
+              <option value="">카테고리를 선택하세요</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </Select>
+            {touched.category && !category && (
+              <ErrorMsg>카테고리를 선택해주세요.</ErrorMsg>
             )}
-          </ImgUploadBox>
-          {touched.images && images.length === 0 && <ErrorMsg>이미지를 1장 이상 등록해 주세요.</ErrorMsg>}
-          <Row>
-            <Label htmlFor="title">제목</Label>
-            <Input id="title" name="title" placeholder="글 제목" value={title} onChange={e=>setTitle(e.target.value)} onBlur={handleBlur} maxLength={40} style={{borderColor:touched.title&&!title?'#ff4d4f':'#e0e2e6',background:'#fafafa',fontSize:17}} />
-            {touched.title && !title && <ErrorMsg>제목을 입력해 주세요.</ErrorMsg>}
+            
+            {/* 서브카테고리 */}
+            {category && (
+              <Select 
+                value={subcategory} 
+                onChange={e => setSubcategory(e.target.value)}
+              >
+                <option value="">세부 카테고리 (선택사항)</option>
+                {categories.find(cat => cat.id === category)?.subcategories.map(sub => (
+                  <option key={sub} value={sub}>{sub}</option>
+                ))}
+              </Select>
+            )}
           </Row>
+
+          {/* 제목 */}
           <Row>
-            <Label htmlFor="desc">자세한 설명</Label>
-            <Textarea id="desc" name="desc" placeholder={`구로동에 올릴 게시글 내용을 작성해 주세요. (판매 금지 물품은 게시가 제한될 수 있어요.)\n\n신뢰할 수 있는 거래를 위해 자세히 적어주세요. 과학기술정보통신부, 한국 인터넷진흥원과 함께 해요.`} value={desc} onChange={e=>setDesc(e.target.value)} onBlur={handleBlur} onFocus={handleDescFocus} maxLength={1000} style={{borderColor:touched.desc&&!desc?'#ff4d4f':'#e0e2e6',background:'#fafafa',fontSize:16}} />
-            {touched.desc && !desc && <ErrorMsg>상세설명을 입력해 주세요.</ErrorMsg>}
-            <FrequentBtn type="button" onClick={()=>alert('자주 쓰는 문구 기능은 추후 지원 예정입니다.')}>자주 쓰는 문구</FrequentBtn>
+            <Label htmlFor="title">
+              제목<RequiredMark>*</RequiredMark>
+            </Label>
+            <Input 
+              id="title" 
+              name="title" 
+              placeholder="예: 야마하 FG800 통기타, 거의 새제품" 
+              value={title} 
+              onChange={e => setTitle(e.target.value)} 
+              onBlur={handleBlur} 
+              maxLength={50}
+              style={{
+                borderColor: touched.title && (!title || title.trim().length < 2) ? '#ff4d4f' : '#eee'
+              }}
+            />
+            {touched.title && (!title || title.trim().length < 2) && (
+              <ErrorMsg>제목을 2글자 이상 입력해주세요. ({title.trim().length}/2)</ErrorMsg>
+            )}
+            <InfoText>상품명, 브랜드, 모델명을 포함해서 작성하면 더 많은 관심을 받을 수 있어요.</InfoText>
           </Row>
+
+          {/* 브랜드 및 모델 */}
           <Row>
-            <Label>거래 방식</Label>
+            <FlexRow>
+              <div>
+                <Label htmlFor="brand">브랜드</Label>
+                <Input 
+                  id="brand"
+                  placeholder="예: 야마하, 펜더"
+                  value={brand}
+                  onChange={e => setBrand(e.target.value)}
+                  maxLength={30}
+                />
+              </div>
+              <div>
+                <Label htmlFor="model">모델명</Label>
+                <Input 
+                  id="model"
+                  placeholder="예: FG800, Stratocaster"
+                  value={model}
+                  onChange={e => setModel(e.target.value)}
+                  maxLength={30}
+                />
+              </div>
+            </FlexRow>
+          </Row>
+
+          {/* 상품 상태 */}
+          <Row>
+            <Label>상품 상태</Label>
+            <ConditionWrap>
+              <ConditionBtn 
+                type="button" 
+                $active={condition === '상'} 
+                onClick={() => setCondition('상')}
+              >
+                상 (거의 새제품)
+              </ConditionBtn>
+              <ConditionBtn 
+                type="button" 
+                $active={condition === '중'} 
+                onClick={() => setCondition('중')}
+              >
+                중 (사용감 있음)
+              </ConditionBtn>
+              <ConditionBtn 
+                type="button" 
+                $active={condition === '하'} 
+                onClick={() => setCondition('하')}
+              >
+                하 (수리 필요)
+              </ConditionBtn>
+            </ConditionWrap>
+            
+            <Textarea
+              placeholder="상품 상태에 대한 자세한 설명을 입력해주세요. (선택사항)"
+              value={conditionDescription}
+              onChange={e => setConditionDescription(e.target.value)}
+              maxLength={200}
+              style={{ minHeight: '60px' }}
+            />
+          </Row>
+
+          {/* 제조년도 */}
+          <Row>
+            <Label htmlFor="year">제조년도 (선택사항)</Label>
+            <Input 
+              id="year"
+              type="number"
+              placeholder="예: 2020"
+              value={yearOfManufacture}
+              onChange={e => setYearOfManufacture(e.target.value)}
+              min="1900"
+              max={new Date().getFullYear()}
+            />
+          </Row>
+
+          {/* 상세 설명 */}
+          <Row>
+            <Label htmlFor="description">
+              상세 설명<RequiredMark>*</RequiredMark>
+            </Label>
+            <Textarea 
+              id="description" 
+              name="description" 
+              placeholder={`악기의 상세한 설명을 작성해주세요.
+
+• 구매 시기와 사용 빈도
+• 관리 상태와 보관 환경  
+• 포함된 구성품 (케이스, 픽 등)
+• 교환/환불 불가 사유
+• 직거래 가능 시간대
+
+예시: 2021년 구매했고 집에서만 연습용으로 사용했습니다. 
+케이스와 여분 현이 포함되어 있고, 생활기스 약간 있지만 소리는 깨끗합니다.`} 
+              value={description} 
+              onChange={e => setDescription(e.target.value)} 
+              onBlur={handleBlur} 
+              maxLength={2000}
+              style={{
+                minHeight: '120px',
+                borderColor: touched.description && (!description || description.trim().length < 10) ? '#ff4d4f' : '#eee'
+              }}
+            />
+            {touched.description && (!description || description.trim().length < 10) && (
+              <ErrorMsg>상세설명을 10글자 이상 입력해주세요. ({description.trim().length}/10)</ErrorMsg>
+            )}
+            <InfoText>
+              자세한 설명일수록 신뢰도가 높아져요. 사진으로 보여주기 어려운 부분을 글로 설명해주세요.
+            </InfoText>
+          </Row>
+
+          {/* 거래 방식 */}
+          <Row>
+            <Label>
+              거래 방식<RequiredMark>*</RequiredMark>
+            </Label>
             <TradeTypeWrap>
-              <TradeTypeBtn type="button" $active={tradeType==='sell'} onClick={()=>setTradeType('sell')}>판매하기</TradeTypeBtn>
-              <TradeTypeBtn type="button" $active={tradeType==='give'} onClick={()=>setTradeType('give')}>나눔하기</TradeTypeBtn>
+              <TradeTypeBtn 
+                type="button" 
+                $active={tradeType === 'sell'} 
+                onClick={() => setTradeType('sell')}
+              >
+                💰 판매하기
+              </TradeTypeBtn>
+              <TradeTypeBtn 
+                type="button" 
+                $active={tradeType === 'give'} 
+                onClick={() => setTradeType('give')}
+              >
+                🎁 나눔하기
+              </TradeTypeBtn>
             </TradeTypeWrap>
-            {tradeType==='sell' && (
-              <>
-                <Input id="price" name="price" type="number" placeholder="₩ 가격을 입력해 주세요." value={price} onChange={e=>setPrice(e.target.value.replace(/[^0-9]/g,''))} onBlur={handleBlur} min={0} style={{borderColor:touched.price&&!price?'#ff4d4f':'#2ed8b6',background:'#fafafa',fontSize:16}} />
-                {touched.price && !price && <ErrorMsg>가격을 입력해 주세요.</ErrorMsg>}
-                <EchoAuthLabel>
-                  <input type="checkbox" checked={echoAuthRequested} onChange={e=>setEchoAuthRequested(e.target.checked)} style={{width:18,height:18,accentColor:'#2ed8b6',marginRight:8}} />
-                  ECHO 인증 신청(관리자 승인 시 인증마크 부여)
-                </EchoAuthLabel>
-              </>
+          </Row>
+
+          {/* 가격 정보 (판매하기일 때만) */}
+          {tradeType === 'sell' && (
+            <Row>
+              <Label htmlFor="price">
+                판매 가격<RequiredMark>*</RequiredMark>
+              </Label>
+              <Input 
+                id="price" 
+                name="price" 
+                type="number" 
+                placeholder="₩ 가격을 입력하세요" 
+                value={price} 
+                onChange={e => setPrice(e.target.value)} 
+                onBlur={handleBlur} 
+                min={0}
+                style={{
+                  borderColor: touched.price && (!price || parseInt(price) <= 0) ? '#ff4d4f' : '#eee'
+                }}
+              />
+              {touched.price && (!price || parseInt(price) <= 0) && (
+                <ErrorMsg>올바른 가격을 입력해주세요.</ErrorMsg>
+              )}
+              
+              <Label htmlFor="originalPrice">정가 (선택사항)</Label>
+              <Input 
+                id="originalPrice"
+                type="number" 
+                placeholder="₩ 구매했을 때 가격" 
+                value={originalPrice} 
+                onChange={e => setOriginalPrice(e.target.value)} 
+                min={0}
+              />
+              
+              <CheckboxLabel>
+                <input 
+                  type="checkbox" 
+                  checked={isPriceNegotiable} 
+                  onChange={e => setIsPriceNegotiable(e.target.checked)} 
+                />
+                가격 제안 받기
+              </CheckboxLabel>
+              
+              <PriceHelp>
+                💡 <strong>가격 책정 팁</strong><br/>
+                • 비슷한 상품의 시세를 확인해보세요<br/>
+                • 상태가 좋다면 정가의 60-80% 정도가 적정해요<br/>
+                • 가격 제안을 받으면 더 빨리 거래될 수 있어요
+              </PriceHelp>
+            </Row>
+          )}
+
+          {/* 거래 희망 지역 */}
+          <Row>
+            <Label>
+              거래 희망 지역<RequiredMark>*</RequiredMark>
+            </Label>
+            <FlexRow>
+              <Select 
+                value={region} 
+                onChange={e => handleRegionChange(e.target.value)}
+                name="region"
+                onBlur={handleBlur}
+                style={{
+                  borderColor: touched.region && !region ? '#ff4d4f' : '#eee'
+                }}
+              >
+                <option value="">시/도 선택</option>
+                {regions.map(reg => (
+                  <option key={reg.id} value={reg.id}>{reg.name}</option>
+                ))}
+              </Select>
+              
+              <Select 
+                value={district} 
+                onChange={e => setDistrict(e.target.value)}
+                name="district"
+                onBlur={handleBlur}
+                disabled={!region}
+                style={{
+                  borderColor: touched.district && !district ? '#ff4d4f' : '#eee'
+                }}
+              >
+                <option value="">구/군 선택</option>
+                {region && regions.find(reg => reg.id === region)?.districts.map(dist => (
+                  <option key={dist} value={dist}>{dist}</option>
+                ))}
+              </Select>
+            </FlexRow>
+            {(touched.region && !region) || (touched.district && !district) && (
+              <ErrorMsg>거래 지역을 선택해주세요.</ErrorMsg>
             )}
           </Row>
+
+          {/* 거래 옵션 */}
           <Row>
-            <Label>거래 희망 장소</Label>
-            <PlaceRow>
-              <PlaceInput id="place" name="place" placeholder="예: 구로디지털단지역 3번 출구 앞" value={place} onChange={e=>setPlace(e.target.value)} maxLength={30} />
-              {place && <PlaceDeleteBtn type="button" onClick={()=>setPlace('')} aria-label="장소 입력 삭제"><FaTimes /></PlaceDeleteBtn>}
-              <LinkBtn type="button" onClick={handleNeighborhoodModalOpen}>
-                {selectedNeighborhood ? selectedNeighborhood : '보여줄 동네 선택 >'}
-              </LinkBtn>
-            </PlaceRow>
+            <Label>거래 옵션</Label>
+            <CheckboxLabel>
+              <input 
+                type="checkbox" 
+                checked={isDeliveryAvailable} 
+                onChange={e => setIsDeliveryAvailable(e.target.checked)} 
+              />
+              택배 거래 가능
+            </CheckboxLabel>
+            
+            {isDeliveryAvailable && (
+              <Input 
+                type="number"
+                placeholder="택배비 (원)"
+                value={deliveryFee}
+                onChange={e => setDeliveryFee(e.target.value)}
+                min={0}
+              />
+            )}
+            
+            <CheckboxLabel>
+              <input 
+                type="checkbox" 
+                checked={isUrgent} 
+                onChange={e => setIsUrgent(e.target.checked)} 
+              />
+              🔥 급매 (빠른 거래 희망)
+            </CheckboxLabel>
           </Row>
-          <SubmitBtn type="submit" disabled={!isValid}>작성 완료</SubmitBtn>
+
+          {/* 에러/성공 메시지 */}
+          {error && <ErrorMsg>{error}</ErrorMsg>}
+          {success && <SuccessMsg>{success}</SuccessMsg>}
+
+          {/* 등록 버튼 */}
+          <SubmitBtn type="submit" disabled={!isValid() || loading}>
+            {loading ? '등록 중...' : '작성 완료'}
+          </SubmitBtn>
         </Form>
       </Inner>
     </Wrapper>
