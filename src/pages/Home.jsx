@@ -27,6 +27,7 @@ const SearchSection = styled.div`
   position: sticky;
   top: 0;
   z-index: 100;
+  will-change: transform;
 `;
 
 const SearchBar = styled.div`
@@ -89,10 +90,11 @@ const ContentContainer = styled.div`
 `;
 
 const ProductGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 16px;
   margin-top: 20px;
+  will-change: transform;
 `;
 
 const ProductCard = styled.div`
@@ -101,7 +103,10 @@ const ProductCard = styled.div`
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  display: flex;
+  min-height: 120px;
+  will-change: transform;
   
   &:hover {
     transform: translateY(-2px);
@@ -111,9 +116,10 @@ const ProductCard = styled.div`
 
 const ProductImageContainer = styled.div`
   position: relative;
-  width: 100%;
-  aspect-ratio: 1;
+  width: 120px;
+  height: 120px;
   overflow: hidden;
+  flex-shrink: 0;
 `;
 
 const ProductImage = styled.img`
@@ -174,6 +180,10 @@ const UrgentBadge = styled.div`
 
 const ProductInfo = styled.div`
   padding: 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 `;
 
 const ProductTitle = styled.h3`
@@ -331,18 +341,20 @@ export default function Home() {
   const [searchInput, setSearchInput] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   
   const observerRef = useRef();
   const lastProductElementRef = useCallback(node => {
-    if (loading) return;
+    if (loading || isLoadingMore) return;
     if (observerRef.current) observerRef.current.disconnect();
     observerRef.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasMore) {
-        loadMoreProducts();
+      if (entries[0].isIntersecting && hasMore && !loading && !isLoadingMore) {
+        setIsLoadingMore(true);
+        loadMoreProducts().finally(() => setIsLoadingMore(false));
       }
-    });
+    }, { threshold: 0.1, rootMargin: '50px' });
     if (node) observerRef.current.observe(node);
-  }, [loading, hasMore, loadMoreProducts]);
+  }, [loading, hasMore, loadMoreProducts, isLoadingMore]);
 
   // URL 상태나 성공 메시지 처리
   useEffect(() => {
@@ -675,14 +687,20 @@ export default function Home() {
               ))}
             </ProductGrid>
             
-            {loading && products && products.length > 0 && (
+            {(loading || isLoadingMore) && products && products.length > 0 && (
               <LoadingContainer>
                 <LoadingSpinner />
               </LoadingContainer>
             )}
             
-            {!loading && hasMore && (
-              <LoadMoreButton onClick={loadMoreProducts}>
+            {!loading && !isLoadingMore && hasMore && (
+              <LoadMoreButton 
+                onClick={() => {
+                  setIsLoadingMore(true);
+                  loadMoreProducts().finally(() => setIsLoadingMore(false));
+                }}
+                disabled={isLoadingMore}
+              >
                 더 많은 상품 보기
               </LoadMoreButton>
             )}
