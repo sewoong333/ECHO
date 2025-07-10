@@ -1,9 +1,16 @@
-import React, { useState, useContext } from 'react';
-import styled from 'styled-components';
-import { UserContext } from '../store/UserContext';
-import { useNavigate } from 'react-router-dom';
-import { FiMail, FiLock, FiUser, FiPhone, FiEye, FiEyeOff } from 'react-icons/fi';
-import { sendVerificationSMS } from '../utils/smsService';
+import React, { useState, useContext } from "react";
+import styled from "styled-components";
+import { UserContext } from "../store/UserContext";
+import { useNavigate } from "react-router-dom";
+import {
+  FiMail,
+  FiLock,
+  FiUser,
+  FiPhone,
+  FiEye,
+  FiEyeOff,
+} from "react-icons/fi";
+import { sendVerificationSMS } from "../utils/smsService";
 
 const Container = styled.div`
   width: 100%;
@@ -26,7 +33,7 @@ const Container = styled.div`
 const Logo = styled.div`
   font-size: 32px;
   font-weight: 800;
-  color: #2ed8b6;
+  color: var(--color-mint-main);
   margin-bottom: 1em;
 `;
 
@@ -63,7 +70,7 @@ const Input = styled.input`
   background: #f8f9fa;
 
   &:focus {
-    border-color: #2ed8b6;
+    border-color: var(--color-mint-main);
     background: #fff;
     box-shadow: 0 0 0 2px rgba(46, 216, 182, 0.1);
   }
@@ -84,17 +91,17 @@ const IconWrapper = styled.div`
 const Button = styled.button`
   width: 100%;
   height: 50px;
-  background: ${props => props.disabled ? '#ccc' : '#2ed8b6'};
+  background: ${(props) => (props.disabled ? "#ccc" : "var(--color-mint-main)")};
   color: white;
   border: none;
   border-radius: 12px;
   font-size: 16px;
   font-weight: 600;
-  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
   transition: all 0.2s;
 
   &:hover {
-    background: ${props => props.disabled ? '#ccc' : '#28c6a6'};
+    background: ${(props) => (props.disabled ? "#ccc" : "#28c6a6")};
   }
 `;
 
@@ -107,7 +114,7 @@ const VerifyButton = styled(Button)`
   height: 36px;
   padding: 0 1em;
   font-size: 14px;
-  background: ${props => props.verified ? '#28c6a6' : '#2ed8b6'};
+  background: ${(props) => (props.verified ? "#28c6a6" : "var(--color-mint-main)")};
 `;
 
 const ErrorMessage = styled.div`
@@ -117,7 +124,7 @@ const ErrorMessage = styled.div`
 `;
 
 const SuccessMessage = styled.div`
-  color: #2ed8b6;
+  color: var(--color-mint-main);
   font-size: 14px;
   margin-top: 0.5em;
 `;
@@ -136,28 +143,29 @@ const PasswordToggle = styled.button`
 
 export default function Signup() {
   const [form, setForm] = useState({
-    email: '',
-    password: '',
-    passwordConfirm: '',
-    nickname: '',
-    phone: ''
+    email: "",
+    password: "",
+    passwordConfirm: "",
+    nickname: "",
+    phone: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [phoneVerification, setPhoneVerification] = useState({
     sent: false,
-    code: '',
+    code: "",
     verified: false,
-    verificationCode: ''
+    verificationCode: "",
   });
   const { user, signupWithEmail } = useContext(UserContext);
   const navigate = useNavigate();
 
   // 비밀번호 유효성 검사
   const validatePassword = (password) => {
-    const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+    const regex =
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
     return regex.test(password);
   };
 
@@ -167,32 +175,32 @@ export default function Signup() {
     return regex.test(phone);
   };
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm(f => ({ ...f, [name]: value }));
-    setError('');
+    setForm((f) => ({ ...f, [name]: value }));
+    setError("");
   };
 
   // 인증번호 발송
   const handleSendVerification = async (e) => {
     e.preventDefault();
     if (!validatePhone(form.phone)) {
-      setError('올바른 휴대폰 번호를 입력해주세요.');
+      setError("올바른 휴대폰 번호를 입력해주세요.");
       return;
     }
 
     try {
       const verificationCode = Math.random().toString().slice(2, 8);
       await sendVerificationSMS(form.phone, verificationCode);
-      setPhoneVerification(prev => ({
+      setPhoneVerification((prev) => ({
         ...prev,
         sent: true,
-        verificationCode
+        verificationCode,
       }));
-      setSuccess('인증번호가 발송되었습니다. 3분 이내에 입력해주세요.');
-      setError('');
+      setSuccess("인증번호가 발송되었습니다. 3분 이내에 입력해주세요.");
+      setError("");
     } catch (err) {
-      setError('인증번호 발송에 실패했습니다. ' + err.message);
+      setError("인증번호 발송에 실패했습니다. " + err.message);
     }
   };
 
@@ -200,37 +208,45 @@ export default function Signup() {
   const handleVerifyCode = async (e) => {
     e.preventDefault();
     if (phoneVerification.code === phoneVerification.verificationCode) {
-      setPhoneVerification(prev => ({ ...prev, verified: true }));
-      setSuccess('휴대폰 인증이 완료되었습니다.');
-      setError('');
+      setPhoneVerification((prev) => ({ ...prev, verified: true }));
+      setSuccess("휴대폰 인증이 완료되었습니다.");
+      setError("");
     } else {
-      setError('인증번호가 일치하지 않습니다.');
+      setError("인증번호가 일치하지 않습니다.");
     }
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     // 유효성 검사
-    if (!form.email || !form.password || !form.passwordConfirm || !form.nickname || !form.phone) {
-      setError('모든 필드를 입력해주세요.');
+    if (
+      !form.email ||
+      !form.password ||
+      !form.passwordConfirm ||
+      !form.nickname ||
+      !form.phone
+    ) {
+      setError("모든 필드를 입력해주세요.");
       return;
     }
 
     if (!validatePassword(form.password)) {
-      setError('비밀번호는 8자 이상이며, 영문, 숫자, 특수문자를 포함해야 합니다.');
+      setError(
+        "비밀번호는 8자 이상이며, 영문, 숫자, 특수문자를 포함해야 합니다.",
+      );
       return;
     }
 
     if (form.password !== form.passwordConfirm) {
-      setError('비밀번호가 일치하지 않습니다.');
+      setError("비밀번호가 일치하지 않습니다.");
       return;
     }
 
     if (!phoneVerification.verified) {
-      setError('휴대폰 인증을 완료해주세요.');
+      setError("휴대폰 인증을 완료해주세요.");
       return;
     }
 
@@ -239,17 +255,19 @@ export default function Signup() {
         email: form.email,
         password: form.password,
         nickname: form.nickname,
-        phone: form.phone
+        phone: form.phone,
       });
-      setSuccess('회원가입이 완료되었습니다! 이메일로 인증 링크가 발송되었습니다. 인증 후 로그인해 주세요.');
-      setTimeout(() => navigate('/login'), 3000);
+      setSuccess(
+        "회원가입이 완료되었습니다! 이메일로 인증 링크가 발송되었습니다. 인증 후 로그인해 주세요.",
+      );
+      setTimeout(() => navigate("/login"), 3000);
     } catch (err) {
-      setError('회원가입에 실패했습니다. ' + err.message);
+      setError("회원가입에 실패했습니다. " + err.message);
     }
   };
 
   if (user.isLoggedIn) {
-    navigate('/');
+    navigate("/");
     return null;
   }
 
@@ -282,7 +300,10 @@ export default function Signup() {
             value={form.password}
             onChange={handleChange}
           />
-          <PasswordToggle type="button" onClick={() => setShowPassword(!showPassword)}>
+          <PasswordToggle
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+          >
             {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
           </PasswordToggle>
         </InputGroup>
@@ -298,7 +319,10 @@ export default function Signup() {
             value={form.passwordConfirm}
             onChange={handleChange}
           />
-          <PasswordToggle type="button" onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}>
+          <PasswordToggle
+            type="button"
+            onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
+          >
             {showPasswordConfirm ? <FiEyeOff size={20} /> : <FiEye size={20} />}
           </PasswordToggle>
         </InputGroup>
@@ -330,11 +354,17 @@ export default function Signup() {
           />
           <VerifyButton
             type="button"
-            onClick={phoneVerification.sent ? handleVerifyCode : handleSendVerification}
+            onClick={
+              phoneVerification.sent ? handleVerifyCode : handleSendVerification
+            }
             verified={phoneVerification.verified}
             disabled={phoneVerification.verified}
           >
-            {phoneVerification.verified ? '인증완료' : (phoneVerification.sent ? '인증확인' : '인증번호 발송')}
+            {phoneVerification.verified
+              ? "인증완료"
+              : phoneVerification.sent
+                ? "인증확인"
+                : "인증번호 발송"}
           </VerifyButton>
         </InputGroup>
 
@@ -347,7 +377,12 @@ export default function Signup() {
               type="text"
               placeholder="인증번호 6자리"
               value={phoneVerification.code}
-              onChange={(e) => setPhoneVerification(prev => ({ ...prev, code: e.target.value }))}
+              onChange={(e) =>
+                setPhoneVerification((prev) => ({
+                  ...prev,
+                  code: e.target.value,
+                }))
+              }
             />
           </InputGroup>
         )}
@@ -361,4 +396,4 @@ export default function Signup() {
       </Form>
     </Container>
   );
-} 
+}

@@ -1,42 +1,21 @@
-import React, { useContext, useEffect, useState } from 'react';
-import styled from 'styled-components';
-import { ProductContext } from '../store/ProductContext';
-import { UserContext } from '../store/UserContext';
-import { useNavigate } from 'react-router-dom';
-import { FiChevronLeft, FiMoreHorizontal, FiHeart, FiMessageCircle } from 'react-icons/fi';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
-import { db } from '../utils/firebase';
-import TopBar from '../components/TopBar';
+import React, { useContext, useEffect, useState } from "react";
+import styled from "styled-components";
+import { ProductContext } from "../store/ProductContext";
+import { UserContext } from "../store/UserContext";
+import { useNavigate } from "react-router-dom";
+import {
+  FiChevronLeft,
+  FiMoreHorizontal,
+  FiHeart,
+  FiMessageCircle,
+} from "react-icons/fi";
+import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { db } from "../utils/firebase";
+import TopBar from "../components/TopBar";
 
 const dummyUser = {
-  profile: 'https://i.ibb.co/3y0Qw1K/profile-demo.jpg',
+  profile: "https://i.ibb.co/3y0Qw1K/profile-demo.jpg",
 };
-const dummyItems = [
-  {
-    img: 'https://i.ibb.co/6bQyQw1/amp-demo.jpg',
-    title: 'labgruppen 랩그루펜 pdx3000 2채널 파워앰프 테스트만해본 제품…',
-    meta: '구로동 · 끌올 3주 전 · 끌올 13회',
-    price: '590,000원',
-    chat: 1,
-    like: 5,
-  },
-  {
-    img: 'https://i.ibb.co/3kQyQw1/bike-demo.jpg',
-    title: '다혼 보드워크 전기자전거 팝니다',
-    meta: '구로동 · 끌올 3주 전 · 끌올 7회',
-    price: '370,000원',
-    chat: 2,
-    like: 14,
-  },
-  {
-    img: 'https://i.ibb.co/2tQyQw1/earring-demo.jpg',
-    title: '반클리프아펠 프리볼 귀걸이',
-    meta: '구로동 · 끌올 3주 전 · 끌올 6회',
-    price: '439만원',
-    chat: 0,
-    like: 15,
-  },
-];
 
 const Wrapper = styled.div`
   width: 100vw;
@@ -102,9 +81,9 @@ const Tab = styled.div`
   text-align: center;
   font-size: 17px;
   font-weight: ${({ $active }) => ($active ? 800 : 600)};
-  color: ${({ $active }) => ($active ? '#222' : '#bbb')};
+  color: ${({ $active }) => ($active ? "#222" : "#bbb")};
   padding-bottom: 12px;
-  border-bottom: ${({ $active }) => ($active ? '2.5px solid #222' : 'none')};
+  border-bottom: ${({ $active }) => ($active ? "2.5px solid #222" : "none")};
   cursor: pointer;
 `;
 const FilterRow = styled.div`
@@ -206,8 +185,8 @@ const MoreBtn = styled(ActionBtn)`
   justify-content: center;
 `;
 const FilterBtn = styled.button`
-  background: ${({ $active }) => ($active ? '#222' : 'none')};
-  color: ${({ $active }) => ($active ? '#fff' : '#222')};
+  background: ${({ $active }) => ($active ? "#222" : "none")};
+  color: ${({ $active }) => ($active ? "#fff" : "#222")};
   font-size: 16px;
   font-weight: 700;
   border: none;
@@ -224,24 +203,24 @@ export default function SalesHistory() {
   const { likes, chatRooms } = useContext(ProductContext);
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState("all");
 
   useEffect(() => {
     const fetchSalesHistory = async () => {
       try {
         const q = query(
-          collection(db, 'products'),
-          where('author', '==', user.nickname),
-          orderBy('createdAt', 'desc')
+          collection(db, "products"),
+          where("author", "==", user.nickname),
+          orderBy("createdAt", "desc"),
         );
         const querySnapshot = await getDocs(q);
-        const salesList = querySnapshot.docs.map(doc => ({
+        const salesList = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         }));
         setList(salesList);
       } catch (err) {
-        console.error('판매내역 불러오기 실패:', err);
+        console.error("판매내역 불러오기 실패:", err);
       } finally {
         setLoading(false);
       }
@@ -252,10 +231,10 @@ export default function SalesHistory() {
     }
   }, [user]);
 
-  const filteredList = list.filter(item => {
-    if (filter === 'all') return true;
-    if (filter === 'active') return !item.sold;
-    if (filter === 'sold') return item.sold;
+  const filteredList = list.filter((item) => {
+    if (filter === "all") return true;
+    if (filter === "active") return !item.sold;
+    if (filter === "sold") return item.sold;
     return true;
   });
 
@@ -263,7 +242,7 @@ export default function SalesHistory() {
     return (
       <Wrapper>
         <TopBar />
-        <div style={{ textAlign: 'center', padding: '40px 0' }}>로딩중...</div>
+        <div style={{ textAlign: "center", padding: "40px 0" }}>로딩중...</div>
       </Wrapper>
     );
   }
@@ -278,36 +257,69 @@ export default function SalesHistory() {
         <ProfileImg src={dummyUser.profile} alt="profile" />
       </StyledTopBar>
       <FilterRow>
-        <FilterBtn $active={filter === 'all'} onClick={() => setFilter('all')}>전체</FilterBtn>
-        <FilterBtn $active={filter === 'active'} onClick={() => setFilter('active')}>판매중</FilterBtn>
-        <FilterBtn $active={filter === 'sold'} onClick={() => setFilter('sold')}>판매완료</FilterBtn>
+        <FilterBtn $active={filter === "all"} onClick={() => setFilter("all")}>
+          전체
+        </FilterBtn>
+        <FilterBtn
+          $active={filter === "active"}
+          onClick={() => setFilter("active")}
+        >
+          판매중
+        </FilterBtn>
+        <FilterBtn
+          $active={filter === "sold"}
+          onClick={() => setFilter("sold")}
+        >
+          판매완료
+        </FilterBtn>
       </FilterRow>
       <List>
-        {filteredList.length === 0 && <div style={{color:'#bbb',textAlign:'center',marginTop:40}}>상품이 없습니다.</div>}
+        {filteredList.length === 0 && (
+          <div style={{ color: "#bbb", textAlign: "center", marginTop: 40 }}>
+            상품이 없습니다.
+          </div>
+        )}
         {filteredList.map((item, i) => (
           <div key={i}>
             <Item>
-              <Thumb src={item.image || 'https://via.placeholder.com/90'} alt="썸네일" />
+              <Thumb
+                src={item.image || "https://via.placeholder.com/90"}
+                alt="썸네일"
+              />
               <Info>
                 <ItemTitle>{item.title}</ItemTitle>
-                <ItemMeta>{item.location} · {item.time || '방금 전'}</ItemMeta>
-                <ItemPrice>{Number(item.price).toLocaleString('ko-KR')}원</ItemPrice>
+                <ItemMeta>
+                  {item.location} · {item.time || "방금 전"}
+                </ItemMeta>
+                <ItemPrice>
+                  {Number(item.price).toLocaleString("ko-KR")}원
+                </ItemPrice>
                 <ItemStats>
-                  <Stat><FiMessageCircle size={16} />{chatRooms?.[item.id]?.length || 0}</Stat>
-                  <Stat><FiHeart size={16} />{likes.filter(id=>id===item.id).length}</Stat>
+                  <Stat>
+                    <FiMessageCircle size={16} />
+                    {chatRooms?.[item.id]?.length || 0}
+                  </Stat>
+                  <Stat>
+                    <FiHeart size={16} />
+                    {likes.filter((id) => id === item.id).length}
+                  </Stat>
                   <Stat>👁{item.views || 0}</Stat>
                 </ItemStats>
               </Info>
-              <MoreBtn><FiMoreHorizontal size={22} /></MoreBtn>
+              <MoreBtn>
+                <FiMoreHorizontal size={22} />
+              </MoreBtn>
             </Item>
             <ItemBtns>
               <ActionBtn>끌어올리기</ActionBtn>
               <ActionBtn>홍보하기</ActionBtn>
-              <MoreBtn><FiMoreHorizontal size={22} /></MoreBtn>
+              <MoreBtn>
+                <FiMoreHorizontal size={22} />
+              </MoreBtn>
             </ItemBtns>
           </div>
         ))}
       </List>
     </Wrapper>
   );
-} 
+}

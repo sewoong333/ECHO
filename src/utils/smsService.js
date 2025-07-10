@@ -1,4 +1,4 @@
-import CryptoJS from 'crypto-js';
+import CryptoJS from "crypto-js";
 
 const SMS_API_URL = import.meta.env.VITE_SMS_API_URL;
 const ACCESS_KEY = import.meta.env.VITE_SMS_ACCESS_KEY;
@@ -8,42 +8,42 @@ const SENDER_PHONE = import.meta.env.VITE_SMS_SENDER_PHONE;
 export const sendVerificationSMS = async (phoneNumber, verificationCode) => {
   try {
     const timestamp = new Date().getTime().toString();
-    
+
     // API 요청 시그니처 생성
     const signature = createSignature(timestamp);
 
     const body = {
-      type: 'SMS',
-      contentType: 'COMM',
-      countryCode: '82',
+      type: "SMS",
+      contentType: "COMM",
+      countryCode: "82",
       from: SENDER_PHONE,
       content: `[ECHO] 인증번호는 [${verificationCode}] 입니다.`,
       messages: [
         {
-          to: phoneNumber
-        }
-      ]
+          to: phoneNumber,
+        },
+      ],
     };
 
     const response = await fetch(SMS_API_URL, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'x-ncp-apigw-timestamp': timestamp,
-        'x-ncp-iam-access-key': ACCESS_KEY,
-        'x-ncp-apigw-signature-v2': signature
+        "Content-Type": "application/json",
+        "x-ncp-apigw-timestamp": timestamp,
+        "x-ncp-iam-access-key": ACCESS_KEY,
+        "x-ncp-apigw-signature-v2": signature,
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
-      throw new Error('SMS 발송에 실패했습니다.');
+      throw new Error("SMS 발송에 실패했습니다.");
     }
 
     const result = await response.json();
     return result;
   } catch (error) {
-    console.error('SMS 발송 에러:', error);
+    console.error("SMS 발송 에러:", error);
     throw error;
   }
 };
@@ -63,9 +63,11 @@ const createSignature = (timestamp) => {
     newLine,
     timestamp,
     newLine,
-    ACCESS_KEY
-  ].join('');
+    ACCESS_KEY,
+  ].join("");
 
-  const signature = CryptoJS.HmacSHA256(message, SECRET_KEY).toString(CryptoJS.enc.Base64);
+  const signature = CryptoJS.HmacSHA256(message, SECRET_KEY).toString(
+    CryptoJS.enc.Base64,
+  );
   return signature;
-}; 
+};

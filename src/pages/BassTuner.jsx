@@ -1,14 +1,14 @@
-import React, { useRef, useState, useEffect } from 'react';
-import styled, { keyframes } from 'styled-components';
-import TopBar from '../components/TopBar';
+import React, { useRef, useState, useEffect } from "react";
+import styled from "styled-components";
+import TopBar from "../components/TopBar";
 
-const ECHO_COLOR = '#2ed8b6';
-const ECHO_ACCENT = '#1976d2';
+const ECHO_COLOR = "#2ed8b6";
+const ECHO_ACCENT = "#1976d2";
 const BASS_NOTES = [
-  { name: 'G₂', freq: 98.00, label: '1번줄 (G2)' },
-  { name: 'D₂', freq: 73.42, label: '2번줄 (D2)' },
-  { name: 'A₁', freq: 55.00, label: '3번줄 (A1)' },
-  { name: 'E₁', freq: 41.20, label: '4번줄 (E1)' },
+  { name: "G₂", freq: 98.0, label: "1번줄 (G2)" },
+  { name: "D₂", freq: 73.42, label: "2번줄 (D2)" },
+  { name: "A₁", freq: 55.0, label: "3번줄 (A1)" },
+  { name: "E₁", freq: 41.2, label: "4번줄 (E1)" },
 ];
 
 function getDiffHz(freq, target) {
@@ -16,23 +16,10 @@ function getDiffHz(freq, target) {
 }
 
 function getAdvice(diff) {
-  if (diff == null) return '';
-  if (Math.abs(diff) < 1) return '정확합니다!';
-  if (diff > 0) return '좀 더 낮게 조정해';
-  return '좀 더 높게 조정해';
-}
-
-function getClosestNote(freq) {
-  let minDiff = Infinity;
-  let closest = BASS_NOTES[0];
-  for (const note of BASS_NOTES) {
-    const diff = Math.abs(note.freq - freq);
-    if (diff < minDiff) {
-      minDiff = diff;
-      closest = note;
-    }
-  }
-  return closest;
+  if (diff == null) return "";
+  if (Math.abs(diff) < 1) return "정확합니다!";
+  if (diff > 0) return "좀 더 낮게 조정해";
+  return "좀 더 높게 조정해";
 }
 
 function autoCorrelate(buf, sampleRate) {
@@ -41,15 +28,28 @@ function autoCorrelate(buf, sampleRate) {
   for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
   rms = Math.sqrt(rms / SIZE);
   if (rms < 0.01) return -1;
-  let r1 = 0, r2 = SIZE - 1, thres = 0.2;
-  for (let i = 0; i < SIZE / 2; i++) if (Math.abs(buf[i]) < thres) { r1 = i; break; }
-  for (let i = 1; i < SIZE / 2; i++) if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; }
+  let r1 = 0,
+    r2 = SIZE - 1,
+    thres = 0.2;
+  for (let i = 0; i < SIZE / 2; i++)
+    if (Math.abs(buf[i]) < thres) {
+      r1 = i;
+      break;
+    }
+  for (let i = 1; i < SIZE / 2; i++)
+    if (Math.abs(buf[SIZE - i]) < thres) {
+      r2 = SIZE - i;
+      break;
+    }
   buf = buf.slice(r1, r2);
   SIZE = buf.length;
   let c = new Array(SIZE).fill(0);
-  for (let i = 0; i < SIZE; i++) for (let j = 0; j < SIZE - i; j++) c[i] = c[i] + buf[j] * buf[j + i];
-  let d = 0; while (c[d] > c[d + 1]) d++;
-  let maxval = -1, maxpos = -1;
+  for (let i = 0; i < SIZE; i++)
+    for (let j = 0; j < SIZE - i; j++) c[i] = c[i] + buf[j] * buf[j + i];
+  let d = 0;
+  while (c[d] > c[d + 1]) d++;
+  let maxval = -1,
+    maxpos = -1;
   for (let i = d; i < SIZE; i++) {
     if (c[i] > maxval) {
       maxval = c[i];
@@ -142,19 +142,22 @@ const StringBtn = styled.button`
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  border: 2.5px solid ${({ $active }) => ($active ? '#1976d2' : '#e0e2e6')};
-  background: ${({ $active }) => ($active ? '#1976d2' : '#fff')};
-  color: ${({ $active }) => ($active ? '#fff' : '#222')};
+  border: 2.5px solid ${({ $active }) => ($active ? "#1976d2" : "#e0e2e6")};
+  background: ${({ $active }) => ($active ? "#1976d2" : "#fff")};
+  color: ${({ $active }) => ($active ? "#fff" : "#222")};
   font-weight: 900;
   font-size: 24px;
   outline: none;
   cursor: pointer;
-  box-shadow: ${({ $active }) => ($active ? '0 2px 8px #b2f0e6' : 'none')};
+  box-shadow: ${({ $active }) => ($active ? "0 2px 8px #b2f0e6" : "none")};
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  transition: background 0.18s, color 0.18s, border 0.18s;
+  transition:
+    background 0.18s,
+    color 0.18s,
+    border 0.18s;
   letter-spacing: 1px;
   padding: 0;
 `;
@@ -178,7 +181,9 @@ const GaugeBox = styled.div`
   align-items: center;
   background: #fff;
   border-radius: 32px;
-  box-shadow: 0 4px 32px 0 rgba(46,216,182,0.10), 0 1.5px 8px 0 #b2f0e6;
+  box-shadow:
+    0 4px 32px 0 rgba(46, 216, 182, 0.1),
+    0 1.5px 8px 0 #b2f0e6;
   padding-top: 12px;
   padding-bottom: 18px;
   @media (max-width: 480px) {
@@ -285,7 +290,8 @@ export default function BassTuner() {
     let stopped = false;
     async function listen() {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const audioContext = new (window.AudioContext ||
+        window.webkitAudioContext)();
       audioContextRef.current = audioContext;
       const analyser = audioContext.createAnalyser();
       analyser.fftSize = 2048;
@@ -339,76 +345,178 @@ export default function BassTuner() {
           {/* 현 선택 버튼 (좌측) */}
           <StringCol>
             {BASS_NOTES.map((n, i) => (
-              <StringBtn key={n.name} $active={i === selected} onClick={() => setSelected(i)}>
-                <span style={{ fontSize: 22, fontWeight: 900, lineHeight: 1 }}>{n.name.split('₁')[0].split('₂')[0]}</span>
-                <span style={{ fontSize: 15, fontWeight: 500, lineHeight: 1, marginTop: 1 }}>{n.name.match(/₁|₂/) ? n.name.match(/₁|₂/)[0].replace('₁','₁').replace('₂','₂') : ''}</span>
+              <StringBtn
+                key={n.name}
+                $active={i === selected}
+                onClick={() => setSelected(i)}
+              >
+                <span style={{ fontSize: 22, fontWeight: 900, lineHeight: 1 }}>
+                  {n.name.split("₁")[0].split("₂")[0]}
+                </span>
+                <span
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 500,
+                    lineHeight: 1,
+                    marginTop: 1,
+                  }}
+                >
+                  {n.name.match(/₁|₂/)
+                    ? n.name.match(/₁|₂/)[0].replace("₁", "₁").replace("₂", "₂")
+                    : ""}
+                </span>
               </StringBtn>
             ))}
           </StringCol>
           {/* 게이지/안내 (우측) */}
           <GaugeWrap>
             {/* 게이지 */}
-            <GaugeBox style={{ background: 'none', boxShadow: 'none', borderRadius: 0, padding: 0, margin: '0 auto 18px auto', width: '100%', maxWidth: 420, height: 220 }}>
-              <svg width="100%" height="180" viewBox="0 0 340 180" style={{ maxWidth: 420, display: 'block', margin: '0 auto' }}>
+            <GaugeBox
+              style={{
+                background: "none",
+                boxShadow: "none",
+                borderRadius: 0,
+                padding: 0,
+                margin: "0 auto 18px auto",
+                width: "100%",
+                maxWidth: 420,
+                height: 220,
+              }}
+            >
+              <svg
+                width="100%"
+                height="180"
+                viewBox="0 0 340 180"
+                style={{ maxWidth: 420, display: "block", margin: "0 auto" }}
+              >
                 {/* 반원형 회색 눈금 */}
-                <path d="M20 150 A150 150 0 0 1 320 150" fill="none" stroke="#e0e2e6" strokeWidth="14" />
+                <path
+                  d="M20 150 A150 150 0 0 1 320 150"
+                  fill="none"
+                  stroke="#e0e2e6"
+                  strokeWidth="14"
+                />
                 {/* 파란 부채꼴: 중앙(정확)일 때만 표시, ±10도(합산 20도) */}
                 {Math.abs(diff) < 1 && (
                   <path
                     d="M170 150 L153.16 52.64 A100 100 0 0 1 186.84 52.64 L170 150 Z"
-                    fill="#1976d2" opacity="0.22"
+                    fill="#1976d2"
+                    opacity="0.22"
                   />
                 )}
                 {/* 눈금선/숫자 */}
                 {[...Array(11)].map((_, i) => {
                   const val = -100 + i * 20;
                   const angle = (val / 200) * 180;
-                  const rad = (angle - 90) * Math.PI / 180;
+                  const rad = ((angle - 90) * Math.PI) / 180;
                   const x1 = 170 + 120 * Math.cos(rad);
                   const y1 = 150 + 120 * Math.sin(rad);
                   const x2 = 170 + 140 * Math.cos(rad);
                   const y2 = 150 + 140 * Math.sin(rad);
                   return (
                     <g key={val}>
-                      <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={val === 0 ? '#1976d2' : '#b0b3b8'} strokeWidth={val === 0 ? 4 : 2} />
-                      <text x={170 + 105 * Math.cos(rad)} y={150 + 105 * Math.sin(rad) + 7} textAnchor="middle" fontSize="18" fontWeight={val === 0 ? 700 : 400} fill={val === 0 ? '#222' : '#b0b3b8'}>{val}</text>
+                      <line
+                        x1={x1}
+                        y1={y1}
+                        x2={x2}
+                        y2={y2}
+                        stroke={val === 0 ? "#1976d2" : "#b0b3b8"}
+                        strokeWidth={val === 0 ? 4 : 2}
+                      />
+                      <text
+                        x={170 + 105 * Math.cos(rad)}
+                        y={150 + 105 * Math.sin(rad) + 7}
+                        textAnchor="middle"
+                        fontSize="18"
+                        fontWeight={val === 0 ? 700 : 400}
+                        fill={val === 0 ? "#222" : "#b0b3b8"}
+                      >
+                        {val}
+                      </text>
                     </g>
                   );
                 })}
                 {/* 바늘 */}
-                <g style={{ transform: `rotate(${Math.max(-100, Math.min(100, diff || 0)) * 0.9}deg)`, transformOrigin: '170px 150px' }}>
-                  <rect x="167" y="150" width="6" height="-70" rx="3" fill="#222" filter="url(#shadow)" />
-                  <circle cx="170" cy="150" r="16" fill="#fff" stroke="#222" strokeWidth="5" />
+                <g
+                  style={{
+                    transform: `rotate(${Math.max(-100, Math.min(100, diff || 0)) * 0.9}deg)`,
+                    transformOrigin: "170px 150px",
+                  }}
+                >
+                  <rect
+                    x="167"
+                    y="150"
+                    width="6"
+                    height="-70"
+                    rx="3"
+                    fill="#222"
+                    filter="url(#shadow)"
+                  />
+                  <circle
+                    cx="170"
+                    cy="150"
+                    r="16"
+                    fill="#fff"
+                    stroke="#222"
+                    strokeWidth="5"
+                  />
                   <circle cx="170" cy="150" r="9" fill="#222" />
                 </g>
               </svg>
               {/* 음표/기준주파수 */}
-              <div style={{ position: 'absolute', top: 10, left: 0, width: '100%', textAlign: 'center' }}>
-                <div style={{ fontSize: 38, fontWeight: 900, color: '#222', letterSpacing: 2 }}>{BASS_NOTES[selected].name}</div>
-                <div style={{ fontSize: 22, color: '#222', fontWeight: 900 }}>{BASS_NOTES[selected].freq.toFixed(1)}</div>
+              <div
+                style={{
+                  position: "absolute",
+                  top: 10,
+                  left: 0,
+                  width: "100%",
+                  textAlign: "center",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 38,
+                    fontWeight: 900,
+                    color: "#222",
+                    letterSpacing: 2,
+                  }}
+                >
+                  {BASS_NOTES[selected].name}
+                </div>
+                <div style={{ fontSize: 22, color: "#222", fontWeight: 900 }}>
+                  {BASS_NOTES[selected].freq.toFixed(1)}
+                </div>
               </div>
             </GaugeBox>
             {/* 감지된 주파수/안내 */}
-            <div style={{
-              fontSize: '32px',
-              fontWeight: 900,
-              color: '#222',
-              textAlign: 'center',
-              marginTop: '18px',
-              letterSpacing: '0.5px',
-              lineHeight: 1.1
-            }}>
-              {pitch ? pitch.toFixed(1) : '--'}
-              <span style={{ fontWeight: 500, fontSize: '22px', marginLeft: 2 }}>헤르츠</span>
+            <div
+              style={{
+                fontSize: "32px",
+                fontWeight: 900,
+                color: "#222",
+                textAlign: "center",
+                marginTop: "18px",
+                letterSpacing: "0.5px",
+                lineHeight: 1.1,
+              }}
+            >
+              {pitch ? pitch.toFixed(1) : "--"}
+              <span
+                style={{ fontWeight: 500, fontSize: "22px", marginLeft: 2 }}
+              >
+                헤르츠
+              </span>
             </div>
-            <div style={{
-              fontSize: '20px',
-              color: '#888',
-              textAlign: 'center',
-              marginTop: '4px',
-              fontWeight: 600
-            }}>
-              {pitch ? getAdvice(diff) : '소리를 들려주세요'}
+            <div
+              style={{
+                fontSize: "20px",
+                color: "#888",
+                textAlign: "center",
+                marginTop: "4px",
+                fontWeight: 600,
+              }}
+            >
+              {pitch ? getAdvice(diff) : "소리를 들려주세요"}
             </div>
           </GaugeWrap>
         </TunerRow>
@@ -420,23 +528,44 @@ export default function BassTuner() {
       <HeadSVGWrap>
         <svg width="180" height="180" viewBox="0 0 180 180">
           {/* 헤드 모양: 사진처럼 곡선, 밝은 갈색 */}
-          <path d="M60 160 Q70 80 90 60 Q120 40 140 60 Q160 80 120 170 Z" fill="#bfa07a" stroke="#a88b6a" strokeWidth="3" />
+          <path
+            d="M60 160 Q70 80 90 60 Q120 40 140 60 Q160 80 120 170 Z"
+            fill="#bfa07a"
+            stroke="#a88b6a"
+            strokeWidth="3"
+          />
           {/* 줄: 4현, 선택된 현만 파란색, 나머지는 연회색 */}
           {BASS_NOTES.map((n, i) => {
-            const x = 80 + i*16;
+            const x = 80 + i * 16;
             return (
-              <line key={n.name} x1={x} y1={160} x2={x-2} y2={60} stroke={i === selected ? '#1976d2' : '#d0d2d6'} strokeWidth={i === selected ? 4 : 2.2} />
+              <line
+                key={n.name}
+                x1={x}
+                y1={160}
+                x2={x - 2}
+                y2={60}
+                stroke={i === selected ? "#1976d2" : "#d0d2d6"}
+                strokeWidth={i === selected ? 4 : 2.2}
+              />
             );
           })}
           {/* 페그: 4개, 선택된 현만 파란색, 나머지는 회색 */}
           {BASS_NOTES.map((n, i) => {
-            const x = 78 + i*16;
+            const x = 78 + i * 16;
             return (
-              <circle key={n.name} cx={x-2} cy={60} r={8} fill={i === selected ? '#1976d2' : '#bbb'} stroke="#888" strokeWidth="1.5" />
+              <circle
+                key={n.name}
+                cx={x - 2}
+                cy={60}
+                r={8}
+                fill={i === selected ? "#1976d2" : "#bbb"}
+                stroke="#888"
+                strokeWidth="1.5"
+              />
             );
           })}
         </svg>
       </HeadSVGWrap>
     </Wrapper>
   );
-} 
+}

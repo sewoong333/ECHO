@@ -1,165 +1,929 @@
-import React, { useContext, useState, useEffect } from 'react';
-import TopBar from '../components/TopBar';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ProductContext } from '../store/ProductContext';
-import { UserContext } from '../store/UserContext';
-import { FaHeart, FaRegCommentDots, FaUserCircle, FaArrowLeft, FaRegHeart } from 'react-icons/fa';
-import { doc, updateDoc, increment } from 'firebase/firestore';
-import { db } from '../utils/firebase';
-import getInstrumentImage from '../utils/getInstrumentImage';
+import React, { useContext, useState, useEffect } from "react";
+import styled from "styled-components";
+import { useNavigate, useParams } from "react-router-dom";
+import { ProductContext } from "../store/ProductContext";
+import { UserContext } from "../store/UserContext";
+import { ChatContext } from "../store/ChatContext";
+import {
+  FaHeart,
+  FaRegHeart,
+  FaShare,
+  FaEllipsisV,
+  FaArrowLeft,
+  FaMapMarkerAlt,
+  FaEye,
+  FaComments,
+  FaShoppingCart,
+  FaUser,
+  FaStar,
+  FaCheckCircle,
+  FaStore,
+  FaClock,
+  FaCheck,
+  FaFlag,
+  FaPhone,
+  FaEnvelope,
+  FaChevronRight,
+  FaChevronLeft,
+  FaTimes,
+  FaExclamationTriangle,
+} from "react-icons/fa";
+
+const Container = styled.div`
+  width: 100vw;
+  min-height: 100vh;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+`;
+
+const Header = styled.div`
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 500px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 100;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+`;
+
+const HeaderLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+`;
+
+const BackButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #333;
+  cursor: pointer;
+  padding: 8px;
+  
+  &:hover {
+    color: #ff7e36;
+  }
+`;
+
+const HeaderRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+`;
+
+const IconButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #333;
+  cursor: pointer;
+  padding: 8px;
+  
+  &:hover {
+    color: #ff7e36;
+  }
+`;
+
+const ImageSection = styled.div`
+  position: relative;
+  margin-top: 56px;
+`;
+
+const ImageSlider = styled.div`
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: #f8f9fa;
+`;
+
+const ImageContainer = styled.div`
+  display: flex;
+  width: ${props => props.imageCount * 100}%;
+  height: 100%;
+  transform: translateX(-${props => props.currentIndex * (100 / props.imageCount)}%);
+  transition: transform 0.3s ease;
+`;
+
+const ProductImage = styled.img`
+  width: ${props => 100 / props.imageCount}%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+`;
+
+const ImagePlaceholder = styled.div`
+  width: ${props => 100 / props.imageCount}%;
+  height: 100%;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 48px;
+`;
+
+const SliderButton = styled.button`
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  ${props => props.direction === 'prev' ? 'left: 16px;' : 'right: 16px;'}
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  
+  &:hover {
+    background: white;
+  }
+`;
+
+const ImageDots = styled.div`
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+`;
+
+const Dot = styled.div`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: ${props => props.active ? 'white' : 'rgba(255, 255, 255, 0.5)'};
+  cursor: pointer;
+  transition: background 0.2s;
+`;
+
+const ContentSection = styled.div`
+  padding: 20px;
+`;
+
+const ProductInfo = styled.div`
+  margin-bottom: 24px;
+`;
+
+const ProductTitle = styled.h1`
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+`;
+
+const ProductMeta = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 16px;
+`;
+
+const ProductPrice = styled.div`
+  font-size: 24px;
+  font-weight: 700;
+  color: #ff7e36;
+  margin-bottom: 16px;
+`;
+
+const ProductStatus = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+`;
+
+const StatusBadge = styled.div`
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: ${props => {
+    switch(props.type) {
+      case 'condition': return '#e8f5e8';
+      case 'negotiable': return '#fff3e0';
+      case 'delivery': return '#e3f2fd';
+      default: return '#f5f5f5';
+    }
+  }};
+  color: ${props => {
+    switch(props.type) {
+      case 'condition': return '#2e7d32';
+      case 'negotiable': return '#f57c00';
+      case 'delivery': return '#1976d2';
+      default: return '#666';
+    }
+  }};
+`;
+
+const ProductDescription = styled.div`
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+  white-space: pre-wrap;
+  margin-bottom: 24px;
+`;
+
+const ProductTags = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+`;
+
+const Tag = styled.div`
+  background: #f8f9fa;
+  color: #666;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+`;
+
+const Divider = styled.div`
+  height: 8px;
+  background: #f8f9fa;
+  margin: 0 -20px 24px -20px;
+`;
+
+const SellerSection = styled.div`
+  margin-bottom: 24px;
+`;
+
+const SellerHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  padding: 12px;
+  border-radius: 12px;
+  
+  &:hover {
+    background: #f8f9fa;
+  }
+`;
+
+const SellerAvatar = styled.div`
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: ${props => props.imageUrl 
+    ? `url(${props.imageUrl})` 
+    : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+  };
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+`;
+
+const SellerInfo = styled.div`
+  flex: 1;
+`;
+
+const SellerName = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+`;
+
+const VerifiedBadge = styled.div`
+  color: #4CAF50;
+  font-size: 14px;
+`;
+
+const SellerLocation = styled.div`
+  font-size: 13px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+const MannerScore = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #ff7e36;
+  font-weight: 600;
+`;
+
+const SellerStats = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  margin-bottom: 16px;
+`;
+
+const StatItem = styled.div`
+  text-align: center;
+`;
+
+const StatNumber = styled.div`
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 4px;
+`;
+
+const StatLabel = styled.div`
+  font-size: 12px;
+  color: #666;
+`;
+
+const RelatedSection = styled.div`
+  margin-bottom: 24px;
+`;
+
+const SectionTitle = styled.h3`
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16px;
+`;
+
+const RelatedGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+`;
+
+const RelatedItem = styled.div`
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  
+  &:hover {
+    border-color: #ff7e36;
+  }
+`;
+
+const RelatedImage = styled.img`
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+`;
+
+const RelatedInfo = styled.div`
+  padding: 12px;
+`;
+
+const RelatedTitle = styled.div`
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const RelatedPrice = styled.div`
+  font-size: 14px;
+  font-weight: 600;
+  color: #ff7e36;
+`;
+
+const BottomActions = styled.div`
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 500px;
+  background: white;
+  border-top: 1px solid #e0e0e0;
+  padding: 16px 20px;
+  display: flex;
+  gap: 12px;
+  z-index: 100;
+`;
+
+const LikeButton = styled.button`
+  width: 48px;
+  height: 48px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  background: white;
+  color: ${props => props.liked ? '#ff7e36' : '#666'};
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    border-color: #ff7e36;
+    color: #ff7e36;
+  }
+`;
+
+const ChatButton = styled.button`
+  flex: 1;
+  height: 48px;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  
+  &:hover {
+    background: #f0f0f0;
+  }
+`;
+
+const BuyButton = styled.button`
+  flex: 1;
+  height: 48px;
+  background: #ff7e36;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  
+  &:hover {
+    background: #e66d2e;
+  }
+`;
+
+const LoadingContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  font-size: 16px;
+  color: #666;
+`;
+
+const NotFoundContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: #666;
+  text-align: center;
+`;
+
+// 이미지 확대 모달
+const ImageModal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ModalCloseButton = styled.button`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+`;
+
+const ModalImage = styled.img`
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+`;
 
 export default function ProductDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { products, setProducts, likes, toggleLike, chatRooms } = useContext(ProductContext);
+  const { products, incrementViews, toggleLike, PRODUCT_STATUS } = useContext(ProductContext);
   const { user } = useContext(UserContext);
-  const product = products.find(p => String(p.id) === String(id));
-  const [showSlide, setShowSlide] = useState(false);
-  const [slideIdx, setSlideIdx] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [redirecting, setRedirecting] = useState(false);
+  const { createOrGetChatRoom } = useContext(ChatContext);
+  
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // 비로그인 사용자는 상세페이지 접근 불가
-  useEffect(() => {
-    if (!user || !user.uid) {
-      setRedirecting(true);
-      setTimeout(() => {
-        navigate('/login', { state: { message: '로그인 후 상품 상세를 볼 수 있습니다.' } });
-      }, 1800);
-    }
-  }, [user, navigate]);
+  // 상품 찾기
+  const product = products.find((p) => String(p.id) === String(id));
 
-  // 조회수 증가
   useEffect(() => {
-    if (!product) return;
-    if (!user || !user.uid) return;
-    const updateViews = async () => {
-      try {
-        const productRef = doc(db, 'products', product.id);
-        await updateDoc(productRef, {
-          views: increment(1)
-        });
-        setProducts(prev => prev.map(p => 
-          p.id === product.id 
-            ? { ...p, views: (p.views || 0) + 1 }
-            : p
-        ));
-      } catch (err) {
-        console.error('조회수 업데이트 실패:', err);
+    if (products.length > 0) {
+      setLoading(false);
+      
+      // 조회수 증가
+      if (product && user?.uid && product.sellerId !== user.uid) {
+        incrementViews(product.id);
       }
-    };
-    updateViews();
-  }, [product?.id, user, setProducts]);
+    }
+  }, [products, product, user, incrementViews]);
 
-  if (!user || !user.uid) {
-    return (
-      <div style={{ padding: 48, textAlign: 'center', color: '#2ed8b6', fontWeight: 700, fontSize: 20 }}>
-        상품 상세는 로그인 후 이용 가능합니다.<br />
-        <span style={{ color: '#888', fontSize: 15, fontWeight: 400 }}>로그인 페이지로 이동합니다...</span>
-      </div>
+  const handlePrevImage = () => {
+    setCurrentImageIndex(prev => 
+      prev === 0 ? (product?.images?.length || 1) - 1 : prev - 1
     );
-  }
+  };
 
-  if (!product) return <div style={{ padding: 32 }}>상품을 찾을 수 없습니다.</div>;
+  const handleNextImage = () => {
+    setCurrentImageIndex(prev => 
+      prev === (product?.images?.length || 1) - 1 ? 0 : prev + 1
+    );
+  };
 
-  const chatCount = chatRooms[product.id]?.length || 0;
-  const likeCount = likes.filter(lid => lid === product.id).length;
-  const viewCount = product.views || 0;
-  const images = product.images && product.images.length ? product.images : [product.image];
+  const handleImageClick = () => {
+    setIsImageModalOpen(true);
+  };
 
-  const handleLike = async (e) => {
-    e.stopPropagation();
-    if (!user.isLoggedIn) {
+  const handleLike = async () => {
+    if (!user?.isLoggedIn) {
       alert('로그인이 필요합니다.');
       navigate('/login');
       return;
     }
-    setLoading(true);
+    
     try {
       await toggleLike(product.id);
-    } catch (err) {
-      console.error('관심 상품 토글 실패:', err);
-      alert('관심 상품 등록에 실패했습니다.');
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      console.error('찜하기 실패:', error);
+      alert('찜하기에 실패했습니다.');
     }
   };
 
+  const handleChat = async () => {
+    if (!user?.isLoggedIn) {
+      alert('로그인이 필요합니다.');
+      navigate('/login');
+      return;
+    }
+    
+    if (product.sellerId === user.uid) {
+      alert('본인 상품에는 채팅할 수 없습니다.');
+      return;
+    }
+    
+    try {
+      // 채팅방 생성 또는 기존 채팅방 찾기
+      const chatRoomId = await createOrGetChatRoom(
+        product.id,
+        product.sellerId,
+        user.uid,
+        {
+          title: product.title,
+          price: product.price,
+          images: product.images,
+          status: product.status
+        }
+      );
+      
+      // 채팅방으로 이동
+      navigate(`/chat/${chatRoomId}`);
+    } catch (error) {
+      console.error('채팅방 생성 실패:', error);
+      alert('채팅방 생성에 실패했습니다.');
+    }
+  };
+
+  const handleBuy = () => {
+    if (!user?.isLoggedIn) {
+      alert('로그인이 필요합니다.');
+      navigate('/login');
+      return;
+    }
+    
+    if (product.sellerId === user.uid) {
+      alert('본인 상품은 구매할 수 없습니다.');
+      return;
+    }
+    
+    if (product.status !== PRODUCT_STATUS.ACTIVE) {
+      alert('판매 완료된 상품입니다.');
+      return;
+    }
+    
+    // 구매 페이지로 이동 (추후 구현)
+    navigate(`/purchase/${product.id}`);
+  };
+
+  const getConditionText = (condition) => {
+    const conditions = {
+      'excellent': '매우 좋음',
+      'good': '좋음',
+      'fair': '보통',
+      'poor': '나쁨'
+    };
+    return conditions[condition] || condition;
+  };
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('ko-KR').format(price);
+  };
+
+  const formatDate = (date) => {
+    if (!date) return '';
+    const d = date.toDate ? date.toDate() : new Date(date);
+    const now = new Date();
+    const diff = now - d;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    
+    if (minutes < 1) return '방금 전';
+    if (minutes < 60) return `${minutes}분 전`;
+    if (hours < 24) return `${hours}시간 전`;
+    if (days < 7) return `${days}일 전`;
+    
+    return d.toLocaleDateString('ko-KR');
+  };
+
+  if (loading) {
+    return (
+      <Container>
+        <LoadingContainer>
+          상품 정보를 불러오는 중...
+        </LoadingContainer>
+      </Container>
+    );
+  }
+
+  if (!product) {
+    return (
+      <Container>
+        <Header>
+          <HeaderLeft>
+            <BackButton onClick={() => navigate(-1)}>
+              <FaArrowLeft />
+            </BackButton>
+          </HeaderLeft>
+        </Header>
+        <NotFoundContainer>
+          <FaExclamationTriangle size={48} color="#ddd" />
+          <h3>상품을 찾을 수 없습니다</h3>
+          <p>삭제되었거나 존재하지 않는 상품입니다.</p>
+        </NotFoundContainer>
+      </Container>
+    );
+  }
+
+  const isLiked = product.isLikedByUser || false;
+  const images = product.images || [];
+  const relatedProducts = products
+    .filter(p => p.category === product.category && p.id !== product.id)
+    .slice(0, 4);
+
   return (
-    <div style={{ width: '100vw', minHeight: '100vh', background: '#f8f9fa', display: 'flex', flexDirection: 'column', alignItems: 'center', position:'relative' }}>
-      <TopBar />
-      <div style={{ width: '100%', maxWidth: 480, margin: '0 auto', padding: 0, boxSizing: 'border-box', position:'relative', paddingBottom: 90 }}>
-        {/* 대표사진(정사각형) */}
-        <div style={{ width: '100%', aspectRatio: '1/1', background: '#eee', position: 'relative', borderRadius: '0 0 18px 18px', overflow: 'hidden', cursor:'pointer' }} onClick={()=>setShowSlide(true)}>
-          <img src={images[0]} alt={product.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          {/* 뒤로가기 */}
-          <button onClick={e => {e.stopPropagation(); navigate(-1);}} style={{ position: 'absolute', top: 16, left: 16, background: 'rgba(255,255,255,0.85)', border: '1.5px solid #b2f0e6', borderRadius: 20, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: '#2ed8b6', zIndex: 102, boxShadow: '0 1px 4px #b2f0e6', padding: 0 }}>
-            <FaArrowLeft style={{ margin: 0, fontSize: 18 }} />
-          </button>
-        </div>
-        {/* 슬라이드 모달 */}
-        {showSlide && (
-          <div style={{ position:'fixed', top:0, left:0, width:'100vw', height:'100vh', background:'rgba(0,0,0,0.85)', zIndex:9999, display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column' }} onClick={()=>setShowSlide(false)}>
-            <div style={{ position:'relative', width: '90vw', maxWidth: 420, aspectRatio:'1/1', background:'#222', borderRadius:18, overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center' }} onClick={e=>e.stopPropagation()}>
-              {/* 우측 상단에 닫기(X) 버튼 */}
-              <button style={{ position:'absolute', top:18, right:18, background:'rgba(255,255,255,0.8)', border:'none', borderRadius:18, width:36, height:36, fontSize:22, cursor:'pointer', zIndex:3, display:'flex', alignItems:'center', justifyContent:'center' }} onClick={()=>setShowSlide(false)}>×</button>
-              {/* 좌우 중앙에 화살표 */}
-              {images.length > 1 && slideIdx > 0 && (
-                <button style={{ position:'absolute', left:8, top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.7)', border:'none', borderRadius:18, width:36, height:36, fontSize:22, cursor:'pointer', zIndex:2, display:'flex', alignItems:'center', justifyContent:'center' }} onClick={()=>setSlideIdx(idx=>Math.max(0,idx-1))}>&lt;</button>
-              )}
-              {images.length > 1 && slideIdx < images.length-1 && (
-                <button style={{ position:'absolute', right:8, top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.7)', border:'none', borderRadius:18, width:36, height:36, fontSize:22, cursor:'pointer', zIndex:2, display:'flex', alignItems:'center', justifyContent:'center' }} onClick={()=>setSlideIdx(idx=>Math.min(images.length-1,idx+1))}>&gt;</button>
-              )}
-              <img src={images[slideIdx]} alt={product.title} style={{ width:'100%', height:'100%', objectFit:'contain', background:'#222' }} />
-            </div>
-            {images.length > 1 && (
-              <div style={{marginTop:18, display:'flex', gap:8}}>
-                {images.map((img, i) => (
-                  <div key={i} style={{width:12, height:12, borderRadius:'50%', background:i===slideIdx?'#2ed8b6':'#bbb', transition:'background 0.2s'}} />
+    <Container>
+      <Header>
+        <HeaderLeft>
+          <BackButton onClick={() => navigate(-1)}>
+            <FaArrowLeft />
+          </BackButton>
+        </HeaderLeft>
+        <HeaderRight>
+          <IconButton>
+            <FaShare />
+          </IconButton>
+          <IconButton>
+            <FaEllipsisV />
+          </IconButton>
+        </HeaderRight>
+      </Header>
+
+      <ImageSection>
+        <ImageSlider>
+          {images.length > 0 ? (
+            <>
+              <ImageContainer 
+                imageCount={images.length}
+                currentIndex={currentImageIndex}
+              >
+                {images.map((image, index) => (
+                  <ProductImage 
+                    key={index}
+                    src={image} 
+                    alt={`상품 이미지 ${index + 1}`}
+                    imageCount={images.length}
+                    onClick={handleImageClick}
+                  />
                 ))}
-              </div>
+              </ImageContainer>
+              
+              {images.length > 1 && (
+                <>
+                  <SliderButton direction="prev" onClick={handlePrevImage}>
+                    <FaChevronLeft />
+                  </SliderButton>
+                  <SliderButton direction="next" onClick={handleNextImage}>
+                    <FaChevronRight />
+                  </SliderButton>
+                  
+                  <ImageDots>
+                    {images.map((_, index) => (
+                      <Dot 
+                        key={index}
+                        active={index === currentImageIndex}
+                        onClick={() => setCurrentImageIndex(index)}
+                      />
+                    ))}
+                  </ImageDots>
+                </>
+              )}
+            </>
+          ) : (
+            <ImagePlaceholder imageCount={1}>
+              <FaUser />
+            </ImagePlaceholder>
+          )}
+        </ImageSlider>
+      </ImageSection>
+
+      <ContentSection>
+        <ProductInfo>
+          <ProductMeta>
+            <FaMapMarkerAlt />
+            {product.region} {product.district}
+            <span>•</span>
+            <FaEye />
+            {product.viewCount || 0}
+            <span>•</span>
+            <FaComments />
+            {product.chatCount || 0}
+            <span>•</span>
+            <FaClock />
+            {formatDate(product.createdAt)}
+          </ProductMeta>
+          
+          <ProductTitle>{product.title}</ProductTitle>
+          
+          <ProductPrice>
+            {formatPrice(product.price)}원
+            {product.negotiable && <span style={{fontSize: '14px', color: '#666', marginLeft: '8px'}}>가격제안 가능</span>}
+          </ProductPrice>
+          
+          <ProductStatus>
+            <StatusBadge type="condition">
+              {getConditionText(product.condition)}
+            </StatusBadge>
+            {product.negotiable && (
+              <StatusBadge type="negotiable">가격제안 가능</StatusBadge>
             )}
-          </div>
-        )}
-        {/* 프로필/닉네임/동네 */}
-        <div style={{ display:'flex', alignItems:'center', gap:12, margin:'18px 0 0 0', padding:'0 18px' }}>
-          <FaUserCircle size={36} color="#bbb" />
-          <div style={{ fontWeight:700, fontSize:17, color:'#222' }}>{product.author}</div>
-          <div style={{ color:'#888', fontSize:15 }}>{product.location}</div>
-        </div>
-        {/* 제목/카테고리/시간 */}
-        <div style={{ padding:'0 18px', marginTop:10 }}>
-          <h1 style={{ fontSize:22, fontWeight:800, color:'#1a4740', margin:'0 0 8px 0' }}>{product.title}</h1>
-          <div style={{ display:'flex', alignItems:'center', gap:10, fontSize:14, color:'#888', marginBottom:6 }}>
-            <span>{product.category || '기타'}</span>
-            <span>· {product.time || '방금 전'}</span>
-          </div>
-        </div>
-        {/* 상세설명 */}
-        <div style={{ padding:'0 18px', margin:'18px 0 0 0', color:'#1a4740', fontSize:16, lineHeight:1.7, wordBreak:'break-all', overflowWrap:'break-word' }}>
+            {product.delivery && (
+              <StatusBadge type="delivery">택배거래 가능</StatusBadge>
+            )}
+          </ProductStatus>
+        </ProductInfo>
+
+        <ProductDescription>
           {product.description}
-        </div>
-        {/* 채팅/관심/조회 */}
-        <div style={{ display:'flex', alignItems:'center', gap:18, fontSize:14, color:'#bbb', margin:'18px 0 0 18px' }}>
-          <span><FaRegCommentDots style={{ marginRight: 2 }} />{chatCount} 채팅</span>
-          <span><FaHeart style={{ marginRight: 2, color: '#ff7e36' }} />{likeCount} 관심</span>
-          <span>{viewCount} 조회</span>
-        </div>
-        {/* 하단 고정 바 */}
-        <div style={{ position:'fixed', left:0, right:0, bottom:0, width:'100%', maxWidth:480, margin:'0 auto', background:'#fff', borderTop:'1.5px solid #e0e0e0', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 18px', height:68, zIndex:200, boxShadow:'0 -2px 12px rgba(46,216,182,0.06)' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-            <FaRegHeart size={26} color="#bbb" style={{marginRight:2}} />
-            <div style={{ fontWeight:800, fontSize:20, color:'#222' }}>{Number(product.price).toLocaleString()}원</div>
-            <span style={{ color:'#ff7e36', fontWeight:700, fontSize:15, marginLeft:6 }}>가격 제안 불가</span>
-          </div>
-          <button
-            style={{ padding:'12px 28px', fontSize:18, background:'#2ed8b6', color:'#fff', border:'none', borderRadius:10, fontWeight:700, boxShadow:'0 2px 8px #b2f0e6', cursor:'pointer' }}
-            onClick={() => navigate(`/chat/${product.id}`)}
-          >
-            채팅하기
-          </button>
-        </div>
-      </div>
-    </div>
+        </ProductDescription>
+
+        {product.tags && product.tags.length > 0 && (
+          <ProductTags>
+            {product.tags.map((tag, index) => (
+              <Tag key={index}>#{tag}</Tag>
+            ))}
+          </ProductTags>
+        )}
+      </ContentSection>
+
+      <Divider />
+
+      <ContentSection>
+        <SellerSection>
+          <SellerHeader onClick={() => navigate(`/user/${product.sellerId}`)}>
+            <SellerAvatar imageUrl={product.sellerProfileImage}>
+              {!product.sellerProfileImage && (product.sellerNickname?.[0] || '?')}
+            </SellerAvatar>
+            <SellerInfo>
+              <SellerName>
+                {product.sellerNickname || '익명'}
+                {product.sellerVerified && (
+                  <VerifiedBadge>
+                    <FaCheckCircle />
+                  </VerifiedBadge>
+                )}
+              </SellerName>
+              <SellerLocation>
+                <FaMapMarkerAlt />
+                {product.region} {product.district}
+              </SellerLocation>
+            </SellerInfo>
+            <MannerScore>
+              <FaStar />
+              {product.sellerMannerScore || 36.5}°C
+            </MannerScore>
+          </SellerHeader>
+
+          <SellerStats>
+            <StatItem>
+              <StatNumber>{product.sellerTransactionCount || 0}</StatNumber>
+              <StatLabel>거래</StatLabel>
+            </StatItem>
+            <StatItem>
+              <StatNumber>{product.sellerReviewCount || 0}</StatNumber>
+              <StatLabel>후기</StatLabel>
+            </StatItem>
+            <StatItem>
+              <StatNumber>{product.sellerFollowerCount || 0}</StatNumber>
+              <StatLabel>팔로워</StatLabel>
+            </StatItem>
+          </SellerStats>
+        </SellerSection>
+      </ContentSection>
+
+      {relatedProducts.length > 0 && (
+        <>
+          <Divider />
+          <ContentSection>
+            <RelatedSection>
+              <SectionTitle>이런 상품은 어떠세요?</SectionTitle>
+              <RelatedGrid>
+                {relatedProducts.map((item) => (
+                  <RelatedItem 
+                    key={item.id}
+                    onClick={() => navigate(`/product/${item.id}`)}
+                  >
+                    <RelatedImage 
+                      src={item.images?.[0] || '/placeholder.jpg'} 
+                      alt={item.title}
+                    />
+                    <RelatedInfo>
+                      <RelatedTitle>{item.title}</RelatedTitle>
+                      <RelatedPrice>{formatPrice(item.price)}원</RelatedPrice>
+                    </RelatedInfo>
+                  </RelatedItem>
+                ))}
+              </RelatedGrid>
+            </RelatedSection>
+          </ContentSection>
+        </>
+      )}
+
+      <div style={{ height: '80px' }} />
+
+      <BottomActions>
+        <LikeButton liked={isLiked} onClick={handleLike}>
+          {isLiked ? <FaHeart /> : <FaRegHeart />}
+        </LikeButton>
+        <ChatButton onClick={handleChat}>
+          채팅하기
+        </ChatButton>
+        <BuyButton onClick={handleBuy}>
+          구매하기
+        </BuyButton>
+      </BottomActions>
+
+      {/* 이미지 확대 모달 */}
+      {isImageModalOpen && (
+        <ImageModal onClick={() => setIsImageModalOpen(false)}>
+          <ModalCloseButton onClick={() => setIsImageModalOpen(false)}>
+            <FaTimes />
+          </ModalCloseButton>
+          <ModalImage 
+            src={images[currentImageIndex]} 
+            alt={`상품 이미지 ${currentImageIndex + 1}`}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </ImageModal>
+      )}
+    </Container>
   );
-} 
+}

@@ -1,11 +1,36 @@
-import React, { useContext, useState, useEffect, useCallback, useRef } from 'react';
-import styled from 'styled-components';
-import { useNavigate, useLocation } from 'react-router-dom';
-import TopBar from '../components/TopBar';
-import { ProductContext } from '../store/ProductContext';
-import { UserContext } from '../store/UserContext';
-import { INSTRUMENT_CATEGORIES, REGIONS } from '../utils/firebase';
-import { FaHeart, FaRegHeart, FaEye, FaMapMarkerAlt, FaFilter, FaSort, FaSearch, FaPlus } from 'react-icons/fa';
+import React, {
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from "react";
+import styled from "styled-components";
+import { useNavigate, useLocation } from "react-router-dom";
+import TopBar from "../components/TopBar";
+import { ProductContext } from "../store/ProductContext";
+import { UserContext } from "../store/UserContext";
+import { INSTRUMENT_CATEGORIES, REGIONS } from "../utils/firebase";
+import {
+  FaHeart,
+  FaRegHeart,
+  FaEye,
+  FaMapMarkerAlt,
+  FaFilter,
+  FaSort,
+  FaSearch,
+  FaPlus,
+  FaTimes,
+  FaChevronDown,
+  FaCog,
+  FaDollarSign,
+  FaCalendar,
+  FaStar,
+  FaComments,
+  FaFireAlt,
+  FaClock,
+  FaCheckCircle,
+} from "react-icons/fa";
 
 const Container = styled.div`
   width: 100vw;
@@ -21,22 +46,27 @@ const Container = styled.div`
 const SearchSection = styled.div`
   width: 100%;
   max-width: 500px;
-  padding: 20px;
   background: white;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   position: sticky;
   top: 0;
   z-index: 100;
-  will-change: transform;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 16px 20px 8px;
+`;
+
+const SearchBarContainer = styled.div`
+  position: relative;
+  margin-bottom: 12px;
 `;
 
 const SearchBar = styled.div`
   display: flex;
   align-items: center;
-  background: #f5f5f5;
+  background: #f8f9fa;
+  border: 2px solid ${props => props.focused ? 'var(--color-mint-main)' : 'transparent'};
   border-radius: 12px;
   padding: 12px 16px;
-  margin-bottom: 16px;
+  transition: all 0.2s;
 `;
 
 const SearchInput = styled.input`
@@ -46,140 +76,313 @@ const SearchInput = styled.input`
   outline: none;
   font-size: 16px;
   margin-left: 8px;
-  
+  color: #333;
+
   &::placeholder {
     color: #999;
   }
 `;
 
-const FilterRow = styled.div`
+const SearchSuggestions = styled.div`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 101;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-top: 4px;
+`;
+
+const SuggestionItem = styled.div`
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #f5f5f5;
+  
+  &:hover {
+    background: #f8f9fa;
+  }
+  
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const RecentSearches = styled.div`
+  margin-bottom: 16px;
+`;
+
+const RecentTitle = styled.div`
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const RecentTags = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+`;
+
+const RecentTag = styled.div`
+  background: #f0f0f0;
+  color: #666;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  
+  &:hover {
+    background: #e0e0e0;
+  }
+`;
+
+const FilterSection = styled.div`
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding-bottom: 8px;
   
   &::-webkit-scrollbar {
     display: none;
   }
 `;
 
-const FilterButton = styled.button`
+const FilterChip = styled.button`
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 20px;
-  background: ${props => props.active ? '#ff7e36' : 'white'};
+  padding: 6px 12px;
+  border: 1px solid ${props => props.active ? 'var(--color-mint-main)' : '#e0e0e0'};
+  border-radius: 16px;
+  background: ${props => props.active ? 'var(--color-mint-main)' : 'white'};
   color: ${props => props.active ? 'white' : '#666'};
   font-size: 12px;
   white-space: nowrap;
   cursor: pointer;
   transition: all 0.2s;
+  min-width: fit-content;
+
+  &:hover {
+    border-color: var(--color-mint-main);
+    color: ${props => props.active ? 'white' : 'var(--color-mint-main)'};
+  }
+`;
+
+const FilterModal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+`;
+
+const FilterContent = styled.div`
+  width: 100%;
+  max-width: 500px;
+  background: white;
+  border-radius: 20px 20px 0 0;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+  
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+`;
+
+const FilterHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  border-bottom: 1px solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  background: white;
+`;
+
+const FilterTitle = styled.h3`
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+`;
+
+const FilterCloseButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+`;
+
+const FilterBody = styled.div`
+  padding: 20px;
+`;
+
+const FilterGroup = styled.div`
+  margin-bottom: 24px;
+`;
+
+const FilterGroupTitle = styled.h4`
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+`;
+
+const FilterOptions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+`;
+
+const FilterOption = styled.button`
+  padding: 8px 16px;
+  border: 1px solid ${props => props.selected ? 'var(--color-mint-main)' : '#e0e0e0'};
+  border-radius: 20px;
+  background: ${props => props.selected ? '#fff5f2' : 'white'};
+  color: ${props => props.selected ? 'var(--color-mint-main)' : '#666'};
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
   
   &:hover {
-    border-color: #ff7e36;
-    color: ${props => props.active ? 'white' : '#ff7e36'};
+    border-color: var(--color-mint-main);
+  }
+`;
+
+const PriceRange = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+`;
+
+const PriceInput = styled.input`
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  
+  &:focus {
+    outline: none;
+    border-color: var(--color-mint-main);
+  }
+`;
+
+const SortSection = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+`;
+
+const ResultCount = styled.div`
+  font-size: 14px;
+  color: #666;
+`;
+
+const SortButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 1px solid #e0e0e0;
+  border-radius: 16px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+  
+  &:hover {
+    border-color: var(--color-mint-main);
+    color: var(--color-mint-main);
   }
 `;
 
 const ContentContainer = styled.div`
   width: 100%;
   max-width: 500px;
-  padding: 0 20px 100px;
+  background: white;
+  position: relative;
 `;
 
 const ProductGrid = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-top: 20px;
-  will-change: transform;
+  padding: 0 20px 100px;
 `;
 
 const ProductCard = styled.div`
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  cursor: pointer;
-  transition: all 0.2s ease;
   display: flex;
-  min-height: 120px;
-  will-change: transform;
+  padding: 16px 0;
+  border-bottom: 1px solid #f5f5f5;
+  cursor: pointer;
+  transition: background-color 0.2s;
   
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    background: #fafafa;
+  }
+  
+  &:last-child {
+    border-bottom: none;
   }
 `;
 
 const ProductImageContainer = styled.div`
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
   overflow: hidden;
   flex-shrink: 0;
+  margin-right: 12px;
 `;
 
 const ProductImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s;
-  
-  ${ProductCard}:hover & {
-    transform: scale(1.05);
-  }
 `;
 
 const ImagePlaceholder = styled.div`
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+  background: #f0f0f0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
   color: #ccc;
-`;
-
-const LikeButton = styled.button`
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.9);
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  color: ${props => props.liked ? '#ff6b6b' : '#999'};
-  
-  &:hover {
-    background: white;
-    transform: scale(1.1);
-  }
-`;
-
-const UrgentBadge = styled.div`
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: #ff4757;
-  color: white;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 24px;
 `;
 
 const ProductInfo = styled.div`
-  padding: 12px;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -187,594 +390,636 @@ const ProductInfo = styled.div`
 `;
 
 const ProductTitle = styled.h3`
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 500;
   color: #333;
-  margin: 0 0 8px 0;
+  margin: 0 0 4px 0;
+  line-height: 1.3;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 `;
 
-const ProductPrice = styled.div`
-  font-size: 16px;
-  font-weight: 700;
-  color: #ff7e36;
+const ProductMeta = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #999;
   margin-bottom: 8px;
 `;
 
-const ProductDetails = styled.div`
+const ProductPrice = styled.div`
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+`;
+
+const ProductActions = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 12px;
-  color: #999;
-`;
-
-const ProductLocation = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 4px;
 `;
 
 const ProductStats = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-`;
-
-const StatItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 2px;
-`;
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: 60px 20px;
+  font-size: 12px;
   color: #999;
 `;
 
-const EmptyIcon = styled.div`
-  font-size: 48px;
-  margin-bottom: 16px;
-`;
-
-const EmptyTitle = styled.h3`
-  font-size: 18px;
-  margin-bottom: 8px;
-  color: #666;
-`;
-
-const EmptyDescription = styled.p`
-  font-size: 14px;
-  line-height: 1.5;
-  margin-bottom: 24px;
-`;
-
-const ActionButton = styled.button`
-  padding: 12px 24px;
-  background: #ff7e36;
-  color: white;
+const LikeButton = styled.button`
+  background: none;
   border: none;
-  border-radius: 8px;
-  font-weight: 600;
+  color: ${props => props.liked ? 'var(--color-mint-main)' : '#ccc'};
+  font-size: 16px;
   cursor: pointer;
-  transition: background 0.2s;
+  padding: 4px;
   
   &:hover {
-    background: #e66b2b;
+    color: var(--color-mint-main);
   }
+`;
+
+const StatusBadge = styled.div`
+  background: ${props => {
+    switch(props.type) {
+      case 'urgent': return 'var(--color-mint-accent)';
+      case 'new': return 'var(--color-mint-light)';
+      case 'hot': return 'var(--color-mint-main)';
+      default: return 'var(--color-mint-light)';
+    }
+  }};
+  color: white;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  margin-right: 4px;
 `;
 
 const LoadingContainer = styled.div`
   display: flex;
+  align-items: center;
   justify-content: center;
   padding: 40px;
+  font-size: 14px;
+  color: #666;
 `;
 
-const LoadingSpinner = styled.div`
-  width: 40px;
-  height: 40px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #ff7e36;
+const EmptyState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #666;
+`;
+
+const FAB = styled.button`
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-`;
-
-const LoadMoreButton = styled.button`
-  width: 100%;
-  padding: 16px;
-  background: white;
-  border: 2px solid #ff7e36;
-  color: #ff7e36;
-  border-radius: 12px;
-  font-weight: 600;
+  background: linear-gradient(135deg, #2ed8b6 0%, #25b89a 100%);
+  border: none;
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
   cursor: pointer;
-  margin-top: 20px;
-  transition: all 0.2s;
+  box-shadow: 0 8px 24px rgba(46, 216, 182, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  transition: all 0.3s ease;
   
   &:hover {
-    background: #ff7e36;
-    color: white;
+    background: linear-gradient(135deg, #25b89a 0%, #1ea085 100%);
+    transform: scale(1.1);
+    box-shadow: 0 12px 32px rgba(46, 216, 182, 0.5);
   }
   
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  &:active {
+    transform: scale(0.95);
   }
-`;
-
-const SuccessMessage = styled.div`
-  background: #d4edda;
-  color: #155724;
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  text-align: center;
 `;
 
 export default function Home() {
-  const {
-    products,
-    loading,
-    error,
-    hasMore,
-    filters,
-    updateFilters,
-    searchProducts,
-    loadMoreProducts,
-    toggleLike,
-    incrementViews,
-    refreshProducts
-  } = useContext(ProductContext);
-  
-  const { user } = useContext(UserContext);
   const navigate = useNavigate();
   const location = useLocation();
+  const { 
+    products, 
+    loading, 
+    hasMore, 
+    filters, 
+    updateFilters, 
+    searchProducts, 
+    loadMoreProducts,
+    toggleLike,
+    INSTRUMENT_CATEGORIES,
+  } = useContext(ProductContext);
+  const { user } = useContext(UserContext);
   
-  const [searchInput, setSearchInput] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
+  const [recentSearches, setRecentSearches] = useState([]);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [tempFilters, setTempFilters] = useState(filters);
+  const [sortBy, setSortBy] = useState('latest');
   
-  const observerRef = useRef();
-  const lastProductElementRef = useCallback(node => {
-    if (loading || isLoadingMore) return;
-    if (observerRef.current) observerRef.current.disconnect();
-    observerRef.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasMore && !loading && !isLoadingMore) {
-        setIsLoadingMore(true);
-        loadMoreProducts().finally(() => setIsLoadingMore(false));
-      }
-    }, { threshold: 0.1, rootMargin: '50px' });
-    if (node) observerRef.current.observe(node);
-  }, [loading, hasMore, loadMoreProducts, isLoadingMore]);
+  const searchInputRef = useRef(null);
+  const observerRef = useRef(null);
 
-  // URL 상태나 성공 메시지 처리
+  // 최근 검색어 로드
   useEffect(() => {
-    if (location.state?.message) {
-      setSuccessMessage(location.state.message);
-      // 상태 초기화 (뒤로가기 시 메시지 재표시 방지)
-      window.history.replaceState({}, document.title);
+    const saved = localStorage.getItem('recentSearches');
+    if (saved) {
+      setRecentSearches(JSON.parse(saved));
+    }
+  }, []);
+
+  // 검색 제안 생성
+  useEffect(() => {
+    if (searchValue.length > 0) {
+      const suggestions = [];
       
-      // 3초 후 메시지 숨김
-      setTimeout(() => setSuccessMessage(''), 3000);
-    }
-  }, [location.state]);
-
-  // 상품 리스트 상태
-  const [displayedProducts, setDisplayedProducts] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const ITEMS_PER_LOAD = 10;
-  const listEndRef = useRef(null);
-
-  // 상품 데이터 불러오기 후 초기 10개만 표시
-  useEffect(() => {
-    if (products && products.length > 0) {
-      setDisplayedProducts(products.slice(0, ITEMS_PER_LOAD));
-      setCurrentIndex(ITEMS_PER_LOAD);
-    }
-  }, [products]);
-
-  // 스크롤 하단 도달 시 10개씩 추가
-  useEffect(() => {
-    const handleScroll = () => {
-      if (
-        window.innerHeight + document.documentElement.scrollTop >=
-        document.documentElement.offsetHeight - 200
-      ) {
-        if (currentIndex < products.length) {
-          const nextIndex = Math.min(currentIndex + ITEMS_PER_LOAD, products.length);
-          setDisplayedProducts(products.slice(0, nextIndex));
-          setCurrentIndex(nextIndex);
+      // 카테고리 매칭
+      Object.values(INSTRUMENT_CATEGORIES).forEach(category => {
+        if (category.name.toLowerCase().includes(searchValue.toLowerCase())) {
+          suggestions.push({
+            type: 'category',
+            text: category.name,
+            value: category.id,
+          });
         }
-      }
+      });
+      
+      // 상품 제목 매칭
+      products.forEach(product => {
+        if (product.title.toLowerCase().includes(searchValue.toLowerCase()) && 
+            suggestions.length < 5) {
+          suggestions.push({
+            type: 'product',
+            text: product.title,
+            value: product.title,
+          });
+        }
+      });
+      
+      setSearchSuggestions(suggestions);
+    } else {
+      setSearchSuggestions([]);
+    }
+  }, [searchValue, products]);
+
+  // 무한 스크롤
+  useEffect(() => {
+    if (observerRef.current) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting && hasMore && !loading) {
+            loadMoreProducts();
+          }
+        },
+        { threshold: 0.1 }
+      );
+
+      observer.observe(observerRef.current);
+      return () => observer.disconnect();
+    }
+  }, [hasMore, loading, loadMoreProducts]);
+
+  const handleSearch = useCallback((query) => {
+    if (query.trim()) {
+      // 최근 검색어에 추가
+      const newRecentSearches = [
+        query,
+        ...recentSearches.filter(item => item !== query)
+      ].slice(0, 10);
+      
+      setRecentSearches(newRecentSearches);
+      localStorage.setItem('recentSearches', JSON.stringify(newRecentSearches));
+      
+      searchProducts(query);
+      setSearchValue(query);
+      setSearchFocused(false);
+    }
+  }, [recentSearches, searchProducts]);
+
+  const handleSuggestionClick = (suggestion) => {
+    if (suggestion.type === 'category') {
+      updateFilters({ category: suggestion.value, searchQuery: '' });
+      setSearchValue('');
+    } else {
+      handleSearch(suggestion.text);
+    }
+    setSearchFocused(false);
+  };
+
+  const handleFilterApply = () => {
+    updateFilters(tempFilters);
+    setIsFilterModalOpen(false);
+  };
+
+  const handleFilterReset = () => {
+    const resetFilters = {
+      category: '',
+      region: '',
+      priceMin: '',
+      priceMax: '',
+      condition: '',
+      sortBy: 'latest',
+      searchQuery: '',
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [currentIndex, products]);
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    searchProducts(searchInput.trim());
+    setTempFilters(resetFilters);
+    updateFilters(resetFilters);
+    setIsFilterModalOpen(false);
   };
 
-  const handleFilterChange = (filterType, value) => {
-    updateFilters({ [filterType]: value });
-  };
-
-  const handleProductClick = (product) => {
-    incrementViews(product.id);
-    navigate(`/product/${product.id}`);
-  };
-
-  const handleLikeClick = async (e, productId) => {
-    e.stopPropagation();
-    
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-
-    try {
-      await toggleLike(productId);
-    } catch (error) {
-      console.error('찜하기 실패:', error);
-    }
+  const clearRecentSearches = () => {
+    setRecentSearches([]);
+    localStorage.removeItem('recentSearches');
   };
 
   const formatPrice = (price) => {
     if (price >= 10000) {
-      const man = Math.floor(price / 10000);
-      const remainder = price % 10000;
-      if (remainder === 0) {
-        return `${man}만원`;
-      } else {
-        return `${man}만 ${remainder.toLocaleString()}원`;
-      }
+      return `${Math.floor(price / 10000)}만원`;
     }
     return `${price.toLocaleString()}원`;
   };
 
-  const formatTimeAgo = (timestamp) => {
-    if (!timestamp) return '방금 전';
-    
+  const formatDate = (date) => {
+    if (!date) return '';
     const now = new Date();
-    const time = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    const diffInSeconds = Math.floor((now - time) / 1000);
+    const d = date.toDate ? date.toDate() : new Date(date);
+    const diff = now - d;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
     
-    if (diffInSeconds < 60) return '방금 전';
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}분 전`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}시간 전`;
-    return `${Math.floor(diffInSeconds / 86400)}일 전`;
+    if (minutes < 1) return '방금 전';
+    if (minutes < 60) return `${minutes}분 전`;
+    if (hours < 24) return `${hours}시간 전`;
+    if (days < 7) return `${days}일 전`;
+    
+    return d.toLocaleDateString();
   };
+
+  const getProductBadge = (product) => {
+    const now = new Date();
+    const created = product.createdAt?.toDate ? product.createdAt.toDate() : new Date(product.createdAt);
+    const hoursDiff = (now - created) / (1000 * 60 * 60);
+    
+    if (hoursDiff < 1) return { type: 'new', text: '신규' };
+    if (product.viewCount > 100) return { type: 'hot', text: '인기' };
+    if (product.priceNegotiable) return { type: 'urgent', text: '급처' };
+    return null;
+  };
+
+  const activeFilterCount = Object.values(filters).filter(v => v && v !== '').length;
 
   return (
     <Container>
       <TopBar />
       
       <SearchSection>
-        {successMessage && (
-          <SuccessMessage>{successMessage}</SuccessMessage>
-        )}
-        
-        <form onSubmit={handleSearch}>
-          <SearchBar>
+        <SearchBarContainer>
+          <SearchBar focused={searchFocused}>
             <FaSearch color="#999" />
             <SearchInput
-              type="text"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              ref={searchInputRef}
               placeholder="어떤 악기를 찾고 계신가요?"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch(searchValue);
+                }
+              }}
             />
+            {searchValue && (
+              <FaTimes 
+                color="#999" 
+                style={{ cursor: 'pointer' }}
+                onClick={() => {
+                  setSearchValue('');
+                  setSearchFocused(false);
+                }}
+              />
+            )}
           </SearchBar>
-        </form>
-        
-        <FilterRow>
-          <FilterButton
-            active={filters?.category === ''}
-            onClick={() => handleFilterChange('category', '')}
-          >
-            전체
-          </FilterButton>
-          {Object.values(INSTRUMENT_CATEGORIES).map(category => (
-            <FilterButton
-              key={category.id}
-              active={filters?.category === category.id}
-              onClick={() => handleFilterChange('category', category.id)}
-            >
-              {category.name}
-            </FilterButton>
-          ))}
           
-          <FilterButton
-            active={showFilters}
-            onClick={() => setShowFilters(!showFilters)}
+          {searchFocused && (
+            <SearchSuggestions>
+              {searchSuggestions.length > 0 ? (
+                searchSuggestions.map((suggestion, index) => (
+                  <SuggestionItem 
+                    key={index}
+                    onClick={() => handleSuggestionClick(suggestion)}
+                  >
+                    {suggestion.type === 'category' ? <FaCog /> : <FaSearch />}
+                    {suggestion.text}
+                  </SuggestionItem>
+                ))
+              ) : recentSearches.length > 0 && (
+                <RecentSearches>
+                  <RecentTitle>
+                    최근 검색어
+                    <button 
+                      onClick={clearRecentSearches}
+                      style={{ 
+                        background: 'none', 
+                        border: 'none', 
+                        color: '#999', 
+                        fontSize: '12px',
+                        cursor: 'pointer' 
+                      }}
+                    >
+                      전체삭제
+                    </button>
+                  </RecentTitle>
+                  <RecentTags>
+                    {recentSearches.slice(0, 5).map((search, index) => (
+                      <RecentTag 
+                        key={index}
+                        onClick={() => handleSearch(search)}
+                      >
+                        <FaClock />
+                        {search}
+                      </RecentTag>
+                    ))}
+                  </RecentTags>
+                </RecentSearches>
+              )}
+            </SearchSuggestions>
+          )}
+        </SearchBarContainer>
+        
+        <FilterSection>
+          <FilterChip 
+            active={activeFilterCount > 0}
+            onClick={() => setIsFilterModalOpen(true)}
           >
             <FaFilter />
-            필터
-          </FilterButton>
-        </FilterRow>
-        
-        {showFilters && (
-          <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div>
-              <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>
-                지역
-              </label>
-              <select
-                value={filters?.region || ''}
-                onChange={(e) => handleFilterChange('region', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  border: '1px solid #ddd',
-                  borderRadius: '6px',
-                  fontSize: '14px'
-                }}
-              >
-                <option value="">전체 지역</option>
-                {Object.values(REGIONS).map(region => (
-                  <option key={region.id} value={region.name}>
-                    {region.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <div style={{ flex: 1 }}>
-                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>
-                  최소 가격
-                </label>
-                <input
-                  type="number"
-                  value={filters?.priceMin || ''}
-                  onChange={(e) => handleFilterChange('priceMin', e.target.value)}
-                  placeholder="최소 가격"
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    border: '1px solid #ddd',
-                    borderRadius: '6px',
-                    fontSize: '14px'
-                  }}
-                />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>
-                  최대 가격
-                </label>
-                <input
-                  type="number"
-                  value={filters?.priceMax || ''}
-                  onChange={(e) => handleFilterChange('priceMax', e.target.value)}
-                  placeholder="최대 가격"
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    border: '1px solid #ddd',
-                    borderRadius: '6px',
-                    fontSize: '14px'
-                  }}
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>
-                정렬
-              </label>
-              <select
-                value={filters?.sortBy || 'latest'}
-                onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  border: '1px solid #ddd',
-                  borderRadius: '6px',
-                  fontSize: '14px'
-                }}
-              >
-                <option value="latest">최신순</option>
-                <option value="price_low">가격 낮은순</option>
-                <option value="price_high">가격 높은순</option>
-                <option value="popular">인기순</option>
-              </select>
-            </div>
-          </div>
-        )}
+            필터 {activeFilterCount > 0 && `(${activeFilterCount})`}
+          </FilterChip>
+          
+          <FilterChip
+            active={filters.category === 'guitar'}
+            onClick={() => updateFilters({ 
+              category: filters.category === 'guitar' ? '' : 'guitar' 
+            })}
+          >
+            기타
+          </FilterChip>
+          
+          <FilterChip
+            active={filters.category === 'piano'}
+            onClick={() => updateFilters({ 
+              category: filters.category === 'piano' ? '' : 'piano' 
+            })}
+          >
+            피아노
+          </FilterChip>
+          
+          <FilterChip
+            active={filters.category === 'drums'}
+            onClick={() => updateFilters({ 
+              category: filters.category === 'drums' ? '' : 'drums' 
+            })}
+          >
+            드럼
+          </FilterChip>
+          
+          <FilterChip
+            active={filters.category === 'wind'}
+            onClick={() => updateFilters({ 
+              category: filters.category === 'wind' ? '' : 'wind' 
+            })}
+          >
+            관악기
+          </FilterChip>
+          
+          <FilterChip
+            active={filters.category === 'audio'}
+            onClick={() => updateFilters({ 
+              category: filters.category === 'audio' ? '' : 'audio' 
+            })}
+          >
+            오디오
+          </FilterChip>
+          
+          <FilterChip 
+            onClick={() => {
+              const newSort = sortBy === 'latest' ? 'price' : 'latest';
+              setSortBy(newSort);
+              updateFilters({ sortBy: newSort });
+            }}
+          >
+            <FaSort />
+            {sortBy === 'latest' ? '최신순' : '가격순'}
+          </FilterChip>
+        </FilterSection>
       </SearchSection>
-      
+
+
       <ContentContainer>
-        {error && (
-          <div style={{
-            background: '#ffebee',
-            color: '#c62828',
-            padding: '12px 16px',
-            borderRadius: '8px',
-            marginBottom: '16px',
-            textAlign: 'center'
-          }}>
-            {error}
-            <button
-              onClick={refreshProducts}
-              style={{
-                marginLeft: '8px',
-                padding: '4px 8px',
-                background: '#c62828',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '12px'
-              }}
-            >
-              다시 시도
-            </button>
-          </div>
-        )}
-        
-        {loading && (!products || products.length === 0) ? (
-          <LoadingContainer>
-            <LoadingSpinner />
-          </LoadingContainer>
-        ) : (!products || products.length === 0) ? (
-          <EmptyState>
-            <EmptyIcon>🎵</EmptyIcon>
-            <EmptyTitle>
-              {filters?.searchQuery ? 
-                `"${filters.searchQuery}"에 대한 검색 결과가 없어요` : 
-                '아직 등록된 상품이 없어요'
-              }
-            </EmptyTitle>
-            <EmptyDescription>
-              {filters?.searchQuery ? 
-                '다른 키워드로 검색해보시거나 필터를 조정해보세요.' :
-                '첫 번째 악기를 등록하고 ECHO 커뮤니티를 시작해보세요!'
-              }
-            </EmptyDescription>
-            {!filters?.searchQuery && (
-              <ActionButton onClick={() => navigate('/register')}>
-                상품 등록하기
-              </ActionButton>
-            )}
-          </EmptyState>
-        ) : (
-          <>
-            <ProductGrid>
-              {displayedProducts.map((product, idx) => (
-                <ProductCard
+        <ProductGrid>
+          {loading && products.length === 0 ? (
+            <LoadingContainer>
+              상품을 불러오는 중...
+            </LoadingContainer>
+          ) : products.length === 0 ? (
+            <EmptyState>
+              <FaSearch size={48} color="#ddd" />
+              <h3>검색 결과가 없습니다</h3>
+              <p>다른 검색어를 입력해보세요</p>
+            </EmptyState>
+          ) : (
+            products.map((product) => {
+              const badge = getProductBadge(product);
+              return (
+                <ProductCard 
                   key={product.id}
-                  ref={idx === displayedProducts.length - 1 ? lastProductElementRef : null}
-                  onClick={() => handleProductClick(product)}
+                  onClick={() => navigate(`/product/${product.id}`)}
                 >
                   <ProductImageContainer>
                     {product.images && product.images.length > 0 ? (
-                      <ProductImage
-                        src={product.images[0]}
+                      <ProductImage 
+                        src={product.images[0]} 
                         alt={product.title}
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                          e.target.nextSibling.style.display = 'flex';
-                        }}
                       />
                     ) : (
-                      <ImagePlaceholder>🎵</ImagePlaceholder>
+                      <ImagePlaceholder>
+                        <FaSearch />
+                      </ImagePlaceholder>
                     )}
-                    <ImagePlaceholder style={{ display: 'none' }}>🎵</ImagePlaceholder>
-                    
-                    {product.isUrgent && <UrgentBadge>급처분</UrgentBadge>}
-                    
-                    <LikeButton
-                      liked={product.isLikedByUser}
-                      onClick={(e) => handleLikeClick(e, product.id)}
-                    >
-                      {product.isLikedByUser ? <FaHeart /> : <FaRegHeart />}
-                    </LikeButton>
                   </ProductImageContainer>
                   
                   <ProductInfo>
-                    <ProductTitle>{product.title}</ProductTitle>
-                    <ProductPrice>
-                      {formatPrice(product.price)}
-                      {product.isPriceNegotiable && (
-                        <span style={{ fontSize: '12px', color: '#999', marginLeft: '4px' }}>
-                          협상가능
-                        </span>
-                      )}
-                    </ProductPrice>
-                    <ProductDetails>
-                      <ProductLocation>
+                    <div>
+                      <ProductMeta>
+                        {badge && (
+                          <StatusBadge type={badge.type}>
+                            {badge.text}
+                          </StatusBadge>
+                        )}
                         <FaMapMarkerAlt />
-                        {product.fullLocation || product.location || '위치 미상'}
-                      </ProductLocation>
-                      <ProductStats>
-                        <StatItem>
-                          <FaEye />
-                          {product.viewCount || 0}
-                        </StatItem>
-                        <StatItem>
-                          <FaHeart />
-                          {product.likeCount || 0}
-                        </StatItem>
-                      </ProductStats>
-                    </ProductDetails>
-                    <div style={{ 
-                      fontSize: '11px', 
-                      color: '#bbb', 
-                      marginTop: '4px',
-                      textAlign: 'right'
-                    }}>
-                      {formatTimeAgo(product.createdAt)}
+                        {product.region} {product.district}
+                        <span>•</span>
+                        {formatDate(product.createdAt)}
+                      </ProductMeta>
+                      
+                      <ProductTitle>{product.title}</ProductTitle>
+                      <ProductPrice>{formatPrice(product.price)}</ProductPrice>
                     </div>
+                    
+                    <ProductActions>
+                      <ProductStats>
+                        <FaEye /> {product.viewCount || 0}
+                        <FaComments /> {product.chatCount || 0}
+                      </ProductStats>
+                      
+                      <LikeButton
+                        liked={product.isLikedByUser}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (user?.isLoggedIn) {
+                            toggleLike(product.id);
+                          } else {
+                            navigate('/login');
+                          }
+                        }}
+                      >
+                        {product.isLikedByUser ? <FaHeart /> : <FaRegHeart />}
+                      </LikeButton>
+                    </ProductActions>
                   </ProductInfo>
                 </ProductCard>
-              ))}
-            </ProductGrid>
-            
-            {(loading || isLoadingMore) && products && products.length > 0 && (
-              <LoadingContainer>
-                <LoadingSpinner />
-              </LoadingContainer>
-            )}
-            
-            {!loading && !isLoadingMore && hasMore && (
-              <LoadMoreButton 
-                onClick={() => {
-                  setIsLoadingMore(true);
-                  loadMoreProducts().finally(() => setIsLoadingMore(false));
-                }}
-                disabled={isLoadingMore}
-              >
-                더 많은 상품 보기
-              </LoadMoreButton>
-            )}
-            
-            {!hasMore && products && products.length > 0 && (
-              <div style={{
-                textAlign: 'center',
-                padding: '20px',
-                color: '#999',
-                fontSize: '14px'
-              }}>
-                모든 상품을 확인했습니다 🎉
-              </div>
-            )}
-          </>
-        )}
+              );
+            })
+          )}
+          
+          {hasMore && (
+            <div ref={observerRef} style={{ height: '1px' }} />
+          )}
+        </ProductGrid>
+        
+        {/* 상품 등록 FAB */}
+        <FAB onClick={() => navigate('/add')}>
+          <FaPlus style={{ fontSize: '24px', color: 'white' }} />
+        </FAB>
       </ContentContainer>
-      <button
-        onClick={() => navigate('/register')}
-        style={{
-          position: 'fixed',
-          bottom: 32,
-          right: 32,
-          width: 56,
-          height: 56,
-          borderRadius: '50%',
-          background: '#2ed8b6',
-          color: '#fff',
-          border: 'none',
-          fontSize: 28,
-          boxShadow: '0 4px 16px rgba(46,216,182,0.18)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          cursor: 'pointer',
-          transition: 'all 0.2s',
-        }}
-        aria-label="상품 등록"
-      >
-        <FaPlus />
-      </button>
+
+      {/* 필터 모달 */}
+      {isFilterModalOpen && (
+        <FilterModal onClick={() => setIsFilterModalOpen(false)}>
+          <FilterContent onClick={(e) => e.stopPropagation()}>
+            <FilterHeader>
+              <FilterTitle>필터</FilterTitle>
+              <FilterCloseButton onClick={() => setIsFilterModalOpen(false)}>
+                <FaTimes />
+              </FilterCloseButton>
+            </FilterHeader>
+            
+            <FilterBody>
+              <FilterGroup>
+                <FilterGroupTitle>가격대</FilterGroupTitle>
+                <PriceRange>
+                  <PriceInput
+                    type="number"
+                    placeholder="최소 금액"
+                    value={tempFilters.priceMin}
+                    onChange={(e) => setTempFilters(prev => ({
+                      ...prev,
+                      priceMin: e.target.value
+                    }))}
+                  />
+                  <span>~</span>
+                  <PriceInput
+                    type="number"
+                    placeholder="최대 금액"
+                    value={tempFilters.priceMax}
+                    onChange={(e) => setTempFilters(prev => ({
+                      ...prev,
+                      priceMax: e.target.value
+                    }))}
+                  />
+                </PriceRange>
+              </FilterGroup>
+              
+              <FilterGroup>
+                <FilterGroupTitle>상품 상태</FilterGroupTitle>
+                <FilterOptions>
+                  {['excellent', 'good', 'fair', 'poor'].map(condition => (
+                    <FilterOption
+                      key={condition}
+                      selected={tempFilters.condition === condition}
+                      onClick={() => setTempFilters(prev => ({
+                        ...prev,
+                        condition: prev.condition === condition ? '' : condition
+                      }))}
+                    >
+                      {condition === 'excellent' && '매우 좋음'}
+                      {condition === 'good' && '좋음'}
+                      {condition === 'fair' && '보통'}
+                      {condition === 'poor' && '나쁨'}
+                    </FilterOption>
+                  ))}
+                </FilterOptions>
+              </FilterGroup>
+              
+              <div style={{ 
+                display: 'flex', 
+                gap: '12px', 
+                marginTop: '24px',
+                paddingTop: '20px',
+                borderTop: '1px solid #f0f0f0'
+              }}>
+                <button 
+                  onClick={handleFilterReset}
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '8px',
+                    background: 'white',
+                    color: '#666',
+                    cursor: 'pointer'
+                  }}
+                >
+                  초기화
+                </button>
+                <button 
+                  onClick={handleFilterApply}
+                  style={{
+                    flex: 2,
+                    padding: '12px',
+                    border: 'none',
+                    borderRadius: '8px',
+                    background: 'var(--color-mint-main)',
+                    color: 'white',
+                    cursor: 'pointer',
+                    fontWeight: '600'
+                  }}
+                >
+                  적용하기
+                </button>
+              </div>
+            </FilterBody>
+          </FilterContent>
+        </FilterModal>
+      )}
     </Container>
   );
 }

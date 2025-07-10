@@ -1,8 +1,8 @@
-import React, { useContext, useState, useRef, useEffect } from 'react';
-import styled from 'styled-components';
-import { FaSearch, FaBell } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
-import { UserContext } from '../store/UserContext';
+import React, { useContext, useState, useRef, useEffect } from "react";
+import styled from "styled-components";
+import { FaSearch, FaBell } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../store/UserContext";
 
 const Bar = styled.header`
   width: 100vw;
@@ -78,7 +78,7 @@ const Logo = styled.span`
   color: #2ed8b6;
   letter-spacing: 1.5px;
   margin-right: 16px;
-  font-family: 'Montserrat', 'Pretendard', sans-serif;
+  font-family: "Montserrat", "Pretendard", sans-serif;
   user-select: none;
   flex-shrink: 0;
   @media (max-width: 480px) {
@@ -123,35 +123,111 @@ export default function TopBar() {
       const rect = menuBtnRef.current.getBoundingClientRect();
       setDropdownPos({
         top: rect.bottom + 4,
-        right: window.innerWidth - rect.right
+        right: window.innerWidth - rect.right,
       });
     }
   }, [menuOpen]);
 
-  const handleLogin = () => navigate('/login');
+  const handleLogin = () => navigate("/login");
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate("/");
   };
   return (
     <Bar>
       <BarInner>
-        <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
-          <Logo style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>ECHO</Logo>
+        <div style={{ display: "flex", alignItems: "center", flex: 1 }}>
+          <Logo style={{ cursor: "pointer" }} onClick={() => navigate("/")}>
+            ECHO
+          </Logo>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            position: "relative",
+          }}
+        >
           {/* 상품등록 버튼 제거 */}
-          <IconBtn ref={menuBtnRef} onClick={() => setMenuOpen(v => !v)} aria-label="메뉴 열기/닫기">
-            <svg width="22" height="22" fill="none" stroke="#222" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <IconBtn
+            ref={menuBtnRef}
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-label="메뉴 열기/닫기"
+          >
+            <svg
+              width="22"
+              height="22"
+              fill="none"
+              stroke="#222"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
           </IconBtn>
           {menuOpen && (
-            <div style={{ position: 'fixed', top: dropdownPos.top, right: dropdownPos.right, background: '#fff', border: '1.5px solid #eee', borderRadius: 10, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', zIndex: 200, minWidth: 140, padding: '8px 0', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
-              <button style={{ padding: '10px 18px', background: 'none', border: 'none', color: '#1a4740', fontWeight: 600, fontSize: 16, textAlign: 'left', cursor: 'pointer' }} onClick={() => { setMenuOpen(false); navigate('/tuner/guitar'); }}>🎸 기타 튜너</button>
-              <button style={{ padding: '10px 18px', background: 'none', border: 'none', color: '#1a4740', fontWeight: 600, fontSize: 16, textAlign: 'left', cursor: 'pointer' }} onClick={() => { setMenuOpen(false); navigate('/tuner/bass'); }}>🎸 베이스 튜너</button>
+            <div
+              style={{
+                position: "fixed",
+                top: dropdownPos.top,
+                right: dropdownPos.right,
+                background: "#fff",
+                border: "1.5px solid #eee",
+                borderRadius: 10,
+                boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+                zIndex: 200,
+                minWidth: 140,
+                padding: "8px 0",
+                display: "flex",
+                flexDirection: "column",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                style={{
+                  padding: "10px 18px",
+                  background: "none",
+                  border: "none",
+                  color: "#1a4740",
+                  fontWeight: 600,
+                  fontSize: 16,
+                  textAlign: "left",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  setMenuOpen(false);
+                  navigate("/tuner/guitar");
+                }}
+              >
+                🎸 기타 튜너
+              </button>
+              <button
+                style={{
+                  padding: "10px 18px",
+                  background: "none",
+                  border: "none",
+                  color: "#1a4740",
+                  fontWeight: 600,
+                  fontSize: 16,
+                  textAlign: "left",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  setMenuOpen(false);
+                  navigate("/tuner/bass");
+                }}
+              >
+                🎸 베이스 튜너
+              </button>
             </div>
           )}
-          <IconBtn><FaSearch size={20} /></IconBtn>
-          <IconBtn style={{ position: 'relative' }}><FaBell size={20} /><Badge /></IconBtn>
+          <IconBtn>
+            <FaSearch size={20} />
+          </IconBtn>
+          <IconBtn style={{ position: "relative" }}>
+            <FaBell size={20} />
+            <Badge />
+          </IconBtn>
           {user.isLoggedIn ? (
             <LogoutBtn onClick={handleLogout}>로그아웃</LogoutBtn>
           ) : (
@@ -161,4 +237,4 @@ export default function TopBar() {
       </BarInner>
     </Bar>
   );
-} 
+}

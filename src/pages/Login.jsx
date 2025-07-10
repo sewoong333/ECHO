@@ -1,13 +1,16 @@
-import React, { useContext, useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { UserContext } from '../store/UserContext';
-import { useNavigate, Link } from 'react-router-dom';
-import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
-import { FcGoogle } from 'react-icons/fc';
-import { SiKakaotalk } from 'react-icons/si';
-import { FaN } from 'react-icons/fa6';
-import { signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth';
-import { auth, googleProvider } from '../utils/firebase';
+import React, { useContext, useState, useEffect } from "react";
+import styled from "styled-components";
+import { UserContext } from "../store/UserContext";
+import { useNavigate, Link } from "react-router-dom";
+import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
+import { FcGoogle } from "react-icons/fc";
+import { SiKakaotalk } from "react-icons/si";
+import { FaN } from "react-icons/fa6";
+import {
+  signInWithPopup,
+  getRedirectResult,
+} from "firebase/auth";
+import { auth, googleProvider } from "../utils/firebase";
 
 const Container = styled.div`
   width: 100%;
@@ -30,7 +33,7 @@ const Container = styled.div`
 const Logo = styled.div`
   font-size: 32px;
   font-weight: 800;
-  color: #2ed8b6;
+  color: var(--color-mint-main);
   margin-bottom: 2em;
 `;
 
@@ -70,7 +73,7 @@ const Input = styled.input`
   box-sizing: border-box;
 
   &:focus {
-    border-color: #2ed8b6;
+    border-color: var(--color-mint-main);
     background: #fff;
     box-shadow: 0 0 0 2px rgba(46, 216, 182, 0.1);
   }
@@ -111,7 +114,7 @@ const PasswordToggle = styled.button`
 const LoginButton = styled.button`
   width: 100%;
   height: 50px;
-  background: #2ed8b6;
+  background: var(--color-mint-main);
   color: white;
   border: none;
   border-radius: 12px;
@@ -144,7 +147,7 @@ const Divider = styled.div`
 
   &::before,
   &::after {
-    content: '';
+    content: "";
     flex: 1;
     border-bottom: 1px solid #e0e0e0;
   }
@@ -186,14 +189,14 @@ const SocialLoginButton = styled.button`
   }
 
   &.kakao {
-    background: #FEE500;
-    border-color: #FEE500;
+    background: #fee500;
+    border-color: #fee500;
     color: #000000;
   }
 
   &.naver {
-    background: #03C75A;
-    border-color: #03C75A;
+    background: #03c75a;
+    border-color: #03c75a;
     color: white;
   }
 `;
@@ -207,7 +210,7 @@ const SignupLink = styled.p`
   box-sizing: border-box;
 
   a {
-    color: #2ed8b6;
+    color: var(--color-mint-main);
     text-decoration: none;
     font-weight: 600;
     margin-left: 0.5em;
@@ -237,16 +240,16 @@ export default function Login() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    setError('');
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setError("");
   };
 
   // 리다이렉트 결과 확인
@@ -255,11 +258,11 @@ export default function Login() {
       try {
         const result = await getRedirectResult(auth);
         if (result?.user) {
-          console.log('Redirect login successful:', result.user);
-          navigate('/', { replace: true });
+          console.log("Redirect login successful:", result.user);
+          navigate("/", { replace: true });
         }
       } catch (error) {
-        console.error('Redirect login error:', error);
+        console.error("Redirect login error:", error);
         handleAuthError(error);
       }
     };
@@ -270,28 +273,32 @@ export default function Login() {
   // 로그인 상태 체크
   useEffect(() => {
     if (!user.loading && user.isLoggedIn) {
-      navigate('/', { replace: true });
+      navigate("/", { replace: true });
     }
   }, [user.loading, user.isLoggedIn, navigate]);
 
   const handleAuthError = (error) => {
-    console.error('Auth error details:', {
+    console.error("Auth error details:", {
       code: error.code,
       message: error.message,
       email: error.email,
-      credential: error.credential
+      credential: error.credential,
     });
 
     switch (error.code) {
-      case 'auth/popup-blocked':
-        alert('팝업이 차단되어 구글 로그인을 진행할 수 없습니다. 브라우저의 팝업 차단을 해제해 주세요.');
+      case "auth/popup-blocked":
+        alert(
+          "팝업이 차단되어 구글 로그인을 진행할 수 없습니다. 브라우저의 팝업 차단을 해제해 주세요.",
+        );
         break;
-      case 'auth/cancelled-popup-request':
-      case 'auth/popup-closed-by-user':
-        console.log('Login popup was cancelled by user');
+      case "auth/cancelled-popup-request":
+      case "auth/popup-closed-by-user":
+        console.log("Login popup was cancelled by user");
         break;
-      case 'auth/unauthorized-domain':
-        alert('현재 도메인에서 구글 로그인이 허용되지 않았습니다. 개발자에게 문의해주세요.');
+      case "auth/unauthorized-domain":
+        alert(
+          "현재 도메인에서 구글 로그인이 허용되지 않았습니다. 개발자에게 문의해주세요.",
+        );
         break;
       default:
         alert(`구글 로그인 중 오류가 발생했습니다. (${error.code})`);
@@ -303,26 +310,33 @@ export default function Login() {
     if (isLoading) return;
 
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
-      console.log('Starting Google login...');
+      console.log("Starting Google login...");
       const result = await signInWithPopup(auth, googleProvider);
-      console.log('Google login successful:', result);
-      
+      console.log("Google login successful:", result);
+
       if (result.user) {
-        console.log('Redirecting to main page...');
-        window.location.href = '/';  // 강제 리다이렉트
+        console.log("Redirecting to main page...");
+        window.location.href = "/"; // 강제 리다이렉트
       }
     } catch (error) {
-      console.error('Google login error:', error);
-      
-      if (error.code === 'auth/popup-blocked') {
-        alert('팝업이 차단되어 구글 로그인을 진행할 수 없습니다. 브라우저의 팝업 차단을 해제해 주세요.');
-      } else if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user') {
-        console.log('Login popup was cancelled by user');
-      } else if (error.code === 'auth/unauthorized-domain') {
-        alert('현재 도메인에서 구글 로그인이 허용되지 않았습니다. 개발자에게 문의해주세요.');
+      console.error("Google login error:", error);
+
+      if (error.code === "auth/popup-blocked") {
+        alert(
+          "팝업이 차단되어 구글 로그인을 진행할 수 없습니다. 브라우저의 팝업 차단을 해제해 주세요.",
+        );
+      } else if (
+        error.code === "auth/cancelled-popup-request" ||
+        error.code === "auth/popup-closed-by-user"
+      ) {
+        console.log("Login popup was cancelled by user");
+      } else if (error.code === "auth/unauthorized-domain") {
+        alert(
+          "현재 도메인에서 구글 로그인이 허용되지 않았습니다. 개발자에게 문의해주세요.",
+        );
       } else {
         alert(`구글 로그인 중 오류가 발생했습니다. (${error.code})`);
       }
@@ -336,15 +350,15 @@ export default function Login() {
     if (isLoading) return;
 
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
       await loginWithEmail(formData);
-      console.log('Email login successful, redirecting...');
-      window.location.href = '/';  // 강제 리다이렉트
+      console.log("Email login successful, redirecting...");
+      window.location.href = "/"; // 강제 리다이렉트
     } catch (error) {
-      console.error('Login error:', error);
-      setError('로그인에 실패했습니다: ' + error.message);
+      console.error("Login error:", error);
+      setError("로그인에 실패했습니다: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -402,11 +416,13 @@ export default function Login() {
         </InputGroup>
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <LoginButton type="submit" disabled={isLoading}>
-          {isLoading ? '로그인 중...' : '로그인'}
+          {isLoading ? "로그인 중..." : "로그인"}
         </LoginButton>
       </Form>
 
-      <Divider><span>또는</span></Divider>
+      <Divider>
+        <span>또는</span>
+      </Divider>
 
       <SocialLoginButton className="google" onClick={handleGoogleLogin}>
         <FcGoogle size={24} />
@@ -429,4 +445,4 @@ export default function Login() {
       </SignupLink>
     </Container>
   );
-} 
+}

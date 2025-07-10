@@ -1,16 +1,16 @@
-import React, { useRef, useState, useEffect } from 'react';
-import styled from 'styled-components';
-import TopBar from '../components/TopBar';
+import React, { useRef, useState, useEffect } from "react";
+import styled from "styled-components";
+import TopBar from "../components/TopBar";
 
-const ECHO_COLOR = '#2ed8b6';
-const ECHO_ACCENT = '#1976d2';
+const ECHO_COLOR = "#2ed8b6";
+const ECHO_ACCENT = "#1976d2";
 const GUITAR_NOTES = [
-  { name: 'E₄', freq: 329.63, label: '1번줄 (E4)' },
-  { name: 'B₃', freq: 246.94, label: '2번줄 (B3)' },
-  { name: 'G₃', freq: 196.00, label: '3번줄 (G3)' },
-  { name: 'D₃', freq: 146.83, label: '4번줄 (D3)' },
-  { name: 'A₂', freq: 110.00, label: '5번줄 (A2)' },
-  { name: 'E₂', freq: 82.41, label: '6번줄 (E2)' },
+  { name: "E₄", freq: 329.63, label: "1번줄 (E4)" },
+  { name: "B₃", freq: 246.94, label: "2번줄 (B3)" },
+  { name: "G₃", freq: 196.0, label: "3번줄 (G3)" },
+  { name: "D₃", freq: 146.83, label: "4번줄 (D3)" },
+  { name: "A₂", freq: 110.0, label: "5번줄 (A2)" },
+  { name: "E₂", freq: 82.41, label: "6번줄 (E2)" },
 ];
 
 function getDiffHz(freq, target) {
@@ -18,10 +18,10 @@ function getDiffHz(freq, target) {
 }
 
 function getAdvice(diff) {
-  if (diff == null) return '';
-  if (Math.abs(diff) < 1) return '정확합니다!';
-  if (diff > 0) return '좀 더 낮게 조정해';
-  return '좀 더 높게 조정해';
+  if (diff == null) return "";
+  if (Math.abs(diff) < 1) return "정확합니다!";
+  if (diff > 0) return "좀 더 낮게 조정해";
+  return "좀 더 높게 조정해";
 }
 
 function autoCorrelate(buf, sampleRate) {
@@ -30,15 +30,28 @@ function autoCorrelate(buf, sampleRate) {
   for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
   rms = Math.sqrt(rms / SIZE);
   if (rms < 0.01) return -1;
-  let r1 = 0, r2 = SIZE - 1, thres = 0.2;
-  for (let i = 0; i < SIZE / 2; i++) if (Math.abs(buf[i]) < thres) { r1 = i; break; }
-  for (let i = 1; i < SIZE / 2; i++) if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; }
+  let r1 = 0,
+    r2 = SIZE - 1,
+    thres = 0.2;
+  for (let i = 0; i < SIZE / 2; i++)
+    if (Math.abs(buf[i]) < thres) {
+      r1 = i;
+      break;
+    }
+  for (let i = 1; i < SIZE / 2; i++)
+    if (Math.abs(buf[SIZE - i]) < thres) {
+      r2 = SIZE - i;
+      break;
+    }
   buf = buf.slice(r1, r2);
   SIZE = buf.length;
   let c = new Array(SIZE).fill(0);
-  for (let i = 0; i < SIZE; i++) for (let j = 0; j < SIZE - i; j++) c[i] = c[i] + buf[j] * buf[j + i];
-  let d = 0; while (c[d] > c[d + 1]) d++;
-  let maxval = -1, maxpos = -1;
+  for (let i = 0; i < SIZE; i++)
+    for (let j = 0; j < SIZE - i; j++) c[i] = c[i] + buf[j] * buf[j + i];
+  let d = 0;
+  while (c[d] > c[d + 1]) d++;
+  let maxval = -1,
+    maxpos = -1;
   for (let i = d; i < SIZE; i++) {
     if (c[i] > maxval) {
       maxval = c[i];
@@ -157,19 +170,22 @@ const StringBtn = styled.button`
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  border: 2.5px solid ${({ $active }) => ($active ? '#1976d2' : '#e0e2e6')};
-  background: ${({ $active }) => ($active ? '#1976d2' : '#fff')};
-  color: ${({ $active }) => ($active ? '#fff' : '#222')};
+  border: 2.5px solid ${({ $active }) => ($active ? "#1976d2" : "#e0e2e6")};
+  background: ${({ $active }) => ($active ? "#1976d2" : "#fff")};
+  color: ${({ $active }) => ($active ? "#fff" : "#222")};
   font-weight: 900;
   font-size: 24px;
   outline: none;
   cursor: pointer;
-  box-shadow: ${({ $active }) => ($active ? '0 2px 8px #b2f0e6' : 'none')};
+  box-shadow: ${({ $active }) => ($active ? "0 2px 8px #b2f0e6" : "none")};
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  transition: background 0.18s, color 0.18s, border 0.18s;
+  transition:
+    background 0.18s,
+    color 0.18s,
+    border 0.18s;
   letter-spacing: 1px;
   padding: 0;
 `;
@@ -192,7 +208,9 @@ const GaugeBox = styled.div`
   align-items: center;
   background: #fff;
   border-radius: 32px;
-  box-shadow: 0 4px 32px 0 rgba(46,216,182,0.10), 0 1.5px 8px 0 #b2f0e6;
+  box-shadow:
+    0 4px 32px 0 rgba(46, 216, 182, 0.1),
+    0 1.5px 8px 0 #b2f0e6;
   padding-top: 12px;
   padding-bottom: 18px;
   @media (max-width: 480px) {
@@ -298,7 +316,8 @@ export default function GuitarTuner() {
     let stopped = false;
     async function listen() {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const audioContext = new (window.AudioContext ||
+        window.webkitAudioContext)();
       audioContextRef.current = audioContext;
       const analyser = audioContext.createAnalyser();
       analyser.fftSize = 2048;
@@ -348,75 +367,187 @@ export default function GuitarTuner() {
         <TunerRow>
           <StringCol>
             {GUITAR_NOTES.map((n, i) => (
-              <StringBtn key={n.name} $active={i === selected} onClick={() => setSelected(i)}>
-                <span style={{ fontSize: 22, fontWeight: 900, lineHeight: 1 }}>{n.name.split('₁')[0].split('₂')[0].split('₃')[0].split('₄')[0]}</span>
-                <span style={{ fontSize: 15, fontWeight: 500, lineHeight: 1, marginTop: 1 }}>{n.name.match(/₁|₂|₃|₄/) ? n.name.match(/₁|₂|₃|₄/)[0] : ''}</span>
+              <StringBtn
+                key={n.name}
+                $active={i === selected}
+                onClick={() => setSelected(i)}
+              >
+                <span style={{ fontSize: 22, fontWeight: 900, lineHeight: 1 }}>
+                  {
+                    n.name
+                      .split("₁")[0]
+                      .split("₂")[0]
+                      .split("₃")[0]
+                      .split("₄")[0]
+                  }
+                </span>
+                <span
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 500,
+                    lineHeight: 1,
+                    marginTop: 1,
+                  }}
+                >
+                  {n.name.match(/₁|₂|₃|₄/) ? n.name.match(/₁|₂|₃|₄/)[0] : ""}
+                </span>
               </StringBtn>
             ))}
           </StringCol>
           <GaugeWrap>
-            <GaugeBox style={{ background: 'none', boxShadow: 'none', borderRadius: 0, padding: 0, margin: '0 auto 18px auto', width: '100%', maxWidth: 420, height: 220 }}>
-              <svg width="100%" height="180" viewBox="0 0 340 180" style={{ maxWidth: 420, display: 'block', margin: '0 auto' }}>
+            <GaugeBox
+              style={{
+                background: "none",
+                boxShadow: "none",
+                borderRadius: 0,
+                padding: 0,
+                margin: "0 auto 18px auto",
+                width: "100%",
+                maxWidth: 420,
+                height: 220,
+              }}
+            >
+              <svg
+                width="100%"
+                height="180"
+                viewBox="0 0 340 180"
+                style={{ maxWidth: 420, display: "block", margin: "0 auto" }}
+              >
                 {/* 반원형 회색 눈금 */}
-                <path d="M20 150 A150 150 0 0 1 320 150" fill="none" stroke="#e0e2e6" strokeWidth="14" />
+                <path
+                  d="M20 150 A150 150 0 0 1 320 150"
+                  fill="none"
+                  stroke="#e0e2e6"
+                  strokeWidth="14"
+                />
                 {/* 파란 부채꼴: 중앙(정확)일 때만 표시, ±10도(합산 20도) */}
                 {Math.abs(diff) < 1 && (
                   <path
                     d="M170 150 L153.16 52.64 A100 100 0 0 1 186.84 52.64 L170 150 Z"
-                    fill="#1976d2" opacity="0.22"
+                    fill="#1976d2"
+                    opacity="0.22"
                   />
                 )}
                 {/* 눈금선/숫자 */}
                 {[...Array(11)].map((_, i) => {
                   const val = -100 + i * 20;
                   const angle = (val / 200) * 180;
-                  const rad = (angle - 90) * Math.PI / 180;
+                  const rad = ((angle - 90) * Math.PI) / 180;
                   const x1 = 170 + 120 * Math.cos(rad);
                   const y1 = 150 + 120 * Math.sin(rad);
                   const x2 = 170 + 140 * Math.cos(rad);
                   const y2 = 150 + 140 * Math.sin(rad);
                   return (
                     <g key={val}>
-                      <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={val === 0 ? '#1976d2' : '#b0b3b8'} strokeWidth={val === 0 ? 4 : 2} />
-                      <text x={170 + 105 * Math.cos(rad)} y={150 + 105 * Math.sin(rad) + 7} textAnchor="middle" fontSize="18" fontWeight={val === 0 ? 700 : 400} fill={val === 0 ? '#222' : '#b0b3b8'}>{val}</text>
+                      <line
+                        x1={x1}
+                        y1={y1}
+                        x2={x2}
+                        y2={y2}
+                        stroke={val === 0 ? "#1976d2" : "#b0b3b8"}
+                        strokeWidth={val === 0 ? 4 : 2}
+                      />
+                      <text
+                        x={170 + 105 * Math.cos(rad)}
+                        y={150 + 105 * Math.sin(rad) + 7}
+                        textAnchor="middle"
+                        fontSize="18"
+                        fontWeight={val === 0 ? 700 : 400}
+                        fill={val === 0 ? "#222" : "#b0b3b8"}
+                      >
+                        {val}
+                      </text>
                     </g>
                   );
                 })}
                 {/* 바늘 */}
-                <g style={{ transform: `rotate(${Math.max(-100, Math.min(100, diff || 0)) * 0.9}deg)`, transformOrigin: '170px 150px' }}>
-                  <rect x="167" y="150" width="6" height="-70" rx="3" fill="#222" />
-                  <circle cx="170" cy="150" r="16" fill="#fff" stroke="#222" strokeWidth="5" />
+                <g
+                  style={{
+                    transform: `rotate(${Math.max(-100, Math.min(100, diff || 0)) * 0.9}deg)`,
+                    transformOrigin: "170px 150px",
+                  }}
+                >
+                  <rect
+                    x="167"
+                    y="150"
+                    width="6"
+                    height="-70"
+                    rx="3"
+                    fill="#222"
+                  />
+                  <circle
+                    cx="170"
+                    cy="150"
+                    r="16"
+                    fill="#fff"
+                    stroke="#222"
+                    strokeWidth="5"
+                  />
                   <circle cx="170" cy="150" r="9" fill="#222" />
                 </g>
               </svg>
               {/* 음표/기준주파수 */}
-              <div style={{ position: 'absolute', top: 10, left: 0, width: '100%', textAlign: 'center' }}>
-                <div style={{ fontSize: 38, fontWeight: 900, color: '#222', letterSpacing: 2 }}>{GUITAR_NOTES[selected].name}</div>
-                <div style={{ fontSize: 22, color: '#222', fontWeight: 900 }}>{GUITAR_NOTES[selected].freq.toFixed(1)}</div>
+              <div
+                style={{
+                  position: "absolute",
+                  top: 10,
+                  left: 0,
+                  width: "100%",
+                  textAlign: "center",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 38,
+                    fontWeight: 900,
+                    color: "#222",
+                    letterSpacing: 2,
+                  }}
+                >
+                  {GUITAR_NOTES[selected].name}
+                </div>
+                <div style={{ fontSize: 22, color: "#222", fontWeight: 900 }}>
+                  {GUITAR_NOTES[selected].freq.toFixed(1)}
+                </div>
               </div>
             </GaugeBox>
             <PitchRow>
-              <PitchNum>{pitch ? pitch.toFixed(1) : '--'}</PitchNum>
+              <PitchNum>{pitch ? pitch.toFixed(1) : "--"}</PitchNum>
               <PitchHz>Hz</PitchHz>
             </PitchRow>
             <Advice>{getAdvice(diff)}</Advice>
           </GaugeWrap>
         </TunerRow>
         <StandardText>
-          표준튜닝: E₄(329.6) - B₃(246.9) - G₃(196.0) - D₃(146.8) - A₂(110.0) - E₂(82.4)
+          표준튜닝: E₄(329.6) - B₃(246.9) - G₃(196.0) - D₃(146.8) - A₂(110.0) -
+          E₂(82.4)
         </StandardText>
       </Frame>
       <HeadSVGWrap>
         <svg width="180" height="180" viewBox="0 0 180 180">
           <rect x="70" y="60" width="40" height="90" rx="20" fill="#bfa07a" />
           {GUITAR_NOTES.map((n, i) => (
-            <line key={n.name} x1={90 + (i-2.5)*10} y1={150} x2={90 + (i-2.5)*10} y2={60} stroke={i === selected ? ECHO_ACCENT : '#bbb'} strokeWidth={i === selected ? 4 : 2.5} />
+            <line
+              key={n.name}
+              x1={90 + (i - 2.5) * 10}
+              y1={150}
+              x2={90 + (i - 2.5) * 10}
+              y2={60}
+              stroke={i === selected ? ECHO_ACCENT : "#bbb"}
+              strokeWidth={i === selected ? 4 : 2.5}
+            />
           ))}
           {GUITAR_NOTES.map((n, i) => (
-            <circle key={n.name} cx={90 + (i-2.5)*10} cy={60} r={7} fill={i === selected ? ECHO_ACCENT : '#888'} />
+            <circle
+              key={n.name}
+              cx={90 + (i - 2.5) * 10}
+              cy={60}
+              r={7}
+              fill={i === selected ? ECHO_ACCENT : "#888"}
+            />
           ))}
         </svg>
       </HeadSVGWrap>
     </Wrapper>
   );
-} 
+}

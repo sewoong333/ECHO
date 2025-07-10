@@ -1,12 +1,25 @@
-import React, { useContext, useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { FiBookmark, FiShoppingBag, FiHeart, FiTag, FiStar, FiChevronRight, FiSettings, FiHome, FiMessageSquare, FiMapPin, FiUsers, FiUser } from 'react-icons/fi';
-import TopBar from '../components/TopBar';
-import { useNavigate } from 'react-router-dom';
-import { UserContext } from '../store/UserContext';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../utils/firebase';
+import React, { useContext, useState, useEffect } from "react";
+import styled from "styled-components";
+import {
+  FiBookmark,
+  FiShoppingBag,
+  FiHeart,
+  FiTag,
+  FiStar,
+  FiChevronRight,
+  FiSettings,
+  FiHome,
+  FiMessageSquare,
+  FiMapPin,
+  FiUsers,
+  FiUser,
+} from "react-icons/fi";
+import TopBar from "../components/TopBar";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../store/UserContext";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, storage } from "../utils/firebase";
 
 const Wrapper = styled.div`
   width: 100vw;
@@ -61,7 +74,9 @@ const MenuItem = styled.div`
   padding: 13px 24px;
   cursor: pointer;
   background: none;
-  &:active { background: #f0f2f4; }
+  &:active {
+    background: #f0f2f4;
+  }
 `;
 const MenuLeft = styled.div`
   display: flex;
@@ -75,7 +90,9 @@ const MenuText = styled.div`
 `;
 const NavBar = styled.div`
   position: fixed;
-  left: 0; right: 0; bottom: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   width: 100vw;
   max-width: 480px;
   margin: 0 auto;
@@ -94,7 +111,9 @@ const NavItem = styled.div`
   font-size: 12px;
   color: #b0b3b8;
   font-weight: 600;
-  &.active { color: #1976d2; }
+  &.active {
+    color: #1976d2;
+  }
 `;
 const ProfileSection = styled.div`
   width: 100vw;
@@ -150,8 +169,11 @@ const EditBtn = styled.button`
 `;
 const ModalOverlay = styled.div`
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.18);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.18);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -162,7 +184,7 @@ const ModalBox = styled.div`
   border-radius: 16px;
   padding: 32px 28px 24px 28px;
   min-width: 320px;
-  box-shadow: 0 4px 24px rgba(46,216,182,0.10);
+  box-shadow: 0 4px 24px rgba(46, 216, 182, 0.1);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -210,10 +232,10 @@ const ModalCancelBtn = styled(ModalBtn)`
 export default function MyEcho() {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
-  const defaultImg = 'https://i.ibb.co/3y0Qw1K/profile-demo.jpg';
+  const defaultImg = "https://i.ibb.co/3y0Qw1K/profile-demo.jpg";
   const [editOpen, setEditOpen] = useState(false);
   const [profileImg, setProfileImg] = useState(user.photoURL || defaultImg);
-  const [nickname, setNickname] = useState(user.nickname || '');
+  const [nickname, setNickname] = useState(user.nickname || "");
   const [loading, setLoading] = useState(false);
   const fileInputRef = React.useRef();
 
@@ -222,23 +244,23 @@ export default function MyEcho() {
       if (!user.isLoggedIn) return;
 
       try {
-        const userRef = doc(db, 'users', user.uid);
+        const userRef = doc(db, "users", user.uid);
         const userDoc = await getDoc(userRef);
-        
+
         if (userDoc.exists()) {
           const userData = userDoc.data();
           setProfileImg(userData.photoURL || defaultImg);
-          setNickname(userData.nickname || '');
+          setNickname(userData.nickname || "");
         }
       } catch (err) {
-        console.error('프로필 불러오기 실패:', err);
+        console.error("프로필 불러오기 실패:", err);
       }
     };
 
     fetchUserProfile();
   }, [user]);
 
-  const handleImgChange = async e => {
+  const handleImgChange = async (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
 
@@ -250,8 +272,8 @@ export default function MyEcho() {
       const downloadURL = await getDownloadURL(imageRef);
       setProfileImg(downloadURL);
     } catch (err) {
-      console.error('프로필 이미지 업로드 실패:', err);
-      alert('프로필 이미지 업로드에 실패했습니다.');
+      console.error("프로필 이미지 업로드 실패:", err);
+      alert("프로필 이미지 업로드에 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -262,16 +284,16 @@ export default function MyEcho() {
 
     try {
       setLoading(true);
-      const userRef = doc(db, 'users', user.uid);
+      const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, {
         nickname,
         photoURL: profileImg,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       });
       setEditOpen(false);
     } catch (err) {
-      console.error('프로필 업데이트 실패:', err);
-      alert('프로필 업데이트에 실패했습니다.');
+      console.error("프로필 업데이트 실패:", err);
+      alert("프로필 업데이트에 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -285,7 +307,7 @@ export default function MyEcho() {
           <ProfileImg src={profileImg} alt="프로필" />
           <ProfileInfo>
             <ProfileName>{nickname}</ProfileName>
-            <ProfileEmail>{user.email || ''}</ProfileEmail>
+            <ProfileEmail>{user.email || ""}</ProfileEmail>
           </ProfileInfo>
           <EditBtn onClick={() => setEditOpen(true)}>프로필 편집</EditBtn>
         </ProfileSection>
@@ -294,33 +316,40 @@ export default function MyEcho() {
             <ModalBox>
               <ModalTitle>프로필 편집</ModalTitle>
               <ModalImg src={profileImg} alt="프로필 미리보기" />
-              <ModalBtn 
-                style={{background:'#e0e2e6',color:'#222',marginBottom:12}}
+              <ModalBtn
+                style={{
+                  background: "#e0e2e6",
+                  color: "#222",
+                  marginBottom: 12,
+                }}
                 onClick={() => fileInputRef.current.click()}
                 disabled={loading}
               >
-                {loading ? '업로드중...' : '프로필 사진 변경'}
+                {loading ? "업로드중..." : "프로필 사진 변경"}
               </ModalBtn>
-              <input 
-                type="file" 
-                accept="image/*" 
-                style={{display:'none'}} 
-                ref={fileInputRef} 
+              <input
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                ref={fileInputRef}
                 onChange={handleImgChange}
                 disabled={loading}
               />
-              <ModalInput 
-                value={nickname} 
-                onChange={e => setNickname(e.target.value)} 
-                maxLength={16} 
+              <ModalInput
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                maxLength={16}
                 placeholder="닉네임 입력"
                 disabled={loading}
               />
               <ModalBtnRow>
                 <ModalBtn onClick={handleEditSave} disabled={loading}>
-                  {loading ? '저장중...' : '저장'}
+                  {loading ? "저장중..." : "저장"}
                 </ModalBtn>
-                <ModalCancelBtn onClick={() => setEditOpen(false)} disabled={loading}>
+                <ModalCancelBtn
+                  onClick={() => setEditOpen(false)}
+                  disabled={loading}
+                >
                   취소
                 </ModalCancelBtn>
               </ModalBtnRow>
@@ -330,12 +359,18 @@ export default function MyEcho() {
         <Section>
           <SectionTitle>나의 거래</SectionTitle>
           <MenuList>
-            <MenuItem onClick={() => navigate('/mypage/sales')}>
-              <MenuLeft><FiBookmark size={22} /><MenuText>판매내역</MenuText></MenuLeft>
+            <MenuItem onClick={() => navigate("/mypage/sales")}>
+              <MenuLeft>
+                <FiBookmark size={22} />
+                <MenuText>판매내역</MenuText>
+              </MenuLeft>
               <FiChevronRight size={22} color="#bbb" />
             </MenuItem>
-            <MenuItem onClick={() => navigate('/mypage/purchases')}>
-              <MenuLeft><FiShoppingBag size={22} /><MenuText>구매내역</MenuText></MenuLeft>
+            <MenuItem onClick={() => navigate("/mypage/purchases")}>
+              <MenuLeft>
+                <FiShoppingBag size={22} />
+                <MenuText>구매내역</MenuText>
+              </MenuLeft>
               <FiChevronRight size={22} color="#bbb" />
             </MenuItem>
           </MenuList>
@@ -344,27 +379,51 @@ export default function MyEcho() {
           <SectionTitle>나의 관심</SectionTitle>
           <MenuList>
             <MenuItem>
-              <MenuLeft><FiHeart size={22} /><MenuText>관심목록</MenuText></MenuLeft>
+              <MenuLeft>
+                <FiHeart size={22} />
+                <MenuText>관심목록</MenuText>
+              </MenuLeft>
               <FiChevronRight size={22} color="#bbb" />
             </MenuItem>
             <MenuItem>
-              <MenuLeft><FiTag size={22} /><MenuText>키워드 알림 설정</MenuText></MenuLeft>
+              <MenuLeft>
+                <FiTag size={22} />
+                <MenuText>키워드 알림 설정</MenuText>
+              </MenuLeft>
               <FiChevronRight size={22} color="#bbb" />
             </MenuItem>
             <MenuItem>
-              <MenuLeft><FiStar size={22} /><MenuText>모아보기</MenuText></MenuLeft>
+              <MenuLeft>
+                <FiStar size={22} />
+                <MenuText>모아보기</MenuText>
+              </MenuLeft>
               <FiChevronRight size={22} color="#bbb" />
             </MenuItem>
           </MenuList>
         </Section>
         <NavBar>
-          <NavItem><FiHome size={24} /><div>홈</div></NavItem>
-          <NavItem><FiUsers size={24} /><div>동네생활</div></NavItem>
-          <NavItem><FiMapPin size={24} /><div>동네지도</div></NavItem>
-          <NavItem><FiMessageSquare size={24} /><div>채팅</div></NavItem>
-          <NavItem className="active"><FiUser size={24} /><div>나의 에코</div></NavItem>
+          <NavItem>
+            <FiHome size={24} />
+            <div>홈</div>
+          </NavItem>
+          <NavItem>
+            <FiUsers size={24} />
+            <div>동네생활</div>
+          </NavItem>
+          <NavItem>
+            <FiMapPin size={24} />
+            <div>동네지도</div>
+          </NavItem>
+          <NavItem>
+            <FiMessageSquare size={24} />
+            <div>채팅</div>
+          </NavItem>
+          <NavItem className="active">
+            <FiUser size={24} />
+            <div>나의 에코</div>
+          </NavItem>
         </NavBar>
       </Wrapper>
     </>
   );
-} 
+}
