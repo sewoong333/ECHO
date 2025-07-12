@@ -27,6 +27,8 @@ import {
   FaChevronLeft,
   FaTimes,
   FaExclamationTriangle,
+  FaEdit,
+  FaTrash,
 } from "react-icons/fa";
 
 const Container = styled.div`
@@ -79,6 +81,7 @@ const HeaderRight = styled.div`
   display: flex;
   align-items: center;
   gap: 16px;
+  position: relative;
 `;
 
 const IconButton = styled.button`
@@ -97,6 +100,8 @@ const IconButton = styled.button`
 const ImageSection = styled.div`
   position: relative;
   margin-top: 56px;
+  padding: 16px;
+  background: #fff;
 `;
 
 const ImageSlider = styled.div`
@@ -105,6 +110,8 @@ const ImageSlider = styled.div`
   aspect-ratio: 1;
   overflow: hidden;
   background: #f8f9fa;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 `;
 
 const ImageContainer = styled.div`
@@ -153,6 +160,19 @@ const SliderButton = styled.button`
   &:hover {
     background: white;
   }
+`;
+
+const ImageCounter = styled.div`
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  backdrop-filter: blur(4px);
 `;
 
 const ImageDots = styled.div`
@@ -532,16 +552,70 @@ const ModalImage = styled.img`
   object-fit: contain;
 `;
 
+// 옵션 메뉴 스타일
+const OptionsMenu = styled.div`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  z-index: 200;
+  min-width: 120px;
+  overflow: hidden;
+`;
+
+const OptionItem = styled.button`
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: white;
+  color: #333;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  &:hover {
+    background: #f8f9fa;
+  }
+  
+  &:not(:last-child) {
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  &.delete {
+    color: #dc3545;
+    
+    &:hover {
+      background: #fff5f5;
+    }
+  }
+`;
+
+const MenuOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 150;
+`;
+
 export default function ProductDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { products, incrementViews, toggleLike, PRODUCT_STATUS } = useContext(ProductContext);
+  const { products, incrementViews, toggleLike, changeProductStatus, PRODUCT_STATUS } = useContext(ProductContext);
   const { user } = useContext(UserContext);
   const { createOrGetChatRoom } = useContext(ChatContext);
   
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
 
   // 상품 찾기
   const product = products.find((p) => String(p.id) === String(id));
@@ -643,6 +717,40 @@ export default function ProductDetail() {
     navigate(`/purchase/${product.id}`);
   };
 
+  // 옵션 메뉴 핸들러
+  const handleOptionsMenu = (e) => {
+    e.stopPropagation();
+    setShowOptionsMenu(!showOptionsMenu);
+  };
+
+  const handleEditProduct = () => {
+    setShowOptionsMenu(false);
+    navigate(`/edit-product/${product.id}`);
+  };
+
+  const handleDeleteProduct = async () => {
+    if (!user?.isLoggedIn || product.sellerId !== user.uid) {
+      alert('권한이 없습니다.');
+      return;
+    }
+
+    if (window.confirm('정말 이 상품을 삭제하시겠습니까?')) {
+      try {
+        await changeProductStatus(product.id, PRODUCT_STATUS.DELETED);
+        alert('상품이 삭제되었습니다.');
+        navigate('/');
+      } catch (error) {
+        console.error('상품 삭제 실패:', error);
+        alert('상품 삭제에 실패했습니다.');
+      }
+    }
+    setShowOptionsMenu(false);
+  };
+
+  const closeOptionsMenu = () => {
+    setShowOptionsMenu(false);
+  };
+
   const getConditionText = (condition) => {
     const conditions = {
       'excellent': '매우 좋음',
@@ -721,9 +829,28 @@ export default function ProductDetail() {
           <IconButton>
             <FaShare />
           </IconButton>
-          <IconButton>
-            <FaEllipsisV />
-          </IconButton>
+          {user?.uid === product?.sellerId && (
+            <>
+              <IconButton onClick={handleOptionsMenu}>
+                <FaEllipsisV />
+              </IconButton>
+              {showOptionsMenu && (
+                <>
+                  <MenuOverlay onClick={closeOptionsMenu} />
+                  <OptionsMenu>
+                    <OptionItem onClick={handleEditProduct}>
+                      <FaEdit />
+                      수정
+                    </OptionItem>
+                    <OptionItem className="delete" onClick={handleDeleteProduct}>
+                      <FaTrash />
+                      삭제
+                    </OptionItem>
+                  </OptionsMenu>
+                </>
+              )}
+            </>
+          )}
         </HeaderRight>
       </Header>
 
@@ -748,12 +875,9 @@ export default function ProductDetail() {
               
               {images.length > 1 && (
                 <>
-                  <SliderButton direction="prev" onClick={handlePrevImage}>
-                    <FaChevronLeft />
-                  </SliderButton>
-                  <SliderButton direction="next" onClick={handleNextImage}>
-                    <FaChevronRight />
-                  </SliderButton>
+                  <ImageCounter>
+                    {currentImageIndex + 1}/{images.length}
+                  </ImageCounter>
                   
                   <ImageDots>
                     {images.map((_, index) => (

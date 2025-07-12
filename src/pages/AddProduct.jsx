@@ -1,4 +1,4 @@
-import React, { useState, useRef, useContext, useEffect } from "react";
+import React, { useState, useRef, useContext } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -17,12 +17,12 @@ import {
 import { MdDragIndicator } from "react-icons/md";
 import { ProductContext } from "../store/ProductContext";
 import { UserContext } from "../store/UserContext";
-import { INSTRUMENT_CATEGORIES, REGIONS } from "../utils/firebase";
+import { INSTRUMENT_CATEGORIES, REGIONS, auth } from "../utils/firebase";
 
 const Container = styled.div`
   width: 100vw;
   min-height: 100vh;
-  background: #f8f9fa;
+  background: var(--color-bg-secondary);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -33,9 +33,14 @@ const Container = styled.div`
 const Inner = styled.div`
   width: 100%;
   max-width: 500px;
-  background: #fff;
+  background: var(--color-bg-primary);
   min-height: 100vh;
   position: relative;
+  box-shadow: var(--shadow-lg);
+  
+  @media (max-width: 500px) {
+    box-shadow: none;
+  }
 `;
 
 const Header = styled.div`
@@ -72,16 +77,16 @@ const HeaderTitle = styled.h1`
 `;
 
 const CompleteButton = styled.button`
-  background: ${props => props.disabled ? '#f5f5f5' : 'linear-gradient(135deg, #2ed8b6 0%, #25b89a 100%)'};
-  color: ${props => props.disabled ? '#999' : 'white'};
+  background: ${props => props.disabled ? 'var(--color-bg-tertiary)' : 'linear-gradient(135deg, var(--color-mint-main) 0%, var(--color-mint-dark) 100%)'};
+  color: ${props => props.disabled ? 'var(--color-text-tertiary)' : 'var(--color-text-inverse)'};
   border: none;
-  border-radius: 12px;
-  padding: 16px 24px;
-  font-size: 16px;
+  border-radius: var(--radius-xl);
+  padding: var(--space-lg) var(--space-xl);
+  font-size: 1rem;
   font-weight: 600;
   cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
-  transition: all 0.2s ease;
-  box-shadow: ${props => props.disabled ? 'none' : '0 2px 12px rgba(46, 216, 182, 0.25)'};
+  transition: all var(--transition-fast);
+  box-shadow: ${props => props.disabled ? 'none' : 'var(--shadow-md)'};
   width: 100%;
   position: relative;
   overflow: hidden;
@@ -468,6 +473,7 @@ export default function AddProduct() {
   const [errors, setErrors] = useState({});
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState('');
+  const [imageUrlInput, setImageUrlInput] = useState('');
 
   const [formData, setFormData] = useState({
     title: '',
@@ -502,19 +508,61 @@ export default function AddProduct() {
         return;
       }
       
-      if (file.size > 5 * 1024 * 1024) {
-        alert('파일 크기는 5MB를 초과할 수 없습니다.');
+      if (file.size > 10 * 1024 * 1024) { // 10MB까지 허용
+        alert('파일 크기는 10MB를 초과할 수 없습니다.');
         return;
       }
       
       const reader = new FileReader();
       reader.onload = (e) => {
-        setImages(prev => [...prev, {
-          id: Date.now() + Math.random(),
-          file: file,
-          url: e.target.result,
-          uploaded: false,
-        }]);
+        // 이미지를 압축하여 저장
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // 해상도 개선 - 더 큰 크기로 압축 (800px)
+          const maxSize = 800;
+          let { width, height } = img;
+          
+          if (width > height) {
+            if (width > maxSize) {
+              height = (height * maxSize) / width;
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width = (width * maxSize) / height;
+              height = maxSize;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // 품질 개선 - JPEG 품질 75%로 설정
+          let compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+          
+          // 파일 크기가 너무 크면 품질을 60%로 줄임
+          if (compressedDataUrl.length > 400000) { // 약 300KB
+            compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
+          }
+          
+          // 그래도 크다면 품질을 45%로 줄임
+          if (compressedDataUrl.length > 600000) { // 약 450KB
+            compressedDataUrl = canvas.toDataURL('image/jpeg', 0.45);
+          }
+          
+          setImages(prev => [...prev, {
+            id: Date.now() + Math.random(),
+            file: file,
+            url: compressedDataUrl,
+            uploaded: false,
+          }]);
+        };
+        img.src = e.target.result;
       };
       reader.readAsDataURL(file);
     });
@@ -539,6 +587,32 @@ export default function AddProduct() {
   // 태그 제거
   const removeTag = (tag) => {
     setTags(prev => prev.filter(t => t !== tag));
+  };
+
+  // 이미지 URL 추가
+  const addImageFromUrl = () => {
+    const url = imageUrlInput.trim();
+    if (!url) return;
+    
+    if (images.length >= 10) {
+      alert('사진은 최대 10장까지 등록할 수 있습니다.');
+      return;
+    }
+    
+    // URL 유효성 검사
+    if (!url.match(/\.(jpeg|jpg|gif|png|webp)$/i) && !url.includes('imgur') && !url.includes('cloudinary')) {
+      alert('올바른 이미지 URL을 입력해주세요. (jpg, png, gif, webp 확장자)');
+      return;
+    }
+    
+    setImages(prev => [...prev, {
+      id: Date.now() + Math.random(),
+      file: null,
+      url: url,
+      uploaded: true,
+    }]);
+    
+    setImageUrlInput('');
   };
 
   // 폼 유효성 검사
@@ -603,35 +677,63 @@ export default function AddProduct() {
       return;
     }
     
-    if (!user.isLoggedIn) {
-      alert('로그인이 필요합니다.');
+    console.log('🔍 현재 사용자 상태 확인:', {
+      user: user,
+      isLoggedIn: user?.isLoggedIn,
+      uid: user?.uid,
+      email: user?.email,
+      nickname: user?.nickname
+    });
+    
+    if (!user?.isLoggedIn || !user?.uid) {
+      console.log('❌ 로그인 체크 실패:', { 
+        isLoggedIn: user?.isLoggedIn, 
+        uid: user?.uid,
+        userObject: user
+      });
+      alert('로그인이 필요합니다. 로그인 페이지로 이동합니다.');
       navigate('/login');
       return;
     }
+    
+    console.log('✅ 사용자 인증 확인됨 - 상품 등록 진행');
     
     setLoading(true);
     
     try {
       const productData = {
-        ...formData,
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
         price: parseInt(formData.price),
-        images: images.map(img => img.url), // 실제로는 업로드된 URL
+        condition: formData.condition,
+        region: formData.region || "",
+        district: formData.district || "",
+        images: images.slice(0, 3).map(img => img.url), // 최대 3개, 압축된 이미지
         tags: tags,
-        viewCount: 0,
-        likeCount: 0,
-        chatCount: 0,
-        status: 'active',
+        isPriceNegotiable: formData.negotiable || false,
+        isDeliveryAvailable: formData.delivery || false,
+        preferredTransactionType: formData.pickup ? "direct" : "delivery",
       };
+      
+      console.log('📦 전송할 상품 데이터:', productData);
+      console.log('👤 현재 사용자:', user);
+      console.log('🔐 Firebase Auth 상태:', {
+        currentUser: auth.currentUser,
+        uid: auth.currentUser?.uid,
+        email: auth.currentUser?.email
+      });
       
       const newProduct = await addProduct(productData);
       
-      // 성공 메시지
+      console.log('✅ 상품 등록 성공:', newProduct);
       alert('상품이 성공적으로 등록되었습니다!');
-      navigate(`/product/${newProduct.id}`);
+      navigate('/');
       
     } catch (error) {
-      console.error('상품 등록 실패:', error);
-      alert('상품 등록에 실패했습니다. 다시 시도해주세요.');
+      console.error('❌ 상품 등록 실패:', error);
+      console.error('❌ 에러 스택:', error.stack);
+      alert(`상품 등록에 실패했습니다: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -653,7 +755,7 @@ export default function AddProduct() {
           <CloseButton onClick={() => navigate(-1)}>
             <FaTimes />
           </CloseButton>
-          <HeaderTitle>상품등록</HeaderTitle>
+          <HeaderTitle>상품등록 ({progress}%)</HeaderTitle>
           <div></div>
         </Header>
 
@@ -710,6 +812,42 @@ export default function AddProduct() {
             </ImageGrid>
             
             <ImageCounter>사진은 최대 10장까지 등록 가능해요.</ImageCounter>
+            
+            {/* 이미지 URL 입력 */}
+            <div style={{ marginTop: '16px', padding: '16px', background: '#f8f9fa', borderRadius: '8px' }}>
+              <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#333' }}>
+                또는 이미지 URL로 추가하기
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <Input
+                  type="url"
+                  placeholder="https://example.com/image.jpg"
+                  value={imageUrlInput}
+                  onChange={(e) => setImageUrlInput(e.target.value)}
+                  style={{ flex: 1 }}
+                />
+                <button
+                  type="button"
+                  onClick={addImageFromUrl}
+                  style={{
+                    padding: '8px 16px',
+                    background: 'var(--color-mint-main)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '500'
+                  }}
+                >
+                  추가
+                </button>
+              </div>
+              <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                무료 이미지 호스팅: imgur.com, cloudinary.com 등 사용 권장
+              </div>
+            </div>
+            
             {errors.images && (
               <ErrorText>
                 <FaExclamationTriangle />
@@ -781,17 +919,6 @@ export default function AddProduct() {
               />
             </PriceInputContainer>
             
-            <div style={{ marginTop: '12px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#333' }}>
-                <input
-                  type="checkbox"
-                  checked={formData.negotiable}
-                  onChange={(e) => handleInputChange('negotiable', e.target.checked)}
-                  style={{ accentColor: '#2ed8b6' }}
-                />
-                가격 제안 받기
-              </label>
-            </div>
             {errors.price && (
               <ErrorText>
                 <FaExclamationTriangle />
@@ -893,7 +1020,7 @@ export default function AddProduct() {
         {/* 등록 완료 버튼 */}
         <div style={{
           position: 'fixed',
-          bottom: '70px',
+          bottom: '80px',
           left: '50%',
           transform: 'translateX(-50%)',
           width: '100%',
@@ -910,7 +1037,8 @@ export default function AddProduct() {
             onClick={handleSubmit}
             style={{
               opacity: isFormValid ? 1 : 0.5,
-              cursor: isFormValid ? 'pointer' : 'not-allowed'
+              cursor: isFormValid ? 'pointer' : 'not-allowed',
+              width: '60% !important'
             }}
           >
             {loading ? '등록 중...' : '상품등록 완료'}

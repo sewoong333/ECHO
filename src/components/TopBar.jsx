@@ -1,6 +1,6 @@
 import React, { useContext, useState, useRef, useEffect } from "react";
 import styled from "styled-components";
-import { FaSearch, FaBell } from "react-icons/fa";
+import { FaSearch, FaBell, FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../store/UserContext";
 
@@ -13,13 +13,19 @@ const Bar = styled.header`
   flex-shrink: 0;
   margin: 0 auto;
   height: 56px;
-  background: #fff;
-  border-bottom: 1px solid #eee;
+  background: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-border-light);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   z-index: 101;
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-sm);
+  
+  @supports not (backdrop-filter: blur(8px)) {
+    background: rgba(255, 255, 255, 0.95);
+  }
 `;
 const BarInner = styled.div`
   width: 100vw;
@@ -52,15 +58,29 @@ const Dropdown = styled.span`
 const IconBtn = styled.button`
   background: none;
   border: none;
-  margin-left: 12px;
-  color: #222;
-  font-size: 20px;
+  margin-left: var(--space-md);
+  color: var(--color-text-secondary);
+  font-size: 1.25rem;
   cursor: pointer;
   position: relative;
   flex-shrink: 0;
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  
+  &:hover {
+    color: var(--color-mint-main);
+    background: var(--color-mint-accent);
+  }
+  
+  &:focus-visible {
+    outline: 2px solid var(--color-mint-main);
+    outline-offset: 2px;
+  }
+  
   @media (max-width: 480px) {
-    margin-left: 8px;
-    font-size: 18px;
+    margin-left: var(--space-sm);
+    font-size: 1.125rem;
   }
 `;
 const Badge = styled.span`
@@ -73,42 +93,102 @@ const Badge = styled.span`
   border-radius: 50%;
 `;
 const Logo = styled.span`
-  font-size: 25px;
+  font-size: 1.5rem;
   font-weight: 900;
-  color: #2ed8b6;
+  background: linear-gradient(135deg, var(--color-mint-main), var(--color-mint-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   letter-spacing: 1.5px;
-  margin-right: 16px;
-  font-family: "Montserrat", "Pretendard", sans-serif;
+  margin-right: var(--space-lg);
+  font-family: "Inter", "Pretendard", sans-serif;
   user-select: none;
   flex-shrink: 0;
+  transition: all var(--transition-fast);
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+  
   @media (max-width: 480px) {
-    font-size: 20px;
-    margin-right: 8px;
+    font-size: 1.25rem;
+    margin-right: var(--space-sm);
   }
 `;
 const LoginBtn = styled.button`
-  margin-left: 12px;
-  padding: 6px 16px;
-  background: #ff7e36;
-  color: #fff;
+  margin-left: var(--space-md);
+  padding: var(--space-sm) var(--space-lg);
+  background: linear-gradient(135deg, var(--color-mint-main), var(--color-mint-dark));
+  color: var(--color-text-inverse);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-lg);
   font-weight: 600;
   cursor: pointer;
-  font-size: 15px;
+  font-size: 0.875rem;
   white-space: nowrap;
   min-width: 70px;
   box-sizing: border-box;
   flex-shrink: 0;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  
+  &:hover {
+    background: linear-gradient(135deg, var(--color-mint-dark), #00a085);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
   @media (max-width: 480px) {
-    font-size: 14px;
-    padding: 6px 12px;
+    font-size: 0.8125rem;
+    padding: var(--space-sm) var(--space-md);
     min-width: 60px;
-    margin-left: 8px;
+    margin-left: var(--space-sm);
   }
 `;
-const LogoutBtn = styled(LoginBtn)`
-  background: #2ed8b6;
+
+const LogoutBtn = styled(LoginBtn)``;
+
+const AddProductBtn = styled.button`
+  margin-left: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: linear-gradient(135deg, var(--color-orange), var(--color-orange-light));
+  color: var(--color-text-inverse);
+  border: none;
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.75rem;
+    padding: var(--space-xs) var(--space-sm);
+    margin-left: var(--space-xs);
+    
+    span {
+      display: none; /* 모바일에서는 텍스트 숨기고 아이콘만 표시 */
+    }
+  }
 `;
 
 export default function TopBar() {

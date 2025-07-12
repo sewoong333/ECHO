@@ -20,16 +20,21 @@ const Bar = styled.nav`
   max-width: 100vw;
   min-width: 0;
   height: 64px;
-  background: #fff;
-  border-top: 1px solid #eee;
+  background: var(--color-bg-primary);
+  border-top: 1px solid var(--color-border-light);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 100;
-  box-shadow: 0 -1px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-lg);
   box-sizing: border-box;
   overflow-x: hidden;
   flex-shrink: 0;
+  backdrop-filter: blur(8px);
+  
+  @supports not (backdrop-filter: blur(8px)) {
+    background: rgba(255, 255, 255, 0.95);
+  }
 `;
 const BarInner = styled.div`
   width: 100vw;
@@ -52,18 +57,32 @@ const Item = styled.button`
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: ${(props) => (props.$active ? "var(--color-mint-main)" : "#888")};
-  font-size: 12px;
-  font-weight: 500;
+  color: ${(props) => (props.$active ? "var(--color-mint-main)" : "var(--color-text-tertiary)")};
+  font-size: 0.75rem;
+  font-weight: 600;
   cursor: pointer;
   flex: 1;
-  padding: 0;
+  padding: var(--space-xs);
   min-width: 0;
   box-sizing: border-box;
   flex-shrink: 0;
   position: relative;
+  transition: all var(--transition-fast);
+  border-radius: var(--radius-md);
+  gap: 2px;
+
+  &:hover {
+    color: var(--color-mint-main);
+    background: var(--color-mint-accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-mint-main);
+    outline-offset: 2px;
+  }
+  
   @media (max-width: 480px) {
-    font-size: 11px;
+    font-size: 0.6875rem;
     svg {
       font-size: 18px;
     }
@@ -75,18 +94,20 @@ const Badge = styled.div`
   top: -2px;
   right: 50%;
   transform: translateX(50%);
-  background: #ff4757;
-  color: white;
+  background: var(--color-red);
+  color: var(--color-text-inverse);
   border-radius: 10px;
   padding: 2px 6px;
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 0.625rem;
+  font-weight: 700;
   min-width: 16px;
   height: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--color-bg-primary);
 `;
 
 export default function BottomNav() {

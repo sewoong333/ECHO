@@ -14,6 +14,10 @@ const GlobalStyle = createGlobalStyle`
     margin: 0 !important;
     padding: 0 !important;
   }
+  
+  .App {
+    padding-bottom: 64px !important; /* BottomNav 높이만큼 패딩 추가 */
+  }
 `;
 
 export default function App() {

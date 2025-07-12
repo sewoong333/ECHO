@@ -6,7 +6,7 @@ import React, {
   useRef,
 } from "react";
 import styled from "styled-components";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import TopBar from "../components/TopBar";
 import { ProductContext } from "../store/ProductContext";
 import { UserContext } from "../store/UserContext";
@@ -36,7 +36,7 @@ const Container = styled.div`
   width: 100vw;
   max-width: 100vw;
   min-height: 100vh;
-  background: #f8f9fa;
+  background: var(--color-bg-secondary);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -46,12 +46,14 @@ const Container = styled.div`
 const SearchSection = styled.div`
   width: 100%;
   max-width: 500px;
-  background: white;
+  background: var(--color-bg-primary);
   position: sticky;
   top: 0;
   z-index: 100;
-  border-bottom: 1px solid #f0f0f0;
-  padding: 16px 20px 8px;
+  border-bottom: 1px solid var(--color-border-light);
+  padding: var(--space-lg) var(--space-xl) var(--space-sm);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-sm);
 `;
 
 const SearchBarContainer = styled.div`
@@ -62,11 +64,12 @@ const SearchBarContainer = styled.div`
 const SearchBar = styled.div`
   display: flex;
   align-items: center;
-  background: #f8f9fa;
-  border: 2px solid ${props => props.focused ? 'var(--color-mint-main)' : 'transparent'};
-  border-radius: 12px;
-  padding: 12px 16px;
-  transition: all 0.2s;
+  background: var(--color-bg-secondary);
+  border: 2px solid ${props => props.focused ? 'var(--color-mint-main)' : 'var(--color-border-light)'};
+  border-radius: var(--radius-xl);
+  padding: var(--space-md) var(--space-lg);
+  transition: all var(--transition-fast);
+  box-shadow: ${props => props.focused ? '0 0 0 3px rgba(0, 217, 182, 0.1)' : 'var(--shadow-sm)'};
 `;
 
 const SearchInput = styled.input`
@@ -74,12 +77,13 @@ const SearchInput = styled.input`
   border: none;
   background: none;
   outline: none;
-  font-size: 16px;
-  margin-left: 8px;
-  color: #333;
+  font-size: 1rem;
+  margin-left: var(--space-sm);
+  color: var(--color-text-primary);
+  font-weight: 500;
 
   &::placeholder {
-    color: #999;
+    color: var(--color-text-tertiary);
   }
 `;
 
@@ -336,7 +340,7 @@ const ContentContainer = styled.div`
 `;
 
 const ProductGrid = styled.div`
-  padding: 0 20px 100px;
+  padding: 0 20px 120px;
 `;
 
 const ProductCard = styled.div`
@@ -464,11 +468,31 @@ const StatusBadge = styled.div`
 
 const LoadingContainer = styled.div`
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px;
-  font-size: 14px;
-  color: #666;
+  padding: var(--space-2xl);
+  gap: var(--space-lg);
+`;
+
+const LoadingSpinner = styled.div`
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-border-light);
+  border-top: 3px solid var(--color-mint-main);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
+const LoadingText = styled.div`
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
 `;
 
 const EmptyState = styled.div`
@@ -476,45 +500,89 @@ const EmptyState = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
+  padding: var(--space-2xl) var(--space-xl);
   text-align: center;
-  color: #666;
+  gap: var(--space-lg);
+  
+  h3 {
+    color: var(--color-text-secondary);
+    font-size: 1.125rem;
+    margin: 0;
+  }
+  
+  p {
+    color: var(--color-text-tertiary);
+    font-size: 0.875rem;
+    margin: 0;
+  }
+  
+  svg {
+    color: var(--color-text-tertiary);
+    opacity: 0.5;
+  }
 `;
 
 const FAB = styled.button`
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
+  position: fixed;
+  bottom: 80px; /* 하단 네비게이션 바(64px) + 여백(16px) */
+  right: calc(50vw - 250px + 5px); /* 리스트 섹션(500px) 우측 끝에서 5px 안쪽 */
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #2ed8b6 0%, #25b89a 100%);
+  background: linear-gradient(135deg, var(--color-mint-main) 0%, var(--color-mint-dark) 100%);
   border: none;
-  color: white;
-  font-size: 28px;
-  font-weight: bold;
+  color: var(--color-text-inverse);
+  font-size: 1.5rem;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(46, 216, 182, 0.4);
+  box-shadow: var(--shadow-xl);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 50;
-  transition: all 0.3s ease;
+  z-index: 60; /* 하단 네비게이션보다 위 */
+  transition: all var(--transition-normal);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-mint-main), var(--color-mint-dark));
+    z-index: -1;
+    transition: all var(--transition-normal);
+  }
   
   &:hover {
-    background: linear-gradient(135deg, #25b89a 0%, #1ea085 100%);
-    transform: scale(1.1);
-    box-shadow: 0 12px 32px rgba(46, 216, 182, 0.5);
+    transform: translateY(-3px) scale(1.08);
+    box-shadow: 0 20px 40px rgba(0, 217, 182, 0.4);
+    
+    &::before {
+      transform: scale(1.15);
+      opacity: 0.8;
+    }
   }
   
   &:active {
-    transform: scale(0.95);
+    transform: translateY(-1px) scale(1.04);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  &:focus-visible {
+    outline: 3px solid rgba(0, 217, 182, 0.3);
+    outline-offset: 3px;
+  }
+  
+  /* 모바일에서는 화면 우측 기준으로 */
+  @media (max-width: 500px) {
+    right: var(--space-lg);
+    bottom: 75px;
   }
 `;
 
 export default function Home() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { 
     products, 
     loading, 
@@ -579,7 +647,7 @@ export default function Home() {
     } else {
       setSearchSuggestions([]);
     }
-  }, [searchValue, products]);
+  }, [searchValue, products, INSTRUMENT_CATEGORIES]);
 
   // 무한 스크롤
   useEffect(() => {
@@ -675,11 +743,7 @@ export default function Home() {
   };
 
   const getProductBadge = (product) => {
-    const now = new Date();
-    const created = product.createdAt?.toDate ? product.createdAt.toDate() : new Date(product.createdAt);
-    const hoursDiff = (now - created) / (1000 * 60 * 60);
-    
-    if (hoursDiff < 1) return { type: 'new', text: '신규' };
+    // 신규 마크 제거됨 - 사용자 요청에 따라
     if (product.viewCount > 100) return { type: 'hot', text: '인기' };
     if (product.priceNegotiable) return { type: 'urgent', text: '급처' };
     return null;
@@ -688,7 +752,7 @@ export default function Home() {
   const activeFilterCount = Object.values(filters).filter(v => v && v !== '').length;
 
   return (
-    <Container>
+    <Container className="main-content">
       <TopBar />
       
       <SearchSection>
@@ -837,7 +901,8 @@ export default function Home() {
         <ProductGrid>
           {loading && products.length === 0 ? (
             <LoadingContainer>
-              상품을 불러오는 중...
+              <LoadingSpinner />
+              <LoadingText>상품을 불러오는 중...</LoadingText>
             </LoadingContainer>
           ) : products.length === 0 ? (
             <EmptyState>
@@ -915,10 +980,15 @@ export default function Home() {
           )}
         </ProductGrid>
         
-        {/* 상품 등록 FAB */}
-        <FAB onClick={() => navigate('/add')}>
-          <FaPlus style={{ fontSize: '24px', color: 'white' }} />
+        {/* 상품 등록 플로팅 버튼 - 하단바 기준 고정 */}
+        <FAB 
+          onClick={() => navigate('/add')}
+          aria-label="상품 등록하기"
+          title="상품 등록하기"
+        >
+          <FaPlus />
         </FAB>
+        
       </ContentContainer>
 
       {/* 필터 모달 */}

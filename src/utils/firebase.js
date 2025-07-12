@@ -1,6 +1,6 @@
 // 개선된 Firebase 설정 및 서비스
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence } from "firebase/auth";
 import {
   getFirestore,
   enableIndexedDbPersistence,
@@ -43,6 +43,17 @@ export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+
+// 인증 지속성 설정 (앱 초기화 시 한 번만 실행)
+if (typeof window !== "undefined") {
+  setPersistence(auth, browserLocalPersistence)
+    .then(() => {
+      console.log("✅ Firebase Auth 지속성 설정 완료 (LOCAL)");
+    })
+    .catch((error) => {
+      console.warn("⚠️ Firebase Auth 지속성 설정 실패:", error);
+    });
+}
 
 // 오프라인 지속성 설정
 if (typeof window !== "undefined") {
@@ -232,7 +243,7 @@ export const REGIONS = {
 // 개선된 상품 서비스
 export const productService = {
   // 상품 생성 (중고거래 표준 구조)
-  async createProduct(productData) {
+  async createProduct(productData, userId) {
     try {
       const now = serverTimestamp();
       const product = {
@@ -252,7 +263,7 @@ export const productService = {
         isPriceNegotiable: productData.isPriceNegotiable || false,
 
         // 상태 정보
-        condition: productData.condition || "상",
+        condition: productData.condition || "good",
         conditionDescription: productData.conditionDescription || "",
         yearOfManufacture: productData.yearOfManufacture
           ? parseInt(productData.yearOfManufacture)
@@ -276,7 +287,7 @@ export const productService = {
           productData.preferredTransactionType || "direct",
 
         // 판매자 정보
-        sellerId: productData.userId,
+        sellerId: userId,
         sellerNickname: productData.sellerNickname || "",
 
         // 상태 관리
@@ -296,7 +307,7 @@ export const productService = {
         lastBumpedAt: now,
 
         // SEO 및 검색
-        searchKeywords: this.generateSearchKeywords(productData),
+        searchKeywords: [],
 
         // 관리자 기능
         isPromoted: false,
@@ -313,11 +324,39 @@ export const productService = {
         defects: productData.defects || [],
       };
 
-      const docRef = await addDoc(productsCollection, product);
-      return { id: docRef.id, ...product };
+      console.log("📦 Firestore에 저장할 상품 데이터:", product);
+      
+      try {
+        const docRef = await addDoc(productsCollection, product);
+        console.log("✅ Firestore 저장 성공, 문서 ID:", docRef.id);
+        
+        const currentTime = new Date();
+        const result = { 
+          id: docRef.id, 
+          ...product,
+          // 명시적으로 현재 시간 설정 (최신 상품이 맨 위로 가도록)
+          createdAt: currentTime,
+          updatedAt: currentTime,
+          lastBumpedAt: currentTime
+        };
+        console.log("📋 반환할 결과:", result);
+        
+        return result;
+      } catch (firestoreError) {
+        console.error("❌ Firestore 저장 실패:", firestoreError);
+        throw firestoreError;
+      }
     } catch (error) {
-      console.error("상품 생성 실패:", error);
-      throw new Error("상품 등록에 실패했습니다.");
+      console.error("❌ Firebase 상품 생성 실패:", error);
+      console.error("❌ Firebase 에러 상세:", {
+        message: error.message,
+        code: error.code,
+        stack: error.stack,
+        productData: productData,
+        userId: userId
+      });
+      
+      throw error;
     }
   },
 
@@ -356,72 +395,77 @@ export const productService = {
         searchQuery = null,
       } = options;
 
+      // 단순한 쿼리로 시작 (인덱스 문제 해결 위해)
       let q = query(
         productsCollection,
         where("status", "==", PRODUCT_STATUS.ACTIVE),
+        orderBy("createdAt", "desc"),
+        limit(pageSize)
       );
 
-      // 필터 적용
-      if (category) {
-        q = query(q, where("category", "==", category));
-      }
-
-      if (region) {
-        q = query(q, where("region", "==", region));
-      }
-
-      if (priceMin !== null && priceMax !== null) {
-        q = query(
-          q,
-          where("price", ">=", priceMin),
-          where("price", "<=", priceMax),
-        );
-      } else if (priceMin !== null) {
-        q = query(q, where("price", ">=", priceMin));
-      } else if (priceMax !== null) {
-        q = query(q, where("price", "<=", priceMax));
-      }
-
-      if (condition) {
-        q = query(q, where("condition", "==", condition));
-      }
-
-      // 검색어 처리
-      if (searchQuery) {
-        const searchTerms = searchQuery.toLowerCase().split(/\s+/);
-        q = query(
-          q,
-          where("searchKeywords", "array-contains-any", searchTerms),
-        );
-      }
-
-      // 정렬
-      switch (sortBy) {
-        case "price_low":
-          q = query(q, orderBy("price", "asc"));
-          break;
-        case "price_high":
-          q = query(q, orderBy("price", "desc"));
-          break;
-        case "popular":
-          q = query(q, orderBy("likeCount", "desc"));
-          break;
-        default:
-          q = query(q, orderBy("createdAt", "desc"));
-      }
-
-      // 페이지네이션
+      // 페이지네이션만 적용
       if (lastDoc) {
-        q = query(q, startAfter(lastDoc));
+        q = query(
+          productsCollection,
+          where("status", "==", PRODUCT_STATUS.ACTIVE),
+          orderBy("createdAt", "desc"),
+          startAfter(lastDoc),
+          limit(pageSize)
+        );
       }
-      q = query(q, limit(pageSize));
 
+      console.log("📋 Firestore 쿼리 실행 중...");
       const querySnapshot = await getDocs(q);
-      const products = querySnapshot.docs.map((doc) => ({
+      console.log("✅ Firestore 쿼리 성공, 문서 수:", querySnapshot.docs.length);
+      
+      let products = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
         _doc: doc,
       }));
+
+      // 클라이언트 사이드에서 필터링 (임시 해결책)
+      if (category) {
+        products = products.filter(p => p.category === category);
+      }
+
+      if (region) {
+        products = products.filter(p => p.region === region);
+      }
+
+      if (condition) {
+        products = products.filter(p => p.condition === condition);
+      }
+
+      if (priceMin !== null) {
+        products = products.filter(p => p.price >= priceMin);
+      }
+
+      if (priceMax !== null) {
+        products = products.filter(p => p.price <= priceMax);
+      }
+
+      if (searchQuery) {
+        const searchLower = searchQuery.toLowerCase();
+        products = products.filter(p => 
+          p.title?.toLowerCase().includes(searchLower) ||
+          p.description?.toLowerCase().includes(searchLower)
+        );
+      }
+
+      // 클라이언트 사이드 정렬
+      switch (sortBy) {
+        case "price_low":
+          products.sort((a, b) => a.price - b.price);
+          break;
+        case "price_high":
+          products.sort((a, b) => b.price - a.price);
+          break;
+        case "popular":
+          products.sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0));
+          break;
+        // latest는 이미 정렬됨
+      }
 
       return {
         products,
@@ -430,6 +474,7 @@ export const productService = {
       };
     } catch (error) {
       console.error("상품 조회 실패:", error);
+      console.error("에러 상세:", error.message, error.code);
       throw new Error("상품을 불러오는데 실패했습니다.");
     }
   },

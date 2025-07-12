@@ -75,19 +75,93 @@ export function UserProvider({ children }) {
         try {
           if (firebaseUser) {
             // 사용자가 로그인한 경우
-            console.log("User authenticated:", firebaseUser);
+            console.log("✅ Firebase 사용자 인증됨:", firebaseUser.uid);
             
-            // Firestore에서 사용자 프로필 정보 가져오기
-            const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
-            const userProfile = userDoc.exists() ? userDoc.data() : {};
+            let userProfile = {};
             
-            // 마지막 로그인 시간 업데이트
-            await updateDoc(doc(db, "users", firebaseUser.uid), {
-              lastLoginAt: serverTimestamp(),
-            });
+            try {
+              // Firestore에서 사용자 프로필 정보 가져오기
+              const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+              userProfile = userDoc.exists() ? userDoc.data() : {};
+              
+              // 새 사용자이거나 프로필이 없는 경우 기본 프로필 생성
+              if (!userDoc.exists()) {
+                console.log("🆕 새 사용자 프로필 생성 중...");
+                const defaultProfile = {
+                  nickname: firebaseUser.displayName || firebaseUser.email?.split("@")[0] || "사용자",
+                  email: firebaseUser.email || "",
+                  profileImage: firebaseUser.photoURL || "",
+                  address: "",
+                  region: "",
+                  district: "",
+                  mannerScore: 36.5,
+                  transactionCount: 0,
+                  reviewCount: 0,
+                  favoriteCount: 0,
+                  isVerified: false,
+                  isBusiness: false,
+                  businessInfo: null,
+                  preferences: {
+                    pushNotifications: true,
+                    emailNotifications: true,
+                    smsNotifications: false,
+                    marketingEmails: false,
+                  },
+                  blockedUsers: [],
+                  following: [],
+                  followers: [],
+                  createdAt: serverTimestamp(),
+                  lastLoginAt: serverTimestamp(),
+                };
+                
+                await setDoc(doc(db, "users", firebaseUser.uid), defaultProfile);
+                userProfile = defaultProfile;
+                console.log("✅ 새 사용자 프로필 생성 완료");
+              } else {
+                // 기존 사용자인 경우 마지막 로그인 시간 업데이트
+                try {
+                  await updateDoc(doc(db, "users", firebaseUser.uid), {
+                    lastLoginAt: serverTimestamp(),
+                  });
+                } catch (updateError) {
+                  console.warn("⚠️ 로그인 시간 업데이트 실패 (무시됨):", updateError);
+                  // 업데이트 실패해도 로그인은 진행
+                }
+              }
+            } catch (firestoreError) {
+              console.warn("⚠️ Firestore 작업 실패:", firestoreError);
+              // Firestore 오류가 있어도 Firebase Auth 정보로 기본 사용자 상태 설정
+              userProfile = {
+                nickname: firebaseUser.displayName || firebaseUser.email?.split("@")[0] || "사용자",
+                email: firebaseUser.email || "",
+                profileImage: firebaseUser.photoURL || "",
+                address: "",
+                region: "",
+                district: "",
+                mannerScore: 36.5,
+                transactionCount: 0,
+                reviewCount: 0,
+                favoriteCount: 0,
+                isVerified: false,
+                isBusiness: false,
+                businessInfo: null,
+                preferences: {
+                  pushNotifications: true,
+                  emailNotifications: true,
+                  smsNotifications: false,
+                  marketingEmails: false,
+                },
+                blockedUsers: [],
+                following: [],
+                followers: [],
+                lastLoginAt: null,
+                createdAt: null,
+              };
+            }
             
-            setUser({
-              nickname: userProfile.nickname || firebaseUser.displayName || "",
+            // 사용자 상태 업데이트
+            const userState = {
+              nickname: userProfile.nickname || firebaseUser.displayName || firebaseUser.email?.split("@")[0] || "사용자",
               email: firebaseUser.email || "",
               uid: firebaseUser.uid,
               isLoggedIn: true,
@@ -116,17 +190,26 @@ export function UserProvider({ children }) {
               blockedUsers: userProfile.blockedUsers || [],
               following: userProfile.following || [],
               followers: userProfile.followers || [],
-            });
+            };
             
+            setUser(userState);
             setUserProfile(userProfile);
+            setAuthError(null);
+
+            console.log("✅ 사용자 상태 업데이트 완료:", {
+              uid: userState.uid,
+              nickname: userState.nickname,
+              isLoggedIn: userState.isLoggedIn
+            });
 
             // 현재 URL이 로그인 페이지인 경우 메인 페이지로 리다이렉트
             if (window.location.pathname === "/login") {
+              console.log("🔄 로그인 성공 - 홈으로 리다이렉트");
               window.location.href = "/";
             }
           } else {
             // 사용자가 로그아웃한 경우
-            console.log("User signed out");
+            console.log("❌ 사용자 로그아웃됨");
             setUser({
               nickname: "",
               email: "",
@@ -159,11 +242,19 @@ export function UserProvider({ children }) {
               followers: [],
             });
             setUserProfile(null);
+            setAuthError(null);
           }
         } catch (error) {
-          console.error("Auth state change error:", error);
+          console.error("❌ 인증 상태 변경 처리 실패:", error);
           setAuthError(error);
-          setUser((prev) => ({ ...prev, loading: false }));
+          
+          // 인증 오류 시에도 로딩 상태는 해제하되, 기존 사용자 정보는 유지
+          setUser((prev) => ({ 
+            ...prev, 
+            loading: false,
+            // 심각한 오류가 아닌 경우 로그인 상태 유지
+            isLoggedIn: prev.uid ? true : false
+          }));
         }
       });
 
@@ -192,10 +283,43 @@ export function UserProvider({ children }) {
 
   const loginWithGoogle = async () => {
     try {
+      console.log("🚀 Google 로그인 시작...");
+      setAuthError(null);
+      
       const result = await signInWithPopup(auth, googleProvider);
-      return result.user;
+      const firebaseUser = result.user;
+      
+      console.log("✅ Google 로그인 성공:", {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+        displayName: firebaseUser.displayName
+      });
+      
+      // onAuthStateChanged가 호출되기까지 잠시 대기
+      return new Promise((resolve) => {
+        const checkAuth = () => {
+          if (user.isLoggedIn && user.uid === firebaseUser.uid) {
+            console.log("✅ 사용자 상태 동기화 완료");
+            resolve(firebaseUser);
+          } else {
+            // 최대 5초까지 대기
+            setTimeout(checkAuth, 100);
+          }
+        };
+        
+        // 즉시 체크 시작
+        setTimeout(checkAuth, 50);
+        
+        // 5초 후 타임아웃
+        setTimeout(() => {
+          console.log("⏰ 인증 상태 동기화 타임아웃 - 로그인 성공으로 처리");
+          resolve(firebaseUser);
+        }, 5000);
+      });
+      
     } catch (error) {
-      console.error("Google login error:", error);
+      console.error("❌ Google 로그인 실패:", error);
+      setAuthError(error);
       throw error;
     }
   };

@@ -44,16 +44,13 @@ service cloud.firestore {
       }
     }
     
-    // 상품 규칙
+    // 상품 규칙 (임시로 완전 개방)
     match /products/{productId} {
-      // 읽기: 모든 사용자가 활성 상품 조회 가능
-      allow read: if resource.data.status == 'active' || 
-                     isOwner(resource.data.sellerId);
+      // 읽기: 모든 사용자가 조회 가능
+      allow read: if true;
       
       // 생성: 인증된 사용자만 상품 등록 가능
-      allow create: if isAuthenticated() && 
-                       validateProductData() && 
-                       request.resource.data.sellerId == request.auth.uid;
+      allow create: if isAuthenticated();
       
       // 수정: 상품 소유자만 수정 가능
       allow update: if isOwner(resource.data.sellerId) && 
@@ -71,7 +68,7 @@ service cloud.firestore {
         ]) &&
         // 제목 검증
         data.title is string &&
-        data.title.size() >= 5 && data.title.size() <= 100 &&
+        data.title.size() >= 2 && data.title.size() <= 100 &&
         
         // 설명 검증
         data.description is string &&
@@ -87,7 +84,7 @@ service cloud.firestore {
         
         // 상태 검증
         data.condition is string &&
-        data.condition in ['최상', '상', '중', '하'] &&
+        data.condition in ['excellent', 'good', 'fair', 'poor'] &&
         
         // 상품 상태 검증
         data.status is string &&

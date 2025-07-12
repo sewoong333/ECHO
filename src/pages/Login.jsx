@@ -16,25 +16,37 @@ const Container = styled.div`
   width: 100%;
   max-width: 400px;
   margin: 0 auto;
-  padding: 2em;
+  padding: var(--space-xl);
   display: flex;
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  background: #fff;
+  background: var(--color-bg-primary);
   box-sizing: border-box;
   justify-content: center;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-2xl);
+  
+  @media (max-width: 480px) {
+    box-shadow: none;
+    border-radius: 0;
+    padding: var(--space-lg);
+  }
 `;
 
 const Logo = styled.div`
-  font-size: 32px;
+  font-size: 2rem;
   font-weight: 800;
   color: var(--color-mint-main);
-  margin-bottom: 2em;
+  margin-bottom: var(--space-xl);
+  background: linear-gradient(135deg, var(--color-mint-main), var(--color-mint-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 `;
 
 const Title = styled.h1`
@@ -63,32 +75,33 @@ const InputGroup = styled.div`
 const Input = styled.input`
   width: 100%;
   height: 50px;
-  padding: 0 1em 0 3em;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  font-size: 16px;
+  padding: 0 1rem 0 3rem;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-xl);
+  font-size: 1rem;
   outline: none;
-  transition: all 0.2s;
-  background: #f8f9fa;
+  transition: all var(--transition-fast);
+  background: var(--color-bg-secondary);
   box-sizing: border-box;
+  color: var(--color-text-primary);
 
   &:focus {
     border-color: var(--color-mint-main);
-    background: #fff;
-    box-shadow: 0 0 0 2px rgba(46, 216, 182, 0.1);
+    background: var(--color-bg-primary);
+    box-shadow: 0 0 0 3px rgba(0, 217, 182, 0.1);
   }
 
   &::placeholder {
-    color: #999;
+    color: var(--color-text-tertiary);
   }
 `;
 
 const IconWrapper = styled.div`
   position: absolute;
-  left: 1em;
+  left: 1rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #666;
+  color: var(--color-text-tertiary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -114,25 +127,33 @@ const PasswordToggle = styled.button`
 const LoginButton = styled.button`
   width: 100%;
   height: 50px;
-  background: var(--color-mint-main);
-  color: white;
+  background: linear-gradient(135deg, var(--color-mint-main), var(--color-mint-dark));
+  color: var(--color-text-inverse);
   border: none;
-  border-radius: 12px;
-  font-size: 16px;
+  border-radius: var(--radius-xl);
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
-  margin-top: 1em;
+  transition: all var(--transition-fast);
+  margin-top: var(--space-md);
   box-sizing: border-box;
+  box-shadow: var(--shadow-md);
 
   &:hover {
-    background: #25b89a;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(46, 216, 182, 0.2);
+    background: linear-gradient(135deg, var(--color-mint-dark), #00a085);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
   }
 
   &:active {
     transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
   }
 `;
 
