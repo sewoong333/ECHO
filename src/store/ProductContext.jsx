@@ -116,62 +116,66 @@ export function ProductProvider({ children }) {
       (realtimeProducts) => {
         console.log("🔄 실시간 업데이트:", realtimeProducts.length, "개");
 
-        // 새로운 상품이나 업데이트된 상품 반영
+        // 실시간 업데이트된 상품들을 필터링하여 반영
         setProducts((prevProducts) => {
           console.log("📋 현재 상품 수:", prevProducts.length);
           
-          // 먼저 기존 상품들을 복사
-          let updatedProducts = [...prevProducts];
-          
           // 실시간으로 받은 상품들을 생성시간 기준으로 정렬 (최신순)
-          const sortedRealtimeProducts = [...realtimeProducts].sort((a, b) => {
+          let filteredProducts = [...realtimeProducts].sort((a, b) => {
             const timeA = a.createdAt?.toDate?.() || new Date(a.createdAt) || new Date();
             const timeB = b.createdAt?.toDate?.() || new Date(b.createdAt) || new Date();
             return timeB - timeA; // 최신 순으로 정렬
           });
 
-          sortedRealtimeProducts.forEach((newProduct) => {
-            const existingIndex = updatedProducts.findIndex(
-              (p) => p.id === newProduct.id,
+          // 현재 적용된 필터들로 클라이언트 사이드 필터링
+          if (filters.category) {
+            filteredProducts = filteredProducts.filter(p => p.category === filters.category);
+          }
+
+          if (filters.region) {
+            filteredProducts = filteredProducts.filter(p => p.region === filters.region);
+          }
+
+          if (filters.condition) {
+            filteredProducts = filteredProducts.filter(p => p.condition === filters.condition);
+          }
+
+          if (filters.priceMin) {
+            filteredProducts = filteredProducts.filter(p => p.price >= parseInt(filters.priceMin));
+          }
+
+          if (filters.priceMax) {
+            filteredProducts = filteredProducts.filter(p => p.price <= parseInt(filters.priceMax));
+          }
+
+          if (filters.searchQuery) {
+            const searchLower = filters.searchQuery.toLowerCase();
+            filteredProducts = filteredProducts.filter(p => 
+              p.title?.toLowerCase().includes(searchLower) ||
+              p.description?.toLowerCase().includes(searchLower)
             );
+          }
 
-            if (existingIndex >= 0) {
-              // 기존 상품 업데이트
-              console.log("🔄 기존 상품 업데이트:", newProduct.id);
-              updatedProducts[existingIndex] = newProduct;
-            } else {
-              // 새 상품 추가 - 생성시간을 비교해서 올바른 위치에 삽입
-              console.log("➕ 새 상품 추가:", newProduct.id, newProduct.title);
-              
-              const newProductTime = newProduct.createdAt?.toDate?.() || new Date(newProduct.createdAt) || new Date();
-              
-              // 더 최신 상품이면 맨 앞에 추가
-              let insertIndex = 0;
-              for (let i = 0; i < updatedProducts.length; i++) {
-                const existingTime = updatedProducts[i].createdAt?.toDate?.() || new Date(updatedProducts[i].createdAt) || new Date();
-                if (newProductTime <= existingTime) {
-                  insertIndex = i + 1;
-                } else {
-                  break;
-                }
-              }
-              
-              updatedProducts.splice(insertIndex, 0, newProduct);
-            }
-          });
+          // 삭제된 상품 제거
+          filteredProducts = filteredProducts.filter((product) => product.status === PRODUCT_STATUS.ACTIVE);
 
-          // 삭제된 상품 제거 후 생성시간 기준으로 다시 정렬
-          const activeProducts = updatedProducts
-            .filter((product) => product.status === PRODUCT_STATUS.ACTIVE)
-            .sort((a, b) => {
-              const timeA = a.createdAt?.toDate?.() || new Date(a.createdAt) || new Date();
-              const timeB = b.createdAt?.toDate?.() || new Date(b.createdAt) || new Date();
-              return timeB - timeA; // 최신 순으로 정렬
-            });
+          // 정렬 적용
+          switch (filters.sortBy) {
+            case "price_low":
+              filteredProducts.sort((a, b) => a.price - b.price);
+              break;
+            case "price_high":
+              filteredProducts.sort((a, b) => b.price - a.price);
+              break;
+            case "popular":
+              filteredProducts.sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0));
+              break;
+            // latest는 이미 정렬됨
+          }
           
-          console.log("✅ 최종 상품 수:", activeProducts.length);
-          console.log("📅 첫 번째 상품 생성시간:", activeProducts[0]?.createdAt, activeProducts[0]?.title);
-          return activeProducts;
+          console.log("✅ 필터링된 상품 수:", filteredProducts.length);
+          console.log("🔍 적용된 필터:", filters);
+          return filteredProducts;
         });
       },
       { category: filters.category },
@@ -181,7 +185,7 @@ export function ProductProvider({ children }) {
       console.log("👋 실시간 구독 해제");
       unsubscribe();
     };
-  }, [filters.category]); // user 의존성 제거
+  }, [filters]); // 모든 필터가 변경될 때 다시 구독
 
   // 사용자별 상품 로드
   const loadUserProducts = useCallback(

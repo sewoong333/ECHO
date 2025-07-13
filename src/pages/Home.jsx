@@ -778,6 +778,10 @@ export default function Home() {
                 onClick={() => {
                   setSearchValue('');
                   setSearchFocused(false);
+                  // 검색 초기화
+                  if (filters.searchQuery) {
+                    updateFilters({ searchQuery: '' });
+                  }
                 }}
               />
             )}
