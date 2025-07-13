@@ -387,6 +387,7 @@ export default function ChatRoom() {
   const [messageText, setMessageText] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
   const messageInputRef = useRef(null);
 
@@ -444,8 +445,17 @@ export default function ChatRoom() {
   };
 
   const handleSendMessage = async () => {
-    if (!messageText.trim() || !chatRoomId) return;
+    if (!messageText.trim() || !chatRoomId || sending) return;
+    
+    // 메시지 길이 검증
+    if (messageText.length > 1000) {
+      setError("메시지는 1000자를 초과할 수 없습니다.");
+      return;
+    }
 
+    setSending(true);
+    setError(null);
+    
     try {
       await sendMessage(chatRoomId, messageText);
       setMessageText("");
@@ -454,7 +464,9 @@ export default function ChatRoom() {
       messageInputRef.current?.focus();
     } catch (error) {
       console.error("메시지 전송 실패:", error);
-      alert("메시지 전송에 실패했습니다.");
+      setError("메시지 전송에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setSending(false);
     }
   };
 
@@ -641,6 +653,18 @@ export default function ChatRoom() {
       </MessagesContainer>
 
       <InputContainer>
+        {error && (
+          <div style={{
+            padding: '8px 16px',
+            background: '#fff5f5',
+            borderLeft: '4px solid #f56565',
+            marginBottom: '8px',
+            fontSize: '14px',
+            color: '#c53030'
+          }}>
+            {error}
+          </div>
+        )}
         <InputActions>
           <ActionButton>
             <FaCamera />
@@ -662,10 +686,10 @@ export default function ChatRoom() {
             rows={1}
           />
           <SendButton 
-            disabled={!messageText.trim()}
+            disabled={!messageText.trim() || sending}
             onClick={handleSendMessage}
           >
-            <FaPaperPlane />
+            {sending ? "•••" : <FaPaperPlane />}
           </SendButton>
         </InputWrapper>
       </InputContainer>

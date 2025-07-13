@@ -381,16 +381,26 @@ export function ProductProvider({ children }) {
   const incrementViews = useCallback(
     async (productId) => {
       try {
+        // 서버에서 조회수 증가 시도 (중복 방지 로직 포함)
         await productService.incrementViewCount(productId, user?.uid);
 
-        // 로컬 상태 업데이트
+        // 서버에서 성공한 경우에만 로컬 상태 업데이트
+        // (중복 방지나 권한 문제로 실패한 경우 로컬도 업데이트 안함)
         setProducts((prev) =>
-          prev.map((product) =>
-            product.id === productId
-              ? { ...product, viewCount: (product.viewCount || 0) + 1 }
-              : product,
-          ),
+          prev.map((product) => {
+            if (product.id === productId) {
+              // 본인 상품이면 로컬 업데이트 안함
+              if (user?.uid && product.sellerId === user.uid) {
+                return product;
+              }
+              // 다른 사람 상품이면 조회수 증가
+              return { ...product, viewCount: (product.viewCount || 0) + 1 };
+            }
+            return product;
+          }),
         );
+        
+        console.log('✅ 조회수 증가 완료:', productId);
       } catch (error) {
         console.error("❌ 조회수 증가 실패:", error);
       }
@@ -509,6 +519,27 @@ export function ProductProvider({ children }) {
     return stats;
   }, [products]);
 
+  // 채팅 수 증가
+  const incrementChatCount = useCallback(
+    async (productId) => {
+      try {
+        await productService.incrementChatCount(productId);
+
+        // 로컬 상태 업데이트
+        setProducts((prev) =>
+          prev.map((product) =>
+            product.id === productId
+              ? { ...product, chatCount: (product.chatCount || 0) + 1 }
+              : product,
+          ),
+        );
+      } catch (error) {
+        console.error("❌ 채팅 수 증가 실패:", error);
+      }
+    },
+    [],
+  );
+
   // 에러 초기화
   const clearError = useCallback(() => {
     setError(null);
@@ -539,6 +570,7 @@ export function ProductProvider({ children }) {
 
     // 상품 상호작용
     incrementViews,
+    incrementChatCount,
     toggleLike,
     bumpProduct,
     changeProductStatus,

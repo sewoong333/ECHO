@@ -496,16 +496,61 @@ export const productService = {
     }
   },
 
-  // 조회수 증가
-  async incrementViewCount(productId) {
+  // 조회수 증가 (중복 방지)
+  async incrementViewCount(productId, userId = null) {
     try {
+      // 세션 스토리지로 중복 방지 (브라우저 탭별로 관리)
+      const viewKey = `viewed_${productId}`;
+      const hasViewed = sessionStorage.getItem(viewKey);
+      
+      if (hasViewed) {
+        console.log('이미 조회한 상품입니다:', productId);
+        return;
+      }
+      
       const productRef = doc(db, "products", productId);
+      
+      // 상품 정보 확인 (본인 상품인지 체크)
+      const productSnap = await getDoc(productRef);
+      if (!productSnap.exists()) {
+        console.log('상품을 찾을 수 없습니다:', productId);
+        return;
+      }
+      
+      const productData = productSnap.data();
+      
+      // 본인 상품은 조회수 증가하지 않음
+      if (userId && productData.sellerId === userId) {
+        console.log('본인 상품은 조회수가 증가하지 않습니다:', productId);
+        return;
+      }
+      
       await updateDoc(productRef, {
         viewCount: increment(1),
         lastViewedAt: serverTimestamp(),
       });
+      
+      // 세션에 조회 기록 저장
+      sessionStorage.setItem(viewKey, Date.now().toString());
+      
+      console.log('조회수 증가 완료:', productId);
     } catch (error) {
       console.error("조회수 증가 실패:", error);
+    }
+  },
+
+  // 채팅 수 증가
+  async incrementChatCount(productId) {
+    try {
+      const productRef = doc(db, "products", productId);
+      await updateDoc(productRef, {
+        chatCount: increment(1),
+        lastChatAt: serverTimestamp(),
+      });
+      console.log('채팅 수 증가 완료:', productId);
+    } catch (error) {
+      console.error("채팅 수 증가 실패:", error);
+      throw error;
     }
   },
 

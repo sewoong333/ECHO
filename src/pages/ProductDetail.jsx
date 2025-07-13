@@ -616,6 +616,7 @@ export default function ProductDetail() {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+  const [creatingChat, setCreatingChat] = useState(false);
 
   // 상품 찾기
   const product = products.find((p) => String(p.id) === String(id));
@@ -674,7 +675,17 @@ export default function ProductDetail() {
       return;
     }
     
+    if (creatingChat) return; // 중복 클릭 방지
+    
+    setCreatingChat(true);
+    
     try {
+      console.log('💬 채팅방 생성 시작...', {
+        productId: product.id,
+        sellerId: product.sellerId,
+        buyerId: user.uid
+      });
+      
       // 채팅방 생성 또는 기존 채팅방 찾기
       const chatRoomId = await createOrGetChatRoom(
         product.id,
@@ -688,11 +699,15 @@ export default function ProductDetail() {
         }
       );
       
+      console.log('✅ 채팅방 생성 성공:', chatRoomId);
+      
       // 채팅방으로 이동
       navigate(`/chat/${chatRoomId}`);
     } catch (error) {
-      console.error('채팅방 생성 실패:', error);
-      alert('채팅방 생성에 실패했습니다.');
+      console.error('❌ 채팅방 생성 실패:', error);
+      alert('채팅방 생성에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setCreatingChat(false);
     }
   };
 
@@ -1027,8 +1042,12 @@ export default function ProductDetail() {
         <LikeButton liked={isLiked} onClick={handleLike}>
           {isLiked ? <FaHeart /> : <FaRegHeart />}
         </LikeButton>
-        <ChatButton onClick={handleChat}>
-          채팅하기
+        <ChatButton 
+          onClick={handleChat}
+          disabled={creatingChat}
+          style={{ opacity: creatingChat ? 0.7 : 1 }}
+        >
+          {creatingChat ? '채팅방 생성 중...' : '채팅하기'}
         </ChatButton>
         <BuyButton onClick={handleBuy}>
           구매하기

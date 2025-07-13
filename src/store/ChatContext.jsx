@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { db } from "../utils/firebase";
+import { db, productService } from "../utils/firebase";
 import { UserContext } from "./UserContext";
 import {
   collection,
@@ -150,6 +150,15 @@ export function ChatProvider({ children }) {
         createdAt: serverTimestamp(),
         isRead: false,
       });
+
+      // 상품의 채팅 수 증가
+      try {
+        await productService.incrementChatCount(productId);
+        console.log('✅ 새 채팅방 생성으로 인한 채팅 수 증가:', productId);
+      } catch (error) {
+        console.error('❌ 채팅 수 증가 실패:', error);
+        // 채팅방은 이미 생성되었으므로 에러가 발생해도 진행
+      }
 
       return chatRoomRef.id;
     } catch (error) {
