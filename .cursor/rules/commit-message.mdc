@@ -1,0 +1,7 @@
+- 커밋 메시지는 한글로 작성하며, "타입: 내용" 형태를 권장합니다.
+  - 예시: "Fix: 채팅 기능 버그 수정"
+- 타입 예시: Feat, Fix, Refactor, Docs, Chore, Style, Test
+description:
+globs:
+alwaysApply: false
+---

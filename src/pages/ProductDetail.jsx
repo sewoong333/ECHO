@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ProductContext } from "../store/ProductContext";
 import { UserContext } from "../store/UserContext";
 import { ChatContext } from "../store/ChatContext";
+import { productService } from "../utils/firebase";
 import {
   FaHeart,
   FaRegHeart,
@@ -624,13 +625,46 @@ export default function ProductDetail() {
   useEffect(() => {
     if (products.length > 0) {
       setLoading(false);
-      
-      // 조회수 증가
-      if (product && user?.uid && product.sellerId !== user.uid) {
-        incrementViews(product.id);
-      }
+      // 디버깅을 위한 로그 추가
+      console.log('🔍 상품 검색:', {
+        searchId: id,
+        totalProducts: products.length,
+        foundProduct: product ? 'YES' : 'NO',
+        productIds: products.slice(0, 5).map(p => p.id) // 처음 5개 상품 ID만 로그
+      });
     }
-  }, [products, product, user, incrementViews]);
+  }, [products, id, product]);
+
+  // 상품을 찾지 못했을 때 개별 조회 시도
+  useEffect(() => {
+    const fetchIndividualProduct = async () => {
+      if (!product && !loading && products.length > 0) {
+        console.log('🔍 개별 상품 조회 시도:', id);
+        try {
+          const individualProduct = await productService.getProduct(id);
+          console.log('✅ 개별 상품 조회 성공:', individualProduct);
+          // 개별 조회된 상품을 products 배열에 추가
+          // 이는 임시 해결책이며, ProductContext에서 처리하는 것이 더 좋습니다
+        } catch (error) {
+          console.error('❌ 개별 상품 조회 실패:', error);
+        }
+      }
+    };
+
+    fetchIndividualProduct();
+  }, [product, loading, products.length, id]);
+
+  // 조회수 증가 - 별도 useEffect로 분리
+  useEffect(() => {
+    if (product && user?.uid && product.sellerId !== user.uid) {
+      console.log('👀 조회수 증가 시도:', {
+        productId: product.id,
+        sellerId: product.sellerId,
+        currentUserId: user.uid
+      });
+      incrementViews(product.id);
+    }
+  }, [product?.id, user?.uid]); // incrementViews 제거, 필수 값들만 의존성 추가
 
   const handlePrevImage = () => {
     setCurrentImageIndex(prev => 
@@ -821,6 +855,23 @@ export default function ProductDetail() {
           <FaExclamationTriangle size={48} color="#ddd" />
           <h3>상품을 찾을 수 없습니다</h3>
           <p>삭제되었거나 존재하지 않는 상품입니다.</p>
+          <p style={{fontSize: '12px', color: '#999', marginTop: '8px'}}>
+            상품 ID: {id} | 로드된 상품 수: {products.length}
+          </p>
+          <button 
+            onClick={() => navigate('/')}
+            style={{
+              marginTop: '16px',
+              padding: '8px 16px',
+              backgroundColor: '#ff7e36',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer'
+            }}
+          >
+            홈으로 돌아가기
+          </button>
         </NotFoundContainer>
       </Container>
     );

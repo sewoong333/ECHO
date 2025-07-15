@@ -482,16 +482,22 @@ export const productService = {
   // 상품 상세 조회
   async getProduct(productId) {
     try {
+      console.log('🔍 상품 상세 조회 시작:', productId);
+      
       const docRef = doc(db, "products", productId);
       const docSnap = await getDoc(docRef);
 
       if (!docSnap.exists()) {
-        throw new Error("상품을 찾을 수 없습니다.");
+        console.log('❌ 상품을 찾을 수 없음:', productId);
+        throw new Error(`상품을 찾을 수 없습니다. (ID: ${productId})`);
       }
 
-      return { id: docSnap.id, ...docSnap.data() };
+      const productData = { id: docSnap.id, ...docSnap.data() };
+      console.log('✅ 상품 상세 조회 성공:', productId, productData.title);
+      
+      return productData;
     } catch (error) {
-      console.error("상품 상세 조회 실패:", error);
+      console.error("❌ 상품 상세 조회 실패:", error);
       throw error;
     }
   },
@@ -499,13 +505,17 @@ export const productService = {
   // 조회수 증가 (중복 방지)
   async incrementViewCount(productId, userId = null) {
     try {
-      // 세션 스토리지로 중복 방지 (브라우저 탭별로 관리)
-      const viewKey = `viewed_${productId}`;
-      const hasViewed = sessionStorage.getItem(viewKey);
+      // 더 강력한 중복 방지 - 사용자 ID와 상품 ID 조합
+      const viewKey = `viewed_${productId}_${userId || 'anonymous'}`;
+      const lastViewTime = sessionStorage.getItem(viewKey);
       
-      if (hasViewed) {
-        console.log('이미 조회한 상품입니다:', productId);
-        return;
+      // 10분 이내 중복 조회 방지
+      if (lastViewTime) {
+        const timeDiff = Date.now() - parseInt(lastViewTime);
+        if (timeDiff < 10 * 60 * 1000) { // 10분
+          console.log('이미 조회한 상품입니다 (중복 방지):', productId, '남은 시간:', Math.ceil((10 * 60 * 1000 - timeDiff) / 1000), '초');
+          return;
+        }
       }
       
       const productRef = doc(db, "products", productId);

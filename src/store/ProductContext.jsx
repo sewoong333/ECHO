@@ -156,8 +156,11 @@ export function ProductProvider({ children }) {
             );
           }
 
-          // 삭제된 상품 제거
-          filteredProducts = filteredProducts.filter((product) => product.status === PRODUCT_STATUS.ACTIVE);
+          // 삭제된 상품 제거 (하지만 ACTIVE가 아닌 상품도 일단 포함)
+          filteredProducts = filteredProducts.filter((product) => 
+            product.status !== PRODUCT_STATUS.DELETED && 
+            product.status !== PRODUCT_STATUS.SUSPENDED
+          );
 
           // 정렬 적용
           switch (filters.sortBy) {
