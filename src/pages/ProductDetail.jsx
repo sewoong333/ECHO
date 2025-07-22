@@ -449,17 +449,19 @@ const RelatedPrice = styled.div`
 const BottomActions = styled.div`
   position: fixed;
   bottom: 64px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
   width: 100%;
   max-width: 500px;
+  margin: 0 auto;
   background: white;
   border-top: 1px solid #e0e0e0;
   padding: 16px 20px;
   display: flex;
   gap: 12px;
-  z-index: 150;
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
+  z-index: 999;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.15);
+  border-radius: 16px 16px 0 0;
 `;
 
 const LikeButton = styled.button`
@@ -490,22 +492,6 @@ const LikeButton = styled.button`
 const ChatButton = styled.button`
   flex: 1;
   height: 48px;
-  background: #f8f9fa;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  color: #333;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  
-  &:hover {
-    background: #f0f0f0;
-  }
-`;
-
-const BuyButton = styled.button`
-  flex: 1;
-  height: 48px;
   background: #ff7e36;
   border: none;
   border-radius: 12px;
@@ -513,9 +499,34 @@ const BuyButton = styled.button`
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
   
   &:hover {
     background: #e66d2e;
+    transform: translateY(-1px);
+  }
+  
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+`;
+
+const BuyButton = styled.button`
+  flex: 1;
+  height: 48px;
+  background: #28a745;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: #218838;
+    transform: translateY(-1px);
   }
 `;
 
@@ -1149,7 +1160,7 @@ export default function ProductDetail() {
         </>
       )}
 
-      <div style={{ height: '144px' }} />
+      <div style={{ height: '160px' }} />
 
       <BottomActions>
         <LikeButton liked={isLiked} onClick={handleLike}>
