@@ -1161,21 +1161,76 @@ export default function ProductDetail() {
 
       <div style={{ height: '180px' }} />
 
-      <BottomActions>
-        <LikeButton liked={isLiked} onClick={handleLike}>
-          {isLiked ? <FaStar /> : <FaRegStar />}
-        </LikeButton>
-        <ChatButton 
+      {/* 강제로 보이게 하는 버튼들 */}
+      <div style={{
+        position: 'fixed',
+        bottom: '80px',
+        left: '16px',
+        right: '16px',
+        maxWidth: '468px',
+        margin: '0 auto',
+        background: 'white',
+        border: '2px solid #ff7e36',
+        borderRadius: '16px',
+        padding: '16px 20px',
+        display: 'flex',
+        gap: '12px',
+        zIndex: 99999,
+        boxShadow: '0 4px 24px rgba(0, 0, 0, 0.3)'
+      }}>
+        <button 
+          onClick={handleLike}
+          style={{
+            width: '48px',
+            height: '48px',
+            border: '1px solid #e0e0e0',
+            borderRadius: '12px',
+            background: 'white',
+            color: isLiked ? '#FFD700' : '#666',
+            fontSize: '20px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          {isLiked ? '⭐' : '☆'}
+        </button>
+        <button 
           onClick={handleChat}
           disabled={creatingChat}
-          style={{ opacity: creatingChat ? 0.7 : 1 }}
+          style={{
+            flex: 1,
+            height: '48px',
+            background: '#ff7e36',
+            border: 'none',
+            borderRadius: '12px',
+            color: 'white',
+            fontSize: '16px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            opacity: creatingChat ? 0.7 : 1
+          }}
         >
-          {creatingChat ? '채팅방 생성 중...' : '채팅하기'}
-        </ChatButton>
-        <BuyButton onClick={handleBuy}>
-          구매하기
-        </BuyButton>
-      </BottomActions>
+          {creatingChat ? '채팅방 생성 중...' : '💬 채팅하기'}
+        </button>
+        <button 
+          onClick={handleBuy}
+          style={{
+            flex: 1,
+            height: '48px',
+            background: '#28a745',
+            border: 'none',
+            borderRadius: '12px',
+            color: 'white',
+            fontSize: '16px',
+            fontWeight: '600',
+            cursor: 'pointer'
+          }}
+        >
+          🛒 구매하기
+        </button>
+      </div>
 
       {/* 이미지 확대 모달 */}
       {isImageModalOpen && (
