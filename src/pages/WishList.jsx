@@ -3,13 +3,12 @@ import TopBar from "../components/TopBar";
 import { ProductContext } from "../store/ProductContext";
 import { UserContext } from "../store/UserContext";
 import { useNavigate } from "react-router-dom";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "../utils/firebase";
 
 export default function WishList() {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
-  const { likes } = useContext(ProductContext);
   const [wishList, setWishList] = useState([]);
   const [loading, setLoading] = useState(true);
 
