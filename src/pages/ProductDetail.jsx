@@ -8,6 +8,8 @@ import { productService } from "../utils/firebase";
 import {
   FaHeart,
   FaRegHeart,
+  FaStar,
+  FaRegStar,
   FaShare,
   FaEllipsisV,
   FaArrowLeft,
@@ -16,7 +18,6 @@ import {
   FaComments,
   FaShoppingCart,
   FaUser,
-  FaStar,
   FaCheckCircle,
   FaStore,
   FaClock,
@@ -467,16 +468,22 @@ const LikeButton = styled.button`
   border: 1px solid #e0e0e0;
   border-radius: 12px;
   background: white;
-  color: ${props => props.liked ? '#ff7e36' : '#666'};
+  color: ${props => props.liked ? '#FFD700' : '#666'};
   font-size: 20px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
   
   &:hover {
-    border-color: #ff7e36;
-    color: #ff7e36;
+    border-color: #FFD700;
+    color: #FFD700;
+    transform: scale(1.05);
+  }
+  
+  &:active {
+    transform: scale(0.95);
   }
 `;
 
@@ -1146,7 +1153,7 @@ export default function ProductDetail() {
 
       <BottomActions>
         <LikeButton liked={isLiked} onClick={handleLike}>
-          {isLiked ? <FaHeart /> : <FaRegHeart />}
+          {isLiked ? <FaStar /> : <FaRegStar />}
         </LikeButton>
         <ChatButton 
           onClick={handleChat}

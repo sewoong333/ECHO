@@ -86,7 +86,7 @@ export function ProductProvider({ children }) {
     loadProducts(true);
   }, []); // 빈 배열로 앱 시작 시 한 번만 실행
 
-  // 필터 변경 시 상품 목록 새로고침
+  // 필터 변경 시 상품 목록 새로고침 (검색어는 제외)
   useEffect(() => {
     console.log("🔧 필터 변경 - 상품 다시 로드");
     setLastDoc(null);
@@ -98,8 +98,16 @@ export function ProductProvider({ children }) {
     filters.priceMax,
     filters.condition,
     filters.sortBy,
-    filters.searchQuery,
   ]);
+
+  // 검색어 변경 시에만 별도 처리
+  useEffect(() => {
+    if (filters.searchQuery.trim()) {
+      console.log("🔍 검색어 변경 - 상품 다시 로드:", filters.searchQuery);
+      setLastDoc(null);
+      loadProducts(true);
+    }
+  }, [filters.searchQuery]);
 
   // 무한 스크롤을 위한 추가 로드
   const loadMoreProducts = useCallback(() => {
@@ -148,7 +156,7 @@ export function ProductProvider({ children }) {
             filteredProducts = filteredProducts.filter(p => p.price <= parseInt(filters.priceMax));
           }
 
-          if (filters.searchQuery) {
+          if (filters.searchQuery && filters.searchQuery.trim()) {
             const searchLower = filters.searchQuery.toLowerCase();
             filteredProducts = filteredProducts.filter(p => 
               p.title?.toLowerCase().includes(searchLower) ||
