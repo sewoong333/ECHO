@@ -246,11 +246,25 @@ export const productService = {
   // 상품 생성 (중고거래 표준 구조)
   async createProduct(productData, userId) {
     try {
+      // 입력 검증
+      if (!productData.title || productData.title.trim().length < 2) {
+        throw new Error("제목을 2글자 이상 입력해주세요.");
+      }
+      if (!productData.description || productData.description.trim().length < 10) {
+        throw new Error("상품 설명을 10글자 이상 입력해주세요.");
+      }
+      if (!productData.price || productData.price < 1000) {
+        throw new Error("가격을 1,000원 이상 입력해주세요.");
+      }
+      if (!userId) {
+        throw new Error("로그인이 필요합니다.");
+      }
+
       const now = serverTimestamp();
       const product = {
-        // 기본 정보
-        title: productData.title.trim(),
-        description: productData.description.trim(),
+        // 기본 정보 (XSS 방지를 위한 HTML 태그 제거)
+        title: productData.title.trim().replace(/<[^>]*>/g, ''),
+        description: productData.description.trim().replace(/<[^>]*>/g, ''),
         category: productData.category,
         subcategory: productData.subcategory || "",
         brand: productData.brand || "",

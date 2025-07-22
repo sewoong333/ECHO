@@ -27,6 +27,7 @@ export default function AppRouter() {
       <Route path="/signup" element={<Signup />} />
       <Route path="/set-location" element={<SetLocation />} />
       <Route path="/register" element={<ProductRegister />} />
+      <Route path="/add" element={<ProductRegister />} />
       <Route path="/product/:id" element={<ProductDetail />} />
       <Route path="/chat/:chatRoomId" element={<ChatRoom />} />
       <Route path="/chat" element={<ChatList />} />
@@ -36,7 +37,6 @@ export default function AppRouter() {
       <Route path="/musiclife/write" element={<MusicLifeWrite />} />
       <Route path="/musiclife/:id" element={<MusicLifeDetail />} />
       <Route path="/map" element={<MapPage />} />
-      <Route path="/add" element={<AddProduct />} />
       <Route path="/tuner/guitar" element={<GuitarTuner />} />
       <Route path="/tuner/bass" element={<BassTuner />} />
       <Route path="/echo-share" element={<EchoShare />} />

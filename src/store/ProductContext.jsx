@@ -12,6 +12,7 @@ import {
   PRODUCT_STATUS,
   INSTRUMENT_CATEGORIES,
 } from "../utils/firebase";
+import { loadDummyProductsForDev } from "../utils/createDummyData";
 
 export const ProductContext = createContext();
 
@@ -57,18 +58,25 @@ export function ProductProvider({ children }) {
 
         const result = await productService.getProducts(options);
 
-        if (resetList) {
-          console.log("🔄 상품 목록 리셋, 새 상품:", result.products.length, "개");
-          setProducts(result.products);
-        } else {
-          console.log("➕ 상품 추가 로드:", result.products.length, "개");
-          setProducts((prev) => [...prev, ...result.products]);
+        // Firebase에서 상품이 없으면 더미 데이터 사용 (개발/데모용)
+        let finalProducts = result.products;
+        if (result.products.length === 0 && resetList) {
+          console.log("📦 Firebase에 상품이 없어서 더미 데이터 로드");
+          finalProducts = loadDummyProductsForDev();
         }
 
-        setHasMore(result.hasMore);
+        if (resetList) {
+          console.log("🔄 상품 목록 리셋, 새 상품:", finalProducts.length, "개");
+          setProducts(finalProducts);
+        } else {
+          console.log("➕ 상품 추가 로드:", finalProducts.length, "개");
+          setProducts((prev) => [...prev, ...finalProducts]);
+        }
+
+        setHasMore(result.hasMore || finalProducts.length > 0);
         setLastDoc(result.lastDoc);
 
-        console.log("✅ 상품 로드 완료:", result.products.length, "개");
+        console.log("✅ 상품 로드 완료:", finalProducts.length, "개");
       } catch (err) {
         console.error("❌ 상품 로드 실패:", err);
         setError(err.message || "상품을 불러오는데 실패했습니다.");

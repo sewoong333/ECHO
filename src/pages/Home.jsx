@@ -581,11 +581,68 @@ const FAB = styled.button`
   }
 `;
 
+const ErrorState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  
+  h3 {
+    color: #333;
+    font-size: 18px;
+    margin: 16px 0 8px;
+  }
+  
+  p {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+`;
+
+const RetryButton = styled.button`
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  
+  &:hover {
+    background: #e55555;
+  }
+`;
+
+const EmptyButton = styled.button`
+  background: var(--color-mint-main);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s ease;
+  
+  &:hover {
+    background: #26c4a8;
+  }
+`;
+
 export default function Home() {
   const navigate = useNavigate();
   const { 
     products, 
     loading, 
+    error,
     hasMore, 
     filters, 
     updateFilters, 
@@ -903,7 +960,16 @@ export default function Home() {
 
       <ContentContainer>
         <ProductGrid>
-          {loading && products.length === 0 ? (
+          {error ? (
+            <ErrorState>
+              <FaTimes size={48} color="#ff6b6b" />
+              <h3>문제가 발생했습니다</h3>
+              <p>{error}</p>
+              <RetryButton onClick={() => window.location.reload()}>
+                다시 시도
+              </RetryButton>
+            </ErrorState>
+          ) : loading && products.length === 0 ? (
             <LoadingContainer>
               <LoadingSpinner />
               <LoadingText>상품을 불러오는 중...</LoadingText>
@@ -911,8 +977,12 @@ export default function Home() {
           ) : products.length === 0 ? (
             <EmptyState>
               <FaSearch size={48} color="#ddd" />
-              <h3>검색 결과가 없습니다</h3>
-              <p>다른 검색어를 입력해보세요</p>
+              <h3>등록된 상품이 없습니다</h3>
+              <p>첫 번째 상품을 등록해보세요!</p>
+              <EmptyButton onClick={() => navigate('/add')}>
+                <FaPlus />
+                상품 등록하기
+              </EmptyButton>
             </EmptyState>
           ) : (
             products.map((product) => {
@@ -927,6 +997,7 @@ export default function Home() {
                       <ProductImage 
                         src={product.images[0]} 
                         alt={product.title}
+                        loading="lazy"
                       />
                     ) : (
                       <ImagePlaceholder>

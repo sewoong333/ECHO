@@ -458,33 +458,41 @@ const BottomActions = styled.div`
   border-radius: 16px;
   padding: 16px 20px;
   display: flex;
-  gap: 12px;
+  align-items: center;
+  gap: 16px;
   z-index: 9999;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+
+  @media (max-width: 600px) {
+    width: calc(100% - 12px);
+    padding: 12px 6px;
+    gap: 8px;
+  }
 `;
 
 const LikeButton = styled.button`
   width: 48px;
   height: 48px;
-  border: 1px solid #e0e0e0;
+  border: 1.5px solid #e0e0e0;
   border-radius: 12px;
   background: white;
   color: ${props => props.liked ? '#FFD700' : '#666'};
-  font-size: 20px;
+  font-size: 22px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  margin-right: 4px;
   &:hover {
     border-color: #FFD700;
     color: #FFD700;
-    transform: scale(1.05);
+    transform: scale(1.08);
+    box-shadow: 0 4px 16px rgba(255,215,0,0.12);
   }
-  
   &:active {
-    transform: scale(0.95);
+    transform: scale(0.96);
   }
 `;
 
@@ -1182,20 +1190,25 @@ export default function ProductDetail() {
         <LikeButton 
           onClick={handleLike}
           liked={isLiked}
+          aria-label="찜하기"
         >
-          {isLiked ? '⭐' : '☆'}
+          {isLiked ? <FaHeart /> : <FaRegHeart />}
         </LikeButton>
-        <ChatButton 
-          onClick={handleChat}
-          disabled={creatingChat}
-        >
-          {creatingChat ? '채팅방 생성 중...' : '💬 채팅하기'}
-        </ChatButton>
-        <BuyButton 
-          onClick={handleBuy}
-        >
-          🛒 구매하기
-        </BuyButton>
+        <div style={{ display: 'flex', flex: 1, gap: 10 }}>
+          <ChatButton 
+            onClick={handleChat}
+            disabled={creatingChat}
+            style={{ flex: 1 }}
+          >
+            {creatingChat ? '채팅방 생성 중...' : '💬 채팅하기'}
+          </ChatButton>
+          <BuyButton 
+            onClick={handleBuy}
+            style={{ flex: 1 }}
+          >
+            🛒 구매하기
+          </BuyButton>
+        </div>
       </BottomActions>
 
       {/* 하단바와 겹치지 않도록 충분한 여백 */}
