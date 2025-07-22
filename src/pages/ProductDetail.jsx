@@ -448,7 +448,7 @@ const RelatedPrice = styled.div`
 
 const BottomActions = styled.div`
   position: fixed;
-  bottom: 80px;
+  bottom: 100px;
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 32px);
