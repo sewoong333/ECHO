@@ -448,7 +448,7 @@ const RelatedPrice = styled.div`
 
 const BottomActions = styled.div`
   position: fixed;
-  bottom: 100px;
+  bottom: 140px;
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 32px);
@@ -485,6 +485,55 @@ const LikeButton = styled.button`
   
   &:active {
     transform: scale(0.95);
+  }
+`;
+
+const ChatButton = styled.button`
+  flex: 1;
+  height: 48px;
+  background: #ff7e36;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: ${props => props.disabled ? 0.7 : 1};
+  transition: all 0.2s ease;
+  
+  &:hover:not(:disabled) {
+    background: #e66d2e;
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  &:disabled {
+    cursor: not-allowed;
+  }
+`;
+
+const BuyButton = styled.button`
+  flex: 1;
+  height: 48px;
+  background: #28a745;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: #218838;
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: translateY(0);
   }
 `;
 
@@ -684,15 +733,25 @@ export default function ProductDetail() {
 
   // 조회수 증가 - 별도 useEffect로 분리
   useEffect(() => {
-    if (product && user?.uid && product.sellerId !== user.uid) {
-      console.log('👀 조회수 증가 시도:', {
+    if (product) {
+      console.log('👀 조회수 증가 조건 확인:', {
         productId: product.id,
+        productTitle: product.title,
         sellerId: product.sellerId,
-        currentUserId: user.uid
+        currentUserId: user?.uid || 'anonymous',
+        isOwnProduct: product.sellerId === user?.uid,
+        viewCount: product.viewCount || 0
       });
-      incrementViews(product.id);
+      
+      // 로그인 여부와 관계없이 조회수 증가 (본인 상품만 제외)
+      if (product.sellerId !== user?.uid) {
+        console.log('✅ 조회수 증가 시작');
+        incrementViews(product.id);
+      } else {
+        console.log('❌ 본인 상품이므로 조회수 증가 안함');
+      }
     }
-  }, [product?.id, user?.uid]); // incrementViews 제거, 필수 값들만 의존성 추가
+  }, [product?.id]); // user 의존성 제거하여 더 자주 실행되도록
 
   const handlePrevImage = () => {
     setCurrentImageIndex(prev => 
@@ -1159,103 +1218,26 @@ export default function ProductDetail() {
         </>
       )}
 
-      {/* 상품 액션 버튼들 - 콘텐츠 하단에 배치 */}
-      <ContentSection>
-        <div style={{
-          background: 'white',
-          border: '1px solid #e0e0e0',
-          borderRadius: '16px',
-          padding: '20px',
-          display: 'flex',
-          gap: '12px',
-          marginBottom: '20px',
-          boxShadow: '0 2px 12px rgba(0, 0, 0, 0.1)'
-        }}>
-          <button 
-            onClick={handleLike}
-            style={{
-              width: '56px',
-              height: '56px',
-              border: '1px solid #e0e0e0',
-              borderRadius: '12px',
-              background: 'white',
-              color: isLiked ? '#FFD700' : '#666',
-              fontSize: '24px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseOver={(e) => {
-              e.target.style.transform = 'scale(1.05)';
-              e.target.style.borderColor = '#FFD700';
-            }}
-            onMouseOut={(e) => {
-              e.target.style.transform = 'scale(1)';
-              e.target.style.borderColor = '#e0e0e0';
-            }}
-          >
-            {isLiked ? '⭐' : '☆'}
-          </button>
-          <button 
-            onClick={handleChat}
-            disabled={creatingChat}
-            style={{
-              flex: 1,
-              height: '56px',
-              background: '#ff7e36',
-              border: 'none',
-              borderRadius: '12px',
-              color: 'white',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              opacity: creatingChat ? 0.7 : 1,
-              transition: 'all 0.2s ease'
-            }}
-            onMouseOver={(e) => {
-              if (!creatingChat) {
-                e.target.style.background = '#e66d2e';
-                e.target.style.transform = 'translateY(-1px)';
-              }
-            }}
-            onMouseOut={(e) => {
-              if (!creatingChat) {
-                e.target.style.background = '#ff7e36';
-                e.target.style.transform = 'translateY(0)';
-              }
-            }}
-          >
-            {creatingChat ? '채팅방 생성 중...' : '💬 채팅하기'}
-          </button>
-          <button 
-            onClick={handleBuy}
-            style={{
-              flex: 1,
-              height: '56px',
-              background: '#28a745',
-              border: 'none',
-              borderRadius: '12px',
-              color: 'white',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseOver={(e) => {
-              e.target.style.background = '#218838';
-              e.target.style.transform = 'translateY(-1px)';
-            }}
-            onMouseOut={(e) => {
-              e.target.style.background = '#28a745';
-              e.target.style.transform = 'translateY(0)';
-            }}
-          >
-            🛒 구매하기
-          </button>
-        </div>
-      </ContentSection>
+      {/* 상품 액션 버튼들 - 하단바 위에 고정 배치 */}
+      <BottomActions>
+        <LikeButton 
+          onClick={handleLike}
+          liked={isLiked}
+        >
+          {isLiked ? '⭐' : '☆'}
+        </LikeButton>
+        <ChatButton 
+          onClick={handleChat}
+          disabled={creatingChat}
+        >
+          {creatingChat ? '채팅방 생성 중...' : '💬 채팅하기'}
+        </ChatButton>
+        <BuyButton 
+          onClick={handleBuy}
+        >
+          🛒 구매하기
+        </BuyButton>
+      </BottomActions>
 
       {/* 하단바와 겹치지 않도록 충분한 여백 */}
       <div style={{ height: '80px' }} />

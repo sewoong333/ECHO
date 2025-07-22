@@ -506,15 +506,17 @@ export const productService = {
   // 조회수 증가 (중복 방지)
   async incrementViewCount(productId, userId = null) {
     try {
+      console.log('🚀 조회수 증가 함수 시작:', { productId, userId: userId || 'anonymous' });
+      
       // 더 강력한 중복 방지 - 사용자 ID와 상품 ID 조합
       const viewKey = `viewed_${productId}_${userId || 'anonymous'}`;
       const lastViewTime = sessionStorage.getItem(viewKey);
       
-      // 10분 이내 중복 조회 방지
+      // 1분 이내 중복 조회 방지 (10분에서 1분으로 단축하여 테스트 용이하게)
       if (lastViewTime) {
         const timeDiff = Date.now() - parseInt(lastViewTime);
-        if (timeDiff < 10 * 60 * 1000) { // 10분
-          console.log('이미 조회한 상품입니다 (중복 방지):', productId, '남은 시간:', Math.ceil((10 * 60 * 1000 - timeDiff) / 1000), '초');
+        if (timeDiff < 1 * 60 * 1000) { // 1분
+          console.log('⏱️ 이미 조회한 상품입니다 (중복 방지):', productId, '남은 시간:', Math.ceil((1 * 60 * 1000 - timeDiff) / 1000), '초');
           return;
         }
       }
@@ -524,18 +526,20 @@ export const productService = {
       // 상품 정보 확인 (본인 상품인지 체크)
       const productSnap = await getDoc(productRef);
       if (!productSnap.exists()) {
-        console.log('상품을 찾을 수 없습니다:', productId);
+        console.log('❌ 상품을 찾을 수 없습니다:', productId);
         return;
       }
       
       const productData = productSnap.data();
+      console.log('📊 현재 조회수:', productData.viewCount || 0);
       
-      // 본인 상품은 조회수 증가하지 않음
+      // 본인 상품은 조회수 증가하지 않음 (로그인 상태일 때만 체크)
       if (userId && productData.sellerId === userId) {
-        console.log('본인 상품은 조회수가 증가하지 않습니다:', productId);
+        console.log('🚫 본인 상품은 조회수가 증가하지 않습니다:', productId);
         return;
       }
       
+      console.log('💫 Firestore 조회수 업데이트 시작...');
       await updateDoc(productRef, {
         viewCount: increment(1),
         lastViewedAt: serverTimestamp(),
@@ -544,9 +548,10 @@ export const productService = {
       // 세션에 조회 기록 저장
       sessionStorage.setItem(viewKey, Date.now().toString());
       
-      console.log('조회수 증가 완료:', productId);
+      console.log('✅ 조회수 증가 완료:', productId, '→', (productData.viewCount || 0) + 1);
     } catch (error) {
-      console.error("조회수 증가 실패:", error);
+      console.error("❌ 조회수 증가 실패:", error);
+      console.error("❌ 에러 상세:", error.message, error.code);
     }
   },
 
