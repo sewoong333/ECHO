@@ -537,47 +537,6 @@ const BuyButton = styled.button`
   }
 `;
 
-const ChatButton = styled.button`
-  flex: 1;
-  height: 48px;
-  background: #ff7e36;
-  border: none;
-  border-radius: 12px;
-  color: white;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    background: #e66d2e;
-    transform: translateY(-1px);
-  }
-  
-  &:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
-`;
-
-const BuyButton = styled.button`
-  flex: 1;
-  height: 48px;
-  background: #28a745;
-  border: none;
-  border-radius: 12px;
-  color: white;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    background: #218838;
-    transform: translateY(-1px);
-  }
-`;
-
 const LoadingContainer = styled.div`
   display: flex;
   align-items: center;
