@@ -448,20 +448,19 @@ const RelatedPrice = styled.div`
 
 const BottomActions = styled.div`
   position: fixed;
-  bottom: 64px;
-  left: 0;
-  right: 0;
-  width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 468px;
   background: white;
-  border-top: 1px solid #e0e0e0;
+  border: 1px solid #e0e0e0;
+  border-radius: 16px;
   padding: 16px 20px;
   display: flex;
   gap: 12px;
-  z-index: 999;
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.15);
-  border-radius: 16px 16px 0 0;
+  z-index: 9999;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
 `;
 
 const LikeButton = styled.button`
@@ -1160,7 +1159,7 @@ export default function ProductDetail() {
         </>
       )}
 
-      <div style={{ height: '160px' }} />
+      <div style={{ height: '180px' }} />
 
       <BottomActions>
         <LikeButton liked={isLiked} onClick={handleLike}>
