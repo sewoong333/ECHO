@@ -10,6 +10,7 @@ import ChatRoom from "../pages/ChatRoom";
 import MyPage from "../pages/MyPage";
 import MusicLife from "../pages/MusicLife";
 import MusicLifeDetail from "../pages/MusicLifeDetail";
+import MusicLifeWrite from "../pages/MusicLifeWrite";
 import MapPage from "../pages/Map";
 import ChatList from "../pages/ChatList";
 import AddProduct from "../pages/AddProduct";
@@ -32,6 +33,7 @@ export default function AppRouter() {
       <Route path="/mypage" element={<MyPage />} />
       <Route path="/mypage/sales" element={<SalesHistory />} />
       <Route path="/musiclife" element={<MusicLife />} />
+      <Route path="/musiclife/write" element={<MusicLifeWrite />} />
       <Route path="/musiclife/:id" element={<MusicLifeDetail />} />
       <Route path="/map" element={<MapPage />} />
       <Route path="/add" element={<AddProduct />} />

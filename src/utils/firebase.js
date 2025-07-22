@@ -76,6 +76,7 @@ export const usersCollection = collection(db, "users");
 export const chatsCollection = collection(db, "chats");
 export const reviewsCollection = collection(db, "reviews");
 export const reportsCollection = collection(db, "reports");
+export const musiclifeCollection = collection(db, "musiclife_posts");
 
 // 상품 상태 열거형
 export const PRODUCT_STATUS = {
@@ -890,6 +891,57 @@ export const subscriptionService = {
       throw error;
     }
   },
+};
+
+export const musiclifeService = {
+  async createPost(data) {
+    return await addDoc(musiclifeCollection, {
+      ...data,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      viewCount: 0,
+      commentCount: 0,
+    });
+  },
+  async getPosts() {
+    const q = query(musiclifeCollection, orderBy("createdAt", "desc"));
+    const snap = await getDocs(q);
+    return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  },
+  async getPost(id) {
+    const ref = doc(db, "musiclife_posts", id);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) throw new Error("게시글이 존재하지 않습니다.");
+    await updateDoc(ref, { viewCount: increment(1) });
+    return { id: snap.id, ...snap.data() };
+  },
+  async updatePost(id, data) {
+    const ref = doc(db, "musiclife_posts", id);
+    await updateDoc(ref, { ...data, updatedAt: serverTimestamp() });
+  },
+  async deletePost(id) {
+    const ref = doc(db, "musiclife_posts", id);
+    await deleteDoc(ref);
+  },
+  async addComment(postId, data) {
+    const commentsCol = collection(db, "musiclife_posts", postId, "comments");
+    await addDoc(commentsCol, {
+      ...data,
+      createdAt: serverTimestamp(),
+    });
+    await updateDoc(doc(db, "musiclife_posts", postId), { commentCount: increment(1) });
+  },
+  async getComments(postId) {
+    const commentsCol = collection(db, "musiclife_posts", postId, "comments");
+    const q = query(commentsCol, orderBy("createdAt", "asc"));
+    const snap = await getDocs(q);
+    return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  },
+  async deleteComment(postId, commentId) {
+    const ref = doc(db, "musiclife_posts", postId, "comments", commentId);
+    await deleteDoc(ref);
+    await updateDoc(doc(db, "musiclife_posts", postId), { commentCount: increment(-1) });
+  }
 };
 
 export default {

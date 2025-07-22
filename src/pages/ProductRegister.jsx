@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { uploadProductImage, productService } from "../utils/firebase";
+import { imageService, productService } from "../utils/firebase";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../store/UserContext";
 
@@ -36,8 +36,8 @@ export default function ProductRegister() {
       // 1. 이미지 업로드
       const imageUrls = [];
       for (const file of images) {
-        const url = await uploadProductImage(file, user.uid);
-        imageUrls.push(url);
+        const result = await imageService.uploadProductImage(file, user.uid);
+        imageUrls.push(result.url);
       }
       // 2. 상품 데이터 저장
       await productService.createProduct({
