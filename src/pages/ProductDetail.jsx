@@ -113,6 +113,7 @@ const ImageSlider = styled.div`
   background: #f8f9fa;
   border-radius: 16px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  touch-action: pan-y;
 `;
 
 const ImageContainer = styled.div`
@@ -157,9 +158,16 @@ const SliderButton = styled.button`
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  transition: all 0.2s ease;
   
   &:hover {
     background: white;
+    transform: translateY(-50%) scale(1.1);
+  }
+  
+  &:active {
+    transform: translateY(-50%) scale(0.95);
   }
 `;
 
@@ -439,7 +447,7 @@ const RelatedPrice = styled.div`
 
 const BottomActions = styled.div`
   position: fixed;
-  bottom: 0;
+  bottom: 64px;
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
@@ -449,7 +457,8 @@ const BottomActions = styled.div`
   padding: 16px 20px;
   display: flex;
   gap: 12px;
-  z-index: 100;
+  z-index: 150;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
 `;
 
 const LikeButton = styled.button`
@@ -618,6 +627,8 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const [creatingChat, setCreatingChat] = useState(false);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
 
   // 상품 찾기
   const product = products.find((p) => String(p.id) === String(id));
@@ -680,6 +691,31 @@ export default function ProductDetail() {
 
   const handleImageClick = () => {
     setIsImageModalOpen(true);
+  };
+
+  // 터치 스와이프 핸들러
+  const handleTouchStart = (e) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+    
+    if (isLeftSwipe && currentImageIndex < (product?.images?.length || 1) - 1) {
+      setCurrentImageIndex(prev => prev + 1);
+    }
+    
+    if (isRightSwipe && currentImageIndex > 0) {
+      setCurrentImageIndex(prev => prev - 1);
+    }
   };
 
   const handleLike = async () => {
@@ -921,7 +957,11 @@ export default function ProductDetail() {
       </Header>
 
       <ImageSection>
-        <ImageSlider>
+        <ImageSlider
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           {images.length > 0 ? (
             <>
               <ImageContainer 
@@ -941,6 +981,21 @@ export default function ProductDetail() {
               
               {images.length > 1 && (
                 <>
+                  <SliderButton 
+                    direction="prev" 
+                    onClick={handlePrevImage}
+                    style={{ display: currentImageIndex === 0 ? 'none' : 'flex' }}
+                  >
+                    <FaChevronLeft />
+                  </SliderButton>
+                  <SliderButton 
+                    direction="next" 
+                    onClick={handleNextImage}
+                    style={{ display: currentImageIndex === images.length - 1 ? 'none' : 'flex' }}
+                  >
+                    <FaChevronRight />
+                  </SliderButton>
+                  
                   <ImageCounter>
                     {currentImageIndex + 1}/{images.length}
                   </ImageCounter>
@@ -1087,7 +1142,7 @@ export default function ProductDetail() {
         </>
       )}
 
-      <div style={{ height: '80px' }} />
+      <div style={{ height: '144px' }} />
 
       <BottomActions>
         <LikeButton liked={isLiked} onClick={handleLike}>
