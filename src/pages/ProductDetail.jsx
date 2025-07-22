@@ -1159,78 +1159,106 @@ export default function ProductDetail() {
         </>
       )}
 
-      <div style={{ height: '180px' }} />
+      {/* 상품 액션 버튼들 - 콘텐츠 하단에 배치 */}
+      <ContentSection>
+        <div style={{
+          background: 'white',
+          border: '1px solid #e0e0e0',
+          borderRadius: '16px',
+          padding: '20px',
+          display: 'flex',
+          gap: '12px',
+          marginBottom: '20px',
+          boxShadow: '0 2px 12px rgba(0, 0, 0, 0.1)'
+        }}>
+          <button 
+            onClick={handleLike}
+            style={{
+              width: '56px',
+              height: '56px',
+              border: '1px solid #e0e0e0',
+              borderRadius: '12px',
+              background: 'white',
+              color: isLiked ? '#FFD700' : '#666',
+              fontSize: '24px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.transform = 'scale(1.05)';
+              e.target.style.borderColor = '#FFD700';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = 'scale(1)';
+              e.target.style.borderColor = '#e0e0e0';
+            }}
+          >
+            {isLiked ? '⭐' : '☆'}
+          </button>
+          <button 
+            onClick={handleChat}
+            disabled={creatingChat}
+            style={{
+              flex: 1,
+              height: '56px',
+              background: '#ff7e36',
+              border: 'none',
+              borderRadius: '12px',
+              color: 'white',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              opacity: creatingChat ? 0.7 : 1,
+              transition: 'all 0.2s ease'
+            }}
+            onMouseOver={(e) => {
+              if (!creatingChat) {
+                e.target.style.background = '#e66d2e';
+                e.target.style.transform = 'translateY(-1px)';
+              }
+            }}
+            onMouseOut={(e) => {
+              if (!creatingChat) {
+                e.target.style.background = '#ff7e36';
+                e.target.style.transform = 'translateY(0)';
+              }
+            }}
+          >
+            {creatingChat ? '채팅방 생성 중...' : '💬 채팅하기'}
+          </button>
+          <button 
+            onClick={handleBuy}
+            style={{
+              flex: 1,
+              height: '56px',
+              background: '#28a745',
+              border: 'none',
+              borderRadius: '12px',
+              color: 'white',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.background = '#218838';
+              e.target.style.transform = 'translateY(-1px)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.background = '#28a745';
+              e.target.style.transform = 'translateY(0)';
+            }}
+          >
+            🛒 구매하기
+          </button>
+        </div>
+      </ContentSection>
 
-      {/* 강제로 보이게 하는 버튼들 */}
-      <div style={{
-        position: 'fixed',
-        bottom: '80px',
-        left: '16px',
-        right: '16px',
-        maxWidth: '468px',
-        margin: '0 auto',
-        background: 'white',
-        border: '2px solid #ff7e36',
-        borderRadius: '16px',
-        padding: '16px 20px',
-        display: 'flex',
-        gap: '12px',
-        zIndex: 99999,
-        boxShadow: '0 4px 24px rgba(0, 0, 0, 0.3)'
-      }}>
-        <button 
-          onClick={handleLike}
-          style={{
-            width: '48px',
-            height: '48px',
-            border: '1px solid #e0e0e0',
-            borderRadius: '12px',
-            background: 'white',
-            color: isLiked ? '#FFD700' : '#666',
-            fontSize: '20px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          {isLiked ? '⭐' : '☆'}
-        </button>
-        <button 
-          onClick={handleChat}
-          disabled={creatingChat}
-          style={{
-            flex: 1,
-            height: '48px',
-            background: '#ff7e36',
-            border: 'none',
-            borderRadius: '12px',
-            color: 'white',
-            fontSize: '16px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            opacity: creatingChat ? 0.7 : 1
-          }}
-        >
-          {creatingChat ? '채팅방 생성 중...' : '💬 채팅하기'}
-        </button>
-        <button 
-          onClick={handleBuy}
-          style={{
-            flex: 1,
-            height: '48px',
-            background: '#28a745',
-            border: 'none',
-            borderRadius: '12px',
-            color: 'white',
-            fontSize: '16px',
-            fontWeight: '600',
-            cursor: 'pointer'
-          }}
-        >
-          🛒 구매하기
-        </button>
-      </div>
+      {/* 하단바와 겹치지 않도록 충분한 여백 */}
+      <div style={{ height: '80px' }} />
 
       {/* 이미지 확대 모달 */}
       {isImageModalOpen && (
