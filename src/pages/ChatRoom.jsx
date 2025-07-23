@@ -388,8 +388,13 @@ export default function ChatRoom() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sending, setSending] = useState(false);
+  const [purchaseIntentSent, setPurchaseIntentSent] = useState(false);
   const messagesEndRef = useRef(null);
   const messageInputRef = useRef(null);
+
+  // URL에서 구매 의도 파라미터 확인
+  const urlParams = new URLSearchParams(window.location.search);
+  const purchaseIntent = urlParams.get('intent') === 'purchase';
 
   // 채팅방 정보 로드 및 메시지 구독
   useEffect(() => {
@@ -439,6 +444,32 @@ export default function ChatRoom() {
       markMessagesAsRead(chatRoomId);
     }
   }, [chatRoomId, user.isLoggedIn, markMessagesAsRead]);
+
+  // 구매 의도 메시지 자동 전송
+  useEffect(() => {
+    const sendPurchaseIntentMessage = async () => {
+      if (purchaseIntent && chatRoom && !purchaseIntentSent && user.isLoggedIn) {
+        try {
+          setPurchaseIntentSent(true);
+          const productInfo = chatRoom.productInfo;
+          const intentMessage = `${productInfo?.title || '상품'} 구매를 희망합니다. 거래 가능하신가요?`;
+          
+          await sendMessage(chatRoomId, intentMessage);
+          
+          // URL에서 intent 파라미터 제거
+          const newUrl = window.location.pathname;
+          window.history.replaceState({}, '', newUrl);
+          
+          console.log('✅ 구매 의도 메시지 전송 완료');
+        } catch (error) {
+          console.error('구매 의도 메시지 전송 실패:', error);
+          setPurchaseIntentSent(false);
+        }
+      }
+    };
+
+    sendPurchaseIntentMessage();
+  }, [purchaseIntent, chatRoom, purchaseIntentSent, user.isLoggedIn, chatRoomId, sendMessage]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

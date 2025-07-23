@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ProductContext } from "../store/ProductContext";
 import { UserContext } from "../store/UserContext";
 import { ChatContext } from "../store/ChatContext";
+import { useToast } from "../store/ToastContext";
 import { productService } from "../utils/firebase";
 import {
   FaHeart,
@@ -654,6 +655,7 @@ export default function ProductDetail() {
   const { products, incrementViews, toggleLike, changeProductStatus, PRODUCT_STATUS } = useContext(ProductContext);
   const { user } = useContext(UserContext);
   const { createOrGetChatRoom } = useContext(ChatContext);
+  const { showSuccess, showError, showWarning } = useToast();
   
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -763,28 +765,43 @@ export default function ProductDetail() {
 
   const handleLike = async () => {
     if (!user?.isLoggedIn) {
-      alert('로그인이 필요합니다.');
+      showWarning('로그인이 필요합니다.', {
+        title: '로그인 필요'
+      });
       navigate('/login');
       return;
     }
     
     try {
+      const isNowLiked = product.isLikedByUser;
       await toggleLike(product.id);
+      
+      if (isNowLiked) {
+        showSuccess('찜 목록에서 제거되었습니다.');
+      } else {
+        showSuccess('찜 목록에 추가되었습니다!', {
+          title: '찜 완료'
+        });
+      }
     } catch (error) {
       console.error('찜하기 실패:', error);
-      alert('찜하기에 실패했습니다.');
+      showError('찜하기 처리 중 오류가 발생했습니다.');
     }
   };
 
   const handleChat = async () => {
     if (!user?.isLoggedIn) {
-      alert('로그인이 필요합니다.');
+      showWarning('로그인이 필요합니다.', {
+        title: '로그인 필요'
+      });
       navigate('/login');
       return;
     }
     
     if (product.sellerId === user.uid) {
-      alert('본인 상품에는 채팅할 수 없습니다.');
+      showWarning('본인 상품에는 채팅할 수 없습니다.', {
+        title: '채팅 불가'
+      });
       return;
     }
     
@@ -824,25 +841,57 @@ export default function ProductDetail() {
     }
   };
 
-  const handleBuy = () => {
+  const handleBuy = async () => {
     if (!user?.isLoggedIn) {
-      alert('로그인이 필요합니다.');
+      showWarning('로그인이 필요합니다.', {
+        title: '로그인 필요'
+      });
       navigate('/login');
       return;
     }
     
     if (product.sellerId === user.uid) {
-      alert('본인 상품은 구매할 수 없습니다.');
+      showWarning('본인 상품은 구매할 수 없습니다.', {
+        title: '구매 불가'
+      });
       return;
     }
     
     if (product.status !== PRODUCT_STATUS.ACTIVE) {
-      alert('판매 완료된 상품입니다.');
+      showError('이미 판매가 완료된 상품입니다.', {
+        title: '판매 완료'
+      });
       return;
     }
     
-    // 구매 페이지로 이동 (추후 구현)
-    navigate(`/purchase/${product.id}`);
+    // 구매 의사 확인
+    const confirmed = window.confirm(
+      `"${product.title}" 상품을 구매하시겠습니까?\n\n가격: ${product.price?.toLocaleString()}원\n\n확인을 누르시면 판매자와 채팅방이 연결되고,\n거래를 진행하실 수 있습니다.`
+    );
+    
+    if (confirmed) {
+      try {
+        // 채팅방 생성하면서 구매 의사 메시지 전송
+        const chatRoomId = await createOrGetChatRoom(
+          product.id,
+          product.sellerId,
+          user.uid,
+          {
+            title: product.title,
+            price: product.price,
+            images: product.images,
+            status: product.status
+          }
+        );
+        
+        // 구매 의사 시스템 메시지 전송을 위해 채팅방으로 이동
+        navigate(`/chat/${chatRoomId}?intent=purchase`);
+        
+      } catch (error) {
+        console.error('구매 프로세스 실패:', error);
+        alert('구매 프로세스 진행 중 오류가 발생했습니다.');
+      }
+    }
   };
 
   // 옵션 메뉴 핸들러

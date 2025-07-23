@@ -46,14 +46,21 @@ const Container = styled.div`
 const SearchSection = styled.div`
   width: 100%;
   max-width: 500px;
-  background: var(--color-bg-primary);
+  background: rgba(255, 255, 255, 0.85);
   position: sticky;
   top: 0;
   z-index: 100;
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   padding: var(--space-lg) var(--space-xl) var(--space-sm);
-  backdrop-filter: blur(8px);
-  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  
+  /* 글래스모피즘 효과 */
+  background: linear-gradient(145deg, 
+    rgba(255, 255, 255, 0.9) 0%, 
+    rgba(255, 255, 255, 0.8) 100%);
 `;
 
 const SearchBarContainer = styled.div`
@@ -64,12 +71,23 @@ const SearchBarContainer = styled.div`
 const SearchBar = styled.div`
   display: flex;
   align-items: center;
-  background: var(--color-bg-secondary);
-  border: 2px solid ${props => props.focused ? 'var(--color-mint-main)' : 'var(--color-border-light)'};
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid ${props => props.focused ? 'rgba(255, 126, 54, 0.6)' : 'rgba(224, 224, 224, 0.3)'};
   border-radius: var(--radius-xl);
   padding: var(--space-md) var(--space-lg);
-  transition: all var(--transition-fast);
-  box-shadow: ${props => props.focused ? '0 0 0 3px rgba(0, 217, 182, 0.1)' : 'var(--shadow-sm)'};
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: ${props => props.focused 
+    ? '0 8px 25px rgba(255, 126, 54, 0.15), 0 0 0 3px rgba(255, 126, 54, 0.1)' 
+    : '0 4px 15px rgba(0, 0, 0, 0.08)'};
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transform: ${props => props.focused ? 'translateY(-2px) scale(1.02)' : 'translateY(0) scale(1)'};
+  
+  &:hover {
+    transform: translateY(-1px) scale(1.01);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    border-color: rgba(255, 126, 54, 0.4);
+  }
 `;
 
 const SearchInput = styled.input`
@@ -339,24 +357,181 @@ const ContentContainer = styled.div`
   position: relative;
 `;
 
-const ProductGrid = styled.div`
+const MainContent = styled.div`
+  width: 100%;
+  max-width: 500px;
   padding: 0 20px 120px;
+`;
+
+const Section = styled.section`
+  margin-bottom: 32px;
+`;
+
+const SectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+`;
+
+const SectionTitle = styled.h2`
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const SectionSubtitle = styled.p`
+  font-size: 14px;
+  color: #6b7280;
+  margin: 4px 0 0 0;
+`;
+
+const SeeMoreButton = styled.button`
+  background: none;
+  border: none;
+  color: #ff7e36;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: rgba(255, 126, 54, 0.1);
+  }
+`;
+
+const HorizontalScroll = styled.div`
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 4px 0 8px;
+  scroll-behavior: smooth;
+  
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 2px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 2px;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+`;
+
+const HorizontalCard = styled.div`
+  min-width: 280px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  gap: 12px;
+  
+  &:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.98);
+  }
+`;
+
+const HorizontalImage = styled.img`
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #f5f5f5;
+`;
+
+const HorizontalInfo = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+`;
+
+const TrendingBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+  margin-bottom: 4px;
+  width: fit-content;
+`;
+
+const ProductGrid = styled.div`
+  margin-top: 24px;
 `;
 
 const ProductCard = styled.div`
   display: flex;
-  padding: 16px 0;
-  border-bottom: 1px solid #f5f5f5;
+  padding: 16px;
+  margin-bottom: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   
   &:hover {
-    background: #fafafa;
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(255, 126, 54, 0.3);
   }
   
-  &:last-child {
-    border-bottom: none;
+  &:active {
+    transform: translateY(-2px) scale(1.01);
+    transition: all 0.1s ease;
   }
+  
+  /* 마이크로 애니메이션 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent, rgba(255, 126, 54, 0.03), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 16px;
+    pointer-events: none;
+  }
+  
+  &:hover::before {
+    opacity: 1;
+  }
+  
+  position: relative;
+  overflow: hidden;
 `;
 
 const ProductImageContainer = styled.div`
@@ -775,6 +950,63 @@ export default function Home() {
     localStorage.removeItem('recentSearches');
   };
 
+  // 인기 상품 계산 (조회수 + 찜하기 수 + 댓글 수 기준)
+  const getPopularProducts = () => {
+    return products
+      .filter(product => product.status === 'active')
+      .map(product => ({
+        ...product,
+        popularityScore: (product.viewCount || 0) * 1 + 
+                        (product.likeCount || 0) * 3 + 
+                        (product.chatCount || 0) * 2
+      }))
+      .sort((a, b) => b.popularityScore - a.popularityScore)
+      .slice(0, 10);
+  };
+
+  // 최근 등록된 상품 (신상품)
+  const getRecentProducts = () => {
+    return products
+      .filter(product => product.status === 'active')
+      .sort((a, b) => {
+        const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+        const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+        return dateB - dateA;
+      })
+      .slice(0, 8);
+  };
+
+  // 추천 상품 (사용자의 찜한 상품 기반)
+  const getRecommendedProducts = () => {
+    if (!user.isLoggedIn) {
+      // 로그인하지 않은 경우 인기 상품을 추천으로 표시
+      return getPopularProducts().slice(0, 6);
+    }
+    
+    const likedProducts = products.filter(product => product.isLikedByUser);
+    const likedCategories = [...new Set(likedProducts.map(product => product.category))];
+    
+    if (likedCategories.length === 0) {
+      // 찜한 상품이 없으면 최근 조회한 상품의 카테고리 기반 (임시로 인기 상품)
+      return getPopularProducts().slice(0, 6);
+    }
+    
+    // 찜한 카테고리와 같은 카테고리의 상품들을 추천
+    return products
+      .filter(product => 
+        product.status === 'active' &&
+        !product.isLikedByUser &&
+        product.sellerId !== user.uid &&
+        likedCategories.includes(product.category)
+      )
+      .sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))
+      .slice(0, 6);
+  };
+
+  const popularProducts = getPopularProducts();
+  const recentProducts = getRecentProducts();
+  const recommendedProducts = getRecommendedProducts();
+
   const formatPrice = (price) => {
     if (price >= 10000) {
       return `${Math.floor(price / 10000)}만원`;
@@ -958,7 +1190,7 @@ export default function Home() {
       </SearchSection>
 
 
-      <ContentContainer>
+      <MainContent>
         <ProductGrid>
           {error ? (
             <ErrorState>
@@ -1064,7 +1296,7 @@ export default function Home() {
           <FaPlus />
         </FAB>
         
-      </ContentContainer>
+      </MainContent>
 
       {/* 필터 모달 */}
       {isFilterModalOpen && (

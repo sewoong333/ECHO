@@ -2,6 +2,8 @@ import React from "react";
 import { BrowserRouter } from "react-router-dom";
 import AppRouter from "./routes/AppRouter";
 import BottomNav from "./components/BottomNav";
+import Toast from "./components/Toast";
+import { ToastProvider, useToast } from "./store/ToastContext";
 import { createGlobalStyle } from "styled-components";
 
 const GlobalStyle = createGlobalStyle`
@@ -20,14 +22,25 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-export default function App() {
+function AppContent() {
+  const { toasts, removeToast } = useToast();
+  
   return (
     <BrowserRouter>
       <GlobalStyle />
       <div className="App">
         <AppRouter />
         <BottomNav />
+        <Toast toasts={toasts} removeToast={removeToast} />
       </div>
     </BrowserRouter>
+  );
+}
+
+export default function App() {
+  return (
+    <ToastProvider>
+      <AppContent />
+    </ToastProvider>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import styled from "styled-components";
 import { imageService, productService } from "../utils/firebase";
 import { useNavigate } from "react-router-dom";
@@ -40,6 +40,14 @@ export default function ProductRegister() {
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
+
+  // 로그인 확인
+  useEffect(() => {
+    if (!user.loading && !user.isLoggedIn) {
+      alert("상품 등록을 위해 로그인이 필요합니다.");
+      navigate("/login");
+    }
+  }, [user.loading, user.isLoggedIn, navigate]);
 
   // 이미지 선택
   const handleImageChange = (e) => {

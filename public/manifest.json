@@ -1,0 +1,66 @@
+{
+  "name": "ECHO - 악기 공유 플랫폼",
+  "short_name": "ECHO",
+  "description": "음악인들을 위한 악기 거래 및 공유 플랫폼",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#ff7e36",
+  "background_color": "#ffffff",
+  "orientation": "portrait",
+  "categories": ["music", "shopping", "social"],
+  "lang": "ko",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "상품 등록",
+      "short_name": "등록",
+      "description": "새로운 악기 상품 등록하기",
+      "url": "/add",
+      "icons": [
+        {
+          "src": "icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "찜한 상품",
+      "short_name": "찜",
+      "description": "찜한 상품 목록 보기",
+      "url": "/wishlist",
+      "icons": [
+        {
+          "src": "icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "채팅",
+      "short_name": "채팅",
+      "description": "채팅 목록 확인하기",
+      "url": "/chat",
+      "icons": [
+        {
+          "src": "icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false
+}
