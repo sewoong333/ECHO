@@ -134,7 +134,7 @@ const TimeStamp = styled.div`
 `;
 
 const UnreadBadge = styled.div`
-  background: #ff7e36;
+  background: #2ed8b6;
   color: white;
   border-radius: 10px;
   padding: 2px 6px;

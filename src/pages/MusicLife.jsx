@@ -347,7 +347,7 @@ const PostHeader = styled.div`
 const CategoryBadge = styled.span`
   background: ${props => {
     switch(props.category) {
-      case 'gear-review': return '#ff6b6b';
+      case 'gear-review': return '#2ed8b6';
       case 'performance': return '#4ecdc4';
       case 'lesson': return '#45b7d1';
       case 'collaboration': return '#96ceb4';

@@ -29,7 +29,7 @@ const Container = styled.div`
 const Hero = styled.section`
   width: 100%;
   max-width: 480px;
-  background: linear-gradient(120deg, #2ed8b6 60%, #ff7e36 100%);
+  background: linear-gradient(120deg, #2ed8b6 60%, #26c4a8 100%);
   border-radius: 24px;
   box-shadow: 0 8px 32px rgba(46, 216, 182, 0.1);
   display: flex;
@@ -139,7 +139,7 @@ const OptionCard = styled.button`
   flex: 1 1 0;
   min-width: 120px;
   background: ${({ active }) =>
-    active ? "linear-gradient(90deg, #2ed8b6 60%, #ff7e36 100%)" : "#fff"};
+    active ? "linear-gradient(90deg, #2ed8b6 60%, #26c4a8 100%)" : "#fff"}};
   color: ${({ active }) => (active ? "#fff" : "#1a4740")};
   border: none;
   border-radius: 18px;
@@ -156,14 +156,14 @@ const OptionCard = styled.button`
     color 0.18s,
     box-shadow 0.18s,
     transform 0.18s;
-  outline: ${({ active }) => (active ? "2px solid #ff7e36" : "none")};
+  outline: ${({ active }) => (active ? "2px solid #26c4a8" : "none")};
   transform: ${({ active }) => (active ? "scale(1.06)" : "scale(1)")};
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
   &:hover {
-    background: linear-gradient(90deg, #2ed8b6 60%, #ff7e36 100%);
+    background: linear-gradient(90deg, #2ed8b6 60%, #26c4a8 100%);
     color: #fff;
     transform: scale(1.06);
     box-shadow: 0 8px 28px rgba(46, 216, 182, 0.22);
@@ -280,7 +280,7 @@ const StepCard = styled.div`
 const StepNumber = styled.div`
   width: 2.1rem;
   height: 2.1rem;
-  background: #ff7e36;
+  background: #2ed8b6;
   color: #fff;
   border-radius: 50%;
   display: flex;
@@ -352,7 +352,7 @@ const FomoSection = styled(Section)`
 const FomoTitle = styled.h3`
   font-size: 1.13rem;
   font-weight: 800;
-  color: #ff7e36;
+  color: #2ed8b6;
   margin-bottom: 0.7rem;
 `;
 
@@ -612,7 +612,7 @@ export default function EchoShare() {
             <br />
             내 악기, 지금 팔면 얼마? 빌리면 한 달에 얼마?
             <br />
-            <span style={{ color: "#ff7e36", fontWeight: 700 }}>
+            <span style={{ color: "#2ed8b6", fontWeight: 700 }}>
               지금 바로 확인!
             </span>
           </OptionDesc>
@@ -847,7 +847,7 @@ export default function EchoShare() {
             <b>내 악기 예상금액 확인</b> 후, 지금 검증받으면{" "}
             <b>첫 거래 수수료 0%</b> + <b>추가 보너스 지급</b>!<br />
             선착순 100명 한정,{" "}
-            <span style={{ color: "#ff7e36" }}>지금 바로 확인하세요!</span>
+            <span style={{ color: "#2ed8b6" }}>지금 바로 확인하세요!</span>
           </FomoDesc>
           <CTAButton href="/product-register">
             <span role="img" aria-label="등록">

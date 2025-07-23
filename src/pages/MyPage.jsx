@@ -83,7 +83,7 @@ const CameraButton = styled.button`
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: #ff7e36;
+  background: #2ed8b6;
   border: 2px solid white;
   color: white;
   display: flex;
@@ -93,7 +93,7 @@ const CameraButton = styled.button`
   font-size: 12px;
   
   &:hover {
-    background: #e66d2e;
+    background: #26c4a8;
   }
 `;
 
@@ -254,7 +254,7 @@ const MenuText = styled.div`
 `;
 
 const MenuBadge = styled.div`
-  background: #ff7e36;
+  background: #2ed8b6;
   color: white;
   padding: 2px 8px;
   border-radius: 10px;
@@ -294,7 +294,7 @@ const EditButton = styled.button`
   position: absolute;
   top: 16px;
   right: 20px;
-  background: #ff7e36;
+  background: #2ed8b6;
   color: white;
   border: none;
   border-radius: 8px;
@@ -306,7 +306,7 @@ const EditButton = styled.button`
   gap: 4px;
   
   &:hover {
-    background: #e66d2e;
+    background: #26c4a8;
   }
 `;
 

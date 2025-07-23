@@ -76,7 +76,7 @@ const BackButton = styled.button`
   padding: 8px;
   
   &:hover {
-    color: #ff7e36;
+    color: #2ed8b6;
   }
 `;
 
@@ -96,7 +96,7 @@ const IconButton = styled.button`
   padding: 8px;
   
   &:hover {
-    color: #ff7e36;
+    color: #2ed8b6;
   }
 `;
 
@@ -232,7 +232,7 @@ const ProductMeta = styled.div`
 const ProductPrice = styled.div`
   font-size: 24px;
   font-weight: 700;
-  color: #ff7e36;
+  color: #2ed8b6;
   margin-bottom: 16px;
 `;
 
@@ -363,7 +363,7 @@ const MannerScore = styled.div`
   align-items: center;
   gap: 4px;
   font-size: 13px;
-  color: #ff7e36;
+  color: #2ed8b6;
   font-weight: 600;
 `;
 
@@ -417,7 +417,7 @@ const RelatedItem = styled.div`
   cursor: pointer;
   
   &:hover {
-    border-color: #ff7e36;
+    border-color: #2ed8b6;
   }
 `;
 
@@ -444,7 +444,7 @@ const RelatedTitle = styled.div`
 const RelatedPrice = styled.div`
   font-size: 14px;
   font-weight: 600;
-  color: #ff7e36;
+  color: #2ed8b6;
 `;
 
 const BottomActions = styled.div`
@@ -500,7 +500,7 @@ const LikeButton = styled.button`
 const ChatButton = styled.button`
   flex: 1;
   height: 48px;
-  background: #ff7e36;
+  background: #2ed8b6;
   border: none;
   border-radius: 12px;
   color: white;
@@ -511,7 +511,7 @@ const ChatButton = styled.button`
   transition: all 0.2s ease;
   
   &:hover:not(:disabled) {
-    background: #e66d2e;
+    background: #26c4a8;
     transform: translateY(-1px);
   }
   
@@ -991,7 +991,7 @@ export default function ProductDetail() {
             style={{
               marginTop: '16px',
               padding: '8px 16px',
-              backgroundColor: '#ff7e36',
+              backgroundColor: '#2ed8b6',
               color: 'white',
               border: 'none',
               borderRadius: '8px',

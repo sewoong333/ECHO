@@ -33,7 +33,7 @@ export default function SetLocation() {
               width: "100%",
               padding: 12,
               fontSize: 18,
-              background: "#ff7e36",
+              background: "#2ed8b6",
               color: "#fff",
               border: "none",
               borderRadius: 4,

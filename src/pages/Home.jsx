@@ -393,7 +393,7 @@ const SectionSubtitle = styled.p`
 const SeeMoreButton = styled.button`
   background: none;
   border: none;
-  color: #ff7e36;
+  color: #2ed8b6;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -472,7 +472,7 @@ const TrendingBadge = styled.div`
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+  background: linear-gradient(135deg, #2ed8b6, #26c4a8);
   color: white;
   font-size: 12px;
   font-weight: 600;
@@ -778,7 +778,7 @@ const ErrorState = styled.div`
 `;
 
 const RetryButton = styled.button`
-  background: #ff6b6b;
+  background: #2ed8b6;
   color: white;
   border: none;
   border-radius: 8px;
@@ -1194,7 +1194,7 @@ export default function Home() {
         <ProductGrid>
           {error ? (
             <ErrorState>
-              <FaTimes size={48} color="#ff6b6b" />
+              <FaTimes size={48} color="#2ed8b6" />
               <h3>문제가 발생했습니다</h3>
               <p>{error}</p>
               <RetryButton onClick={() => window.location.reload()}>

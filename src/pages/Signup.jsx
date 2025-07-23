@@ -118,7 +118,7 @@ const VerifyButton = styled(Button)`
 `;
 
 const ErrorMessage = styled.div`
-  color: #ff6b6b;
+  color: #2ed8b6;
   font-size: 14px;
   margin-top: 0.5em;
 `;

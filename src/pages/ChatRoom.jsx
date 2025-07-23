@@ -153,7 +153,7 @@ const ProductTitle = styled.div`
 const ProductPrice = styled.div`
   font-size: 16px;
   font-weight: 700;
-  color: #ff7e36;
+  color: #2ed8b6;
   margin-bottom: 4px;
 `;
 
@@ -232,7 +232,7 @@ const MessageBubble = styled.div`
   max-width: 70%;
   padding: 10px 14px;
   border-radius: 18px;
-  background: ${props => props.isOwn ? '#ff7e36' : 'white'};
+  background: ${props => props.isOwn ? '#2ed8b6' : 'white'};
   color: ${props => props.isOwn ? 'white' : '#333'};
   border: ${props => props.isOwn ? 'none' : '1px solid #e0e0e0'};
   word-wrap: break-word;
@@ -322,7 +322,7 @@ const MessageInput = styled.textarea`
   background: #f8f9fa;
   
   &:focus {
-    border-color: #ff7e36;
+    border-color: #2ed8b6;
     background: white;
   }
   
@@ -335,7 +335,7 @@ const SendButton = styled.button`
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: ${props => props.disabled ? '#e0e0e0' : '#ff7e36'};
+  background: ${props => props.disabled ? '#e0e0e0' : '#2ed8b6'};
   border: none;
   color: white;
   cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
@@ -344,7 +344,7 @@ const SendButton = styled.button`
   justify-content: center;
   
   &:hover {
-    background: ${props => props.disabled ? '#e0e0e0' : '#e66d2e'};
+    background: ${props => props.disabled ? '#e0e0e0' : '#26c4a8'};
   }
 `;
 
@@ -570,7 +570,7 @@ export default function ChatRoom() {
             onClick={() => navigate('/chat')}
             style={{
               padding: '8px 16px',
-              background: '#ff7e36',
+              background: '#2ed8b6',
               color: 'white',
               border: 'none',
               borderRadius: '8px',

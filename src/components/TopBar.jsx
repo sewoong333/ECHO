@@ -89,7 +89,7 @@ const Badge = styled.span`
   right: 2px;
   width: 8px;
   height: 8px;
-  background: #ff7e36;
+  background: #2ed8b6;
   border-radius: 50%;
 `;
 const Logo = styled.span`

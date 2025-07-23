@@ -83,7 +83,7 @@ export default function AdManage() {
               position: "absolute",
               top: 12,
               right: 12,
-              background: "#ff7e36",
+              background: "#2ed8b6",
               color: "#fff",
               border: "none",
               borderRadius: 6,
