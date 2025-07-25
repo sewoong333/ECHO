@@ -94,26 +94,54 @@ export function ChatProvider({ children }) {
   const createOrGetChatRoom = async (productId, sellerId, buyerId, productInfo) => {
     try {
       setLoading(true);
+      console.log('🔄 채팅방 생성/조회 시작:', { productId, sellerId, buyerId });
 
-      // 기존 채팅방 확인
+      // 기존 채팅방 확인 (더 안전한 방식)
       const existingRoomQuery = query(
         collection(db, "chatRooms"),
         where("productId", "==", productId),
-        where("participants", "==", [sellerId, buyerId].sort())
+        where("participants", "array-contains", sellerId)
       );
 
       const existingRooms = await getDocs(existingRoomQuery);
       
-      if (!existingRooms.empty) {
-        const existingRoom = existingRooms.docs[0];
+      // 정확한 참여자 매칭 확인
+      let existingRoom = null;
+      existingRooms.forEach(doc => {
+        const roomData = doc.data();
+        if (roomData.participants && 
+            roomData.participants.length === 2 && 
+            roomData.participants.includes(sellerId) && 
+            roomData.participants.includes(buyerId)) {
+          existingRoom = doc;
+        }
+      });
+      
+      if (existingRoom) {
+        console.log('✅ 기존 채팅방 발견:', existingRoom.id);
         return existingRoom.id;
       }
 
-      // 참여자 정보 수집
-      const [sellerInfo, buyerInfo] = await Promise.all([
-        getUserInfo(sellerId),
-        getUserInfo(buyerId)
-      ]);
+      // 참여자 정보 수집 (더 안전한 방식)
+      let sellerInfo, buyerInfo;
+      try {
+        [sellerInfo, buyerInfo] = await Promise.all([
+          getUserInfo(sellerId),
+          getUserInfo(buyerId)
+        ]);
+      } catch (userInfoError) {
+        console.warn('⚠️ 사용자 정보 조회 실패, 기본값 사용:', userInfoError);
+        sellerInfo = { nickname: "판매자", profileImage: "" };
+        buyerInfo = { nickname: "구매자", profileImage: "" };
+      }
+
+      console.log('📋 채팅방 생성 정보:', {
+        productId,
+        sellerId,
+        buyerId,
+        sellerInfo: sellerInfo?.nickname,
+        buyerInfo: buyerInfo?.nickname
+      });
 
       // 새 채팅방 생성
       const chatRoomData = {
@@ -151,6 +179,7 @@ export function ChatProvider({ children }) {
       };
 
       const chatRoomRef = await addDoc(collection(db, "chatRooms"), chatRoomData);
+      console.log('✅ 새 채팅방 생성 완료:', chatRoomRef.id);
       
       // 환영 메시지 추가
       await addDoc(collection(db, "chatRooms", chatRoomRef.id, "messages"), {
@@ -169,6 +198,7 @@ export function ChatProvider({ children }) {
         // 채팅방은 이미 생성되었으므로 에러가 발생해도 진행
       }
 
+      console.log('🎉 채팅방 생성 프로세스 완료:', chatRoomRef.id);
       return chatRoomRef.id;
     } catch (error) {
       console.error("채팅방 생성 실패:", error);

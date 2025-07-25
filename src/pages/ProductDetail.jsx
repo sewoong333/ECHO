@@ -837,7 +837,9 @@ export default function ProductDetail() {
       navigate(`/chat/${chatRoomId}`);
     } catch (error) {
       console.error('❌ 채팅방 생성 실패:', error);
-      alert('채팅방 생성에 실패했습니다. 다시 시도해주세요.');
+      showError('채팅방 생성에 실패했습니다. 다시 시도해주세요.', {
+        title: '채팅 생성 실패'
+      });
     } finally {
       setCreatingChat(false);
     }
