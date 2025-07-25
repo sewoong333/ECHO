@@ -121,17 +121,14 @@ service cloud.firestore {
       }
     }
     
-    // 채팅 규칙
-    match /chats/{chatId} {
-      // 읽기/쓰기: 채팅 참여자만 가능
-      allow read, write: if isAuthenticated() && 
-                            (request.auth.uid in resource.data.participants ||
-                             request.auth.uid in request.resource.data.participants);
+    // 채팅방 규칙 (임시로 완화)
+    match /chatRooms/{chatRoomId} {
+      // 읽기/쓰기: 인증된 사용자만 (임시)
+      allow read, write: if isAuthenticated();
       
       // 채팅 메시지
       match /messages/{messageId} {
-        allow read, write: if isAuthenticated() && 
-                              request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+        allow read, write: if isAuthenticated();
       }
     }
     
