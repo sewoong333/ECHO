@@ -574,7 +574,7 @@ export default function AddProduct() {
   };
 
   // 태그 추가
-  const addTag = () => {
+  const _addTag = () => {
     const tag = tagInput.trim();
     if (tag && !tags.includes(tag) && tags.length < 5) {
       setTags(prev => [...prev, tag]);
@@ -585,7 +585,7 @@ export default function AddProduct() {
   };
 
   // 태그 제거
-  const removeTag = (tag) => {
+  const _removeTag = (tag) => {
     setTags(prev => prev.filter(t => t !== tag));
   };
 

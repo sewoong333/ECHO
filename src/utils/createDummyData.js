@@ -1,4 +1,4 @@
-import { productService } from './firebase';
+// import { productService } from './firebase';
 
 const dummyProducts = [
   {

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import styled, { keyframes } from "styled-components";
+import styled from "styled-components";
 import TopBar from "../components/TopBar";
 
 const Wrapper = styled.div`
@@ -460,7 +460,7 @@ export default function EchoShare() {
   const [selectedOption, setSelectedOption] = useState("quick");
   const [instrument, setInstrument] = useState("guitar");
   const [condition, setCondition] = useState(1.0);
-  const [customBase, setCustomBase] = useState("");
+  const [customBase, _setCustomBase] = useState("");
   const [showResult, setShowResult] = useState(false);
   const [brand, setBrand] = useState("");
   const [model, setModel] = useState("");
@@ -472,17 +472,17 @@ export default function EchoShare() {
   const [customModel, setCustomModel] = useState("");
 
   // 계산 로직
-  const basePrice =
+  const _basePrice =
     instrument === "custom"
       ? Number(customBase) || 500000
       : INSTRUMENTS.find((i) => i.value === instrument).base;
-  const conditionRate = Number(condition);
-  const finalBase = Math.round(basePrice * conditionRate);
-  const selected = OPTIONS.find((o) => o.key === selectedOption);
-  const result = selected.calc(finalBase);
+  const _conditionRate = Number(condition);
+  const _finalBase = Math.round(_basePrice * _conditionRate);
+  const _selected = OPTIONS.find((o) => o.key === selectedOption);
+  const _result = _selected.calc(_finalBase);
 
   // 옵션 설명
-  const optionDesc = OPTIONS.find((o) => o.key === selectedOption).desc;
+  const _optionDesc = OPTIONS.find((o) => o.key === selectedOption).desc;
 
   // 후기 더미
   const reviews = [

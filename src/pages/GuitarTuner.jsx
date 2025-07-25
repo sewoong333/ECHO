@@ -347,11 +347,11 @@ export default function GuitarTuner() {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       if (audioContextRef.current) audioContextRef.current.close();
     };
-    // eslint-disable-next-line
+     
   }, [selected]);
 
   const angle = Math.max(-100, Math.min(100, diff || 0));
-  const animatedAngle = useAnimatedAngle(angle);
+  const _animatedAngle = useAnimatedAngle(angle);
 
   return (
     <Wrapper>

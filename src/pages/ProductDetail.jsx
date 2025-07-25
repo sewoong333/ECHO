@@ -6,6 +6,7 @@ import { UserContext } from "../store/UserContext";
 import { ChatContext } from "../store/ChatContext";
 import { useToast } from "../store/ToastContext";
 import { productService } from "../utils/firebase";
+import PaymentModal from "../components/PaymentModal";
 import {
   FaHeart,
   FaRegHeart,
@@ -664,6 +665,7 @@ export default function ProductDetail() {
   const [creatingChat, setCreatingChat] = useState(false);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   // 상품 찾기
   const product = products.find((p) => String(p.id) === String(id));
@@ -864,34 +866,8 @@ export default function ProductDetail() {
       return;
     }
     
-    // 구매 의사 확인
-    const confirmed = window.confirm(
-      `"${product.title}" 상품을 구매하시겠습니까?\n\n가격: ${product.price?.toLocaleString()}원\n\n확인을 누르시면 판매자와 채팅방이 연결되고,\n거래를 진행하실 수 있습니다.`
-    );
-    
-    if (confirmed) {
-      try {
-        // 채팅방 생성하면서 구매 의사 메시지 전송
-        const chatRoomId = await createOrGetChatRoom(
-          product.id,
-          product.sellerId,
-          user.uid,
-          {
-            title: product.title,
-            price: product.price,
-            images: product.images,
-            status: product.status
-          }
-        );
-        
-        // 구매 의사 시스템 메시지 전송을 위해 채팅방으로 이동
-        navigate(`/chat/${chatRoomId}?intent=purchase`);
-        
-      } catch (error) {
-        console.error('구매 프로세스 실패:', error);
-        alert('구매 프로세스 진행 중 오류가 발생했습니다.');
-      }
-    }
+    // 결제 모달 열기
+    setShowPaymentModal(true);
   };
 
   // 옵션 메뉴 핸들러
@@ -926,6 +902,41 @@ export default function ProductDetail() {
 
   const closeOptionsMenu = () => {
     setShowOptionsMenu(false);
+  };
+
+  const handlePaymentSuccess = async (_paymentData) => {
+    try {
+      // 결제 성공 후 상품 상태 변경
+      await changeProductStatus(product.id, PRODUCT_STATUS.SOLD);
+      
+      // 채팅방 생성 및 결제 완료 알림
+      const chatRoomId = await createOrGetChatRoom(
+        product.id,
+        product.sellerId,
+        user.uid,
+        {
+          title: product.title,
+          price: product.price,
+          images: product.images,
+          status: PRODUCT_STATUS.SOLD
+        }
+      );
+      
+      setShowPaymentModal(false);
+      showSuccess('결제가 완료되었습니다! 판매자와 연락하여 거래를 진행해 주세요.');
+      
+      // 채팅방으로 이동
+      navigate(`/chat/${chatRoomId}?payment=success`);
+      
+    } catch (error) {
+      console.error('결제 후 처리 실패:', error);
+      showError('결제는 완료되었지만 후속 처리 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handlePaymentError = (error) => {
+    setShowPaymentModal(false);
+    showError(error.message || '결제 중 오류가 발생했습니다.');
   };
 
   const getConditionText = (condition) => {
@@ -1276,6 +1287,15 @@ export default function ProductDetail() {
           />
         </ImageModal>
       )}
+
+      {/* 결제 모달 */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        product={product}
+        onPaymentSuccess={handlePaymentSuccess}
+        onPaymentError={handlePaymentError}
+      />
     </Container>
   );
 }

@@ -71,22 +71,45 @@ const SearchBarContainer = styled.div`
 const SearchBar = styled.div`
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.9);
-  border: 2px solid ${props => props.focused ? 'rgba(255, 126, 54, 0.6)' : 'rgba(224, 224, 224, 0.3)'};
-  border-radius: var(--radius-xl);
-  padding: var(--space-md) var(--space-lg);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--color-bg-glass);
+  border: 1px solid ${props => props.focused ? 'var(--color-mint-main)' : 'var(--color-border-light)'};
+  border-radius: var(--radius-3xl);
+  padding: var(--space-4) var(--space-6);
+  transition: all var(--transition-normal);
   box-shadow: ${props => props.focused 
-    ? '0 8px 25px rgba(255, 126, 54, 0.15), 0 0 0 3px rgba(255, 126, 54, 0.1)' 
-    : '0 4px 15px rgba(0, 0, 0, 0.08)'};
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  transform: ${props => props.focused ? 'translateY(-2px) scale(1.02)' : 'translateY(0) scale(1)'};
+    ? 'var(--shadow-lg), var(--glow-mint)' 
+    : 'var(--shadow-md)'};
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transform: ${props => props.focused ? 'translateY(-1px)' : 'translateY(0)'};
+  position: relative;
+  overflow: hidden;
+  
+  /* 글로우 효과 강화 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+      var(--color-mint-glass) 0%, 
+      transparent 50%, 
+      var(--color-orange-glass) 100%);
+    opacity: ${props => props.focused ? 0.7 : 0};
+    transition: opacity var(--transition-normal);
+    pointer-events: none;
+  }
   
   &:hover {
-    transform: translateY(-1px) scale(1.01);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-    border-color: rgba(255, 126, 54, 0.4);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-mint-light);
+    
+    &::before {
+      opacity: 0.3;
+    }
   }
 `;
 
@@ -488,30 +511,44 @@ const ProductGrid = styled.div`
 
 const ProductCard = styled.div`
   display: flex;
-  padding: 16px;
-  margin-bottom: 12px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 16px;
+  padding: var(--space-5);
+  margin-bottom: var(--space-4);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(255, 255, 255, 0.85) 100%);
+  border-radius: var(--radius-3xl);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: all var(--transition-normal) var(--ease-out-cubic);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 
+    0 8px 32px rgba(0, 217, 182, 0.04),
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
   
   &:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
-    background: rgba(255, 255, 255, 0.95);
-    border-color: rgba(255, 126, 54, 0.3);
+    transform: translateY(-6px) scale(1.025);
+    box-shadow: 
+      0 20px 60px rgba(0, 217, 182, 0.12),
+      0 8px 32px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
+      0 0 40px rgba(0, 217, 182, 0.08);
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.98) 0%, 
+      rgba(255, 255, 255, 0.92) 100%);
+    border-color: rgba(0, 217, 182, 0.25);
   }
   
   &:active {
-    transform: translateY(-2px) scale(1.01);
-    transition: all 0.1s ease;
+    transform: translateY(-3px) scale(1.015);
+    transition: all var(--transition-micro) var(--ease-out-quad);
+    box-shadow: 
+      0 12px 40px rgba(0, 217, 182, 0.08),
+      0 4px 16px rgba(0, 0, 0, 0.06);
   }
   
-  /* 마이크로 애니메이션 */
+  /* Enhanced micro-animations with mint theme */
   &::before {
     content: '';
     position: absolute;
@@ -519,46 +556,139 @@ const ProductCard = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(45deg, transparent, rgba(255, 126, 54, 0.03), transparent);
+    background: linear-gradient(135deg, 
+      rgba(0, 217, 182, 0.02) 0%, 
+      rgba(0, 217, 182, 0.08) 50%, 
+      rgba(255, 126, 54, 0.04) 100%);
     opacity: 0;
-    transition: opacity 0.3s ease;
-    border-radius: 16px;
+    transition: opacity var(--transition-normal) var(--ease-out-cubic);
+    border-radius: var(--radius-3xl);
     pointer-events: none;
+    z-index: 1;
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, 
+      var(--color-mint-main), 
+      var(--color-mint-light), 
+      var(--color-orange));
+    opacity: 0;
+    border-radius: calc(var(--radius-3xl) + 2px);
+    z-index: -1;
+    transition: opacity var(--transition-normal) var(--ease-out-cubic);
   }
   
   &:hover::before {
     opacity: 1;
   }
   
+  &:hover::after {
+    opacity: 0.6;
+  }
+  
   position: relative;
   overflow: hidden;
+  z-index: 2;
 `;
 
 const ProductImageContainer = styled.div`
   position: relative;
-  width: 100px;
-  height: 100px;
-  border-radius: 12px;
+  width: 110px;
+  height: 110px;
+  border-radius: var(--radius-2xl);
   overflow: hidden;
   flex-shrink: 0;
-  margin-right: 12px;
+  margin-right: var(--space-4);
+  background: linear-gradient(135deg, 
+    var(--color-mint-lightest) 0%, 
+    var(--color-mint-bg) 100%);
+  box-shadow: 
+    inset 0 2px 8px rgba(0, 217, 182, 0.08),
+    0 4px 16px rgba(0, 0, 0, 0.04);
+  transition: all var(--transition-normal) var(--ease-out-cubic);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+      transparent 0%, 
+      rgba(0, 217, 182, 0.04) 50%, 
+      transparent 100%);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+    z-index: 2;
+  }
+  
+  ${ProductCard}:hover & {
+    transform: scale(1.05);
+    box-shadow: 
+      inset 0 2px 12px rgba(0, 217, 182, 0.12),
+      0 8px 24px rgba(0, 0, 0, 0.08);
+      
+    &::before {
+      opacity: 1;
+    }
+  }
 `;
 
 const ProductImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: all var(--transition-slow) var(--ease-out-cubic);
+  filter: contrast(1.02) saturate(1.05);
+  
+  ${ProductCard}:hover & {
+    transform: scale(1.08);
+    filter: contrast(1.08) saturate(1.15) brightness(1.02);
+  }
+  
+  &[loading] {
+    background: linear-gradient(
+      90deg,
+      var(--color-mint-lightest) 25%,
+      var(--color-mint-bg) 50%,
+      var(--color-mint-lightest) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
 `;
 
 const ImagePlaceholder = styled.div`
   width: 100%;
   height: 100%;
-  background: #f0f0f0;
+  background: linear-gradient(135deg, 
+    var(--color-mint-lightest) 0%, 
+    var(--color-mint-bg) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ccc;
-  font-size: 24px;
+  color: var(--color-mint-main);
+  font-size: 28px;
+  opacity: 0.6;
+  transition: all var(--transition-normal);
+  
+  ${ProductCard}:hover & {
+    color: var(--color-mint-dark);
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
 `;
 
 const ProductInfo = styled.div`
@@ -569,32 +699,71 @@ const ProductInfo = styled.div`
 `;
 
 const ProductTitle = styled.h3`
-  font-size: 16px;
-  font-weight: 500;
-  color: #333;
-  margin: 0 0 4px 0;
-  line-height: 1.3;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-1) 0;
+  line-height: 1.4;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  letter-spacing: -0.02em;
+  transition: color var(--transition-fast);
+  
+  ${ProductCard}:hover & {
+    color: var(--color-text-primary);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
 `;
 
 const ProductMeta = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #999;
-  margin-bottom: 8px;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--space-2);
+  font-weight: 500;
+  
+  svg {
+    color: var(--color-mint-main);
+    transition: color var(--transition-fast);
+  }
+  
+  ${ProductCard}:hover & {
+    color: var(--color-text-secondary);
+    
+    svg {
+      color: var(--color-mint-dark);
+    }
+  }
 `;
 
 const ProductPrice = styled.div`
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 4px;
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-mint-dark);
+  margin-bottom: var(--space-1);
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, 
+    var(--color-mint-dark) 0%, 
+    var(--color-mint-main) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all var(--transition-fast);
+  
+  ${ProductCard}:hover & {
+    background: linear-gradient(135deg, 
+      var(--color-mint-main) 0%, 
+      var(--color-orange) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transform: translateY(-1px);
+  }
 `;
 
 const ProductActions = styled.div`
@@ -606,39 +775,103 @@ const ProductActions = styled.div`
 const ProductStats = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #999;
+  gap: var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  font-weight: 500;
+  
+  svg {
+    color: var(--color-mint-light);
+    transition: all var(--transition-fast);
+  }
+  
+  ${ProductCard}:hover & {
+    color: var(--color-text-secondary);
+    
+    svg {
+      color: var(--color-mint-main);
+      transform: scale(1.1);
+    }
+  }
 `;
 
 const LikeButton = styled.button`
-  background: none;
-  border: none;
-  color: ${props => props.liked ? 'var(--color-mint-main)' : '#ccc'};
+  background: ${props => props.liked 
+    ? 'linear-gradient(135deg, var(--color-mint-main), var(--color-mint-light))' 
+    : 'rgba(255, 255, 255, 0.6)'};
+  border: 1px solid ${props => props.liked 
+    ? 'transparent' 
+    : 'var(--color-border-light)'};
+  color: ${props => props.liked ? 'white' : 'var(--color-text-tertiary)'};
   font-size: 16px;
   cursor: pointer;
-  padding: 4px;
+  padding: var(--space-2);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-normal) var(--ease-spring);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: ${props => props.liked 
+    ? '0 4px 12px rgba(0, 217, 182, 0.25)' 
+    : '0 2px 6px rgba(0, 0, 0, 0.08)'};
   
   &:hover {
-    color: var(--color-mint-main);
+    color: ${props => props.liked ? 'white' : 'var(--color-mint-main)'};
+    background: ${props => props.liked 
+      ? 'linear-gradient(135deg, var(--color-mint-dark), var(--color-mint-main))' 
+      : 'rgba(255, 255, 255, 0.9)'};
+    border-color: var(--color-mint-light);
+    transform: translateY(-2px) scale(1.1);
+    box-shadow: ${props => props.liked 
+      ? '0 8px 20px rgba(0, 217, 182, 0.35)' 
+      : '0 4px 12px rgba(0, 217, 182, 0.15)'};
+  }
+  
+  &:active {
+    transform: translateY(0) scale(1.05);
+    transition: all var(--transition-micro);
   }
 `;
 
 const StatusBadge = styled.div`
   background: ${props => {
     switch(props.type) {
-      case 'urgent': return 'var(--color-mint-accent)';
-      case 'new': return 'var(--color-mint-light)';
-      case 'hot': return 'var(--color-mint-main)';
-      default: return 'var(--color-mint-light)';
+      case 'urgent': return 'linear-gradient(135deg, #ff4757, #ff3742)';
+      case 'new': return 'linear-gradient(135deg, var(--color-mint-main), var(--color-mint-light))';
+      case 'hot': return 'linear-gradient(135deg, var(--color-orange), #ff6b35)';
+      default: return 'linear-gradient(135deg, var(--color-mint-light), var(--color-mint-main))';
     }
   }};
   color: white;
-  padding: 2px 6px;
-  border-radius: 8px;
-  font-size: 10px;
-  font-weight: 600;
-  margin-right: 4px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-xl);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  margin-right: var(--space-1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px ${props => {
+    switch(props.type) {
+      case 'urgent': return 'rgba(255, 71, 87, 0.3)';
+      case 'new': return 'rgba(0, 217, 182, 0.3)';
+      case 'hot': return 'rgba(255, 126, 54, 0.3)';
+      default: return 'rgba(0, 217, 182, 0.3)';
+    }
+  }};
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: all var(--transition-fast);
+  
+  ${ProductCard}:hover & {
+    transform: translateY(-1px) scale(1.05);
+    box-shadow: 0 4px 12px ${props => {
+      switch(props.type) {
+        case 'urgent': return 'rgba(255, 71, 87, 0.4)';
+        case 'new': return 'rgba(0, 217, 182, 0.4)';
+        case 'hot': return 'rgba(255, 126, 54, 0.4)';
+        default: return 'rgba(0, 217, 182, 0.4)';
+      }
+    }};
+  }
 `;
 
 const LoadingContainer = styled.div`
@@ -1003,9 +1236,9 @@ export default function Home() {
       .slice(0, 6);
   };
 
-  const popularProducts = getPopularProducts();
-  const recentProducts = getRecentProducts();
-  const recommendedProducts = getRecommendedProducts();
+  const _popularProducts = getPopularProducts();
+  const _recentProducts = getRecentProducts();
+  const _recommendedProducts = getRecommendedProducts();
 
   const formatPrice = (price) => {
     if (price >= 10000) {
@@ -1222,6 +1455,7 @@ export default function Home() {
               return (
                 <ProductCard 
                   key={product.id}
+                  className="ProductCard"
                   onClick={() => navigate(`/product/${product.id}`)}
                 >
                   <ProductImageContainer>

@@ -11,7 +11,6 @@ import {
   updateProfile,
   sendPasswordResetEmail,
   PhoneAuthProvider,
-  signInWithCredential,
 } from "firebase/auth";
 import { 
   doc, 
@@ -262,7 +261,7 @@ export function UserProvider({ children }) {
       unsubscribeToken = onIdTokenChanged(auth, async (firebaseUser) => {
         if (firebaseUser) {
           try {
-            const token = await firebaseUser.getIdToken(true);
+            const _token = await firebaseUser.getIdToken(true);
             console.log("Token refreshed successfully");
           } catch (error) {
             console.error("Token refresh error:", error);
@@ -429,11 +428,7 @@ export function UserProvider({ children }) {
 
   // 주소 변경
   const updateAddress = async (address, region, district) => {
-    try {
-      await updateUserProfile({ address, region, district });
-    } catch (error) {
-      throw error;
-    }
+    await updateUserProfile({ address, region, district });
   };
 
   // 비밀번호 재설정

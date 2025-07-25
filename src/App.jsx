@@ -3,7 +3,9 @@ import { BrowserRouter } from "react-router-dom";
 import AppRouter from "./routes/AppRouter";
 import BottomNav from "./components/BottomNav";
 import Toast from "./components/Toast";
+import ErrorBoundary from "./components/ErrorBoundary";
 import { ToastProvider, useToast } from "./store/ToastContext";
+import { UserContext } from "./store/UserContext";
 import { createGlobalStyle } from "styled-components";
 
 const GlobalStyle = createGlobalStyle`
@@ -24,15 +26,18 @@ const GlobalStyle = createGlobalStyle`
 
 function AppContent() {
   const { toasts, removeToast } = useToast();
+  const { user } = React.useContext(UserContext);
   
   return (
     <BrowserRouter>
       <GlobalStyle />
-      <div className="App">
-        <AppRouter />
-        <BottomNav />
-        <Toast toasts={toasts} removeToast={removeToast} />
-      </div>
+      <ErrorBoundary userId={user?.uid}>
+        <div className="App">
+          <AppRouter />
+          <BottomNav />
+          <Toast toasts={toasts} removeToast={removeToast} />
+        </div>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }

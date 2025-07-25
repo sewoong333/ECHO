@@ -372,10 +372,10 @@ export default function ChatRoom() {
   const navigate = useNavigate();
   const { chatRoomId } = useParams();
   const { user } = useContext(UserContext);
-  const { products } = useContext(ProductContext);
+  const { products: _products } = useContext(ProductContext);
   const { 
     messages, 
-    currentChat, 
+    currentChat: _currentChat, 
     sendMessage, 
     getChatRoomInfo, 
     setActiveChat, 

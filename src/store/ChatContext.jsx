@@ -14,13 +14,12 @@ import {
   serverTimestamp,
   getDocs,
   getDoc,
-  setDoc,
 } from "firebase/firestore";
 
 export const ChatContext = createContext();
 
 export function ChatProvider({ children }) {
-  const { user } = useContext(UserContext);
+  const { user, getUserInfo } = useContext(UserContext);
   const [chatRooms, setChatRooms] = useState([]);
   const [messages, setMessages] = useState({});
   const [currentChat, setCurrentChat] = useState(null);
@@ -110,6 +109,12 @@ export function ChatProvider({ children }) {
         return existingRoom.id;
       }
 
+      // 참여자 정보 수집
+      const [sellerInfo, buyerInfo] = await Promise.all([
+        getUserInfo(sellerId),
+        getUserInfo(buyerId)
+      ]);
+
       // 새 채팅방 생성
       const chatRoomData = {
         productId,
@@ -118,10 +123,14 @@ export function ChatProvider({ children }) {
           [sellerId]: {
             userId: sellerId,
             role: "seller",
+            nickname: sellerInfo?.nickname || "판매자",
+            profileImage: sellerInfo?.profileImage || "",
           },
           [buyerId]: {
             userId: buyerId,
-            role: "buyer",
+            role: "buyer", 
+            nickname: buyerInfo?.nickname || "구매자",
+            profileImage: buyerInfo?.profileImage || "",
           },
         },
         productInfo: {

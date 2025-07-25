@@ -321,12 +321,12 @@ export default function BassTuner() {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       if (audioContextRef.current) audioContextRef.current.close();
     };
-    // eslint-disable-next-line
+     
   }, [selected]);
 
   // 게이지 바늘 각도: -100~+100Hz 차이 → -100~+100deg (최대 ±100Hz만 표시)
   const angle = Math.max(-100, Math.min(100, diff || 0));
-  const animatedAngle = useAnimatedAngle(angle);
+  const _animatedAngle = useAnimatedAngle(angle);
 
   return (
     <Wrapper>

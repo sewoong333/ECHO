@@ -311,8 +311,8 @@ const EditButton = styled.button`
 `;
 
 export default function MyPage() {
-  const { user, logout, userProfile, getUserInfo } = useContext(UserContext);
-  const { userProducts, loadUserProducts } = useContext(ProductContext);
+  const { user, logout, userProfile: _userProfile, getUserInfo: _getUserInfo } = useContext(UserContext);
+  const { userProducts: _userProducts, loadUserProducts } = useContext(ProductContext);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({

@@ -4,7 +4,7 @@ const SUGGESTED_PATH = require('path').join(__dirname, 'user_suggested_models.js
 const USED_PRICES = require('./used_prices.js');
 
 // Helper to remove outliers
-function removeOutliers(prices) {
+function _removeOutliers(prices) {
   if (prices.length < 5) return prices;
   const mean = prices.reduce((a, b) => a + b, 0) / prices.length;
   const std = Math.sqrt(prices.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / prices.length);
@@ -73,7 +73,7 @@ async function crawlDanggeun({ instrument, brand, model }) {
   }
 }
 
-async function crawlAll({ instrument, brand, model, condition }) {
+async function _crawlAll({ instrument, brand, model, condition }) {
   let prices = [];
   const [b, d, j] = await Promise.all([
     crawlBungaejangter({ instrument, brand, model }),
@@ -100,7 +100,7 @@ module.exports = async function handler(req, res) {
       body = {};
     }
   }
-  const { instrument, brand, model, condition } = body;
+  const { instrument, brand, model, condition: _condition } = body;
   if (!instrument || !brand || !model) {
     res.status(400).json({ error: 'Missing required fields' });
     return;
