@@ -1,7 +1,7 @@
 // Service Worker for ECHO Music Platform
-const CACHE_NAME = 'echo-v1.0.0';
-const STATIC_CACHE = 'echo-static-v1';
-const DYNAMIC_CACHE = 'echo-dynamic-v1';
+const CACHE_NAME = 'echo-v1.1.0';
+const STATIC_CACHE = 'echo-static-v2';
+const DYNAMIC_CACHE = 'echo-dynamic-v2';
 
 const STATIC_FILES = [
   '/',

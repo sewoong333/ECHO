@@ -151,19 +151,29 @@
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
     
-    <!-- Service Worker Registration -->
+    <!-- Service Worker Registration - 임시 비활성화 -->
     <script>
+      // Service Worker 임시 비활성화 - 캐시 문제 방지
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('/sw.js')
-            .then(function(registration) {
-              console.log('Service Worker registered successfully:', registration.scope);
-            })
-            .catch(function(error) {
-              console.log('Service Worker registration failed:', error);
-            });
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) {
+            registration.unregister();
+            console.log('Service Worker unregistered:', registration.scope);
+          }
         });
       }
+      
+      // if ('serviceWorker' in navigator) {
+      //   window.addEventListener('load', function() {
+      //     navigator.serviceWorker.register('/sw.js')
+      //       .then(function(registration) {
+      //         console.log('Service Worker registered successfully:', registration.scope);
+      //       })
+      //       .catch(function(error) {
+      //         console.log('Service Worker registration failed:', error);
+      //       });
+      //   });
+      // }
       
       // Hide loading screen after app loads
       window.addEventListener('load', function() {
