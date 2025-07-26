@@ -431,7 +431,7 @@ export default function ChatRoom() {
     } else if (!user.isLoggedIn) {
       navigate('/login');
     }
-  }, [chatRoomId, user.isLoggedIn, getChatRoomInfo, setActiveChat, subscribeToMessages, navigate]);
+  }, [chatRoomId, user.isLoggedIn]);
 
   // 스크롤을 맨 아래로
   useEffect(() => {
@@ -443,7 +443,7 @@ export default function ChatRoom() {
     if (chatRoomId && user.isLoggedIn) {
       markMessagesAsRead(chatRoomId);
     }
-  }, [chatRoomId, user.isLoggedIn, markMessagesAsRead]);
+  }, [chatRoomId, user.isLoggedIn]);
 
   // 구매 의도 메시지 자동 전송
   useEffect(() => {
@@ -469,7 +469,7 @@ export default function ChatRoom() {
     };
 
     sendPurchaseIntentMessage();
-  }, [purchaseIntent, chatRoom, purchaseIntentSent, user.isLoggedIn, chatRoomId, sendMessage]);
+  }, [purchaseIntent, chatRoom, purchaseIntentSent, user.isLoggedIn, chatRoomId]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
