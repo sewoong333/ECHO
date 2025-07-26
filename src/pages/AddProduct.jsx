@@ -397,6 +397,53 @@ const InfoBox = styled.div`
   margin-top: 12px;
 `;
 
+const CheckboxGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+const CheckboxItem = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  background: white;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    border-color: #2ed8b6;
+    background: #f0fffe;
+  }
+`;
+
+const Checkbox = styled.input`
+  width: 20px;
+  height: 20px;
+  accent-color: #2ed8b6;
+  cursor: pointer;
+`;
+
+const CheckboxLabel = styled.div`
+  flex: 1;
+`;
+
+const CheckboxTitle = styled.div`
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+`;
+
+const CheckboxDescription = styled.div`
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+`;
+
 const InfoText = styled.p`
   font-size: 13px;
   color: #666;
@@ -486,6 +533,7 @@ export default function AddProduct() {
     negotiable: true,
     delivery: false,
     pickup: true,
+    showPhoneNumber: false, // 전화번호 노출 여부
   });
 
   // 입력값 변경 핸들러
@@ -714,6 +762,7 @@ export default function AddProduct() {
         isPriceNegotiable: formData.negotiable || false,
         isDeliveryAvailable: formData.delivery || false,
         preferredTransactionType: formData.pickup ? "direct" : "delivery",
+        showPhoneNumber: formData.showPhoneNumber && user.phoneNumber ? true : false, // 전화번호 공개 여부
       };
       
       console.log('📦 전송할 상품 데이터:', productData);
@@ -1013,6 +1062,82 @@ export default function AddProduct() {
                 예일음에서 동네인증이 필요해요. 지금은 글을 작성중인 구로동에만 글을 올릴 수 있어요.
               </div>
             </div>
+          </FormGroup>
+
+          {/* 거래 옵션 */}
+          <FormGroup>
+            <Label>거래 옵션</Label>
+            <CheckboxGroup>
+              <CheckboxItem>
+                <Checkbox
+                  type="checkbox"
+                  checked={formData.negotiable}
+                  onChange={(e) => handleInputChange('negotiable', e.target.checked)}
+                />
+                <CheckboxLabel>
+                  <CheckboxTitle>가격 제안 받기</CheckboxTitle>
+                  <CheckboxDescription>구매자가 가격을 제안할 수 있어요</CheckboxDescription>
+                </CheckboxLabel>
+              </CheckboxItem>
+              
+              <CheckboxItem>
+                <Checkbox
+                  type="checkbox"
+                  checked={formData.delivery}
+                  onChange={(e) => handleInputChange('delivery', e.target.checked)}
+                />
+                <CheckboxLabel>
+                  <CheckboxTitle>택배 거래</CheckboxTitle>
+                  <CheckboxDescription>택배로 안전하게 거래할 수 있어요</CheckboxDescription>
+                </CheckboxLabel>
+              </CheckboxItem>
+              
+              <CheckboxItem>
+                <Checkbox
+                  type="checkbox"
+                  checked={formData.pickup}
+                  onChange={(e) => handleInputChange('pickup', e.target.checked)}
+                />
+                <CheckboxLabel>
+                  <CheckboxTitle>직거래</CheckboxTitle>
+                  <CheckboxDescription>직접 만나서 거래할 수 있어요</CheckboxDescription>
+                </CheckboxLabel>
+              </CheckboxItem>
+            </CheckboxGroup>
+          </FormGroup>
+
+          {/* 연락처 옵션 */}
+          <FormGroup>
+            <Label>연락처 옵션</Label>
+            <CheckboxGroup>
+              <CheckboxItem>
+                <Checkbox
+                  type="checkbox"
+                  checked={formData.showPhoneNumber}
+                  onChange={(e) => handleInputChange('showPhoneNumber', e.target.checked)}
+                />
+                <CheckboxLabel>
+                  <CheckboxTitle>전화번호 공개</CheckboxTitle>
+                  <CheckboxDescription>
+                    {user.phoneNumber ? 
+                      `안전번호(${user.phoneNumber?.replace(/(\d{3})\d{4}(\d{4})/, '$1-****-$2')})로 번호를 공개해요` :
+                      '프로필에서 전화번호를 등록한 후 사용할 수 있어요'
+                    }
+                  </CheckboxDescription>
+                </CheckboxLabel>
+              </CheckboxItem>
+            </CheckboxGroup>
+            
+            {formData.showPhoneNumber && !user.phoneNumber && (
+              <InfoBox style={{ marginTop: '12px', background: '#fff3e0', border: '1px solid #ffe0b3' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                  <FaExclamationTriangle color="#ff8c00" style={{ marginTop: '2px', fontSize: '12px' }} />
+                  <div style={{ fontSize: '12px', color: '#666', lineHeight: '1.4' }}>
+                    전화번호 공개를 위해서는 먼저 프로필에서 전화번호를 등록하고 인증을 완료해주세요.
+                  </div>
+                </div>
+              </InfoBox>
+            )}
           </FormGroup>
           </ScrollContainer>
         </form>

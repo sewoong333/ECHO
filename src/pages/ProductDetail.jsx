@@ -33,6 +33,7 @@ import {
   FaExclamationTriangle,
   FaEdit,
   FaTrash,
+  FaRegCommentDots,
 } from "react-icons/fa";
 
 const Container = styled.div`
@@ -101,9 +102,134 @@ const IconButton = styled.button`
   }
 `;
 
+// 새로운 상단 액션바 스타일 컴포넌트들
+const TopActionBar = styled.div`
+  position: fixed;
+  top: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 500px;
+  height: 60px;
+  background: var(--color-bg-glass, rgba(255, 255, 255, 0.85));
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 12px);
+  padding: 0 var(--space-4, 16px);
+  z-index: 99;
+  border-bottom: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
+  box-shadow: var(--shadow-lg, 0 8px 32px rgba(0, 0, 0, 0.08));
+`;
+
+const TopLikeButton = styled.button`
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full, 50%);
+  border: none;
+  background: ${props => props.liked ? 'var(--color-mint-main, #2ed8b6)' : 'var(--color-bg-primary, #ffffff)'};
+  color: ${props => props.liked ? 'white' : 'var(--color-text-secondary, #6b7280)'};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all var(--transition-normal, 0.2s ease);
+  box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.08));
+  position: relative;
+  overflow: hidden;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg, 0 8px 32px rgba(0, 0, 0, 0.12));
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+  }
+  
+  &:hover::before {
+    left: 100%;
+  }
+`;
+
+const TopActionButton = styled.button`
+  flex: 1;
+  height: 48px;
+  border-radius: var(--radius-2xl, 24px);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2, 8px);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-normal, 0.2s ease);
+  position: relative;
+  overflow: hidden;
+  
+  &.chat {
+    background: var(--color-bg-primary, #ffffff);
+    color: var(--color-text-primary, #1a1a1a);
+    box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.08));
+    
+    &:hover {
+      background: var(--color-bg-secondary, #f8f9fa);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.12));
+    }
+    
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+  }
+  
+  &.buy {
+    background: linear-gradient(135deg, var(--color-mint-main, #2ed8b6), var(--color-mint-dark, #26c4a8));
+    color: white;
+    box-shadow: var(--shadow-md, 0 4px 16px rgba(46, 216, 182, 0.3));
+    
+    &:hover {
+      background: linear-gradient(135deg, var(--color-mint-dark, #26c4a8), var(--color-mint-main, #2ed8b6));
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg, 0 8px 24px rgba(46, 216, 182, 0.4));
+    }
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s;
+  }
+  
+  &:hover::before {
+    left: 100%;
+  }
+`;
+
 const ImageSection = styled.div`
   position: relative;
-  margin-top: 56px;
+  margin-top: 116px; /* 56px(헤더) + 60px(액션바) */
   padding: 16px;
   background: #fff;
 `;
@@ -448,104 +574,6 @@ const RelatedPrice = styled.div`
   color: #2ed8b6;
 `;
 
-const BottomActions = styled.div`
-  position: fixed;
-  bottom: 140px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(100% - 32px);
-  max-width: 468px;
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 16px;
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  z-index: 9999;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
-
-  @media (max-width: 600px) {
-    width: calc(100% - 12px);
-    padding: 12px 6px;
-    gap: 8px;
-  }
-`;
-
-const LikeButton = styled.button`
-  width: 48px;
-  height: 48px;
-  border: 1.5px solid #e0e0e0;
-  border-radius: 12px;
-  background: white;
-  color: ${props => props.liked ? '#FFD700' : '#666'};
-  font-size: 22px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  margin-right: 4px;
-  &:hover {
-    border-color: #FFD700;
-    color: #FFD700;
-    transform: scale(1.08);
-    box-shadow: 0 4px 16px rgba(255,215,0,0.12);
-  }
-  &:active {
-    transform: scale(0.96);
-  }
-`;
-
-const ChatButton = styled.button`
-  flex: 1;
-  height: 48px;
-  background: #2ed8b6;
-  border: none;
-  border-radius: 12px;
-  color: white;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  opacity: ${props => props.disabled ? 0.7 : 1};
-  transition: all 0.2s ease;
-  
-  &:hover:not(:disabled) {
-    background: #26c4a8;
-    transform: translateY(-1px);
-  }
-  
-  &:active {
-    transform: translateY(0);
-  }
-  
-  &:disabled {
-    cursor: not-allowed;
-  }
-`;
-
-const BuyButton = styled.button`
-  flex: 1;
-  height: 48px;
-  background: #28a745;
-  border: none;
-  border-radius: 12px;
-  color: white;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    background: #218838;
-    transform: translateY(-1px);
-  }
-  
-  &:active {
-    transform: translateY(0);
-  }
-`;
 
 const LoadingContainer = styled.div`
   display: flex;
@@ -1247,34 +1275,33 @@ export default function ProductDetail() {
         </>
       )}
 
-      {/* 상품 액션 버튼들 - 하단바 위에 고정 배치 */}
-      <BottomActions>
-        <LikeButton 
+      {/* 새로운 상단 액션바 */}
+      <TopActionBar>
+        <TopLikeButton 
           onClick={handleLike}
           liked={isLiked}
           aria-label="찜하기"
         >
           {isLiked ? <FaHeart /> : <FaRegHeart />}
-        </LikeButton>
-        <div style={{ display: 'flex', flex: 1, gap: 10 }}>
-          <ChatButton 
-            onClick={handleChat}
-            disabled={creatingChat}
-            style={{ flex: 1 }}
-          >
-            {creatingChat ? '채팅방 생성 중...' : '💬 채팅하기'}
-          </ChatButton>
-          <BuyButton 
-            onClick={handleBuy}
-            style={{ flex: 1 }}
-          >
-            🛒 구매하기
-          </BuyButton>
-        </div>
-      </BottomActions>
-
-      {/* 하단바와 겹치지 않도록 충분한 여백 */}
-      <div style={{ height: '80px' }} />
+        </TopLikeButton>
+        
+        <TopActionButton 
+          className="chat"
+          onClick={handleChat}
+          disabled={creatingChat}
+        >
+          <FaRegCommentDots />
+          {creatingChat ? '생성 중...' : '채팅하기'}
+        </TopActionButton>
+        
+        <TopActionButton 
+          className="buy"
+          onClick={handleBuy}
+        >
+          <FaShoppingCart />
+          구매하기
+        </TopActionButton>
+      </TopActionBar>
 
       {/* 이미지 확대 모달 */}
       {isImageModalOpen && (

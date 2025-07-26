@@ -26,6 +26,7 @@ const EchoShare = lazy(() => import("../pages/EchoShare"));
 const PaymentSuccess = lazy(() => import("../pages/PaymentSuccess"));
 const PaymentFail = lazy(() => import("../pages/PaymentFail"));
 const WishList = lazy(() => import("../pages/WishList"));
+const PhoneRegister = lazy(() => import("../pages/PhoneRegister"));
 
 // Loading component
 const LoadingContainer = styled.div`
@@ -94,6 +95,7 @@ export default function AppRouter() {
         <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route path="/payment/fail" element={<PaymentFail />} />
         <Route path="/wishlist" element={<WishList />} />
+        <Route path="/profile/phone" element={<PhoneRegister />} />
       </Routes>
     </Suspense>
   );

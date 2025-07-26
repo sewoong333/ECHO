@@ -146,6 +146,37 @@ const JoinDate = styled.div`
   font-size: 14px;
 `;
 
+const PhoneSection = styled.div`
+  margin-top: 8px;
+`;
+
+const PhoneInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #666;
+  font-size: 14px;
+`;
+
+const PhoneNumber = styled.span`
+  color: #333;
+  font-weight: 500;
+`;
+
+const PhoneNotRegistered = styled.button`
+  background: none;
+  border: none;
+  color: #2ed8b6;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  
+  &:hover {
+    color: #26c4a8;
+  }
+`;
+
 const MannerScoreSection = styled.div`
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 12px;
@@ -477,6 +508,27 @@ export default function MyPage() {
               <FaCalendar />
               {formatDate(user.createdAt)} 가입
             </JoinDate>
+            
+            <PhoneSection>
+              <PhoneInfo>
+                <FaPhone />
+                {user.phoneNumber ? (
+                  <div>
+                    <PhoneNumber>{user.phoneNumber?.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3')}</PhoneNumber>
+                    {user.phoneVerified && (
+                      <VerifiedBadge style={{ marginLeft: '6px', fontSize: '12px' }}>
+                        <FaCheckCircle />
+                        인증완료
+                      </VerifiedBadge>
+                    )}
+                  </div>
+                ) : (
+                  <PhoneNotRegistered onClick={() => navigate('/profile/phone')}>
+                    전화번호 등록하기
+                  </PhoneNotRegistered>
+                )}
+              </PhoneInfo>
+            </PhoneSection>
           </ProfileInfo>
         </ProfileHeader>
         

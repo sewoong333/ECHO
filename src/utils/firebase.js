@@ -1,6 +1,15 @@
 // 개선된 Firebase 설정 및 서비스
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence } from "firebase/auth";
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  setPersistence, 
+  browserLocalPersistence,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  PhoneAuthProvider,
+  linkWithCredential
+} from "firebase/auth";
 import {
   getFirestore,
   enableIndexedDbPersistence,
@@ -963,11 +972,108 @@ export const musiclifeService = {
   }
 };
 
+// 전화번호 인증 서비스
+export const phoneAuthService = {
+  recaptchaVerifier: null,
+
+  // reCAPTCHA 설정
+  setupRecaptcha(elementId = 'recaptcha-container') {
+    try {
+      if (!this.recaptchaVerifier) {
+        this.recaptchaVerifier = new RecaptchaVerifier(auth, elementId, {
+          size: 'invisible',
+          callback: (response) => {
+            console.log('reCAPTCHA 완료:', response);
+          },
+          'expired-callback': () => {
+            console.log('reCAPTCHA 만료됨');
+          }
+        });
+      }
+      return this.recaptchaVerifier;
+    } catch (error) {
+      console.error('reCAPTCHA 설정 실패:', error);
+      throw error;
+    }
+  },
+
+  // 인증 번호 전송
+  async sendVerificationCode(phoneNumber) {
+    try {
+      // 전화번호 형식 검증 (+82로 변환)
+      const formattedPhone = phoneNumber.startsWith('+82') 
+        ? phoneNumber 
+        : '+82' + phoneNumber.replace(/^0/, '');
+
+      console.log('전화번호 인증 요청:', formattedPhone);
+
+      const appVerifier = this.setupRecaptcha();
+      const confirmationResult = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
+      
+      console.log('인증번호 전송 성공');
+      return confirmationResult;
+    } catch (error) {
+      console.error('인증번호 전송 실패:', error);
+      this.resetRecaptcha();
+      throw error;
+    }
+  },
+
+  // 인증 번호 확인
+  async verifyCode(confirmationResult, code) {
+    try {
+      const result = await confirmationResult.confirm(code);
+      console.log('전화번호 인증 성공:', result.user);
+      return result.user;
+    } catch (error) {
+      console.error('인증번호 확인 실패:', error);
+      throw error;
+    }
+  },
+
+  // 기존 계정에 전화번호 연결
+  async linkPhoneNumber(phoneNumber, verificationCode) {
+    try {
+      const credential = PhoneAuthProvider.credential(verificationCode, phoneNumber);
+      const result = await linkWithCredential(auth.currentUser, credential);
+      console.log('전화번호 연결 성공:', result);
+      return result;
+    } catch (error) {
+      console.error('전화번호 연결 실패:', error);
+      throw error;
+    }
+  },
+
+  // reCAPTCHA 초기화
+  resetRecaptcha() {
+    if (this.recaptchaVerifier) {
+      this.recaptchaVerifier.clear();
+      this.recaptchaVerifier = null;
+    }
+  },
+
+  // 전화번호 형식 검증
+  validatePhoneNumber(phoneNumber) {
+    const phoneRegex = /^01[0-9]-\d{4}-\d{4}$/;
+    return phoneRegex.test(phoneNumber);
+  },
+
+  // 전화번호 포맷팅
+  formatPhoneNumber(phoneNumber) {
+    const cleaned = phoneNumber.replace(/\D/g, '');
+    if (cleaned.length === 11 && cleaned.startsWith('010')) {
+      return cleaned.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+    }
+    return phoneNumber;
+  }
+};
+
 export default {
   productService,
   imageService,
   userService,
   subscriptionService,
+  phoneAuthService,
   PRODUCT_STATUS,
   TRANSACTION_STATUS,
   INSTRUMENT_CATEGORIES,

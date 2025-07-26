@@ -19,7 +19,7 @@ const Bar = styled.header`
   align-items: center;
   justify-content: center;
   padding: 0;
-  z-index: 101;
+  z-index: 1000;
   backdrop-filter: blur(8px);
   box-shadow: var(--shadow-sm);
   
@@ -208,6 +208,24 @@ export default function TopBar() {
     }
   }, [menuOpen]);
 
+  // 외부 클릭 시 메뉴 닫기
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuOpen && menuBtnRef.current && !menuBtnRef.current.contains(event.target)) {
+        // 드롭다운 메뉴 영역을 클릭하지 않은 경우에만 닫기
+        const dropdown = document.querySelector('[data-dropdown-menu]');
+        if (!dropdown || !dropdown.contains(event.target)) {
+          setMenuOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuOpen]);
+
   const handleLogin = () => navigate("/login");
   const handleLogout = () => {
     logout();
@@ -247,6 +265,7 @@ export default function TopBar() {
           </IconBtn>
           {menuOpen && (
             <div
+              data-dropdown-menu
               style={{
                 position: "fixed",
                 top: dropdownPos.top,
@@ -254,8 +273,8 @@ export default function TopBar() {
                 background: "#fff",
                 border: "1.5px solid #eee",
                 borderRadius: 10,
-                boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-                zIndex: 200,
+                boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+                zIndex: 9999,
                 minWidth: 140,
                 padding: "8px 0",
                 display: "flex",
