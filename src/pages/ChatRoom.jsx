@@ -29,6 +29,7 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  padding-top: 60px; /* 헤더 높이만큼 패딩 추가 */
 `;
 
 const Header = styled.div`
@@ -167,8 +168,9 @@ const ProductStatus = styled.div`
 
 const MessagesContainer = styled.div`
   flex: 1;
-  padding: 0 20px 100px;
+  padding: 0 20px 160px; /* 하단바(90px) + 입력창(70px) 여유 공간 */
   overflow-y: auto;
+  padding-top: 20px;
 `;
 
 const MessageGroup = styled.div`
@@ -269,7 +271,7 @@ const MessageStatus = styled.div`
 
 const InputContainer = styled.div`
   position: fixed;
-  bottom: 0;
+  bottom: 90px; /* 하단바 위에 위치 */
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
@@ -278,6 +280,7 @@ const InputContainer = styled.div`
   border-top: 1px solid #e0e0e0;
   padding: 12px 16px;
   z-index: 100;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 `;
 
 const InputWrapper = styled.div`
