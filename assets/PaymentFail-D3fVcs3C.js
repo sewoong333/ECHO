@@ -1,4 +1,4 @@
-import{u as p,aq as h,j as e,z as f,ar as u,as as m,i as r}from"./index-DAMqcVbj.js";const b=r.div`
+import{u as p,aq as h,j as e,z as f,ar as u,as as m,i as r}from"./index-D7Jk6aBN.js";const b=r.div`
   min-height: 100vh;
   background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
   display: flex;
