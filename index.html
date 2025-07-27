@@ -2,7 +2,7 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     
     <!-- Primary Meta Tags -->
@@ -43,9 +43,9 @@
     <meta name="msapplication-config" content="/browserconfig.xml" />
     
     <!-- Apple Touch Icons -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/icon-192x192.svg" />
-    <link rel="icon" type="image/svg+xml" sizes="32x32" href="/favicon.svg" />
-    <link rel="icon" type="image/svg+xml" sizes="16x16" href="/favicon-16x16.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
@@ -141,12 +141,8 @@
       }
     }
     </script>
-    <script type="module" crossorigin src="/assets/js/index-czRqZILZ.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/js/vendor-others-BwC04hQF.js">
-    <link rel="modulepreload" crossorigin href="/assets/js/vendor-react-xhcWTtxo.js">
-    <link rel="modulepreload" crossorigin href="/assets/js/vendor-ui-28GTjlMA.js">
-    <link rel="modulepreload" crossorigin href="/assets/js/vendor-firebase-Cl2QMYMN.js">
-    <link rel="stylesheet" crossorigin href="/assets/css/index-DTmk2CxM.css">
+    <script type="module" crossorigin src="/assets/index-C0jD-Qlp.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DTmk2CxM.css">
   </head>
   <body>
     <!-- Loading Screen -->
@@ -156,20 +152,29 @@
     
     <div id="root"></div>
     
-    <!-- Service Worker Registration -->
+    <!-- Service Worker Registration - 임시 비활성화 -->
     <script>
-      // Service Worker 등록
+      // Service Worker 임시 비활성화 - 캐시 문제 방지
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('/sw.js')
-            .then(function(registration) {
-              console.log('Service Worker registered successfully:', registration.scope);
-            })
-            .catch(function(error) {
-              console.log('Service Worker registration failed:', error);
-            });
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) {
+            registration.unregister();
+            console.log('Service Worker unregistered:', registration.scope);
+          }
         });
       }
+      
+      // if ('serviceWorker' in navigator) {
+      //   window.addEventListener('load', function() {
+      //     navigator.serviceWorker.register('/sw.js')
+      //       .then(function(registration) {
+      //         console.log('Service Worker registered successfully:', registration.scope);
+      //       })
+      //       .catch(function(error) {
+      //         console.log('Service Worker registration failed:', error);
+      //       });
+      //   });
+      // }
       
       // Hide loading screen after app loads
       window.addEventListener('load', function() {

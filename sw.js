@@ -1,221 +1,150 @@
-// Enhanced Service Worker for ECHO Music Platform
-const VERSION = '2.0.0';
-const CACHE_NAME = `echo-v${VERSION}`;
-const STATIC_CACHE = `echo-static-v${VERSION}`;
-const DYNAMIC_CACHE = `echo-dynamic-v${VERSION}`;
-const IMAGE_CACHE = `echo-images-v${VERSION}`;
+// Service Worker for ECHO Music Platform
+const CACHE_NAME = 'echo-v1.1.0';
+const STATIC_CACHE = 'echo-static-v2';
+const DYNAMIC_CACHE = 'echo-dynamic-v2';
 
 const STATIC_FILES = [
   '/',
+  '/static/js/bundle.js',
+  '/static/css/main.css',
   '/manifest.json',
-  '/favicon.svg',
-  '/icon-192x192.svg',
-  '/icon-512x512.svg'
+  'https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap'
 ];
-
-const CACHE_STRATEGIES = {
-  CACHE_FIRST: 'cache-first',
-  NETWORK_FIRST: 'network-first',
-  STALE_WHILE_REVALIDATE: 'stale-while-revalidate'
-};
-
-// Clear old caches
-async function clearOldCaches() {
-  const cacheNames = await caches.keys();
-  const oldCaches = cacheNames.filter(name => 
-    name.startsWith('echo-') && !name.includes(VERSION)
-  );
-  
-  return Promise.all(oldCaches.map(name => {
-    console.log(`[SW] Deleting old cache: ${name}`);
-    return caches.delete(name);
-  }));
-}
 
 // Install event - cache static files
 self.addEventListener('install', (event) => {
-  console.log(`[SW] Installing service worker v${VERSION}...`);
+  console.log('[SW] Installing service worker...');
   
   event.waitUntil(
-    Promise.all([
-      caches.open(STATIC_CACHE)
-        .then((cache) => {
-          console.log('[SW] Caching static files');
-          return cache.addAll(STATIC_FILES);
-        }),
-      // Clear old caches
-      clearOldCaches()
-    ])
-    .then(() => {
-      console.log('[SW] Service worker installed successfully');
-      return self.skipWaiting();
-    })
-    .catch((error) => {
-      console.error('[SW] Failed to install service worker:', error);
-    })
+    caches.open(STATIC_CACHE)
+      .then((cache) => {
+        console.log('[SW] Caching static files');
+        return cache.addAll(STATIC_FILES.filter(url => !url.startsWith('http')));
+      })
+      .then(() => {
+        console.log('[SW] Service worker installed successfully');
+        return self.skipWaiting();
+      })
+      .catch((error) => {
+        console.error('[SW] Failed to cache static files:', error);
+      })
   );
 });
 
-// Activate event - clean old caches and claim clients
+// Activate event - clean old caches
 self.addEventListener('activate', (event) => {
   console.log('[SW] Activating service worker...');
   
   event.waitUntil(
-    Promise.all([
-      clearOldCaches(),
-      self.clients.claim()
-    ])
-    .then(() => {
-      console.log('[SW] Service worker activated');
-    })
+    caches.keys()
+      .then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
+              console.log('[SW] Deleting old cache:', cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      })
+      .then(() => {
+        console.log('[SW] Service worker activated');
+        return self.clients.claim();
+      })
   );
 });
 
-// Cache strategy functions
-async function cacheFirst(request, cacheName) {
-  const cache = await caches.open(cacheName);
-  const cachedResponse = await cache.match(request);
-  
-  if (cachedResponse) {
-    return cachedResponse;
-  }
-  
-  try {
-    const networkResponse = await fetch(request);
-    if (networkResponse.ok) {
-      cache.put(request, networkResponse.clone());
-    }
-    return networkResponse;
-  } catch (error) {
-    console.error('[SW] Network request failed:', error);
-    // Return offline fallback if available
-    return new Response('Offline', { status: 503 });
-  }
-}
-
-async function networkFirst(request, cacheName) {
-  const cache = await caches.open(cacheName);
-  
-  try {
-    const networkResponse = await fetch(request);
-    if (networkResponse.ok) {
-      cache.put(request, networkResponse.clone());
-    }
-    return networkResponse;
-  } catch (error) {
-    console.warn('[SW] Network failed, serving from cache:', request.url);
-    const cachedResponse = await cache.match(request);
-    return cachedResponse || new Response('Offline', { status: 503 });
-  }
-}
-
-async function staleWhileRevalidate(request, cacheName) {
-  const cache = await caches.open(cacheName);
-  const cachedResponse = await cache.match(request);
-  
-  const networkPromise = fetch(request)
-    .then(response => {
-      if (response.ok) {
-        cache.put(request, response.clone());
-      }
-      return response;
-    })
-    .catch(() => null);
-  
-  return cachedResponse || await networkPromise || new Response('Offline', { status: 503 });
-}
-
-// Fetch event handler
+// Fetch event - serve from cache when offline
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  const url = new URL(request.url);
   
   // Skip non-GET requests
   if (request.method !== 'GET') {
     return;
   }
   
-  // Skip Firebase and external API requests
-  if (url.hostname.includes('firebase') || 
-      url.hostname.includes('googleapis.com') ||
-      url.hostname.includes('gstatic.com') ||
-      url.hostname.includes('tosspayments.com')) {
+  // Skip Firebase requests
+  if (request.url.includes('firestore.googleapis.com') || 
+      request.url.includes('firebase') ||
+      request.url.includes('googleapis.com')) {
     return;
   }
   
-  event.respondWith(handleRequest(request));
+  event.respondWith(
+    caches.match(request)
+      .then((cachedResponse) => {
+        // Return cached version if available
+        if (cachedResponse) {
+          console.log('[SW] Serving from cache:', request.url);
+          return cachedResponse;
+        }
+        
+        // Fetch from network and cache dynamic content
+        return fetch(request)
+          .then((response) => {
+            // Only cache successful GET requests
+            if (response.status === 200) {
+              const responseClone = response.clone();
+              
+              // Cache images and other assets
+              if (request.destination === 'image' || 
+                  request.url.includes('static/') ||
+                  request.url.endsWith('.js') ||
+                  request.url.endsWith('.css')) {
+                
+                caches.open(DYNAMIC_CACHE)
+                  .then((cache) => {
+                    cache.put(request, responseClone);
+                  });
+              }
+            }
+            
+            return response;
+          })
+          .catch((error) => {
+            console.log('[SW] Fetch failed for:', request.url, error);
+            
+            // Return offline page for navigation requests
+            if (request.destination === 'document') {
+              return caches.match('/');
+            }
+            
+            // Return placeholder for images
+            if (request.destination === 'image') {
+              return new Response(
+                '<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="#f0f0f0"/><text x="50%" y="50%" text-anchor="middle" fill="#999">이미지를 불러올 수 없습니다</text></svg>',
+                { headers: { 'Content-Type': 'image/svg+xml' } }
+              );
+            }
+            
+            throw error;
+          });
+      })
+  );
 });
-
-async function handleRequest(request) {
-  const url = new URL(request.url);
-  
-  // Static assets (JS, CSS) - Cache first
-  if (url.pathname.startsWith('/assets/')) {
-    return cacheFirst(request, STATIC_CACHE);
-  }
-  
-  // Images - Cache first with image cache
-  if (request.destination === 'image' || 
-      /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(url.pathname)) {
-    return cacheFirst(request, IMAGE_CACHE);
-  }
-  
-  // HTML pages - Network first
-  if (request.destination === 'document' || 
-      url.pathname === '/' ||
-      !url.pathname.includes('.')) {
-    return networkFirst(request, DYNAMIC_CACHE);
-  }
-  
-  // API requests - Network first
-  if (url.pathname.startsWith('/api/')) {
-    return networkFirst(request, DYNAMIC_CACHE);
-  }
-  
-  // Everything else - Stale while revalidate
-  return staleWhileRevalidate(request, DYNAMIC_CACHE);
-}
 
 // Background sync for offline actions
 self.addEventListener('sync', (event) => {
   console.log('[SW] Background sync triggered:', event.tag);
   
   if (event.tag === 'background-sync') {
-    event.waitUntil(handleBackgroundSync());
+    event.waitUntil(doBackgroundSync());
   }
 });
 
-async function handleBackgroundSync() {
-  // Handle any pending offline actions
-  try {
-    // This would sync any offline data when back online
-    console.log('[SW] Performing background sync...');
-    // Implementation depends on your offline strategy
-  } catch (error) {
-    console.error('[SW] Background sync failed:', error);
-  }
-}
-
-// Push notification handler
+// Push notifications
 self.addEventListener('push', (event) => {
-  console.log('[SW] Push notification received');
+  console.log('[SW] Push message received:', event);
   
-  if (!event.data) {
-    return;
-  }
-  
-  const data = event.data.json();
   const options = {
-    body: data.body,
-    icon: '/icon-192x192.svg',
-    badge: '/icon-192x192.svg',
-    tag: data.tag || 'echo-notification',
-    requireInteraction: true,
+    body: event.data ? event.data.text() : '새로운 알림이 있습니다',
+    icon: '/icon-192x192.png',
+    badge: '/icon-192x192.png',
+    vibrate: [200, 100, 200],
     actions: [
       {
-        action: 'view',
-        title: '보기',
-        icon: '/icon-192x192.svg'
+        action: 'open',
+        title: '확인하기'
       },
       {
         action: 'close',
@@ -225,30 +154,37 @@ self.addEventListener('push', (event) => {
   };
   
   event.waitUntil(
-    self.registration.showNotification(data.title || 'ECHO 알림', options)
+    self.registration.showNotification('ECHO', options)
   );
 });
 
-// Notification click handler
+// Notification click
 self.addEventListener('notificationclick', (event) => {
-  console.log('[SW] Notification clicked');
+  console.log('[SW] Notification clicked:', event);
   
   event.notification.close();
   
-  if (event.action === 'view') {
+  if (event.action === 'open') {
     event.waitUntil(
       clients.openWindow('/')
     );
   }
 });
 
-// Error handling
-self.addEventListener('error', (event) => {
-  console.error('[SW] Service Worker error:', event.error);
-});
+// Helper function for background sync
+async function doBackgroundSync() {
+  try {
+    // Implement background sync logic here
+    // e.g., sync offline actions, update cache, etc.
+    console.log('[SW] Background sync completed');
+  } catch (error) {
+    console.error('[SW] Background sync failed:', error);
+  }
+}
 
-self.addEventListener('unhandledrejection', (event) => {
-  console.error('[SW] Unhandled promise rejection:', event.reason);
+// Message handling
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
-
-console.log(`[SW] Service Worker v${VERSION} loaded`);
