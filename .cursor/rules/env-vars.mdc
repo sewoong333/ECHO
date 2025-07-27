@@ -1,0 +1,7 @@
+- 모든 클라이언트 환경 변수는 VITE_ 접두사를 붙여야 합니다.
+- 민감 정보는 절대 커밋하지 않습니다.
+- 예시 파일은 .env.example 또는 firebase-config-example.txt로 제공합니다.
+description:
+globs:
+alwaysApply: false
+---

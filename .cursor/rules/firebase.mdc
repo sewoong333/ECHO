@@ -1,0 +1,6 @@
+- Firebase 연동은 [src/utils/firebase.js](mdc:src/utils/firebase.js)에서 일원화합니다.
+- Firestore 보안 규칙은 [firestore.rules](mdc:firestore.rules)에서 관리하며, 배포 전 항상 최신화합니다.
+description:
+globs:
+alwaysApply: false
+---

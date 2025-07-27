@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
+    <!-- Primary Meta Tags -->
+    <title>ECHO - 악기 공유 플랫폼 | 음악인들의 악기 거래 커뮤니티</title>
+    <meta name="title" content="ECHO - 악기 공유 플랫폼 | 음악인들의 악기 거래 커뮤니티" />
+    <meta name="description" content="음악인들을 위한 신뢰할 수 있는 악기 거래 플랫폼. 기타, 피아노, 드럼, 관악기 등 다양한 악기를 안전하게 거래하세요. 실시간 채팅과 찜하기 기능으로 편리한 거래 경험을 제공합니다." />
+    <meta name="keywords" content="악기거래, 악기판매, 중고악기, 기타, 피아노, 드럼, 바이올린, 음악, 뮤직, 악기공유, 음악커뮤니티" />
+    <meta name="author" content="ECHO Team" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="Korean" />
+    <meta name="geo.region" content="KR" />
+    <meta name="geo.country" content="Korea" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://echo-music.vercel.app/" />
+    <meta property="og:title" content="ECHO - 악기 공유 플랫폼" />
+    <meta property="og:description" content="음악인들을 위한 신뢰할 수 있는 악기 거래 플랫폼. 안전하고 편리한 악기 거래를 경험해보세요." />
+    <meta property="og:image" content="https://echo-music.vercel.app/og-image.png" />
+    <meta property="og:site_name" content="ECHO" />
+    <meta property="og:locale" content="ko_KR" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://echo-music.vercel.app/" />
+    <meta property="twitter:title" content="ECHO - 악기 공유 플랫폼" />
+    <meta property="twitter:description" content="음악인들을 위한 신뢰할 수 있는 악기 거래 플랫폼. 안전하고 편리한 악기 거래를 경험해보세요." />
+    <meta property="twitter:image" content="https://echo-music.vercel.app/og-image.png" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="application-name" content="ECHO" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="ECHO" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#2ed8b6" />
+    <meta name="msapplication-TileColor" content="#2ed8b6" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/icon-192x192.svg" />
+    <link rel="icon" type="image/svg+xml" sizes="32x32" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" sizes="16x16" href="/favicon-16x16.svg" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://firestore.googleapis.com" />
+    <link rel="preconnect" href="https://storage.googleapis.com" />
+    
+    <!-- Critical CSS Variables -->
+    <style>
+      :root {
+        --color-primary: #2ed8b6;
+        --color-primary-dark: #26c4a8;
+        --color-bg-primary: #ffffff;
+        --color-bg-secondary: #f8f9fa;
+        --color-text-primary: #1a1a1a;
+        --color-text-secondary: #6b7280;
+        --color-border: #e5e7eb;
+        --color-success: #10b981;
+        --color-error: #ef4444;
+        --color-warning: #f59e0b;
+      }
+      
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      
+      html, body, #root {
+        width: 100vw;
+        min-width: 0;
+        max-width: 100vw;
+        overflow-x: hidden;
+        font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      }
+      
+      /* Loading Screen */
+      .loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: linear-gradient(135deg, #2ed8b6, #00d9b7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 1;
+        transition: opacity 0.5s ease-out;
+      }
+      
+      .loading-screen.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      
+      .loading-logo {
+        font-size: 3rem;
+        font-weight: 800;
+        color: white;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        animation: pulse 2s infinite;
+      }
+      
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+    </style>
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "ECHO",
+      "description": "음악인들을 위한 악기 거래 플랫폼",
+      "url": "https://echo-music.vercel.app/",
+      "applicationCategory": "Marketplace",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "KRW"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "ECHO Team"
+      }
+    }
+    </script>
+    <script type="module" crossorigin src="/assets/js/index-czRqZILZ.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/js/vendor-others-BwC04hQF.js">
+    <link rel="modulepreload" crossorigin href="/assets/js/vendor-react-xhcWTtxo.js">
+    <link rel="modulepreload" crossorigin href="/assets/js/vendor-ui-28GTjlMA.js">
+    <link rel="modulepreload" crossorigin href="/assets/js/vendor-firebase-Cl2QMYMN.js">
+    <link rel="stylesheet" crossorigin href="/assets/css/index-DTmk2CxM.css">
+  </head>
+  <body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+      <div class="loading-logo">ECHO</div>
+    </div>
+    
+    <div id="root"></div>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      // Service Worker 등록
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js')
+            .then(function(registration) {
+              console.log('Service Worker registered successfully:', registration.scope);
+            })
+            .catch(function(error) {
+              console.log('Service Worker registration failed:', error);
+            });
+        });
+      }
+      
+      // Hide loading screen after app loads
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          const loadingScreen = document.getElementById('loading-screen');
+          if (loadingScreen) {
+            loadingScreen.classList.add('hidden');
+            setTimeout(() => loadingScreen.remove(), 500);
+          }
+        }, 1000);
+      });
+      
+      // Install prompt for PWA
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        console.log('PWA install prompt available');
+      });
+    </script>
+  </body>
+</html>
