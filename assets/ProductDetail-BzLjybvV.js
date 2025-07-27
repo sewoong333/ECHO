@@ -1,4 +1,4 @@
-import{r as x,U as fe,o as he,j as e,q as be,s as Ue,t as Ye,v as qe,w as re,i as r,u as Ke,x as He,P as We,C as Ve,y as oe,z as Xe,A as Ge,B as Je,D as Qe,E as Ze,G as et,H as tt,I as nt,J as ie,K as rt,L as ot,M as it,N as st,O as at,Q as ct,R as lt,S as se,V as dt,W as pt,X as xt,p as ut}from"./index-D7Jk6aBN.js";function me(t,i){if(!(t instanceof i))throw new TypeError("Cannot call a class as a function")}function we(t,i){if(typeof i!="function"&&i!==null)throw new TypeError("Super expression must either be null or a function");t.prototype=Object.create(i&&i.prototype,{constructor:{value:t,writable:!0,configurable:!0}}),i&&_(t,i)}function R(t){return R=Object.setPrototypeOf?Object.getPrototypeOf:function(a){return a.__proto__||Object.getPrototypeOf(a)},R(t)}function _(t,i){return _=Object.setPrototypeOf||function(d,l){return d.__proto__=l,d},_(t,i)}function ve(){if(typeof Reflect>"u"||!Reflect.construct||Reflect.construct.sham)return!1;if(typeof Proxy=="function")return!0;try{return Boolean.prototype.valueOf.call(Reflect.construct(Boolean,[],function(){})),!0}catch{return!1}}function U(t,i,a){return ve()?U=Reflect.construct:U=function(l,u,w){var s=[null];s.push.apply(s,u);var g=Function.bind.apply(l,s),b=new g;return w&&_(b,w.prototype),b},U.apply(null,arguments)}function gt(t){return Function.toString.call(t).indexOf("[native code]")!==-1}function Y(t){var i=typeof Map=="function"?new Map:void 0;return Y=function(d){if(d===null||!gt(d))return d;if(typeof d!="function")throw new TypeError("Super expression must either be null or a function");if(typeof i<"u"){if(i.has(d))return i.get(d);i.set(d,l)}function l(){return U(d,arguments,R(this).constructor)}return l.prototype=Object.create(d.prototype,{constructor:{value:l,enumerable:!1,writable:!0,configurable:!0}}),_(l,d)},Y(t)}function ft(t){if(t===void 0)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return t}function ht(t,i){if(i&&(typeof i=="object"||typeof i=="function"))return i;if(i!==void 0)throw new TypeError("Derived constructors may only return object or undefined");return ft(t)}function ye(t){var i=ve();return function(){var d=R(t),l;if(i){var u=R(this).constructor;l=Reflect.construct(d,arguments,u)}else l=d.apply(this,arguments);return ht(this,l)}}var M=null;function bt(t,i){var a=arguments.length>2&&arguments[2]!==void 0?arguments[2]:{};if(M!=null)return M;var d=new Promise(function(l,u){try{var w=function(){B(i)!=null?l(B(i)):u(new mt(i))},s=function(){u(new wt(t))};if(typeof window>"u"||typeof document>"u")return l(null);if(B(i)!=null)return l(B(i));var g=document.querySelector('script[src="'.concat(t,'"]'));if(g!=null){var b;g.removeEventListener("load",w),g.removeEventListener("error",s),(b=g.parentElement)===null||b===void 0||b.removeChild(g)}var f=document.createElement("script");f.src=t,f.addEventListener("load",w),f.addEventListener("error",s),a.priority!=null&&(f.fetchPriority=a.priority),document.head.appendChild(f)}catch(h){u(h);return}});return M=d.catch(function(l){return M=null,Promise.reject(l)}),M}function B(t){return window[t]}var mt=function(t){we(a,t);var i=ye(a);function a(d){var l;return me(this,a),l=i.call(this,"[TossPayments SDK] ".concat(d," is not available")),l.name="NamespaceNotAvailableError",l}return a}(Y(Error)),wt=function(t){we(a,t);var i=ye(a);function a(d){var l;return me(this,a),l=i.call(this,"[TossPayments SDK] Failed to load script: [".concat(d,"]")),l.name="ScriptLoadFailedError",l}return a}(Y(Error)),vt="https://js.tosspayments.com/v1";function yt(t){var i=arguments.length>1&&arguments[1]!==void 0?arguments[1]:{},a=i.src,d=a===void 0?vt:a;return typeof window>"u"?Promise.resolve({requestPayment:function(){throw new Error("[TossPayments SDK] It looks like runtime is not from browser. This method is only executable on browser.")},requestBillingAuth:function(){throw new Error("[TossPayments SDK] It looks like runtime is not from browser. This method is only executable on browser.")},cancelPayment:function(){throw new Error("[TossPayments SDK] It looks like runtime is not from browser. This method is only executable on browser.")}}):bt(d,"TossPayments").then(function(l){return l(t)})}const jt=r.div`
+import{r as x,U as fe,o as he,j as e,q as be,s as Ue,t as Ye,v as qe,w as re,i as r,u as Ke,x as He,P as We,C as Ve,y as oe,z as Xe,A as Ge,B as Je,D as Qe,E as Ze,G as et,H as tt,I as nt,J as ie,K as rt,L as ot,M as it,N as st,O as at,Q as ct,R as lt,S as se,V as dt,W as pt,X as xt,p as ut}from"./index-DGNRr8H-.js";function me(t,i){if(!(t instanceof i))throw new TypeError("Cannot call a class as a function")}function we(t,i){if(typeof i!="function"&&i!==null)throw new TypeError("Super expression must either be null or a function");t.prototype=Object.create(i&&i.prototype,{constructor:{value:t,writable:!0,configurable:!0}}),i&&_(t,i)}function R(t){return R=Object.setPrototypeOf?Object.getPrototypeOf:function(a){return a.__proto__||Object.getPrototypeOf(a)},R(t)}function _(t,i){return _=Object.setPrototypeOf||function(d,l){return d.__proto__=l,d},_(t,i)}function ve(){if(typeof Reflect>"u"||!Reflect.construct||Reflect.construct.sham)return!1;if(typeof Proxy=="function")return!0;try{return Boolean.prototype.valueOf.call(Reflect.construct(Boolean,[],function(){})),!0}catch{return!1}}function U(t,i,a){return ve()?U=Reflect.construct:U=function(l,u,w){var s=[null];s.push.apply(s,u);var g=Function.bind.apply(l,s),b=new g;return w&&_(b,w.prototype),b},U.apply(null,arguments)}function gt(t){return Function.toString.call(t).indexOf("[native code]")!==-1}function Y(t){var i=typeof Map=="function"?new Map:void 0;return Y=function(d){if(d===null||!gt(d))return d;if(typeof d!="function")throw new TypeError("Super expression must either be null or a function");if(typeof i<"u"){if(i.has(d))return i.get(d);i.set(d,l)}function l(){return U(d,arguments,R(this).constructor)}return l.prototype=Object.create(d.prototype,{constructor:{value:l,enumerable:!1,writable:!0,configurable:!0}}),_(l,d)},Y(t)}function ft(t){if(t===void 0)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return t}function ht(t,i){if(i&&(typeof i=="object"||typeof i=="function"))return i;if(i!==void 0)throw new TypeError("Derived constructors may only return object or undefined");return ft(t)}function ye(t){var i=ve();return function(){var d=R(t),l;if(i){var u=R(this).constructor;l=Reflect.construct(d,arguments,u)}else l=d.apply(this,arguments);return ht(this,l)}}var M=null;function bt(t,i){var a=arguments.length>2&&arguments[2]!==void 0?arguments[2]:{};if(M!=null)return M;var d=new Promise(function(l,u){try{var w=function(){B(i)!=null?l(B(i)):u(new mt(i))},s=function(){u(new wt(t))};if(typeof window>"u"||typeof document>"u")return l(null);if(B(i)!=null)return l(B(i));var g=document.querySelector('script[src="'.concat(t,'"]'));if(g!=null){var b;g.removeEventListener("load",w),g.removeEventListener("error",s),(b=g.parentElement)===null||b===void 0||b.removeChild(g)}var f=document.createElement("script");f.src=t,f.addEventListener("load",w),f.addEventListener("error",s),a.priority!=null&&(f.fetchPriority=a.priority),document.head.appendChild(f)}catch(h){u(h);return}});return M=d.catch(function(l){return M=null,Promise.reject(l)}),M}function B(t){return window[t]}var mt=function(t){we(a,t);var i=ye(a);function a(d){var l;return me(this,a),l=i.call(this,"[TossPayments SDK] ".concat(d," is not available")),l.name="NamespaceNotAvailableError",l}return a}(Y(Error)),wt=function(t){we(a,t);var i=ye(a);function a(d){var l;return me(this,a),l=i.call(this,"[TossPayments SDK] Failed to load script: [".concat(d,"]")),l.name="ScriptLoadFailedError",l}return a}(Y(Error)),vt="https://js.tosspayments.com/v1";function yt(t){var i=arguments.length>1&&arguments[1]!==void 0?arguments[1]:{},a=i.src,d=a===void 0?vt:a;return typeof window>"u"?Promise.resolve({requestPayment:function(){throw new Error("[TossPayments SDK] It looks like runtime is not from browser. This method is only executable on browser.")},requestBillingAuth:function(){throw new Error("[TossPayments SDK] It looks like runtime is not from browser. This method is only executable on browser.")},cancelPayment:function(){throw new Error("[TossPayments SDK] It looks like runtime is not from browser. This method is only executable on browser.")}}):bt(d,"TossPayments").then(function(l){return l(t)})}const jt=r.div`
   position: fixed;
   top: 0;
   left: 0;
@@ -293,7 +293,7 @@ import{r as x,U as fe,o as he,j as e,q as be,s as Ue,t as Ye,v as qe,w as re,i a
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
+  font-size: 22px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: ${t=>t.liked?"0 8px 24px rgba(255, 107, 157, 0.3), 0 4px 12px rgba(233, 30, 99, 0.2)":"0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8)"};
@@ -350,8 +350,7 @@ import{r as x,U as fe,o as he,j as e,q as be,s as Ue,t as Ye,v as qe,w as re,i a
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  letter-spacing: -0.3px;
-  white-space: nowrap;
+  letter-spacing: -0.2px;
   
   &.chat {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
@@ -398,9 +397,8 @@ import{r as x,U as fe,o as he,j as e,q as be,s as Ue,t as Ye,v as qe,w as re,i a
   
   /* 버튼 아이콘 강화 */
   svg {
-    font-size: 20px;
+    font-size: 18px;
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
-    flex-shrink: 0;
   }
   
   /* 반짝이는 효과 */
@@ -486,8 +484,7 @@ import{r as x,U as fe,o as he,j as e,q as be,s as Ue,t as Ye,v as qe,w as re,i a
     inset 0 1px 0 rgba(255, 255, 255, 0.8),
     0 2px 8px rgba(99, 102, 241, 0.1);
   border: 1px solid rgba(148, 163, 184, 0.1);
-  letter-spacing: -0.3px;
-  white-space: nowrap;
+  letter-spacing: -0.2px;
   
   &:hover {
     background: linear-gradient(135deg, rgba(245, 247, 250, 0.98) 0%, rgba(241, 245, 249, 0.95) 100%);
@@ -506,9 +503,8 @@ import{r as x,U as fe,o as he,j as e,q as be,s as Ue,t as Ye,v as qe,w as re,i a
   
   /* 버튼 아이콘 강화 */
   svg {
-    font-size: 20px;
+    font-size: 18px;
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
-    flex-shrink: 0;
   }
   
   /* 반짝이는 효과 */
