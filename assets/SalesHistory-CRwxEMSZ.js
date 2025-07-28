@@ -1,4 +1,4 @@
-import{u as S,r as o,U as C,P as B,j as t,T as I,ah as L,ac as $,ai as F,aj as m,ak as T,al as q,am as A,an as H,ao as M,ap as P,i as e}from"./index-BryaZ5dw.js";const E={profile:"https://i.ibb.co/3y0Qw1K/profile-demo.jpg"},b=e.div`
+import{u as S,r as o,U as C,P as B,j as t,T as I,ag as L,aa as $,ah as F,ai as m,aj as T,ak as q,al as A,am as H,an as M,ao as P,i as e}from"./index-CGuM-vkb.js";const E={profile:"https://i.ibb.co/3y0Qw1K/profile-demo.jpg"},b=e.div`
   width: 100vw;
   min-height: 100vh;
   background: #fff;
