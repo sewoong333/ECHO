@@ -104,41 +104,58 @@ const IconButton = styled.button`
 
 // 하단 액션바 스타일 컴포넌트들 (하단 네비게이션 바로 위)
 const BottomActionBar = styled.div`
-  position: fixed;
-  bottom: 72px; /* BottomNav 높이(72px) 바로 위 */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 500px;
+  position: fixed !important;
+  bottom: 72px !important; /* BottomNav 높이(72px) 바로 위 */
+  left: 0 !important;
+  right: 0 !important;
+  width: 100vw !important;
+  max-width: 100vw !important;
   height: 60px;
-  background: var(--color-bg-glass, rgba(255, 255, 255, 0.95));
+  background: rgba(255, 255, 255, 0.98) !important;
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  display: flex;
+  display: flex !important;
   align-items: center;
-  gap: var(--space-3, 12px);
-  padding: 0 var(--space-4, 16px);
-  z-index: 99;
-  border-top: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
-  box-shadow: var(--shadow-lg, 0 -8px 32px rgba(0, 0, 0, 0.08));
+  justify-content: center;
+  gap: 12px;
+  padding: 0 16px;
+  z-index: 999 !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.15) !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  
+  /* 중앙 정렬을 위한 컨테이너 */
+  &::before {
+    content: '';
+    flex: 1;
+    max-width: calc((100vw - 500px) / 2);
+  }
+  
+  &::after {
+    content: '';
+    flex: 1;
+    max-width: calc((100vw - 500px) / 2);
+  }
 `;
 
 const BottomLikeButton = styled.button`
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-full, 50%);
-  border: none;
-  background: ${props => props.liked ? 'var(--color-mint-main, #2ed8b6)' : 'var(--color-bg-primary, #ffffff)'};
-  color: ${props => props.liked ? 'white' : 'var(--color-text-secondary, #6b7280)'};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  cursor: pointer;
-  transition: all var(--transition-normal, 0.2s ease);
-  box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.08));
-  position: relative;
-  overflow: hidden;
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
+  border: none !important;
+  background: ${props => props.liked ? '#2ed8b6 !important' : '#ffffff !important'};
+  color: ${props => props.liked ? 'white !important' : '#6b7280 !important'};
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 20px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
   
   &:hover {
     transform: translateY(-2px);
@@ -166,48 +183,51 @@ const BottomLikeButton = styled.button`
 `;
 
 const BottomActionButton = styled.button`
-  flex: 1;
-  height: 48px;
-  border-radius: var(--radius-2xl, 24px);
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2, 8px);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition-normal, 0.2s ease);
-  position: relative;
-  overflow: hidden;
+  flex: 1 !important;
+  height: 48px !important;
+  max-width: 180px !important;
+  border-radius: 24px !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
   
   &.chat {
-    background: var(--color-bg-primary, #ffffff);
-    color: var(--color-text-primary, #1a1a1a);
-    box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.08));
+    background: #ffffff !important;
+    color: #1a1a1a !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+    border: 1px solid #e5e5e5 !important;
     
     &:hover {
-      background: var(--color-bg-secondary, #f8f9fa);
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.12));
+      background: #f8f9fa !important;
+      transform: translateY(-1px) !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
     }
     
     &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
+      opacity: 0.6 !important;
+      cursor: not-allowed !important;
+      transform: none !important;
     }
   }
   
   &.buy {
-    background: linear-gradient(135deg, var(--color-mint-main, #2ed8b6), var(--color-mint-dark, #26c4a8));
-    color: white;
-    box-shadow: var(--shadow-md, 0 4px 16px rgba(46, 216, 182, 0.3));
+    background: linear-gradient(135deg, #2ed8b6, #26c4a8) !important;
+    color: white !important;
+    box-shadow: 0 4px 16px rgba(46, 216, 182, 0.4) !important;
     
     &:hover {
-      background: linear-gradient(135deg, var(--color-mint-dark, #26c4a8), var(--color-mint-main, #2ed8b6));
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-lg, 0 8px 24px rgba(46, 216, 182, 0.4));
+      background: linear-gradient(135deg, #26c4a8, #2ed8b6) !important;
+      transform: translateY(-1px) !important;
+      box-shadow: 0 8px 24px rgba(46, 216, 182, 0.5) !important;
     }
   }
   
@@ -938,7 +958,8 @@ export default function ProductDetail() {
     setShowOptionsMenu(false);
   };
 
-  const handlePaymentSuccess = async (_paymentData) => {
+  const handlePaymentSuccess = async (paymentData) => {
+    console.log('Payment success:', paymentData);
     try {
       // 결제 성공 후 상품 상태 변경
       await changeProductStatus(product.id, PRODUCT_STATUS.SOLD);

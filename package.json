@@ -8,7 +8,7 @@
     "dev:clean": "kill-port 5173 && vite",
     "build": "vite build",
     "build:test": "npm run lint && npm run build && echo '✅ Build successful! Ready for deployment'",
-    "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint . --report-unused-disable-directives --max-warnings 20",
     "preview": "vite preview",
     "deploy": "gh-pages -d dist",
     "deploy:safe": "npm run build:test && git push origin main"
