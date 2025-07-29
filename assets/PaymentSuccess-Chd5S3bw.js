@@ -1,4 +1,4 @@
-import{u as m,ap as j,r as c,P as b,U as C,o as w,j as e,N as k,aq as y,L as v,i as t}from"./index-CGuM-vkb.js";const P=t.div`
+import{u as m,ap as j,r as c,P as b,U as y,o as C,j as e,N as w,aq as k,L as v,i as t}from"./index-CH1wDzjU.js";const P=t.div`
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
@@ -54,7 +54,7 @@ import{u as m,ap as j,r as c,P as b,U as C,o as w,j as e,N as k,aq as y,L as v,i
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: ${s=>s.last?"0":"12px"};
+  margin-bottom: ${n=>n.last?"0":"12px"};
   font-size: 14px;
 `,d=t.span`
   color: #666;
@@ -96,4 +96,4 @@ import{u as m,ap as j,r as c,P as b,U as C,o as w,j as e,N as k,aq as y,L as v,i
   &:hover {
     background: #e9ecef;
   }
-`;function N(){const s=m(),[o]=j(),{changeProductStatus:B,PRODUCT_STATUS:A}=c.useContext(b),{user:E}=c.useContext(C),{showSuccess:x}=w(),r=o.get("orderId"),n=o.get("paymentKey"),a=o.get("amount");c.useEffect(()=>{r&&n&&a&&x("결제가 성공적으로 완료되었습니다!",{title:"결제 완료"})},[r,n,a,x]);const h=()=>{s("/")},p=()=>{s("/chat")},f=g=>new Intl.NumberFormat("ko-KR").format(g);return e.jsx(P,{children:e.jsxs(S,{children:[e.jsx(I,{children:e.jsx(k,{})}),e.jsx(T,{children:"결제 완료!"}),e.jsxs(U,{children:["결제가 성공적으로 완료되었습니다.",e.jsx("br",{}),"판매자와 연락하여 거래를 진행해 주세요."]}),e.jsxs(z,{children:[e.jsxs(i,{children:[e.jsx(d,{children:"주문번호"}),e.jsx(l,{children:r})]}),e.jsxs(i,{children:[e.jsx(d,{children:"결제키"}),e.jsxs(l,{children:[n==null?void 0:n.slice(0,20),"..."]})]}),e.jsxs(i,{last:!0,children:[e.jsx(d,{children:"결제금액"}),e.jsxs(l,{children:[f(a),"원"]})]})]}),e.jsxs(F,{children:[e.jsxs(_,{onClick:h,children:[e.jsx(y,{}),"홈으로"]}),e.jsxs(R,{onClick:p,children:[e.jsx(v,{}),"채팅하기"]})]})]})})}export{N as default};
+`;function K(){const n=m(),[s]=j(),{changeProductStatus:B,PRODUCT_STATUS:A}=c.useContext(b),{user:E}=c.useContext(y),{showSuccess:x}=C(),o=s.get("orderId"),r=s.get("paymentKey"),a=s.get("amount");c.useEffect(()=>{o&&r&&a&&x("결제가 성공적으로 완료되었습니다!",{title:"결제 완료"})},[o,r,a,x]);const h=()=>{n("/")},p=()=>{n("/chat")},f=g=>new Intl.NumberFormat("ko-KR").format(g);return e.jsx(P,{children:e.jsxs(S,{children:[e.jsx(I,{children:e.jsx(w,{})}),e.jsx(T,{children:"결제 완료!"}),e.jsxs(U,{children:["결제가 성공적으로 완료되었습니다.",e.jsx("br",{}),"판매자와 연락하여 거래를 진행해 주세요."]}),e.jsxs(z,{children:[e.jsxs(i,{children:[e.jsx(d,{children:"주문번호"}),e.jsx(l,{children:o})]}),e.jsxs(i,{children:[e.jsx(d,{children:"결제키"}),e.jsxs(l,{children:[r?.slice(0,20),"..."]})]}),e.jsxs(i,{last:!0,children:[e.jsx(d,{children:"결제금액"}),e.jsxs(l,{children:[f(a),"원"]})]})]}),e.jsxs(F,{children:[e.jsxs(_,{onClick:h,children:[e.jsx(k,{}),"홈으로"]}),e.jsxs(R,{onClick:p,children:[e.jsx(v,{}),"채팅하기"]})]})]})})}export{K as default};

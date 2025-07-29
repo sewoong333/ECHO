@@ -1,4 +1,4 @@
-import{u as g,ap as h,j as e,z as f,aq as u,ar as m,i as r}from"./index-CGuM-vkb.js";const b=r.div`
+import{u as g,ap as h,j as e,z as f,aq as u,ar as m,i as r}from"./index-CH1wDzjU.js";const b=r.div`
   min-height: 100vh;
   background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
   display: flex;
