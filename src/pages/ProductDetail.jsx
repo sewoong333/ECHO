@@ -102,16 +102,16 @@ const IconButton = styled.button`
   }
 `;
 
-// 새로운 상단 액션바 스타일 컴포넌트들
-const TopActionBar = styled.div`
+// 하단 액션바 스타일 컴포넌트들 (하단 네비게이션 바로 위)
+const BottomActionBar = styled.div`
   position: fixed;
-  top: 56px;
+  bottom: 72px; /* BottomNav 높이(72px) 바로 위 */
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
   max-width: 500px;
   height: 60px;
-  background: var(--color-bg-glass, rgba(255, 255, 255, 0.85));
+  background: var(--color-bg-glass, rgba(255, 255, 255, 0.95));
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   display: flex;
@@ -119,11 +119,11 @@ const TopActionBar = styled.div`
   gap: var(--space-3, 12px);
   padding: 0 var(--space-4, 16px);
   z-index: 99;
-  border-bottom: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
-  box-shadow: var(--shadow-lg, 0 8px 32px rgba(0, 0, 0, 0.08));
+  border-top: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
+  box-shadow: var(--shadow-lg, 0 -8px 32px rgba(0, 0, 0, 0.08));
 `;
 
-const TopLikeButton = styled.button`
+const BottomLikeButton = styled.button`
   width: 48px;
   height: 48px;
   border-radius: var(--radius-full, 50%);
@@ -165,7 +165,7 @@ const TopLikeButton = styled.button`
   }
 `;
 
-const TopActionButton = styled.button`
+const BottomActionButton = styled.button`
   flex: 1;
   height: 48px;
   border-radius: var(--radius-2xl, 24px);
@@ -229,7 +229,7 @@ const TopActionButton = styled.button`
 
 const ImageSection = styled.div`
   position: relative;
-  margin-top: 116px; /* 56px(헤더) + 60px(액션바) */
+  margin-top: 56px; /* 56px(헤더만) */
   padding: 16px;
   background: #fff;
 `;
@@ -333,6 +333,10 @@ const Dot = styled.div`
 
 const ContentSection = styled.div`
   padding: 20px;
+  
+  &:last-child {
+    padding-bottom: 152px; /* 60px(액션바) + 72px(하단바) + 20px(여백) */
+  }
 `;
 
 const ProductInfo = styled.div`
@@ -1275,33 +1279,33 @@ export default function ProductDetail() {
         </>
       )}
 
-      {/* 새로운 상단 액션바 */}
-      <TopActionBar>
-        <TopLikeButton 
+      {/* 하단 액션바 (하단 네비게이션 바로 위) */}
+      <BottomActionBar>
+        <BottomLikeButton 
           onClick={handleLike}
           liked={isLiked}
           aria-label="찜하기"
         >
           {isLiked ? <FaHeart /> : <FaRegHeart />}
-        </TopLikeButton>
+        </BottomLikeButton>
         
-        <TopActionButton 
+        <BottomActionButton 
           className="chat"
           onClick={handleChat}
           disabled={creatingChat}
         >
           <FaRegCommentDots />
           {creatingChat ? '생성 중...' : '채팅하기'}
-        </TopActionButton>
+        </BottomActionButton>
         
-        <TopActionButton 
+        <BottomActionButton 
           className="buy"
           onClick={handleBuy}
         >
           <FaShoppingCart />
           구매하기
-        </TopActionButton>
-      </TopActionBar>
+        </BottomActionButton>
+      </BottomActionBar>
 
       {/* 이미지 확대 모달 */}
       {isImageModalOpen && (
