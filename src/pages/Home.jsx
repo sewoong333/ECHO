@@ -36,28 +36,12 @@ const Container = styled.div`
   width: 100vw;
   max-width: 100vw;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  background-attachment: fixed;
+  background: #ffffff;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   overflow-x: hidden;
-  
-  &::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: 
-      radial-gradient(600px circle at 20% 30%, rgba(46, 216, 182, 0.15), transparent 40%),
-      radial-gradient(800px circle at 80% 70%, rgba(118, 75, 162, 0.15), transparent 40%),
-      radial-gradient(400px circle at 40% 80%, rgba(102, 126, 234, 0.1), transparent 40%);
-    pointer-events: none;
-    z-index: 0;
-  }
 `;
 
 const SearchSection = styled.div`
