@@ -132,7 +132,7 @@ const LikeButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 24px;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
@@ -265,34 +265,6 @@ const ImagePlaceholder = styled.div`
   font-size: 48px;
 `;
 
-const SliderButton = styled.button`
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  ${props => props.direction === 'prev' ? 'left: 16px;' : 'right: 16px;'}
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
-  color: #333;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  z-index: 10;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    background: white;
-    transform: translateY(-50%) scale(1.1);
-  }
-  
-  &:active {
-    transform: translateY(-50%) scale(0.95);
-  }
-`;
 
 const ImageCounter = styled.div`
   position: absolute;
@@ -600,23 +572,71 @@ const ImageModal = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+`;
+
+const ModalImageContainer = styled.div`
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: pan-y;
 `;
 
 const ModalCloseButton = styled.button`
   position: absolute;
   top: 20px;
   right: 20px;
-  background: none;
+  background: rgba(0, 0, 0, 0.5);
   border: none;
   color: white;
   font-size: 24px;
   cursor: pointer;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  z-index: 1001;
+  transition: background 0.2s;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.7);
+  }
+`;
+
+const ModalImageSlider = styled.div`
+  display: flex;
+  width: ${props => props.imageCount * 100}vw;
+  height: 100vh;
+  transform: translateX(-${props => props.currentIndex * 100}vw);
+  transition: transform 0.3s ease;
 `;
 
 const ModalImage = styled.img`
-  max-width: 90vw;
-  max-height: 90vh;
+  width: 100vw;
+  height: 100vh;
   object-fit: contain;
+  cursor: grab;
+  
+  &:active {
+    cursor: grabbing;
+  }
+`;
+
+const ModalImageCounter = styled.div`
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  backdrop-filter: blur(4px);
+  z-index: 1001;
 `;
 
 // 옵션 메뉴 스타일
@@ -687,6 +707,8 @@ export default function ProductDetail() {
   const [creatingChat, setCreatingChat] = useState(false);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
+  const [modalTouchStart, setModalTouchStart] = useState(0);
+  const [modalTouchEnd, setModalTouchEnd] = useState(0);
 
   // 상품 찾기
   const product = products.find((p) => String(p.id) === String(id));
@@ -745,17 +767,6 @@ export default function ProductDetail() {
     }
   }, [product?.id]); // user 의존성 제거하여 더 자주 실행되도록
 
-  const handlePrevImage = () => {
-    setCurrentImageIndex(prev => 
-      prev === 0 ? (product?.images?.length || 1) - 1 : prev - 1
-    );
-  };
-
-  const handleNextImage = () => {
-    setCurrentImageIndex(prev => 
-      prev === (product?.images?.length || 1) - 1 ? 0 : prev + 1
-    );
-  };
 
   const handleImageClick = () => {
     setIsImageModalOpen(true);
@@ -774,6 +785,31 @@ export default function ProductDetail() {
     if (!touchStart || !touchEnd) return;
     
     const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+    
+    if (isLeftSwipe && currentImageIndex < (product?.images?.length || 1) - 1) {
+      setCurrentImageIndex(prev => prev + 1);
+    }
+    
+    if (isRightSwipe && currentImageIndex > 0) {
+      setCurrentImageIndex(prev => prev - 1);
+    }
+  };
+
+  // 모달 터치 스와이프 핸들러
+  const handleModalTouchStart = (e) => {
+    setModalTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleModalTouchMove = (e) => {
+    setModalTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleModalTouchEnd = () => {
+    if (!modalTouchStart || !modalTouchEnd) return;
+    
+    const distance = modalTouchStart - modalTouchEnd;
     const isLeftSwipe = distance > 50;
     const isRightSwipe = distance < -50;
     
@@ -1047,21 +1083,6 @@ export default function ProductDetail() {
               
               {images.length > 1 && (
                 <>
-                  <SliderButton 
-                    direction="prev" 
-                    onClick={handlePrevImage}
-                    style={{ display: currentImageIndex === 0 ? 'none' : 'flex' }}
-                  >
-                    <FaChevronLeft />
-                  </SliderButton>
-                  <SliderButton 
-                    direction="next" 
-                    onClick={handleNextImage}
-                    style={{ display: currentImageIndex === images.length - 1 ? 'none' : 'flex' }}
-                  >
-                    <FaChevronRight />
-                  </SliderButton>
-                  
                   <ImageCounter>
                     {currentImageIndex + 1}/{images.length}
                   </ImageCounter>
@@ -1233,11 +1254,32 @@ export default function ProductDetail() {
           <ModalCloseButton onClick={() => setIsImageModalOpen(false)}>
             <FaTimes />
           </ModalCloseButton>
-          <ModalImage 
-            src={images[currentImageIndex]} 
-            alt={`상품 이미지 ${currentImageIndex + 1}`}
+          
+          <ModalImageContainer
+            onTouchStart={handleModalTouchStart}
+            onTouchMove={handleModalTouchMove}
+            onTouchEnd={handleModalTouchEnd}
             onClick={(e) => e.stopPropagation()}
-          />
+          >
+            <ModalImageSlider 
+              imageCount={images.length}
+              currentIndex={currentImageIndex}
+            >
+              {images.map((image, index) => (
+                <ModalImage 
+                  key={index}
+                  src={image} 
+                  alt={`상품 이미지 ${index + 1}`}
+                />
+              ))}
+            </ModalImageSlider>
+            
+            {images.length > 1 && (
+              <ModalImageCounter>
+                {currentImageIndex + 1}/{images.length}
+              </ModalImageCounter>
+            )}
+          </ModalImageContainer>
         </ImageModal>
       )}
 
