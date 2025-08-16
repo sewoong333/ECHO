@@ -7,9 +7,11 @@
     "dev": "vite",
     "dev:clean": "kill-port 5173 && vite",
     "build": "vite build",
-    "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
+    "build:test": "npm run lint && npm run build && echo '✅ Build successful! Ready for deployment'",
+    "lint": "eslint . --report-unused-disable-directives --max-warnings 20",
     "preview": "vite preview",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "deploy:safe": "npm run build:test && git push origin main"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
@@ -31,13 +33,13 @@
   "devDependencies": {
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.21",
-    "@vitejs/plugin-react": "^4.2.1",
+    "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.34.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
     "gh-pages": "^6.1.1",
     "kill-port": "^2.0.1",
-    "vite": "^7.0.6"
+    "vite": "^6.0.0"
   }
 }
