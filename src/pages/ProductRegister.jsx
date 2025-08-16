@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { imageService, productService } from "../utils/firebase";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../store/UserContext";
+import { useToast } from "../store/ToastContext";
 import TopBar from "../components/TopBar";
 import { FiCamera, FiX, FiCheck } from "react-icons/fi";
 
@@ -40,11 +41,12 @@ export default function ProductRegister() {
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
+  const { addToast } = useToast();
 
   // 로그인 확인
   useEffect(() => {
     if (!user.loading && !user.isLoggedIn) {
-      alert("상품 등록을 위해 로그인이 필요합니다.");
+      addToast("상품 등록을 위해 로그인이 필요합니다.", "warning");
       navigate("/login");
     }
   }, [user.loading, user.isLoggedIn, navigate]);
@@ -53,7 +55,7 @@ export default function ProductRegister() {
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length + images.length > 10) {
-      alert("최대 10장까지만 업로드할 수 있습니다.");
+      addToast("최대 10장까지만 업로드할 수 있습니다.", "warning");
       return;
     }
     const newImages = [...images, ...files];
@@ -85,7 +87,7 @@ export default function ProductRegister() {
     
     const errorMsg = validateForm();
     if (errorMsg) {
-      alert(errorMsg);
+      addToast(errorMsg, "warning");
       return;
     }
 
@@ -117,12 +119,13 @@ export default function ProductRegister() {
       }, user.uid);
       
       setSuccess(true);
+      addToast("상품이 성공적으로 등록되었습니다!", "success");
       setTimeout(() => {
         navigate("/");
       }, 1500);
     } catch (err) {
       console.error("상품 등록 실패:", err);
-      alert("상품 등록 실패: " + err.message);
+      addToast("상품 등록 실패: " + err.message, "error");
     } finally {
       setLoading(false);
     }

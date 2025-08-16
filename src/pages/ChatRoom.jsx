@@ -310,6 +310,22 @@ const ActionButton = styled.button`
   &:hover {
     background: #f0f0f0;
   }
+  
+  &.phone-share {
+    background: linear-gradient(135deg, #2ed8b6, #26c4a8);
+    color: white;
+    border: none;
+    width: auto;
+    padding: 8px 12px;
+    border-radius: 18px;
+    font-size: 12px;
+    font-weight: 600;
+    
+    &:hover {
+      background: linear-gradient(135deg, #26c4a8, #2ed8b6);
+      transform: translateY(-1px);
+    }
+  }
 `;
 
 const MessageInput = styled.textarea`
@@ -371,6 +387,95 @@ const ErrorContainer = styled.div`
   padding: 20px;
 `;
 
+const PhoneModal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+`;
+
+const PhoneModalContent = styled.div`
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+`;
+
+const PhoneModalHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+`;
+
+const PhoneModalTitle = styled.h3`
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+`;
+
+const PhoneModalClose = styled.button`
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+`;
+
+const PhoneInput = styled.input`
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  margin-bottom: 16px;
+  
+  &:focus {
+    outline: none;
+    border-color: #2ed8b6;
+  }
+`;
+
+const PhoneModalButtons = styled.div`
+  display: flex;
+  gap: 12px;
+`;
+
+const PhoneModalButton = styled.button`
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  
+  &.cancel {
+    background: #f5f5f5;
+    color: #666;
+  }
+  
+  &.share {
+    background: #2ed8b6;
+    color: white;
+  }
+  
+  &:hover {
+    opacity: 0.9;
+  }
+`;
+
 export default function ChatRoom() {
   const navigate = useNavigate();
   const { chatRoomId } = useParams();
@@ -392,6 +497,8 @@ export default function ChatRoom() {
   const [error, setError] = useState(null);
   const [sending, setSending] = useState(false);
   const [purchaseIntentSent, setPurchaseIntentSent] = useState(false);
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
+  const [userPhone, setUserPhone] = useState("");
   const messagesEndRef = useRef(null);
   const messageInputRef = useRef(null);
 
@@ -501,6 +608,31 @@ export default function ChatRoom() {
       setError("메시지 전송에 실패했습니다. 다시 시도해주세요.");
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleSharePhone = async () => {
+    if (!userPhone.trim()) {
+      setError("전화번호를 입력해주세요.");
+      return;
+    }
+    
+    // 전화번호 형식 검증 (간단한 형식)
+    const phoneRegex = /^[0-9-]{10,15}$/;
+    if (!phoneRegex.test(userPhone.replace(/[^0-9-]/g, ''))) {
+      setError("올바른 전화번호 형식이 아닙니다.");
+      return;
+    }
+    
+    try {
+      const phoneMessage = `💁‍♀️ 연락처를 공유합니다.\n📞 전화번호: ${userPhone}\n\n거래 관련 문의사항은 언제든지 연락주세요!`;
+      await sendMessage(chatRoomId, phoneMessage);
+      setShowPhoneModal(false);
+      setUserPhone("");
+      setError(null);
+    } catch (error) {
+      console.error("전화번호 공유 실패:", error);
+      setError("전화번호 공유에 실패했습니다. 다시 시도해주세요.");
     }
   };
 
@@ -706,8 +838,13 @@ export default function ChatRoom() {
           <ActionButton>
             <FaImage />
           </ActionButton>
-          <ActionButton>
-            <FaPlus />
+          <ActionButton 
+            className="phone-share"
+            onClick={() => setShowPhoneModal(true)}
+            title="전화번호 공유하기"
+          >
+            <FaPhone />
+            번호 공유
           </ActionButton>
         </InputActions>
         <InputWrapper>
@@ -727,6 +864,47 @@ export default function ChatRoom() {
           </SendButton>
         </InputWrapper>
       </InputContainer>
+
+      {/* 전화번호 공유 모달 */}
+      {showPhoneModal && (
+        <PhoneModal onClick={() => setShowPhoneModal(false)}>
+          <PhoneModalContent onClick={(e) => e.stopPropagation()}>
+            <PhoneModalHeader>
+              <PhoneModalTitle>전화번호 공유하기</PhoneModalTitle>
+              <PhoneModalClose onClick={() => setShowPhoneModal(false)}>
+                <FaTimes />
+              </PhoneModalClose>
+            </PhoneModalHeader>
+            
+            <PhoneInput
+              type="tel"
+              placeholder="010-1234-5678"
+              value={userPhone}
+              onChange={(e) => setUserPhone(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleSharePhone();
+                }
+              }}
+            />
+            
+            <PhoneModalButtons>
+              <PhoneModalButton 
+                className="cancel"
+                onClick={() => setShowPhoneModal(false)}
+              >
+                취소
+              </PhoneModalButton>
+              <PhoneModalButton 
+                className="share"
+                onClick={handleSharePhone}
+              >
+                공유하기
+              </PhoneModalButton>
+            </PhoneModalButtons>
+          </PhoneModalContent>
+        </PhoneModal>
+      )}
     </Container>
   );
 }

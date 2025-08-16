@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import styled from "styled-components";
 import { UserContext } from "../store/UserContext";
+import { useToast } from "../store/ToastContext";
 import { useNavigate } from "react-router-dom";
 import {
   FiMail,
@@ -160,6 +161,7 @@ export default function Signup() {
     verificationCode: "",
   });
   const { user, signupWithEmail } = useContext(UserContext);
+  const { addToast } = useToast();
   const navigate = useNavigate();
 
   // 비밀번호 유효성 검사
@@ -198,9 +200,11 @@ export default function Signup() {
         verificationCode,
       }));
       setSuccess("인증번호가 발송되었습니다. 3분 이내에 입력해주세요.");
+      addToast("인증번호가 발송되었습니다!", "success");
       setError("");
     } catch (err) {
       setError("인증번호 발송에 실패했습니다. " + err.message);
+      addToast("인증번호 발송에 실패했습니다.", "error");
     }
   };
 
@@ -210,9 +214,11 @@ export default function Signup() {
     if (phoneVerification.code === phoneVerification.verificationCode) {
       setPhoneVerification((prev) => ({ ...prev, verified: true }));
       setSuccess("휴대폰 인증이 완료되었습니다.");
+      addToast("휴대폰 인증이 완료되었습니다!", "success");
       setError("");
     } else {
       setError("인증번호가 일치하지 않습니다.");
+      addToast("인증번호가 일치하지 않습니다.", "error");
     }
   };
 

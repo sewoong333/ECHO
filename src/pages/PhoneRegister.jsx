@@ -251,7 +251,7 @@ const SuccessBox = styled.div`
 
 export default function PhoneRegister() {
   const navigate = useNavigate();
-  const { user, updateUserProfile } = useContext(UserContext);
+  const { updateUserProfile } = useContext(UserContext);
   const { showSuccess, showError } = useToast();
   
   const [step, setStep] = useState(1); // 1: 전화번호 입력, 2: 인증코드 입력

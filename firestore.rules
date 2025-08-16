@@ -50,7 +50,7 @@ service cloud.firestore {
       allow read: if true;
       
       // 생성: 인증된 사용자만 상품 등록 가능
-      allow create: if isAuthenticated();
+      allow create: if isAuthenticated() && validateProductData();
       
       // 수정: 상품 소유자만 수정 가능
       allow update: if isOwner(resource.data.sellerId) && 

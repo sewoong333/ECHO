@@ -23,8 +23,6 @@ const GuitarTuner = lazy(() => import("../pages/GuitarTuner"));
 const BassTuner = lazy(() => import("../pages/BassTuner"));
 const SalesHistory = lazy(() => import("../pages/SalesHistory"));
 const EchoShare = lazy(() => import("../pages/EchoShare"));
-const PaymentSuccess = lazy(() => import("../pages/PaymentSuccess"));
-const PaymentFail = lazy(() => import("../pages/PaymentFail"));
 const WishList = lazy(() => import("../pages/WishList"));
 const PhoneRegister = lazy(() => import("../pages/PhoneRegister"));
 
@@ -92,8 +90,6 @@ export default function AppRouter() {
         <Route path="/tuner/guitar" element={<GuitarTuner />} />
         <Route path="/tuner/bass" element={<BassTuner />} />
         <Route path="/echo-share" element={<EchoShare />} />
-        <Route path="/payment/success" element={<PaymentSuccess />} />
-        <Route path="/payment/fail" element={<PaymentFail />} />
         <Route path="/wishlist" element={<WishList />} />
         <Route path="/profile/phone" element={<PhoneRegister />} />
       </Routes>

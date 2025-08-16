@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import styled from "styled-components";
 import { UserContext } from "../store/UserContext";
+import { useToast } from "../store/ToastContext";
 import { useNavigate, Link } from "react-router-dom";
 import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
@@ -258,6 +259,7 @@ const LoadingText = styled.div`
 
 export default function Login() {
   const { user, loginWithEmail } = useContext(UserContext);
+  const { addToast } = useToast();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -308,21 +310,17 @@ export default function Login() {
 
     switch (error.code) {
       case "auth/popup-blocked":
-        alert(
-          "팝업이 차단되어 구글 로그인을 진행할 수 없습니다. 브라우저의 팝업 차단을 해제해 주세요.",
-        );
+        addToast("팝업이 차단되었습니다. 브라우저 설정을 확인해주세요.", "error");
         break;
       case "auth/cancelled-popup-request":
       case "auth/popup-closed-by-user":
         console.log("Login popup was cancelled by user");
         break;
       case "auth/unauthorized-domain":
-        alert(
-          "현재 도메인에서 구글 로그인이 허용되지 않았습니다. 개발자에게 문의해주세요.",
-        );
+        addToast("현재 도메인에서 구글 로그인이 허용되지 않습니다.", "error");
         break;
       default:
-        alert(`구글 로그인 중 오류가 발생했습니다. (${error.code})`);
+        addToast(`로그인 중 오류가 발생했습니다. (${error.code})`, "error");
     }
   };
 
@@ -340,27 +338,15 @@ export default function Login() {
 
       if (result.user) {
         console.log("Redirecting to main page...");
-        window.location.href = "/"; // 강제 리다이렉트
+        addToast("로그인이 완료되었습니다!", "success");
+        setTimeout(() => {
+          window.location.href = "/"; // 강제 리다이렉트
+        }, 1000);
       }
     } catch (error) {
       console.error("Google login error:", error);
 
-      if (error.code === "auth/popup-blocked") {
-        alert(
-          "팝업이 차단되어 구글 로그인을 진행할 수 없습니다. 브라우저의 팝업 차단을 해제해 주세요.",
-        );
-      } else if (
-        error.code === "auth/cancelled-popup-request" ||
-        error.code === "auth/popup-closed-by-user"
-      ) {
-        console.log("Login popup was cancelled by user");
-      } else if (error.code === "auth/unauthorized-domain") {
-        alert(
-          "현재 도메인에서 구글 로그인이 허용되지 않았습니다. 개발자에게 문의해주세요.",
-        );
-      } else {
-        alert(`구글 로그인 중 오류가 발생했습니다. (${error.code})`);
-      }
+      handleAuthError(error);
     } finally {
       setIsLoading(false);
     }
@@ -376,10 +362,22 @@ export default function Login() {
     try {
       await loginWithEmail(formData);
       console.log("Email login successful, redirecting...");
-      window.location.href = "/"; // 강제 리다이렉트
+      addToast("로그인이 완료되었습니다!", "success");
+      setTimeout(() => {
+        window.location.href = "/"; // 강제 리다이렉트
+      }, 1000);
     } catch (error) {
       console.error("Login error:", error);
-      setError("로그인에 실패했습니다: " + error.message);
+      const errorMsg = error.code === "auth/user-not-found" 
+        ? "등록되지 않은 이메일입니다." 
+        : error.code === "auth/wrong-password"
+        ? "비밀번호가 올바르지 않습니다."
+        : error.code === "auth/invalid-email"
+        ? "올바른 이메일 형식이 아닙니다."
+        : "로그인에 실패했습니다.";
+      
+      setError(errorMsg);
+      addToast(errorMsg, "error");
     } finally {
       setIsLoading(false);
     }
@@ -450,14 +448,22 @@ export default function Login() {
         Google로 로그인
       </SocialLoginButton>
 
-      <SocialLoginButton className="kakao">
+      <SocialLoginButton 
+        className="kakao" 
+        disabled={true}
+        style={{ opacity: 0.5, cursor: 'not-allowed' }}
+      >
         <SiKakaotalk size={24} />
-        카카오로 로그인
+        카카오로 로그인 (준비중)
       </SocialLoginButton>
 
-      <SocialLoginButton className="naver">
+      <SocialLoginButton 
+        className="naver"
+        disabled={true}
+        style={{ opacity: 0.5, cursor: 'not-allowed' }}
+      >
         <FaN size={24} />
-        네이버로 로그인
+        네이버로 로그인 (준비중)
       </SocialLoginButton>
 
       <SignupLink>

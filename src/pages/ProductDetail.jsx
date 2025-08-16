@@ -6,7 +6,6 @@ import { UserContext } from "../store/UserContext";
 import { ChatContext } from "../store/ChatContext";
 import { useToast } from "../store/ToastContext";
 import { productService } from "../utils/firebase";
-import PaymentModal from "../components/PaymentModal";
 import {
   FaHeart,
   FaRegHeart,
@@ -18,7 +17,6 @@ import {
   FaMapMarkerAlt,
   FaEye,
   FaComments,
-  FaShoppingCart,
   FaUser,
   FaCheckCircle,
   FaStore,
@@ -102,51 +100,90 @@ const IconButton = styled.button`
   }
 `;
 
-// 새로운 상단 액션바 스타일 컴포넌트들
-const TopActionBar = styled.div`
+// 하단 액션바 스타일 컴포넌트들
+const BottomActionBar = styled.div`
   position: fixed;
-  top: 56px;
+  bottom: 90px; /* 하단 네비게이션 바 위에 위치 */
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
   max-width: 500px;
-  height: 60px;
-  background: var(--color-bg-glass, rgba(255, 255, 255, 0.85));
+  height: 70px;
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   display: flex;
   align-items: center;
-  gap: var(--space-3, 12px);
-  padding: 0 var(--space-4, 16px);
+  gap: 12px;
+  padding: 0 20px;
   z-index: 99;
-  border-bottom: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.06));
-  box-shadow: var(--shadow-lg, 0 8px 32px rgba(0, 0, 0, 0.08));
+  border-top: 1px solid rgba(46, 216, 182, 0.1);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+  border-radius: 20px 20px 0 0;
 `;
 
-const TopLikeButton = styled.button`
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-full, 50%);
-  border: none;
-  background: ${props => props.liked ? 'var(--color-mint-main, #2ed8b6)' : 'var(--color-bg-primary, #ffffff)'};
-  color: ${props => props.liked ? 'white' : 'var(--color-text-secondary, #6b7280)'};
+const LikeButton = styled.button`
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid ${props => props.liked ? '#2ed8b6' : '#e0e0e0'};
+  background: ${props => props.liked ? '#2ed8b6' : 'white'};
+  color: ${props => props.liked ? 'white' : '#666'};
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
   cursor: pointer;
-  transition: all var(--transition-normal, 0.2s ease);
-  box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.08));
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  
+  &:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 24px rgba(46, 216, 182, 0.3);
+    border-color: #2ed8b6;
+    color: ${props => props.liked ? 'white' : '#2ed8b6'};
+  }
+  
+  &:active {
+    transform: translateY(0) scale(1);
+  }
+`;
+
+const ChatButton = styled.button`
+  flex: 1;
+  height: 56px;
+  border-radius: 28px;
+  border: none;
+  background: linear-gradient(135deg, #2ed8b6 0%, #26c4a8 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(46, 216, 182, 0.4);
   position: relative;
   overflow: hidden;
   
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg, 0 8px 32px rgba(0, 0, 0, 0.12));
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(46, 216, 182, 0.5);
+    background: linear-gradient(135deg, #26c4a8 0%, #2ed8b6 100%);
   }
   
   &:active {
-    transform: translateY(0);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(46, 216, 182, 0.4);
+  }
+  
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 4px 12px rgba(46, 216, 182, 0.3);
   }
   
   &::before {
@@ -157,79 +194,36 @@ const TopLikeButton = styled.button`
     width: 100%;
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transition: left 0.5s;
+    transition: left 0.8s ease;
   }
   
   &:hover::before {
     left: 100%;
   }
-`;
-
-const TopActionButton = styled.button`
-  flex: 1;
-  height: 48px;
-  border-radius: var(--radius-2xl, 24px);
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2, 8px);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition-normal, 0.2s ease);
-  position: relative;
-  overflow: hidden;
   
-  &.chat {
-    background: var(--color-bg-primary, #ffffff);
-    color: var(--color-text-primary, #1a1a1a);
-    box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.08));
-    
-    &:hover {
-      background: var(--color-bg-secondary, #f8f9fa);
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.12));
-    }
-    
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-  }
-  
-  &.buy {
-    background: linear-gradient(135deg, var(--color-mint-main, #2ed8b6), var(--color-mint-dark, #26c4a8));
-    color: white;
-    box-shadow: var(--shadow-md, 0 4px 16px rgba(46, 216, 182, 0.3));
-    
-    &:hover {
-      background: linear-gradient(135deg, var(--color-mint-dark, #26c4a8), var(--color-mint-main, #2ed8b6));
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-lg, 0 8px 24px rgba(46, 216, 182, 0.4));
-    }
-  }
-  
-  &::before {
+  /* 글로우 효과 */
+  &::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.6s;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, #2ed8b6, #26c4a8);
+    border-radius: 30px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
   }
   
-  &:hover::before {
-    left: 100%;
+  &:hover::after {
+    opacity: 0.7;
   }
 `;
 
 const ImageSection = styled.div`
   position: relative;
-  margin-top: 116px; /* 56px(헤더) + 60px(액션바) */
+  margin-top: 56px; /* 헤더 높이만큼만 */
   padding: 16px;
   background: #fff;
 `;
@@ -693,7 +687,6 @@ export default function ProductDetail() {
   const [creatingChat, setCreatingChat] = useState(false);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   // 상품 찾기
   const product = products.find((p) => String(p.id) === String(id));
@@ -873,32 +866,6 @@ export default function ProductDetail() {
     }
   };
 
-  const handleBuy = async () => {
-    if (!user?.isLoggedIn) {
-      showWarning('로그인이 필요합니다.', {
-        title: '로그인 필요'
-      });
-      navigate('/login');
-      return;
-    }
-    
-    if (product.sellerId === user.uid) {
-      showWarning('본인 상품은 구매할 수 없습니다.', {
-        title: '구매 불가'
-      });
-      return;
-    }
-    
-    if (product.status !== PRODUCT_STATUS.ACTIVE) {
-      showError('이미 판매가 완료된 상품입니다.', {
-        title: '판매 완료'
-      });
-      return;
-    }
-    
-    // 결제 모달 열기
-    setShowPaymentModal(true);
-  };
 
   // 옵션 메뉴 핸들러
   const handleOptionsMenu = (e) => {
@@ -934,40 +901,6 @@ export default function ProductDetail() {
     setShowOptionsMenu(false);
   };
 
-  const handlePaymentSuccess = async (_paymentData) => {
-    try {
-      // 결제 성공 후 상품 상태 변경
-      await changeProductStatus(product.id, PRODUCT_STATUS.SOLD);
-      
-      // 채팅방 생성 및 결제 완료 알림
-      const chatRoomId = await createOrGetChatRoom(
-        product.id,
-        product.sellerId,
-        user.uid,
-        {
-          title: product.title,
-          price: product.price,
-          images: product.images,
-          status: PRODUCT_STATUS.SOLD
-        }
-      );
-      
-      setShowPaymentModal(false);
-      showSuccess('결제가 완료되었습니다! 판매자와 연락하여 거래를 진행해 주세요.');
-      
-      // 채팅방으로 이동
-      navigate(`/chat/${chatRoomId}?payment=success`);
-      
-    } catch (error) {
-      console.error('결제 후 처리 실패:', error);
-      showError('결제는 완료되었지만 후속 처리 중 오류가 발생했습니다.');
-    }
-  };
-
-  const handlePaymentError = (error) => {
-    setShowPaymentModal(false);
-    showError(error.message || '결제 중 오류가 발생했습니다.');
-  };
 
   const getConditionText = (condition) => {
     const conditions = {
@@ -1275,33 +1208,24 @@ export default function ProductDetail() {
         </>
       )}
 
-      {/* 새로운 상단 액션바 */}
-      <TopActionBar>
-        <TopLikeButton 
+      {/* 하단 액션바 */}
+      <BottomActionBar>
+        <LikeButton 
           onClick={handleLike}
           liked={isLiked}
           aria-label="찜하기"
         >
           {isLiked ? <FaHeart /> : <FaRegHeart />}
-        </TopLikeButton>
+        </LikeButton>
         
-        <TopActionButton 
-          className="chat"
+        <ChatButton 
           onClick={handleChat}
           disabled={creatingChat}
         >
           <FaRegCommentDots />
-          {creatingChat ? '생성 중...' : '채팅하기'}
-        </TopActionButton>
-        
-        <TopActionButton 
-          className="buy"
-          onClick={handleBuy}
-        >
-          <FaShoppingCart />
-          구매하기
-        </TopActionButton>
-      </TopActionBar>
+          {creatingChat ? '채팅 생성 중...' : '채팅으로 거래하기'}
+        </ChatButton>
+      </BottomActionBar>
 
       {/* 이미지 확대 모달 */}
       {isImageModalOpen && (
@@ -1317,14 +1241,6 @@ export default function ProductDetail() {
         </ImageModal>
       )}
 
-      {/* 결제 모달 */}
-      <PaymentModal
-        isOpen={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
-        product={product}
-        onPaymentSuccess={handlePaymentSuccess}
-        onPaymentError={handlePaymentError}
-      />
     </Container>
   );
 }
