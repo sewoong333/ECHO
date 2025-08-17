@@ -126,6 +126,7 @@ const OptionSection = styled.section`
   margin: 0 auto 2.2rem auto;
   padding: 0 10px;
   box-sizing: border-box;
+  overflow: hidden;
 `;
 
 const OptionCardRow = styled.div`
@@ -133,6 +134,7 @@ const OptionCardRow = styled.div`
   gap: 0.7rem;
   margin-bottom: 1.2rem;
   flex-wrap: wrap;
+  overflow: hidden;
 `;
 
 const OptionCard = styled.button`
@@ -157,7 +159,9 @@ const OptionCard = styled.button`
     box-shadow 0.18s,
     transform 0.18s;
   outline: ${({ active }) => (active ? "2px solid #26c4a8" : "none")};
-  transform: ${({ active }) => (active ? "scale(1.06)" : "scale(1)")};
+  transform: ${({ active }) => (active ? "scale(1.02)" : "scale(1)")};
+  transform-origin: center;
+  will-change: transform;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -165,7 +169,7 @@ const OptionCard = styled.button`
   &:hover {
     background: linear-gradient(90deg, #2ed8b6 60%, #26c4a8 100%);
     color: #fff;
-    transform: scale(1.06);
+    transform: scale(1.02);
     box-shadow: 0 8px 28px rgba(46, 216, 182, 0.22);
   }
 `;
