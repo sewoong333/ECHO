@@ -934,7 +934,7 @@ const EmptyState = styled.div`
 const FAB = styled.button`
   position: fixed;
   bottom: 80px; /* 하단 네비게이션 바(64px) + 여백(16px) */
-  right: calc(50vw - 250px + 5px); /* 리스트 섹션(500px) 우측 끝에서 5px 안쪽 */
+  right: calc(50vw - 250px + 20px); /* 리스트 섹션(500px) 우측 끝에서 20px 안쪽 */
   width: 60px;
   height: 60px;
   border-radius: 50%;
@@ -985,8 +985,8 @@ const FAB = styled.button`
   
   /* 모바일에서는 화면 우측 기준으로 */
   @media (max-width: 500px) {
-    right: var(--space-lg);
-    bottom: 75px;
+    right: 20px !important;
+    bottom: 80px !important;
   }
 `;
 

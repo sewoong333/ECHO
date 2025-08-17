@@ -1,4 +1,5 @@
 import React, { useContext, useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import styled from "styled-components";
 import { FaSearch, FaBell, FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -263,7 +264,7 @@ export default function TopBar() {
               <path d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </IconBtn>
-          {menuOpen && (
+          {menuOpen && createPortal(
             <div
               data-dropdown-menu
               style={{
@@ -274,7 +275,7 @@ export default function TopBar() {
                 border: "1.5px solid #eee",
                 borderRadius: 10,
                 boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-                zIndex: 9999,
+                zIndex: 999999,
                 minWidth: 140,
                 padding: "8px 0",
                 display: "flex",
@@ -318,7 +319,8 @@ export default function TopBar() {
               >
                 🎸 베이스 튜너
               </button>
-            </div>
+            </div>,
+            document.body
           )}
           <IconBtn>
             <FaSearch size={20} />
