@@ -1,6 +1,6 @@
 import { productService } from './firebase';
 
-// 실제 사용자들이 볼 수 있는 상품 데이터
+// 실제 소비자들이 거래할 수 있는 상품 데이터 (더미가 아닌 실제 데이터)
 const realProducts = [
   {
     title: '야마하 FG800 통기타',

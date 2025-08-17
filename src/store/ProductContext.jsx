@@ -122,11 +122,12 @@ export function ProductProvider({ children }) {
 
         const result = await productService.getProducts(options);
 
-        // Firebase에서 상품이 없으면 더미 데이터 사용 (개발/데모용)
+        // 소비자 사용을 위해 Firebase 데이터만 사용 (더미 데이터 제거)
         let finalProducts = result.products;
+        
+        // 실제 사용자를 위한 초기 데이터가 필요한 경우 Firebase에 직접 추가
         if (result.products.length === 0 && resetList) {
-          console.log("📦 Firebase에 상품이 없어서 더미 데이터 로드");
-          finalProducts = loadDummyProductsForDev();
+          console.log("📦 Firebase에 상품이 없습니다. 관리자가 상품을 추가해주세요.");
         }
 
         if (resetList) {

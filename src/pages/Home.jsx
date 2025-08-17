@@ -11,6 +11,7 @@ import TopBar from "../components/TopBar";
 import { ProductContext } from "../store/ProductContext";
 import { UserContext } from "../store/UserContext";
 import { INSTRUMENT_CATEGORIES, REGIONS } from "../utils/firebase";
+// 개발 시에만 사용 - 브라우저 콘솔에서 window.addRealProducts() 실행
 import { addRealProductsToFirebase } from "../utils/addRealData";
 import {
   FaHeart,
@@ -1068,6 +1069,13 @@ export default function Home() {
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [recentSearches, setRecentSearches] = useState([]);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+
+  // 개발자 도구용 - 소비자가 직접 사용하지 않음
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.addRealProducts = addRealProductsToFirebase;
+    }
+  }, []);
   const [tempFilters, setTempFilters] = useState(filters);
   const [sortBy, setSortBy] = useState('latest');
   
@@ -1449,20 +1457,6 @@ export default function Home() {
               <EmptyButton onClick={() => navigate('/add')}>
                 <FaPlus />
                 상품 등록하기
-              </EmptyButton>
-              <EmptyButton 
-                onClick={async () => {
-                  try {
-                    await addRealProductsToFirebase();
-                    window.location.reload();
-                  } catch (error) {
-                    console.error('데이터 추가 실패:', error);
-                  }
-                }}
-                style={{ backgroundColor: '#2ed8b6', marginTop: '10px' }}
-              >
-                <FaPlus />
-                실제 상품 데이터 추가 (개발용)
               </EmptyButton>
             </EmptyState>
           ) : (
