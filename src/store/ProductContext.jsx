@@ -124,87 +124,87 @@ export function ProductProvider({ children }) {
     }
   }, [loading, hasMore, loadProducts]);
 
-  // 실시간 데이터 구독 (사용자 상태와 관계없이)
-  useEffect(() => {
-    console.log("👂 실시간 상품 구독 시작...");
+  // 실시간 데이터 구독 비활성화 - 데이터 로딩 충돌 방지
+  // useEffect(() => {
+  //   console.log("👂 실시간 상품 구독 시작...");
 
-    const unsubscribe = subscriptionService.subscribeToProducts(
-      (realtimeProducts) => {
-        console.log("🔄 실시간 업데이트:", realtimeProducts.length, "개");
+  //   const unsubscribe = subscriptionService.subscribeToProducts(
+  //     (realtimeProducts) => {
+  //       console.log("🔄 실시간 업데이트:", realtimeProducts.length, "개");
 
-        // 실시간 업데이트된 상품들을 필터링하여 반영
-        setProducts((prevProducts) => {
-          console.log("📋 현재 상품 수:", prevProducts.length);
+  //       // 실시간 업데이트된 상품들을 필터링하여 반영
+  //       setProducts((prevProducts) => {
+  //         console.log("📋 현재 상품 수:", prevProducts.length);
           
-          // 실시간으로 받은 상품들을 생성시간 기준으로 정렬 (최신순)
-          let filteredProducts = [...realtimeProducts].sort((a, b) => {
-            const timeA = a.createdAt?.toDate?.() || new Date(a.createdAt) || new Date();
-            const timeB = b.createdAt?.toDate?.() || new Date(b.createdAt) || new Date();
-            return timeB - timeA; // 최신 순으로 정렬
-          });
+  //         // 실시간으로 받은 상품들을 생성시간 기준으로 정렬 (최신순)
+  //         let filteredProducts = [...realtimeProducts].sort((a, b) => {
+  //           const timeA = a.createdAt?.toDate?.() || new Date(a.createdAt) || new Date();
+  //           const timeB = b.createdAt?.toDate?.() || new Date(b.createdAt) || new Date();
+  //           return timeB - timeA; // 최신 순으로 정렬
+  //         });
 
-          // 현재 적용된 필터들로 클라이언트 사이드 필터링
-          if (filters.category) {
-            filteredProducts = filteredProducts.filter(p => p.category === filters.category);
-          }
+  //         // 현재 적용된 필터들로 클라이언트 사이드 필터링
+  //         if (filters.category) {
+  //           filteredProducts = filteredProducts.filter(p => p.category === filters.category);
+  //         }
 
-          if (filters.region) {
-            filteredProducts = filteredProducts.filter(p => p.region === filters.region);
-          }
+  //         if (filters.region) {
+  //           filteredProducts = filteredProducts.filter(p => p.region === filters.region);
+  //         }
 
-          if (filters.condition) {
-            filteredProducts = filteredProducts.filter(p => p.condition === filters.condition);
-          }
+  //         if (filters.condition) {
+  //           filteredProducts = filteredProducts.filter(p => p.condition === filters.condition);
+  //         }
 
-          if (filters.priceMin) {
-            filteredProducts = filteredProducts.filter(p => p.price >= parseInt(filters.priceMin));
-          }
+  //         if (filters.priceMin) {
+  //           filteredProducts = filteredProducts.filter(p => p.price >= parseInt(filters.priceMin));
+  //         }
 
-          if (filters.priceMax) {
-            filteredProducts = filteredProducts.filter(p => p.price <= parseInt(filters.priceMax));
-          }
+  //         if (filters.priceMax) {
+  //           filteredProducts = filteredProducts.filter(p => p.price <= parseInt(filters.priceMax));
+  //         }
 
-          if (filters.searchQuery && filters.searchQuery.trim()) {
-            const searchLower = filters.searchQuery.toLowerCase();
-            filteredProducts = filteredProducts.filter(p => 
-              p.title?.toLowerCase().includes(searchLower) ||
-              p.description?.toLowerCase().includes(searchLower)
-            );
-          }
+  //         if (filters.searchQuery && filters.searchQuery.trim()) {
+  //           const searchLower = filters.searchQuery.toLowerCase();
+  //           filteredProducts = filteredProducts.filter(p => 
+  //             p.title?.toLowerCase().includes(searchLower) ||
+  //             p.description?.toLowerCase().includes(searchLower)
+  //           );
+  //         }
 
-          // 삭제된 상품 제거 (하지만 ACTIVE가 아닌 상품도 일단 포함)
-          filteredProducts = filteredProducts.filter((product) => 
-            product.status !== PRODUCT_STATUS.DELETED && 
-            product.status !== PRODUCT_STATUS.SUSPENDED
-          );
+  //         // 삭제된 상품 제거 (하지만 ACTIVE가 아닌 상품도 일단 포함)
+  //         filteredProducts = filteredProducts.filter((product) => 
+  //           product.status !== PRODUCT_STATUS.DELETED && 
+  //           product.status !== PRODUCT_STATUS.SUSPENDED
+  //         );
 
-          // 정렬 적용
-          switch (filters.sortBy) {
-            case "price_low":
-              filteredProducts.sort((a, b) => a.price - b.price);
-              break;
-            case "price_high":
-              filteredProducts.sort((a, b) => b.price - a.price);
-              break;
-            case "popular":
-              filteredProducts.sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0));
-              break;
-            // latest는 이미 정렬됨
-          }
+  //         // 정렬 적용
+  //         switch (filters.sortBy) {
+  //           case "price_low":
+  //             filteredProducts.sort((a, b) => a.price - b.price);
+  //             break;
+  //           case "price_high":
+  //             filteredProducts.sort((a, b) => b.price - a.price);
+  //             break;
+  //           case "popular":
+  //             filteredProducts.sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0));
+  //             break;
+  //           // latest는 이미 정렬됨
+  //         }
           
-          console.log("✅ 필터링된 상품 수:", filteredProducts.length);
-          console.log("🔍 적용된 필터:", filters);
-          return filteredProducts;
-        });
-      },
-      { category: filters.category },
-    );
+  //         console.log("✅ 필터링된 상품 수:", filteredProducts.length);
+  //         console.log("🔍 적용된 필터:", filters);
+  //         return filteredProducts;
+  //       });
+  //     },
+  //     { category: filters.category },
+  //   );
 
-    return () => {
-      console.log("👋 실시간 구독 해제");
-      unsubscribe();
-    };
-  }, [filters]); // 모든 필터가 변경될 때 다시 구독
+  //   return () => {
+  //     console.log("👋 실시간 구독 해제");
+  //     unsubscribe();
+  //   };
+  // }, [filters]); // 모든 필터가 변경될 때 다시 구독
 
   // 사용자별 상품 로드
   const loadUserProducts = useCallback(
