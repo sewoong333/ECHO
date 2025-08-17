@@ -11,6 +11,7 @@ import TopBar from "../components/TopBar";
 import { ProductContext } from "../store/ProductContext";
 import { UserContext } from "../store/UserContext";
 import { INSTRUMENT_CATEGORIES, REGIONS } from "../utils/firebase";
+import { addRealProductsToFirebase } from "../utils/addRealData";
 import {
   FaHeart,
   FaRegHeart,
@@ -1448,6 +1449,20 @@ export default function Home() {
               <EmptyButton onClick={() => navigate('/add')}>
                 <FaPlus />
                 상품 등록하기
+              </EmptyButton>
+              <EmptyButton 
+                onClick={async () => {
+                  try {
+                    await addRealProductsToFirebase();
+                    window.location.reload();
+                  } catch (error) {
+                    console.error('데이터 추가 실패:', error);
+                  }
+                }}
+                style={{ backgroundColor: '#2ed8b6', marginTop: '10px' }}
+              >
+                <FaPlus />
+                실제 상품 데이터 추가 (개발용)
               </EmptyButton>
             </EmptyState>
           ) : (

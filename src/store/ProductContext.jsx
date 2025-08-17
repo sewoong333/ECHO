@@ -41,6 +41,70 @@ export function ProductProvider({ children }) {
 
   const { user } = useContext(UserContext);
 
+  // 필터링 및 정렬 적용 함수
+  const applyFiltersAndSort = useCallback((productList, currentFilters) => {
+    let filteredProducts = [...productList];
+
+    // 삭제된 상품 제거
+    filteredProducts = filteredProducts.filter((product) => 
+      product.status !== PRODUCT_STATUS.DELETED && 
+      product.status !== PRODUCT_STATUS.SUSPENDED
+    );
+
+    // 필터 적용
+    if (currentFilters.category) {
+      filteredProducts = filteredProducts.filter(p => p.category === currentFilters.category);
+    }
+
+    if (currentFilters.region) {
+      filteredProducts = filteredProducts.filter(p => p.region === currentFilters.region);
+    }
+
+    if (currentFilters.condition) {
+      filteredProducts = filteredProducts.filter(p => p.condition === currentFilters.condition);
+    }
+
+    if (currentFilters.priceMin) {
+      filteredProducts = filteredProducts.filter(p => p.price >= parseInt(currentFilters.priceMin));
+    }
+
+    if (currentFilters.priceMax) {
+      filteredProducts = filteredProducts.filter(p => p.price <= parseInt(currentFilters.priceMax));
+    }
+
+    if (currentFilters.searchQuery && currentFilters.searchQuery.trim()) {
+      const searchLower = currentFilters.searchQuery.toLowerCase();
+      filteredProducts = filteredProducts.filter(p => 
+        p.title?.toLowerCase().includes(searchLower) ||
+        p.description?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // 정렬 적용
+    switch (currentFilters.sortBy) {
+      case "price_low":
+        filteredProducts.sort((a, b) => a.price - b.price);
+        break;
+      case "price_high":
+        filteredProducts.sort((a, b) => b.price - a.price);
+        break;
+      case "popular":
+        filteredProducts.sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0));
+        break;
+      case "latest":
+      default:
+        // 최신순 정렬 (기본값)
+        filteredProducts.sort((a, b) => {
+          const timeA = a.createdAt?.toDate?.() || new Date(a.createdAt) || new Date();
+          const timeB = b.createdAt?.toDate?.() || new Date(b.createdAt) || new Date();
+          return timeB - timeA;
+        });
+        break;
+    }
+
+    return filteredProducts;
+  }, []);
+
   // 초기 상품 로드
   const loadProducts = useCallback(
     async (resetList = false) => {
@@ -124,87 +188,73 @@ export function ProductProvider({ children }) {
     }
   }, [loading, hasMore, loadProducts]);
 
-  // 실시간 데이터 구독 비활성화 - 데이터 로딩 충돌 방지
-  // useEffect(() => {
-  //   console.log("👂 실시간 상품 구독 시작...");
+  // 실시간 데이터 구독 - 초기 로드 완료 후에만 활성화
+  useEffect(() => {
+    // 초기 로드가 완료되지 않았으면 구독하지 않음
+    if (loading && products.length === 0) {
+      console.log("⏳ 초기 로드 대기 중... 실시간 구독 연기");
+      return;
+    }
 
-  //   const unsubscribe = subscriptionService.subscribeToProducts(
-  //     (realtimeProducts) => {
-  //       console.log("🔄 실시간 업데이트:", realtimeProducts.length, "개");
+    console.log("👂 실시간 상품 구독 시작... (초기 데이터:", products.length, "개)");
 
-  //       // 실시간 업데이트된 상품들을 필터링하여 반영
-  //       setProducts((prevProducts) => {
-  //         console.log("📋 현재 상품 수:", prevProducts.length);
+    const unsubscribe = subscriptionService.subscribeToProducts(
+      (realtimeProducts) => {
+        console.log("🔄 실시간 업데이트:", realtimeProducts.length, "개");
+
+        // 실시간 업데이트는 기존 데이터와 병합하여 처리
+        setProducts((prevProducts) => {
+          console.log("📋 현재 상품 수:", prevProducts.length);
           
-  //         // 실시간으로 받은 상품들을 생성시간 기준으로 정렬 (최신순)
-  //         let filteredProducts = [...realtimeProducts].sort((a, b) => {
-  //           const timeA = a.createdAt?.toDate?.() || new Date(a.createdAt) || new Date();
-  //           const timeB = b.createdAt?.toDate?.() || new Date(b.createdAt) || new Date();
-  //           return timeB - timeA; // 최신 순으로 정렬
-  //         });
+          // 기존 상품이 없으면 실시간 데이터를 그대로 사용
+          if (prevProducts.length === 0) {
+            console.log("🆕 초기 상품 없음 - 실시간 데이터로 초기화");
+            let filteredProducts = [...realtimeProducts];
+            
+            // 필터링 및 정렬 적용 후 반환
+            return applyFiltersAndSort(filteredProducts, filters);
+          }
 
-  //         // 현재 적용된 필터들로 클라이언트 사이드 필터링
-  //         if (filters.category) {
-  //           filteredProducts = filteredProducts.filter(p => p.category === filters.category);
-  //         }
-
-  //         if (filters.region) {
-  //           filteredProducts = filteredProducts.filter(p => p.region === filters.region);
-  //         }
-
-  //         if (filters.condition) {
-  //           filteredProducts = filteredProducts.filter(p => p.condition === filters.condition);
-  //         }
-
-  //         if (filters.priceMin) {
-  //           filteredProducts = filteredProducts.filter(p => p.price >= parseInt(filters.priceMin));
-  //         }
-
-  //         if (filters.priceMax) {
-  //           filteredProducts = filteredProducts.filter(p => p.price <= parseInt(filters.priceMax));
-  //         }
-
-  //         if (filters.searchQuery && filters.searchQuery.trim()) {
-  //           const searchLower = filters.searchQuery.toLowerCase();
-  //           filteredProducts = filteredProducts.filter(p => 
-  //             p.title?.toLowerCase().includes(searchLower) ||
-  //             p.description?.toLowerCase().includes(searchLower)
-  //           );
-  //         }
-
-  //         // 삭제된 상품 제거 (하지만 ACTIVE가 아닌 상품도 일단 포함)
-  //         filteredProducts = filteredProducts.filter((product) => 
-  //           product.status !== PRODUCT_STATUS.DELETED && 
-  //           product.status !== PRODUCT_STATUS.SUSPENDED
-  //         );
-
-  //         // 정렬 적용
-  //         switch (filters.sortBy) {
-  //           case "price_low":
-  //             filteredProducts.sort((a, b) => a.price - b.price);
-  //             break;
-  //           case "price_high":
-  //             filteredProducts.sort((a, b) => b.price - a.price);
-  //             break;
-  //           case "popular":
-  //             filteredProducts.sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0));
-  //             break;
-  //           // latest는 이미 정렬됨
-  //         }
+          // 기존 상품이 있으면 실시간 업데이트와 병합
+          console.log("🔄 기존 데이터와 실시간 데이터 병합");
           
-  //         console.log("✅ 필터링된 상품 수:", filteredProducts.length);
-  //         console.log("🔍 적용된 필터:", filters);
-  //         return filteredProducts;
-  //       });
-  //     },
-  //     { category: filters.category },
-  //   );
+          // 실시간 데이터에서 새로운 상품이나 업데이트된 상품 찾기
+          const existingIds = new Set(prevProducts.map(p => p.id));
+          const newOrUpdatedProducts = realtimeProducts.filter(rtProduct => {
+            const existingProduct = prevProducts.find(p => p.id === rtProduct.id);
+            // 새 상품이거나 업데이트된 상품만 포함
+            return !existingProduct || 
+                   existingProduct.updatedAt?.toMillis?.() !== rtProduct.updatedAt?.toMillis?.();
+          });
 
-  //   return () => {
-  //     console.log("👋 실시간 구독 해제");
-  //     unsubscribe();
-  //   };
-  // }, [filters]); // 모든 필터가 변경될 때 다시 구독
+          // 실시간 업데이트에 없는 기존 상품들 (삭제되지 않은 것만)
+          const unchangedProducts = prevProducts.filter(prevProduct => {
+            const rtProduct = realtimeProducts.find(p => p.id === prevProduct.id);
+            return rtProduct && rtProduct.status !== PRODUCT_STATUS.DELETED;
+          });
+
+          // 병합하여 최종 상품 목록 생성
+          const mergedProducts = [...newOrUpdatedProducts, ...unchangedProducts];
+          
+          console.log("📊 병합 결과:", {
+            기존: prevProducts.length,
+            실시간: realtimeProducts.length,
+            새로운업데이트: newOrUpdatedProducts.length,
+            변화없음: unchangedProducts.length,
+            최종: mergedProducts.length
+          });
+
+          return applyFiltersAndSort(mergedProducts, filters);
+        });
+      },
+      { category: filters.category },
+    );
+
+    return () => {
+      console.log("👋 실시간 구독 해제");
+      unsubscribe();
+    };
+  }, [filters, loading, products.length]); // loading과 products.length도 의존성에 추가
 
   // 사용자별 상품 로드
   const loadUserProducts = useCallback(
