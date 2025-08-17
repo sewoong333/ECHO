@@ -103,7 +103,7 @@ const IconButton = styled.button`
 // 하단 액션바 스타일 컴포넌트들
 const BottomActionBar = styled.div`
   position: fixed;
-  bottom: 90px; /* 하단 네비게이션 바 위에 위치 */
+  bottom: 70px; /* 하단 네비게이션 바에 딱 붙임 */
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
@@ -119,7 +119,7 @@ const BottomActionBar = styled.div`
   z-index: 99;
   border-top: 1px solid rgba(46, 216, 182, 0.1);
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
-  border-radius: 20px 20px 0 0;
+  border-radius: 0;
 `;
 
 const LikeButton = styled.button`
@@ -132,7 +132,7 @@ const LikeButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
+  font-size: 56px;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
@@ -848,6 +848,16 @@ export default function ProductDetail() {
     }
   };
 
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      showSuccess('링크가 클립보드에 복사되었습니다!');
+    } catch (error) {
+      console.error('링크 복사 실패:', error);
+      showError('링크 복사에 실패했습니다.');
+    }
+  };
+
   const handleChat = async () => {
     if (!user?.isLoggedIn) {
       showWarning('로그인이 필요합니다.', {
@@ -1030,7 +1040,7 @@ export default function ProductDetail() {
           </BackButton>
         </HeaderLeft>
         <HeaderRight>
-          <IconButton>
+          <IconButton onClick={handleShare}>
             <FaShare />
           </IconButton>
           {user?.uid === product?.sellerId && (

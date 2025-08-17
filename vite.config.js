@@ -13,6 +13,7 @@ export default defineConfig({
   build: {
     // 청크 사이즈 최적화
     rollupOptions: {
+      external: ['@tosspayments/payment-sdk'],
       output: {
         manualChunks: {
           // Firebase 관련 청크

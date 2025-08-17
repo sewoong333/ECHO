@@ -536,9 +536,9 @@ export default function MyPage() {
           <MannerScoreHeader>
             <MannerScoreTitle>
               <FaAward />
-              매너온도
+              매너 점수
             </MannerScoreTitle>
-            <MannerScore>{user.mannerScore}°C</MannerScore>
+            <MannerScore>{user.mannerScore}점</MannerScore>
           </MannerScoreHeader>
           <MannerScoreDesc>
             {user.mannerScore >= 40 ? '매우 좋은 거래자예요!' :
