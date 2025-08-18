@@ -58,19 +58,20 @@ const AvatarContainer = styled.div`
 const Avatar = styled.div`
   width: 48px;
   height: 48px;
-  border-radius: 50%;
+  border-radius: 12px;
   background: ${props => props.imageUrl 
     ? `url(${props.imageUrl})` 
-    : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    : 'linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%)'
   };
   background-size: cover;
   background-position: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #999;
   font-weight: bold;
   font-size: 16px;
+  border: 1px solid #f0f0f0;
 `;
 
 const OnlineIndicator = styled.div`
@@ -96,10 +97,35 @@ const ChatHeader = styled.div`
   margin-bottom: 4px;
 `;
 
+const UserInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
 const UserName = styled.div`
   font-size: 16px;
   font-weight: 600;
   color: #333;
+`;
+
+const UserAvatar = styled.div`
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: ${props => props.imageUrl 
+    ? `url(${props.imageUrl})` 
+    : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+  };
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 10px;
+  border: 1px solid #e0e0e0;
 `;
 
 const ProductInfo = styled.div`
@@ -228,12 +254,19 @@ export default function ChatList() {
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
     
-    if (minutes < 1) return '방금';
-    if (minutes < 60) return `${minutes}분`;
-    if (hours < 24) return `${hours}시간`;
-    if (days < 7) return `${days}일`;
+    if (minutes < 1) return '방금 전';
+    if (minutes < 60) return `${minutes}분 전`;
+    if (hours < 24) return `${hours}시간 전`;
+    if (days === 1) return '어제';
+    if (days < 7) return `${days}일 전`;
     
-    return date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
+    // 일주일 이상은 정확한 날짜 표시
+    return date.toLocaleDateString('ko-KR', { 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   const getOtherParticipant = (participants) => {
@@ -310,18 +343,23 @@ export default function ChatList() {
                 onClick={() => handleChatClick(chatRoom)}
               >
                 <AvatarContainer>
-                  <Avatar imageUrl={otherParticipant.profileImage}>
-                    {!otherParticipant.profileImage && 
-                     (otherParticipant.nickname?.[0] || '?')}
+                  <Avatar imageUrl={chatRoom.productInfo?.images?.[0]}>
+                    {!chatRoom.productInfo?.images?.[0] && 
+                     <FaImage />}
                   </Avatar>
-                  {/* 온라인 상태 표시 (추후 구현) */}
                 </AvatarContainer>
                 
                 <ChatInfo>
                   <ChatHeader>
-                    <UserName>
-                      {otherParticipant.nickname || '익명 사용자'}
-                    </UserName>
+                    <UserInfo>
+                      <UserName>
+                        {otherParticipant.nickname || '익명 사용자'}
+                      </UserName>
+                      <UserAvatar imageUrl={otherParticipant.profileImage}>
+                        {!otherParticipant.profileImage && 
+                         (otherParticipant.nickname?.[0] || '?')}
+                      </UserAvatar>
+                    </UserInfo>
                     <TimeStamp>
                       {formatTime(chatRoom.lastMessageAt)}
                     </TimeStamp>
@@ -329,12 +367,6 @@ export default function ChatList() {
                   
                   {chatRoom.productInfo && (
                     <ProductInfo>
-                      {chatRoom.productInfo.images?.[0] && (
-                        <ProductImage 
-                          src={chatRoom.productInfo.images[0]} 
-                          alt="상품" 
-                        />
-                      )}
                       {chatRoom.productInfo.title}
                     </ProductInfo>
                   )}
