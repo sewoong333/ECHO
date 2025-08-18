@@ -108,7 +108,7 @@ const Logo = styled.span`
   transition: all var(--transition-fast);
   
   &:hover {
-    transform: scale(1.05);
+    /* transform: scale removed to prevent screen breakage */
   }
   
   @media (max-width: 480px) {

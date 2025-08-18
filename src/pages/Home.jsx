@@ -473,7 +473,7 @@ const HorizontalCard = styled.div`
   gap: 12px;
   
   &:hover {
-    transform: translateY(-2px) scale(1.02);
+    transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     background: rgba(255, 255, 255, 0.98);
   }
@@ -531,7 +531,7 @@ const ProductCard = styled.div`
     inset 0 1px 0 rgba(255, 255, 255, 0.7);
   
   &:hover {
-    transform: translateY(-6px) scale(1.025);
+    transform: translateY(-6px);
     box-shadow: 
       0 20px 60px rgba(0, 217, 182, 0.12),
       0 8px 32px rgba(0, 0, 0, 0.08),
@@ -544,7 +544,7 @@ const ProductCard = styled.div`
   }
   
   &:active {
-    transform: translateY(-3px) scale(1.015);
+    transform: translateY(-3px);
     transition: all var(--transition-micro) var(--ease-out-quad);
     box-shadow: 
       0 12px 40px rgba(0, 217, 182, 0.08),
@@ -633,7 +633,7 @@ const ProductImageContainer = styled.div`
   }
   
   ${ProductCard}:hover & {
-    transform: scale(1.05);
+    /* transform: scale removed to prevent screen breakage */
     box-shadow: 
       inset 0 2px 12px rgba(0, 217, 182, 0.12),
       0 8px 24px rgba(0, 0, 0, 0.08);
@@ -652,7 +652,7 @@ const ProductImage = styled.img`
   filter: contrast(1.02) saturate(1.05);
   
   ${ProductCard}:hover & {
-    transform: scale(1.08);
+    /* transform: scale removed to prevent screen breakage */
     filter: contrast(1.08) saturate(1.15) brightness(1.02);
   }
   
@@ -690,7 +690,7 @@ const ImagePlaceholder = styled.div`
   ${ProductCard}:hover & {
     color: var(--color-mint-dark);
     opacity: 0.8;
-    transform: scale(1.1);
+    /* transform: scale removed to prevent screen breakage */
   }
 `;
 
@@ -793,7 +793,7 @@ const ProductStats = styled.div`
     
     svg {
       color: var(--color-mint-main);
-      transform: scale(1.1);
+      /* transform: scale removed to prevent screen breakage */
     }
   }
 `;
@@ -823,14 +823,14 @@ const LikeButton = styled.button`
       ? 'linear-gradient(135deg, var(--color-mint-dark), var(--color-mint-main))' 
       : 'rgba(255, 255, 255, 0.9)'};
     border-color: var(--color-mint-light);
-    transform: translateY(-2px) scale(1.1);
+    transform: translateY(-2px);
     box-shadow: ${props => props.liked 
       ? '0 8px 20px rgba(0, 217, 182, 0.35)' 
       : '0 4px 12px rgba(0, 217, 182, 0.15)'};
   }
   
   &:active {
-    transform: translateY(0) scale(1.05);
+    transform: translateY(0);
     transition: all var(--transition-micro);
   }
 `;
@@ -865,7 +865,7 @@ const StatusBadge = styled.div`
   transition: all var(--transition-fast);
   
   ${ProductCard}:hover & {
-    transform: translateY(-1px) scale(1.05);
+    transform: translateY(-1px);
     box-shadow: 0 4px 12px ${props => {
       switch(props.type) {
         case 'urgent': return 'rgba(255, 71, 87, 0.4)';
@@ -966,17 +966,17 @@ const FAB = styled.button`
   }
   
   &:hover {
-    transform: translateY(-3px) scale(1.08);
+    transform: translateY(-3px);
     box-shadow: 0 20px 40px rgba(0, 217, 182, 0.4);
     
     &::before {
-      transform: scale(1.15);
+      /* transform: scale removed to prevent screen breakage */
       opacity: 0.8;
     }
   }
   
   &:active {
-    transform: translateY(-1px) scale(1.04);
+    transform: translateY(-1px);
     box-shadow: var(--shadow-lg);
   }
   

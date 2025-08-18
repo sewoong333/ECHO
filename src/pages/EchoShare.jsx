@@ -108,7 +108,7 @@ const CTAButton = styled.a`
   &:active {
     background: #2ed8b6;
     color: #fff;
-    transform: scale(0.98);
+    opacity: 0.9;
   }
   &:hover {
     background: #fff;
@@ -156,12 +156,9 @@ const OptionCard = styled.button`
   transition:
     background 0.18s,
     color 0.18s,
-    box-shadow 0.18s,
-    transform 0.18s;
+    box-shadow 0.18s;
   outline: ${({ active }) => (active ? "2px solid #26c4a8" : "none")};
-  transform: ${({ active }) => (active ? "scale(1.02)" : "scale(1)")};
-  transform-origin: center;
-  will-change: transform;
+  /* 확대 효과 제거 - 화면 깨짐 방지 */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -169,7 +166,6 @@ const OptionCard = styled.button`
   &:hover {
     background: linear-gradient(90deg, #2ed8b6 60%, #26c4a8 100%);
     color: #fff;
-    transform: scale(1.02);
     box-shadow: 0 8px 28px rgba(46, 216, 182, 0.22);
   }
 `;

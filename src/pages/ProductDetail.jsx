@@ -138,14 +138,14 @@ const LikeButton = styled.button`
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   
   &:hover {
-    transform: translateY(-2px) scale(1.05);
+    transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(46, 216, 182, 0.3);
     border-color: #2ed8b6;
     color: ${props => props.liked ? 'white' : '#2ed8b6'};
   }
   
   &:active {
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 `;
 

@@ -99,7 +99,7 @@ const Item = styled.button`
   svg {
     font-size: 20px;
     transition: all var(--transition-normal);
-    transform: ${props => props.$active ? 'scale(1.1)' : 'scale(1)'};
+    /* transform: scale removed to prevent screen breakage */
     filter: ${props => props.$active ? 'drop-shadow(0 0 8px var(--color-mint-glow))' : 'none'};
   }
 
@@ -109,7 +109,7 @@ const Item = styled.button`
     transform: translateY(-1px);
     
     svg {
-      transform: scale(1.05);
+      /* transform: scale removed to prevent screen breakage */
       filter: drop-shadow(0 0 6px var(--color-mint-glow));
     }
   }
