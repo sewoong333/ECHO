@@ -88,18 +88,18 @@ const CTAButton = styled.a`
   width: 100%;
   max-width: 360px;
   margin: 1.7rem auto 0 auto;
-  background: #222;
+  background: #2ed8b6;
   color: #fff;
   font-size: 1.23rem;
   font-weight: 900;
   text-align: center;
   border-radius: 18px;
   padding: 1.3rem 0;
-  box-shadow: 0 6px 24px rgba(34, 34, 34, 0.18);
+  box-shadow: 0 6px 24px rgba(46, 216, 182, 0.3);
   text-decoration: none;
   letter-spacing: 0.01em;
-  border: 2.5px solid #fff;
-  outline: 2.5px solid #2ed8b6;
+  border: none;
+  outline: none;
   transition:
     background 0.18s,
     color 0.18s,
