@@ -530,6 +530,7 @@ export default function AddProduct() {
     condition: '',
     region: user.region || '',
     district: user.district || '',
+    address: '', // 주소 입력 필드 추가
     negotiable: true,
     delivery: false,
     pickup: true,
@@ -691,6 +692,14 @@ export default function AddProduct() {
     
     if (!formData.condition) {
       newErrors.condition = '상품 상태를 선택해주세요.';
+    }
+    
+    if (!formData.address.trim()) {
+      newErrors.address = '거래 희망 장소를 입력해주세요.';
+    }
+    
+    if (!formData.region) {
+      newErrors.region = '시/도를 선택해주세요.';
     }
     
     if (images.length === 0) {
@@ -1025,43 +1034,66 @@ export default function AddProduct() {
 
           {/* 거래 희망 장소 */}
           <FormGroup>
-            <Label>거래 희망 장소 <span style={{ color: '#999', fontSize: '12px' }}>삭제</span></Label>
-            <div style={{
-              padding: '16px',
-              border: '1px solid #e0e0e0',
-              borderRadius: '12px',
-              background: '#f8f9fa',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              cursor: 'pointer'
-            }}>
-              <div>
-                <div style={{ fontSize: '16px', color: '#333', fontWeight: '500' }}>구로동</div>
-                <div style={{ fontSize: '12px', color: '#666' }}>서울특별시 구로구 구로동</div>
-              </div>
-              <FaChevronDown color="#666" />
-            </div>
+            <Label>거래 희망 장소 <Required>*</Required></Label>
+            <Input
+              type="text"
+              placeholder="주소를 입력하세요 (예: 서울 강남구 역삼동)"
+              value={formData.address}
+              onChange={(e) => handleInputChange('address', e.target.value)}
+              style={{ marginBottom: '8px' }}
+            />
             
-            <div style={{ fontSize: '12px', color: '#999', marginTop: '8px' }}>
-              보여줄 동네 선택 &gt;
+            <div style={{ 
+              display: 'flex',
+              gap: '8px',
+              marginBottom: '12px'
+            }}>
+              <Select
+                value={formData.region}
+                onChange={(e) => handleInputChange('region', e.target.value)}
+                style={{ flex: 1 }}
+              >
+                <option value="">시/도 선택</option>
+                {Object.keys(REGIONS).map(region => (
+                  <option key={region} value={region}>
+                    {region}
+                  </option>
+                ))}
+              </Select>
+              
+              <Select
+                value={formData.district}
+                onChange={(e) => handleInputChange('district', e.target.value)}
+                style={{ flex: 1 }}
+                disabled={!formData.region}
+              >
+                <option value="">구/군 선택</option>
+                {formData.region && REGIONS[formData.region]?.map(district => (
+                  <option key={district} value={district}>
+                    {district}
+                  </option>
+                ))}
+              </Select>
             </div>
             
             <div style={{ 
-              marginTop: '16px',
-              padding: '12px',
-              background: '#fff7e6',
-              borderRadius: '8px',
-              border: '1px solid #ffe0b3',
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: '8px'
+              fontSize: '12px', 
+              color: '#666', 
+              lineHeight: '1.4',
+              background: '#f8f9fa',
+              padding: '8px',
+              borderRadius: '6px'
             }}>
-              <FaExclamationTriangle color="#ff8c00" style={{ marginTop: '2px', fontSize: '12px' }} />
-              <div style={{ fontSize: '12px', color: '#666', lineHeight: '1.4' }}>
-                예일음에서 동네인증이 필요해요. 지금은 글을 작성중인 구로동에만 글을 올릴 수 있어요.
-              </div>
+              💡 상세 주소를 입력하고 시/도, 구/군을 선택해주세요. 
+              정확한 위치 정보가 안전한 거래에 도움이 됩니다.
             </div>
+            
+            {(errors.region || errors.address) && (
+              <ErrorText>
+                <FaExclamationTriangle />
+                {errors.region || errors.address}
+              </ErrorText>
+            )}
           </FormGroup>
 
           {/* 거래 옵션 */}

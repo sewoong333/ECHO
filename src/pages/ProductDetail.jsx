@@ -123,19 +123,19 @@ const BottomActionBar = styled.div`
 `;
 
 const LikeButton = styled.button`
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  border: 2px solid ${props => props.liked ? '#2ed8b6' : '#e0e0e0'};
+  border: 3px solid ${props => props.liked ? '#2ed8b6' : '#e0e0e0'};
   background: ${props => props.liked ? '#2ed8b6' : 'white'};
-  color: ${props => props.liked ? 'white' : '#666'};
+  color: ${props => props.liked ? 'white' : '#e74c3c'};
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 56px;
+  font-size: 28px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   
   &:hover {
     transform: translateY(-2px);
@@ -639,6 +639,39 @@ const ModalImageCounter = styled.div`
   z-index: 1001;
 `;
 
+const SlideButton = styled.button`
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  color: #333;
+  font-size: 24px;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  z-index: 1001;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  
+  &:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: translateY(-50%) scale(1.1);
+  }
+  
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: translateY(-50%) scale(0.9);
+  }
+  
+  ${props => props.direction === 'left' ? 'left: 20px;' : 'right: 20px;'}
+`;
+
 // 옵션 메뉴 스타일
 const OptionsMenu = styled.div`
   position: absolute;
@@ -819,6 +852,20 @@ export default function ProductDetail() {
     
     if (isRightSwipe && currentImageIndex > 0) {
       setCurrentImageIndex(prev => prev - 1);
+    }
+  };
+
+  const handlePrevImage = (e) => {
+    e.stopPropagation();
+    if (currentImageIndex > 0) {
+      setCurrentImageIndex(prev => prev - 1);
+    }
+  };
+
+  const handleNextImage = (e) => {
+    e.stopPropagation();
+    if (currentImageIndex < (product?.images?.length || 1) - 1) {
+      setCurrentImageIndex(prev => prev + 1);
     }
   };
 
@@ -1284,10 +1331,29 @@ export default function ProductDetail() {
               ))}
             </ModalImageSlider>
             
+            {/* 슬라이드 버튼들 */}
             {images.length > 1 && (
-              <ModalImageCounter>
-                {currentImageIndex + 1}/{images.length}
-              </ModalImageCounter>
+              <>
+                <SlideButton 
+                  direction="left"
+                  onClick={handlePrevImage}
+                  disabled={currentImageIndex === 0}
+                >
+                  <FaChevronLeft />
+                </SlideButton>
+                
+                <SlideButton 
+                  direction="right"
+                  onClick={handleNextImage}
+                  disabled={currentImageIndex === images.length - 1}
+                >
+                  <FaChevronRight />
+                </SlideButton>
+                
+                <ModalImageCounter>
+                  {currentImageIndex + 1}/{images.length}
+                </ModalImageCounter>
+              </>
             )}
           </ModalImageContainer>
         </ImageModal>
