@@ -110,13 +110,7 @@ const CTAButton = styled.a`
     color: #fff;
     opacity: 0.9;
   }
-  &:hover {
-    background: #fff;
-    color: #222;
-    border: 2.5px solid #2ed8b6;
-    outline: 2.5px solid #fff;
-    box-shadow: 0 10px 32px rgba(46, 216, 182, 0.22);
-  }
+  /* 호버 색상 변화 제거 */
 `;
 
 // --- Option Simulator ---
@@ -163,11 +157,7 @@ const OptionCard = styled.button`
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  &:hover {
-    background: linear-gradient(90deg, #2ed8b6 60%, #26c4a8 100%);
-    color: #fff;
-    box-shadow: 0 8px 28px rgba(46, 216, 182, 0.22);
-  }
+  /* 호버 색상 변화 제거 */
 `;
 
 const OptionDesc = styled.div`

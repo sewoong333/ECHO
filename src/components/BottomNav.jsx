@@ -103,16 +103,7 @@ const Item = styled.button`
     filter: ${props => props.$active ? 'drop-shadow(0 0 8px var(--color-mint-glow))' : 'none'};
   }
 
-  &:hover:not(:disabled) {
-    color: var(--color-mint-main);
-    background: var(--color-mint-glass);
-    transform: translateY(-1px);
-    
-    svg {
-      /* transform: scale removed to prevent screen breakage */
-      filter: drop-shadow(0 0 6px var(--color-mint-glow));
-    }
-  }
+  /* 모든 호버 색상 변화 제거 */
 
   &:active {
     transform: translateY(0);

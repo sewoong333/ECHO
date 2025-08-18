@@ -37,6 +37,7 @@ import {
 const Container = styled.div`
   width: 100vw;
   max-width: 100vw;
+  min-width: 0;
   min-height: 100vh;
   background: #ffffff;
   position: relative;
@@ -44,6 +45,9 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
+  contain: layout style paint;
 `;
 
 const SearchSection = styled.div`
@@ -108,7 +112,7 @@ const SearchBar = styled.div`
   &:hover {
     transform: translateY(-1px);
     box-shadow: var(--shadow-lg);
-    border-color: var(--color-mint-light);
+    /* 호버 테두리 색상 변화 제거 */
     
     &::before {
       opacity: 0.3;
@@ -225,7 +229,7 @@ const FilterChip = styled.button`
   min-width: fit-content;
 
   &:hover {
-    border-color: var(--color-mint-main);
+    /* 호버 테두리 색상 변화 제거 */
     color: ${props => props.active ? 'white' : 'var(--color-mint-main)'};
   }
 `;
@@ -320,7 +324,7 @@ const FilterOption = styled.button`
   transition: all 0.2s;
   
   &:hover {
-    border-color: var(--color-mint-main);
+    /* 호버 테두리 색상 변화 제거 */
   }
 `;
 
@@ -340,7 +344,7 @@ const PriceInput = styled.input`
   
   &:focus {
     outline: none;
-    border-color: var(--color-mint-main);
+    /* 호버 테두리 색상 변화 제거 */
   }
 `;
 
@@ -371,8 +375,8 @@ const SortButton = styled.button`
   cursor: pointer;
   
   &:hover {
-    border-color: var(--color-mint-main);
-    color: var(--color-mint-main);
+    /* 호버 테두리 색상 변화 제거 */
+    /* 호버 텍스트 색상 변화 제거 */
   }
 `;
 
@@ -473,9 +477,9 @@ const HorizontalCard = styled.div`
   gap: 12px;
   
   &:hover {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    background: rgba(255, 255, 255, 0.98);
+    /* 호버 배경 색상 변화 제거 */
   }
 `;
 
@@ -531,20 +535,18 @@ const ProductCard = styled.div`
     inset 0 1px 0 rgba(255, 255, 255, 0.7);
   
   &:hover {
-    transform: translateY(-6px);
+    transform: translateY(-1px);
     box-shadow: 
       0 20px 60px rgba(0, 217, 182, 0.12),
       0 8px 32px rgba(0, 0, 0, 0.08),
       inset 0 1px 0 rgba(255, 255, 255, 0.8),
       0 0 40px rgba(0, 217, 182, 0.08);
-    background: linear-gradient(135deg, 
-      rgba(255, 255, 255, 0.98) 0%, 
-      rgba(255, 255, 255, 0.92) 100%);
-    border-color: rgba(0, 217, 182, 0.25);
+    /* 호버 배경 그라데이션 제거 */
+    /* 호버 테두리 색상 변화 제거 */
   }
   
   &:active {
-    transform: translateY(-3px);
+    transform: translateY(-1px);
     transition: all var(--transition-micro) var(--ease-out-quad);
     box-shadow: 
       0 12px 40px rgba(0, 217, 182, 0.08),
@@ -688,7 +690,7 @@ const ImagePlaceholder = styled.div`
   transition: all var(--transition-normal);
   
   ${ProductCard}:hover & {
-    color: var(--color-mint-dark);
+    /* 호버 텍스트 색상 변화 제거 */
     opacity: 0.8;
     /* transform: scale removed to prevent screen breakage */
   }
@@ -731,7 +733,7 @@ const ProductMeta = styled.div`
   font-weight: 500;
   
   svg {
-    color: var(--color-mint-main);
+    /* 호버 텍스트 색상 변화 제거 */
     transition: color var(--transition-fast);
   }
   
@@ -739,7 +741,7 @@ const ProductMeta = styled.div`
     color: var(--color-text-secondary);
     
     svg {
-      color: var(--color-mint-dark);
+      /* 호버 텍스트 색상 변화 제거 */
     }
   }
 `;
@@ -792,7 +794,7 @@ const ProductStats = styled.div`
     color: var(--color-text-secondary);
     
     svg {
-      color: var(--color-mint-main);
+      /* 호버 텍스트 색상 변화 제거 */
       /* transform: scale removed to prevent screen breakage */
     }
   }
@@ -817,17 +819,7 @@ const LikeButton = styled.button`
     ? '0 4px 12px rgba(0, 217, 182, 0.25)' 
     : '0 2px 6px rgba(0, 0, 0, 0.08)'};
   
-  &:hover {
-    color: ${props => props.liked ? 'white' : 'var(--color-mint-main)'};
-    background: ${props => props.liked 
-      ? 'linear-gradient(135deg, var(--color-mint-dark), var(--color-mint-main))' 
-      : 'rgba(255, 255, 255, 0.9)'};
-    border-color: var(--color-mint-light);
-    transform: translateY(-2px);
-    box-shadow: ${props => props.liked 
-      ? '0 8px 20px rgba(0, 217, 182, 0.35)' 
-      : '0 4px 12px rgba(0, 217, 182, 0.15)'};
-  }
+  /* 모든 호버 색상 변화 제거 */
   
   &:active {
     transform: translateY(0);
@@ -966,7 +958,7 @@ const FAB = styled.button`
   }
   
   &:hover {
-    transform: translateY(-3px);
+    transform: translateY(-1px);
     box-shadow: 0 20px 40px rgba(0, 217, 182, 0.4);
     
     &::before {

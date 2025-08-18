@@ -206,8 +206,7 @@ a::before {
 }
 
 a:hover {
-  color: var(--color-mint-dark);
-  transform: translateY(-1px);
+  /* 링크 호버 색상 변화 제거 */
 }
 
 a:hover::before {
@@ -275,7 +274,7 @@ button {
 }
 
 button:hover {
-  background-color: var(--color-mint-dark);
+  /* 버튼 호버 색상 변화 제거 */
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
