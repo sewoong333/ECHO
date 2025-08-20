@@ -79,56 +79,66 @@ export function UserProvider({ children }) {
             let userProfile = {};
             
             try {
-              // Firestore에서 사용자 프로필 정보 가져오기
-              const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
-              userProfile = userDoc.exists() ? userDoc.data() : {};
+              // Firestore 작업에 타임아웃 적용 (10초)
+              const firestoreTimeout = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Firestore timeout')), 10000)
+              );
               
-              // 새 사용자이거나 프로필이 없는 경우 기본 프로필 생성
-              if (!userDoc.exists()) {
-                console.log("🆕 새 사용자 프로필 생성 중...");
-                const defaultProfile = {
-                  nickname: firebaseUser.displayName || firebaseUser.email?.split("@")[0] || "사용자",
-                  email: firebaseUser.email || "",
-                  profileImage: firebaseUser.photoURL || "",
-                  address: "",
-                  region: "",
-                  district: "",
-                  mannerScore: 36.5,
-                  transactionCount: 0,
-                  reviewCount: 0,
-                  favoriteCount: 0,
-                  isVerified: false,
-                  isBusiness: false,
-                  businessInfo: null,
-                  preferences: {
-                    pushNotifications: true,
-                    emailNotifications: true,
-                    smsNotifications: false,
-                    marketingEmails: false,
-                  },
-                  blockedUsers: [],
-                  following: [],
-                  followers: [],
-                  createdAt: serverTimestamp(),
-                  lastLoginAt: serverTimestamp(),
-                };
+              const firestoreWork = async () => {
+                // Firestore에서 사용자 프로필 정보 가져오기
+                const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+                const profileData = userDoc.exists() ? userDoc.data() : {};
                 
-                await setDoc(doc(db, "users", firebaseUser.uid), defaultProfile);
-                userProfile = defaultProfile;
-                console.log("✅ 새 사용자 프로필 생성 완료");
-              } else {
-                // 기존 사용자인 경우 마지막 로그인 시간 업데이트
-                try {
-                  await updateDoc(doc(db, "users", firebaseUser.uid), {
+                // 새 사용자이거나 프로필이 없는 경우 기본 프로필 생성
+                if (!userDoc.exists()) {
+                  console.log("🆕 새 사용자 프로필 생성 중...");
+                  const defaultProfile = {
+                    nickname: firebaseUser.displayName || firebaseUser.email?.split("@")[0] || "사용자",
+                    email: firebaseUser.email || "",
+                    profileImage: firebaseUser.photoURL || "",
+                    address: "",
+                    region: "",
+                    district: "",
+                    mannerScore: 36.5,
+                    transactionCount: 0,
+                    reviewCount: 0,
+                    favoriteCount: 0,
+                    isVerified: false,
+                    isBusiness: false,
+                    businessInfo: null,
+                    preferences: {
+                      pushNotifications: true,
+                      emailNotifications: true,
+                      smsNotifications: false,
+                      marketingEmails: false,
+                    },
+                    blockedUsers: [],
+                    following: [],
+                    followers: [],
+                    createdAt: serverTimestamp(),
                     lastLoginAt: serverTimestamp(),
+                  };
+                  
+                  await setDoc(doc(db, "users", firebaseUser.uid), defaultProfile);
+                  console.log("✅ 새 사용자 프로필 생성 완료");
+                  return defaultProfile;
+                } else {
+                  // 기존 사용자인 경우 마지막 로그인 시간 업데이트 (백그라운드에서)
+                  updateDoc(doc(db, "users", firebaseUser.uid), {
+                    lastLoginAt: serverTimestamp(),
+                  }).catch(error => {
+                    console.warn("⚠️ 로그인 시간 업데이트 실패 (무시됨):", error);
                   });
-                } catch (updateError) {
-                  console.warn("⚠️ 로그인 시간 업데이트 실패 (무시됨):", updateError);
-                  // 업데이트 실패해도 로그인은 진행
+                  
+                  return profileData;
                 }
-              }
+              };
+              
+              // Firestore 작업 실행 (타임아웃과 함께)
+              userProfile = await Promise.race([firestoreWork(), firestoreTimeout]);
+              
             } catch (firestoreError) {
-              console.warn("⚠️ Firestore 작업 실패:", firestoreError);
+              console.warn("⚠️ Firestore 작업 실패 또는 타임아웃:", firestoreError.message);
               // Firestore 오류가 있어도 Firebase Auth 정보로 기본 사용자 상태 설정
               userProfile = {
                 nickname: firebaseUser.displayName || firebaseUser.email?.split("@")[0] || "사용자",
@@ -201,11 +211,7 @@ export function UserProvider({ children }) {
               isLoggedIn: userState.isLoggedIn
             });
 
-            // 현재 URL이 로그인 페이지인 경우 메인 페이지로 리다이렉트
-            if (window.location.pathname === "/login") {
-              console.log("🔄 로그인 성공 - 홈으로 리다이렉트");
-              window.location.href = "/";
-            }
+            // 리다이렉트는 Login 컴포넌트에서 처리하도록 변경
           } else {
             // 사용자가 로그아웃한 경우
             console.log("❌ 사용자 로그아웃됨");
@@ -247,34 +253,53 @@ export function UserProvider({ children }) {
           console.error("❌ 인증 상태 변경 처리 실패:", error);
           setAuthError(error);
           
-          // 인증 오류 시에도 로딩 상태는 해제하되, 기존 사용자 정보는 유지
+          // 인증 오류 시에도 로딩 상태는 반드시 해제
           setUser((prev) => ({ 
             ...prev, 
             loading: false,
-            // 심각한 오류가 아닌 경우 로그인 상태 유지
-            isLoggedIn: prev.uid ? true : false
+            // 네트워크 오류가 아닌 경우에만 로그아웃 처리
+            isLoggedIn: error.code === 'auth/network-request-failed' ? prev.isLoggedIn : false
           }));
         }
       });
 
-      // 토큰 갱신 리스너
+      // 토큰 갱신 리스너 (타임아웃 추가)
       unsubscribeToken = onIdTokenChanged(auth, async (firebaseUser) => {
         if (firebaseUser) {
           try {
-            const _token = await firebaseUser.getIdToken(true);
-            console.log("Token refreshed successfully");
+            // 토큰 갱신에 5초 타임아웃 적용
+            const tokenTimeout = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Token refresh timeout')), 5000)
+            );
+            
+            const tokenRefresh = firebaseUser.getIdToken(true);
+            await Promise.race([tokenRefresh, tokenTimeout]);
+            
+            console.log("✅ 토큰 갱신 성공");
           } catch (error) {
-            console.error("Token refresh error:", error);
-            setAuthError(error);
+            console.warn("⚠️ 토큰 갱신 실패 (무시됨):", error.message);
+            // 토큰 갱신 실패는 자동으로 재시도되므로 무시
           }
         }
       });
     };
 
     setupAuthListeners();
+    
+    // 초기 로딩 상태를 10초 후 자동으로 해제 (안전장치)
+    const loadingTimeout = setTimeout(() => {
+      setUser(prev => {
+        if (prev.loading) {
+          console.warn("⚠️ 로딩 타임아웃 - 강제 해제");
+          return { ...prev, loading: false };
+        }
+        return prev;
+      });
+    }, 10000);
 
     // 클린업 함수
     return () => {
+      clearTimeout(loadingTimeout);
       if (unsubscribeAuth) unsubscribeAuth();
       if (unsubscribeToken) unsubscribeToken();
     };
@@ -294,27 +319,8 @@ export function UserProvider({ children }) {
         displayName: firebaseUser.displayName
       });
       
-      // onAuthStateChanged가 호출되기까지 잠시 대기
-      return new Promise((resolve) => {
-        const checkAuth = () => {
-          if (user.isLoggedIn && user.uid === firebaseUser.uid) {
-            console.log("✅ 사용자 상태 동기화 완료");
-            resolve(firebaseUser);
-          } else {
-            // 최대 5초까지 대기
-            setTimeout(checkAuth, 100);
-          }
-        };
-        
-        // 즉시 체크 시작
-        setTimeout(checkAuth, 50);
-        
-        // 5초 후 타임아웃
-        setTimeout(() => {
-          console.log("⏰ 인증 상태 동기화 타임아웃 - 로그인 성공으로 처리");
-          resolve(firebaseUser);
-        }, 5000);
-      });
+      // onAuthStateChanged에서 자동으로 처리하므로 여기서는 단순히 성공만 반환
+      return firebaseUser;
       
     } catch (error) {
       console.error("❌ Google 로그인 실패:", error);

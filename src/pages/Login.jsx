@@ -293,12 +293,14 @@ export default function Login() {
     checkRedirectResult();
   }, [navigate]);
 
-  // 로그인 상태 체크
+  // 로그인 상태 체크 (개선된 로직)
   useEffect(() => {
-    if (!user.loading && user.isLoggedIn) {
+    // 로딩이 끝나고 로그인된 상태라면 리다이렉트
+    if (!user.loading && user.isLoggedIn && user.uid) {
+      console.log("✅ 이미 로그인됨 - 홈으로 리다이렉트");
       navigate("/", { replace: true });
     }
-  }, [user.loading, user.isLoggedIn, navigate]);
+  }, [user.loading, user.isLoggedIn, user.uid, navigate]);
 
   const handleAuthError = (error) => {
     console.error("Auth error details:", {
@@ -332,23 +334,38 @@ export default function Login() {
     setError("");
 
     try {
-      console.log("Starting Google login...");
-      const result = await signInWithPopup(auth, googleProvider);
-      console.log("Google login successful:", result);
-
+      console.log("🚀 Google 로그인 시작...");
+      
+      // 타임아웃 설정 (30초)
+      const loginTimeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('로그인 시간 초과')), 30000)
+      );
+      
+      const loginPromise = signInWithPopup(auth, googleProvider);
+      const result = await Promise.race([loginPromise, loginTimeout]);
+      
+      console.log("✅ Google 로그인 성공:", result.user?.uid);
+      
       if (result.user) {
-        console.log("Redirecting to main page...");
         addToast("로그인이 완료되었습니다!", "success");
+        
+        // UserContext의 onAuthStateChanged가 처리하므로 여기서는 기다리기만
+        console.log("⏳ 사용자 상태 동기화 대기 중...");
+        
+        // 최대 5초까지 대기하다가 강제 리다이렉트
         setTimeout(() => {
-          window.location.href = "/"; // 강제 리다이렉트
-        }, 1000);
+          if (window.location.pathname === "/login") {
+            console.log("🔄 강제 리다이렉트 실행");
+            navigate("/", { replace: true });
+          }
+        }, 5000);
       }
     } catch (error) {
-      console.error("Google login error:", error);
-
+      console.error("❌ Google 로그인 실패:", error);
       handleAuthError(error);
     } finally {
-      setIsLoading(false);
+      // 로딩 상태를 조금 더 유지하여 깜빡임 방지
+      setTimeout(() => setIsLoading(false), 500);
     }
   };
 
@@ -360,40 +377,79 @@ export default function Login() {
     setError("");
 
     try {
-      await loginWithEmail(formData);
-      console.log("Email login successful, redirecting...");
+      console.log("📧 이메일 로그인 시작...");
+      
+      // 타임아웃 설정 (20초)
+      const loginTimeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('로그인 시간 초과')), 20000)
+      );
+      
+      const loginPromise = loginWithEmail(formData);
+      await Promise.race([loginPromise, loginTimeout]);
+      
+      console.log("✅ 이메일 로그인 성공");
       addToast("로그인이 완료되었습니다!", "success");
+      
+      // UserContext가 리다이렉트를 처리하므로 여기서는 기다리기만
       setTimeout(() => {
-        window.location.href = "/"; // 강제 리다이렉트
-      }, 1000);
+        if (window.location.pathname === "/login") {
+          console.log("🔄 강제 리다이렉트 실행");
+          navigate("/", { replace: true });
+        }
+      }, 3000);
+      
     } catch (error) {
-      console.error("Login error:", error);
-      const errorMsg = error.code === "auth/user-not-found" 
-        ? "등록되지 않은 이메일입니다." 
-        : error.code === "auth/wrong-password"
-        ? "비밀번호가 올바르지 않습니다."
-        : error.code === "auth/invalid-email"
-        ? "올바른 이메일 형식이 아닙니다."
-        : "로그인에 실패했습니다.";
+      console.error("❌ 이메일 로그인 실패:", error);
+      
+      let errorMsg = "로그인에 실패했습니다.";
+      
+      if (error.message === '로그인 시간 초과') {
+        errorMsg = "로그인 시간이 초과되었습니다. 인터넷 연결을 확인하고 다시 시도해주세요.";
+      } else {
+        switch (error.code) {
+          case "auth/user-not-found":
+            errorMsg = "등록되지 않은 이메일입니다.";
+            break;
+          case "auth/wrong-password":
+            errorMsg = "비밀번호가 올바르지 않습니다.";
+            break;
+          case "auth/invalid-email":
+            errorMsg = "올바른 이메일 형식이 아닙니다.";
+            break;
+          case "auth/too-many-requests":
+            errorMsg = "너무 많은 시도가 있었습니다. 잠시 후 다시 시도해주세요.";
+            break;
+          case "auth/network-request-failed":
+            errorMsg = "네트워크 연결을 확인해주세요.";
+            break;
+        }
+      }
       
       setError(errorMsg);
       addToast(errorMsg, "error");
     } finally {
-      setIsLoading(false);
+      setTimeout(() => setIsLoading(false), 500);
     }
   };
 
+  // 로딩 상태 처리 개선
   if (user.loading) {
     return (
       <Container>
         <Logo>ECHO</Logo>
-        <LoadingText>로딩중...</LoadingText>
+        <LoadingText>🔄 로딩중...</LoadingText>
       </Container>
     );
   }
 
-  if (user.isLoggedIn) {
-    return null;
+  // 이미 로그인된 경우 null 반환 (리다이렉트는 useEffect에서 처리)
+  if (user.isLoggedIn && user.uid) {
+    return (
+      <Container>
+        <Logo>ECHO</Logo>
+        <LoadingText>✅ 로그인 완료! 이동 중...</LoadingText>
+      </Container>
+    );
   }
 
   return (
