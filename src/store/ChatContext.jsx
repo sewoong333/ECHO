@@ -63,6 +63,7 @@ export function ChatProvider({ children }) {
     // 로그인 상태가 확실하지 않거나 로딩 중인 경우 대기
     if (user.loading) {
       console.log('👤 사용자 정보 로딩 중 - 채팅방 구독 대기');
+      setLoading(false);
       return;
     }
 
@@ -72,6 +73,7 @@ export function ChatProvider({ children }) {
       setMessages({});
       setCurrentChat(null);
       setUnreadCount(0);
+      setLoading(false);
       return;
     }
 
@@ -100,7 +102,7 @@ export function ChatProvider({ children }) {
           if (!room.participantInfo) {
             // 참가자 정보가 없는 경우 기본값 설정
             const participantInfo = {};
-            room.participants.forEach(pid => {
+            room.participants?.forEach(pid => {
               if (pid !== user.uid) {
                 participantInfo[pid] = {
                   nickname: '사용자',
@@ -129,11 +131,17 @@ export function ChatProvider({ children }) {
         console.error('❌ 채팅방 목록 구독 오류:', error);
         setLoading(false);
         
-        // 권한 오류가 아닌 경우에만 재시도
-        if (error.code !== 'permission-denied') {
+        // 특정 에러 코드에 따른 처리
+        if (error.code === 'permission-denied') {
+          console.log('🚫 권한 거부됨 - Firestore 규칙 확인 필요');
+        } else if (error.code === 'failed-precondition') {
+          console.log('📋 인덱스 없음 - Firebase Console에서 인덱스 생성 필요');
+        } else {
+          console.log('🔄 3초 후 재시도');
           setTimeout(() => {
-            console.log('🔄 채팅방 목록 구독 재시도');
-            // 재시도는 useEffect가 다시 실행되도록 함
+            if (user.isLoggedIn && user.uid) {
+              console.log('🔄 채팅방 목록 구독 재시도');
+            }
           }, 3000);
         }
       }
@@ -143,7 +151,7 @@ export function ChatProvider({ children }) {
       console.log('🔌 채팅방 목록 구독 해제');
       unsubscribe();
     };
-  }, [user.isLoggedIn, user.uid, user.loading]); // user.loading도 의존성에 추가
+  }, [user.isLoggedIn, user.uid]); // user.loading 의존성 제거
 
   // 특정 채팅방의 메시지 실시간 구독
   const subscribeToMessages = (chatRoomId) => {

@@ -232,6 +232,34 @@ const SearchInput = styled.input`
   }
 `;
 
+const LoadingSpinner = styled.div`
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f0f0f0;
+  border-top: 4px solid #2ed8b6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
+const LoadingContainer = styled.div`
+  padding: 60px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+`;
+
+const LoadingText = styled.div`
+  color: #666;
+  font-size: 16px;
+`;
+
 export default function ChatList() {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
@@ -245,11 +273,16 @@ export default function ChatList() {
   
   // 로그인 후 채팅방 데이터 새로고침
   useEffect(() => {
-    if (user.isLoggedIn && user.uid && chatRooms.length === 0 && !loading) {
+    // 사용자가 로그인되어 있고, 로딩이 완료되었으며, 채팅방이 없을 때만 새로고침
+    if (user.isLoggedIn && user.uid && !user.loading && chatRooms.length === 0 && !loading) {
       console.log('🔄 로그인 후 채팅방 데이터 새로고침 시도');
-      refreshChatRooms();
+      const timeoutId = setTimeout(() => {
+        refreshChatRooms();
+      }, 1000); // 1초 지연 후 새로고침
+      
+      return () => clearTimeout(timeoutId);
     }
-  }, [user.isLoggedIn, user.uid, chatRooms.length, loading, refreshChatRooms]);
+  }, [user.isLoggedIn, user.uid, user.loading, chatRooms.length, loading, refreshChatRooms]);
 
   const formatTime = (timestamp) => {
     if (!timestamp) return '';
@@ -302,7 +335,8 @@ export default function ChatList() {
     refreshChatRooms();
   };
 
-  if (loading) {
+  // 사용자가 로딩 중이거나 채팅 데이터 로딩 중일 때
+  if (user.loading || (loading && chatRooms.length === 0)) {
     return (
       <Container>
         <TopBar 
@@ -310,9 +344,12 @@ export default function ChatList() {
           badge={unreadCount > 0 ? unreadCount : null}
         />
         <Content>
-          <div style={{ padding: '20px', textAlign: 'center' }}>
-            채팅 목록을 불러오는 중...
-          </div>
+          <LoadingContainer>
+            <LoadingSpinner />
+            <LoadingText>
+              {user.loading ? '로그인 정보를 확인하는 중...' : '채팅 목록을 불러오는 중...'}
+            </LoadingText>
+          </LoadingContainer>
         </Content>
       </Container>
     );
