@@ -235,13 +235,21 @@ const SearchInput = styled.input`
 export default function ChatList() {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
-  const { chatRooms, loading, unreadCount } = useContext(ChatContext);
+  const { chatRooms, loading, unreadCount, refreshChatRooms } = useContext(ChatContext);
 
   useEffect(() => {
-    if (!user.isLoggedIn) {
+    if (!user.loading && !user.isLoggedIn) {
       navigate('/login');
     }
-  }, [user.isLoggedIn, navigate]);
+  }, [user.loading, user.isLoggedIn, navigate]);
+  
+  // 로그인 후 채팅방 데이터 새로고침
+  useEffect(() => {
+    if (user.isLoggedIn && user.uid && chatRooms.length === 0 && !loading) {
+      console.log('🔄 로그인 후 채팅방 데이터 새로고침 시도');
+      refreshChatRooms();
+    }
+  }, [user.isLoggedIn, user.uid, chatRooms.length, loading, refreshChatRooms]);
 
   const formatTime = (timestamp) => {
     if (!timestamp) return '';
@@ -288,6 +296,12 @@ export default function ChatList() {
     return message;
   };
 
+  // 채팅방 데이터 새로고침 핸들러
+  const handleRefresh = () => {
+    console.log('🔄 사용자가 채팅방 새로고침 요청');
+    refreshChatRooms();
+  };
+
   if (loading) {
     return (
       <Container>
@@ -331,6 +345,38 @@ export default function ChatList() {
               관심 있는 상품의 '채팅하기' 버튼을 눌러<br />
               판매자와 대화를 시작해보세요!
             </EmptyDescription>
+            {!loading && (
+              <button 
+                onClick={handleRefresh}
+                style={{
+                  marginTop: '16px',
+                  padding: '12px 24px',
+                  background: '#2ed8b6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  margin: '16px auto 0',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 2px 8px rgba(46, 216, 182, 0.3)'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#26c4a8';
+                  e.target.style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = '#2ed8b6';
+                  e.target.style.transform = 'translateY(0)';
+                }}
+              >
+                🔄 새로고침
+              </button>
+            )}
           </EmptyState>
         ) : (
           chatRooms.map((chatRoom) => {

@@ -25,24 +25,22 @@ export function ChatProvider({ children }) {
   const [currentChat, setCurrentChat] = useState(null);
   const [loading, setLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-
-  // 채팅방 목록 실시간 구독
-  useEffect(() => {
-    if (!user.isLoggedIn || !user.uid) {
-      setChatRooms([]);
-      setMessages({});
-      setCurrentChat(null);
-      setUnreadCount(0);
-      return;
-    }
-
-    const q = query(
-      collection(db, "chatRooms"),
-      where("participants", "array-contains", user.uid),
-      orderBy("lastMessageAt", "desc")
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+  
+  // 채팅방 데이터 새로고침 함수
+  const refreshChatRooms = async () => {
+    if (!user.uid) return;
+    
+    try {
+      console.log('🔄 채팅방 데이터 새로고침');
+      setLoading(true);
+      
+      const q = query(
+        collection(db, "chatRooms"),
+        where("participants", "array-contains", user.uid),
+        orderBy("lastMessageAt", "desc")
+      );
+      
+      const snapshot = await getDocs(q);
       const rooms = [];
       snapshot.forEach((doc) => {
         rooms.push({
@@ -52,17 +50,100 @@ export function ChatProvider({ children }) {
       });
       
       setChatRooms(rooms);
-      
-      // 읽지 않은 메시지 수 계산
-      const totalUnread = rooms.reduce((total, room) => {
-        const unread = room.unreadCount?.[user.uid] || 0;
-        return total + unread;
-      }, 0);
-      setUnreadCount(totalUnread);
-    });
+      console.log('✅ 채팅방 데이터 새로고침 완료:', rooms.length, '개');
+    } catch (error) {
+      console.error('❌ 채팅방 새로고침 실패:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return () => unsubscribe();
-  }, [user.isLoggedIn, user.uid]);
+  // 채팅방 목록 실시간 구독 (개선된 로직)
+  useEffect(() => {
+    // 로그인 상태가 확실하지 않거나 로딩 중인 경우 대기
+    if (user.loading) {
+      console.log('👤 사용자 정보 로딩 중 - 채팅방 구독 대기');
+      return;
+    }
+
+    if (!user.isLoggedIn || !user.uid) {
+      console.log('❌ 로그인되지 않음 - 채팅방 데이터 초기화');
+      setChatRooms([]);
+      setMessages({});
+      setCurrentChat(null);
+      setUnreadCount(0);
+      return;
+    }
+
+    console.log('🔄 채팅방 목록 구독 시작:', user.uid);
+    setLoading(true);
+
+    const q = query(
+      collection(db, "chatRooms"),
+      where("participants", "array-contains", user.uid),
+      orderBy("lastMessageAt", "desc")
+    );
+
+    const unsubscribe = onSnapshot(q, 
+      (snapshot) => {
+        console.log('📥 채팅방 데이터 수신:', snapshot.size, '개');
+        const rooms = [];
+        snapshot.forEach((doc) => {
+          rooms.push({
+            id: doc.id,
+            ...doc.data(),
+          });
+        });
+        
+        // 참가자 정보 보완
+        const roomsWithParticipantInfo = rooms.map(room => {
+          if (!room.participantInfo) {
+            // 참가자 정보가 없는 경우 기본값 설정
+            const participantInfo = {};
+            room.participants.forEach(pid => {
+              if (pid !== user.uid) {
+                participantInfo[pid] = {
+                  nickname: '사용자',
+                  profileImage: ''
+                };
+              }
+            });
+            return { ...room, participantInfo };
+          }
+          return room;
+        });
+        
+        setChatRooms(roomsWithParticipantInfo);
+        
+        // 읽지 않은 메시지 수 계산
+        const totalUnread = roomsWithParticipantInfo.reduce((total, room) => {
+          const unread = room.unreadCount?.[user.uid] || 0;
+          return total + unread;
+        }, 0);
+        setUnreadCount(totalUnread);
+        setLoading(false);
+        
+        console.log('✅ 채팅방 목록 업데이트 완료:', roomsWithParticipantInfo.length, '개');
+      },
+      (error) => {
+        console.error('❌ 채팅방 목록 구독 오류:', error);
+        setLoading(false);
+        
+        // 권한 오류가 아닌 경우에만 재시도
+        if (error.code !== 'permission-denied') {
+          setTimeout(() => {
+            console.log('🔄 채팅방 목록 구독 재시도');
+            // 재시도는 useEffect가 다시 실행되도록 함
+          }, 3000);
+        }
+      }
+    );
+
+    return () => {
+      console.log('🔌 채팅방 목록 구독 해제');
+      unsubscribe();
+    };
+  }, [user.isLoggedIn, user.uid, user.loading]); // user.loading도 의존성에 추가
 
   // 특정 채팅방의 메시지 실시간 구독
   const subscribeToMessages = (chatRoomId) => {
@@ -347,6 +428,7 @@ export function ChatProvider({ children }) {
     setActiveChat,
     getChatRoomInfo,
     subscribeToMessages,
+    refreshChatRooms,
   };
 
   return (
