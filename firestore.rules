@@ -181,6 +181,42 @@ service cloud.firestore {
       allow read, write: if isOwner(resource.data.userId);
     }
     
+    // 음악생활 게시글 규칙
+    match /musiclife_posts/{postId} {
+      // 읽기: 모든 사용자가 조회 가능
+      allow read: if true;
+      
+      // 생성: 인증된 사용자만 게시글 작성 가능
+      allow create: if isAuthenticated() && validateMusicLifePost();
+      
+      // 수정/삭제: 게시글 작성자만 가능
+      allow update, delete: if isOwner(resource.data.authorId);
+      
+      // 게시글 데이터 유효성 검사
+      function validateMusicLifePost() {
+        let data = request.resource.data;
+        return data.keys().hasAll(['title', 'content', 'authorId']) &&
+               data.title is string &&
+               data.title.size() >= 1 && data.title.size() <= 100 &&
+               data.content is string &&
+               data.content.size() >= 1 && data.content.size() <= 5000 &&
+               data.authorId == request.auth.uid;
+      }
+      
+      // 댓글 규칙
+      match /comments/{commentId} {
+        // 읽기: 모든 사용자가 조회 가능
+        allow read: if true;
+        
+        // 생성: 인증된 사용자만 댓글 작성 가능
+        allow create: if isAuthenticated() && 
+                         request.resource.data.authorId == request.auth.uid;
+        
+        // 수정/삭제: 댓글 작성자만 가능
+        allow update, delete: if isOwner(resource.data.authorId);
+      }
+    }
+    
     // 관리자 전용 컬렉션
     match /admin/{document=**} {
       // 관리자만 접근 가능 (실제 구현에서는 커스텀 클레임 사용)
