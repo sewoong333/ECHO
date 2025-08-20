@@ -37,8 +37,7 @@ export function ChatProvider({ children }) {
       
       const q = query(
         collection(db, "chatRooms"),
-        where("participants", "array-contains", user.uid),
-        orderBy("lastMessageAt", "desc")
+        where("participants", "array-contains", user.uid)
       );
       
       const snapshot = await getDocs(q);
@@ -50,8 +49,15 @@ export function ChatProvider({ children }) {
         });
       });
       
-      setChatRooms(rooms);
-      console.log('✅ 채팅방 데이터 새로고침 완료:', rooms.length, '개');
+      // 클라이언트 사이드에서 시간 순으로 정렬
+      const sortedRooms = rooms.sort((a, b) => {
+        const aTime = a.lastMessageAt?.toMillis?.() || 0;
+        const bTime = b.lastMessageAt?.toMillis?.() || 0;
+        return bTime - aTime; // 최신순
+      });
+      
+      setChatRooms(sortedRooms);
+      console.log('✅ 채팅방 데이터 새로고침 완료:', sortedRooms.length, '개');
     } catch (error) {
       console.error('❌ 채팅방 새로고침 실패:', error);
     } finally {
@@ -87,10 +93,10 @@ export function ChatProvider({ children }) {
       setLoading(true);
     }
 
+    // 인덱스가 생성될 때까지 orderBy 없이 쿼리
     const q = query(
       collection(db, "chatRooms"),
-      where("participants", "array-contains", user.uid),
-      orderBy("lastMessageAt", "desc")
+      where("participants", "array-contains", user.uid)
     );
 
     try {
@@ -122,10 +128,17 @@ export function ChatProvider({ children }) {
             return room;
           });
           
-          setChatRooms(roomsWithParticipantInfo);
+          // 클라이언트 사이드에서 시간 순으로 정렬
+          const sortedRooms = roomsWithParticipantInfo.sort((a, b) => {
+            const aTime = a.lastMessageAt?.toMillis?.() || 0;
+            const bTime = b.lastMessageAt?.toMillis?.() || 0;
+            return bTime - aTime; // 최신순
+          });
+          
+          setChatRooms(sortedRooms);
           
           // 읽지 않은 메시지 수 계산
-          const totalUnread = roomsWithParticipantInfo.reduce((total, room) => {
+          const totalUnread = sortedRooms.reduce((total, room) => {
             const unread = room.unreadCount?.[user.uid] || 0;
             return total + unread;
           }, 0);
@@ -137,19 +150,24 @@ export function ChatProvider({ children }) {
           }
           setLoading(false);
           
-          console.log('✅ 채팅방 목록 업데이트 완료:', roomsWithParticipantInfo.length, '개');
+          console.log('✅ 채팅방 목록 업데이트 완료:', sortedRooms.length, '개');
         },
         (error) => {
           console.error('❌ 채팅방 목록 구독 오류:', error);
+          console.error('❌ 에러 코드:', error.code);
+          console.error('❌ 에러 메시지:', error.message);
           setLoading(false);
           setInitialized(true);
           
           // 에러 타입별 처리
           if (error.code === 'permission-denied') {
-            console.log('🚫 권한 거부됨');
+            console.log('🚫 권한 거부됨 - Firestore 규칙 확인 필요');
             setChatRooms([]);
           } else if (error.code === 'failed-precondition') {
-            console.log('📋 인덱스 없음');
+            console.log('📋 인덱스 없음 - Firebase Console에서 인덱스 생성 중');
+            setChatRooms([]);
+          } else {
+            console.log('🔄 기타 오류 - 빈 배열로 초기화');
             setChatRooms([]);
           }
         }
