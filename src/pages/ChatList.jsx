@@ -263,7 +263,7 @@ const LoadingText = styled.div`
 export default function ChatList() {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
-  const { chatRooms, loading, unreadCount, refreshChatRooms } = useContext(ChatContext);
+  const { chatRooms, loading, unreadCount, initialized, refreshChatRooms } = useContext(ChatContext);
 
   useEffect(() => {
     if (!user.loading && !user.isLoggedIn) {
@@ -271,18 +271,11 @@ export default function ChatList() {
     }
   }, [user.loading, user.isLoggedIn, navigate]);
   
-  // 로그인 후 채팅방 데이터 새로고침
-  useEffect(() => {
-    // 사용자가 로그인되어 있고, 로딩이 완료되었으며, 채팅방이 없을 때만 새로고침
-    if (user.isLoggedIn && user.uid && !user.loading && chatRooms.length === 0 && !loading) {
-      console.log('🔄 로그인 후 채팅방 데이터 새로고침 시도');
-      const timeoutId = setTimeout(() => {
-        refreshChatRooms();
-      }, 1000); // 1초 지연 후 새로고침
-      
-      return () => clearTimeout(timeoutId);
-    }
-  }, [user.isLoggedIn, user.uid, user.loading, chatRooms.length, loading, refreshChatRooms]);
+  // 수동 새로고침을 위한 함수 (자동 새로고침 제거)
+  const handleManualRefresh = () => {
+    console.log('🔄 사용자 수동 새로고침 요청');
+    refreshChatRooms();
+  };
 
   const formatTime = (timestamp) => {
     if (!timestamp) return '';
@@ -329,14 +322,8 @@ export default function ChatList() {
     return message;
   };
 
-  // 채팅방 데이터 새로고침 핸들러
-  const handleRefresh = () => {
-    console.log('🔄 사용자가 채팅방 새로고침 요청');
-    refreshChatRooms();
-  };
-
-  // 사용자가 로딩 중이거나 채팅 데이터 로딩 중일 때
-  if (user.loading || (loading && chatRooms.length === 0)) {
+  // 사용자 정보 로딩 중이거나 채팅 데이터 첫 로딩 중일 때만 로딩 화면
+  if (user.loading || (loading && !initialized)) {
     return (
       <Container>
         <TopBar 
@@ -384,7 +371,7 @@ export default function ChatList() {
             </EmptyDescription>
             {!loading && (
               <button 
-                onClick={handleRefresh}
+                onClick={handleManualRefresh}
                 style={{
                   marginTop: '16px',
                   padding: '12px 24px',
