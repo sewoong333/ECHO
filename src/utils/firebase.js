@@ -932,21 +932,19 @@ export const musiclifeService = {
     });
   },
   async getPosts() {
-    const q = query(musiclifeCollection, orderBy("createdAt", "desc"));
-    const snap = await getDocs(q);
-    return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  },
-  async getPost(id) {
     try {
-      const ref = doc(db, "musiclife_posts", id);
-      const snap = await getDoc(ref);
+      const q = query(musiclifeCollection, orderBy("createdAt", "desc"));
+      const snap = await getDocs(q);
+      const posts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       
-      if (!snap.exists()) {
-        console.log(`🚫 게시글 ID ${id}를 찾을 수 없습니다.`);
+      // 실제 게시글이 없거나 적을 때 샘플 데이터 추가
+      if (posts.length < 5) {
+        console.log('📝 음악생활 게시글 샘플 데이터 생성');
         
-        // ID에 따른 다양한 샘플 데이터 생성
+        // 상세페이지와 동일한 샘플 데이터 사용
         const samplePosts = [
           {
+            id: "sample-post-1",
             title: "🎸 첫 번째 기타 연주 후기",
             content: `안녕하세요! 오늘 드디어 첫 기타 연주를 해봤어요.
 
@@ -957,11 +955,15 @@ export const musiclifeService = {
 다음 목표는 스트럼 패턴을 익혀서 간단한 노래라도 쳐보는 거예요. 
 
 음악생활 시작한 분들, 모두 화이팅해요! 🎵`,
+            authorId: "sample-user-1",
             authorName: "음악러버",
+            createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1일 전
             viewCount: 127,
-            commentCount: 8
+            commentCount: 8,
+            likes: 23
           },
           {
+            id: "sample-post-2", 
             title: "🎹 피아노 독학 3개월 후기",
             content: `안녕하세요! 피아노 독학을 시작한 지 3개월이 되었어요.
 
@@ -972,11 +974,15 @@ export const musiclifeService = {
 온라인 강의도 많이 도움이 되지만, 역시 직접 손으로 치면서 익히는 게 제일 중요한 것 같아요.
 
 다음 목표는 쇼팽의 '녹턴'에 도전해보는 거예요! 🎼`,
-            authorName: "피아니스트 지망생",
+            authorId: "sample-user-2",
+            authorName: "피아니스트 지망생", 
+            createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2일 전
             viewCount: 89,
-            commentCount: 12
+            commentCount: 12,
+            likes: 34
           },
           {
+            id: "sample-post-3",
             title: "🥁 드럼 레슨 시작했어요!",
             content: `드럼을 배우고 싶다고 생각만 하다가 드디어 레슨을 시작했어요!
 
@@ -987,11 +993,15 @@ export const musiclifeService = {
 다음 주부터는 필인(fill-in) 연습을 시작한다고 하니 기대돼요!
 
 드럼 치시는 분들, 초보자에게 조언 부탁드려요~ 🥁`,
+            authorId: "sample-user-3",
             authorName: "드러머 지망생",
+            createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3일 전
             viewCount: 156,
-            commentCount: 6
+            commentCount: 6,
+            likes: 19
           },
           {
+            id: "sample-post-4",
             title: "🎺 색소폰의 매력에 빠졌어요",
             content: `우연히 재즈바에서 들은 색소폰 소리에 매료되어서 배우기 시작했어요.
 
@@ -1002,11 +1012,15 @@ export const musiclifeService = {
 지금은 재즈 스탠다드 곡들을 연습하고 있어요. 'Autumn Leaves'가 목표예요!
 
 관악기 연주하시는 분들 계시면 연습 팁 공유해주세요~ 🎷`,
+            authorId: "sample-user-4",
             authorName: "재즈러버",
+            createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), // 4일 전
             viewCount: 203,
-            commentCount: 9
+            commentCount: 9,
+            likes: 42
           },
           {
+            id: "sample-post-5",
             title: "🎻 바이올린의 아픈 손가락들...",
             content: `바이올린을 시작한 지 2주가 됐는데, 손가락이 정말 아파요 ㅠㅠ
 
@@ -1019,22 +1033,150 @@ export const musiclifeService = {
 지금은 '작은 별' 정도만 겨우 칠 수 있지만, 언젠가는 아름다운 클래식 곡들을 연주하고 싶어요.
 
 바이올린 연주자 분들, 초보 때 어떻게 버티셨나요? 🎻`,
+            authorId: "sample-user-5",
             authorName: "현악기 도전자",
+            createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5일 전
             viewCount: 78,
-            commentCount: 15
+            commentCount: 15,
+            likes: 27
           }
         ];
         
-        // ID 해시를 이용해서 일관된 샘플 데이터 선택
-        const hash = id.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-        const selectedPost = samplePosts[hash % samplePosts.length];
+        // 기존 게시글과 샘플 게시글 합치기
+        return [...posts, ...samplePosts];
+      }
+      
+      return posts;
+    } catch (error) {
+      console.error('게시글 목록 조회 오류:', error);
+      
+      // 에러 발생 시에도 샘플 데이터 반환
+      return [
+        {
+          id: "sample-post-1",
+          title: "🎸 첫 번째 기타 연주 후기", 
+          content: "안녕하세요! 오늘 드디어 첫 기타 연주를 해봤어요...",
+          authorId: "sample-user-1",
+          authorName: "음악러버",
+          createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+          viewCount: 127,
+          commentCount: 8,
+          likes: 23
+        }
+      ];
+    }
+  },
+  async getPost(id) {
+    try {
+      const ref = doc(db, "musiclife_posts", id);
+      const snap = await getDoc(ref);
+      
+      if (!snap.exists()) {
+        console.log(`🚫 게시글 ID ${id}를 찾을 수 없습니다.`);
         
-        return {
-          ...selectedPost,
-          authorId: "sample-user",
-          createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000), // 랜덤한 최근 일주일 내
-          likes: Math.floor(Math.random() * 50) + 5
+        // 특정 샘플 ID들에 대해 일치하는 데이터 반환
+        const samplePosts = {
+          "sample-post-1": {
+            title: "🎸 첫 번째 기타 연주 후기",
+            content: `안녕하세요! 오늘 드디어 첫 기타 연주를 해봤어요.
+
+처음엔 손가락이 아프고 코드 잡는 게 어려웠지만, 계속 연습하니까 조금씩 소리가 나더라고요.
+
+특히 C코드에서 G코드로 넘어가는 부분이 제일 어려웠는데, 유튜브 강의를 보면서 천천히 따라하니까 이제 조금은 할 수 있게 됐어요!
+
+다음 목표는 스트럼 패턴을 익혀서 간단한 노래라도 쳐보는 거예요. 
+
+음악생활 시작한 분들, 모두 화이팅해요! 🎵`,
+            authorName: "음악러버",
+            authorId: "sample-user-1",
+            createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+            viewCount: 127,
+            commentCount: 8,
+            likes: 23
+          },
+          "sample-post-2": {
+            title: "🎹 피아노 독학 3개월 후기",
+            content: `안녕하세요! 피아노 독학을 시작한 지 3개월이 되었어요.
+
+처음엔 건반 위치도 모르고 악보 읽는 것도 어려웠는데, 지금은 간단한 곡 정도는 칠 수 있게 됐어요!
+
+요즘 연습하고 있는 곡은 '캐논 변주곡'인데, 왼손 반주가 정말 어려워요 ㅠㅠ 그래도 매일 조금씩 연습하니까 실력이 늘고 있는 걸 느껴요.
+
+온라인 강의도 많이 도움이 되지만, 역시 직접 손으로 치면서 익히는 게 제일 중요한 것 같아요.
+
+다음 목표는 쇼팽의 '녹턴'에 도전해보는 거예요! 🎼`,
+            authorName: "피아니스트 지망생",
+            authorId: "sample-user-2",
+            createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+            viewCount: 89,
+            commentCount: 12,
+            likes: 34
+          },
+          "sample-post-3": {
+            title: "🥁 드럼 레슨 시작했어요!",
+            content: `드럼을 배우고 싶다고 생각만 하다가 드디어 레슨을 시작했어요!
+
+첫 날엔 스틱 잡는 법부터 배웠는데, 생각보다 어렵더라고요. 팔의 힘을 빼고 손목을 사용해서 쳐야 한다는데 익숙해지는데 시간이 좀 걸릴 것 같아요.
+
+그래도 간단한 8비트 패턴 정도는 칠 수 있게 됐어요! 킥, 스네어, 하이햇 조합이 생각보다 재밌더라고요.
+
+다음 주부터는 필인(fill-in) 연습을 시작한다고 하니 기대돼요!
+
+드럼 치시는 분들, 초보자에게 조언 부탁드려요~ 🥁`,
+            authorName: "드러머 지망생",
+            authorId: "sample-user-3",
+            createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+            viewCount: 156,
+            commentCount: 6,
+            likes: 19
+          },
+          "sample-post-4": {
+            title: "🎺 색소폰의 매력에 빠졌어요",
+            content: `우연히 재즈바에서 들은 색소폰 소리에 매료되어서 배우기 시작했어요.
+
+처음엔 소리 내는 것부터 어려웠어요. 입술 모양, 혀의 위치, 숨쉬는 법까지 신경 써야 할 게 너무 많더라고요.
+
+하지만 한 달 정도 연습하니까 드디어 깨끗한 소리가 나기 시작했어요! 'Amazing Grace'를 연주할 수 있게 됐을 때의 그 감동은 정말 잊을 수 없어요.
+
+지금은 재즈 스탠다드 곡들을 연습하고 있어요. 'Autumn Leaves'가 목표예요!
+
+관악기 연주하시는 분들 계시면 연습 팁 공유해주세요~ 🎷`,
+            authorName: "재즈러버",
+            authorId: "sample-user-4",
+            createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+            viewCount: 203,
+            commentCount: 9,
+            likes: 42
+          },
+          "sample-post-5": {
+            title: "🎻 바이올린의 아픈 손가락들...",
+            content: `바이올린을 시작한 지 2주가 됐는데, 손가락이 정말 아파요 ㅠㅠ
+
+현을 누르는 왼손 손가락 끝이 아프고, 활을 잡는 오른손도 계속 긴장돼서 피곤해요. 자세도 어색하고 턱받이도 불편하고...
+
+그런데 가끔 깨끗한 소리가 날 때가 있어요. 그때의 그 기분은 정말 최고예요! 
+
+선생님께서 바이올린은 인내의 악기라고 하시더라고요. 정말 맞는 말인 것 같아요.
+
+지금은 '작은 별' 정도만 겨우 칠 수 있지만, 언젠가는 아름다운 클래식 곡들을 연주하고 싶어요.
+
+바이올린 연주자 분들, 초보 때 어떻게 버티셨나요? 🎻`,
+            authorName: "현악기 도전자", 
+            authorId: "sample-user-5",
+            createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+            viewCount: 78,
+            commentCount: 15,
+            likes: 27
+          }
         };
+        
+        // 해당 ID의 샘플 데이터가 있으면 반환
+        if (samplePosts[id]) {
+          return samplePosts[id];
+        }
+        
+        // ID가 없으면 기본 샘플 데이터 반환
+        return samplePosts["sample-post-1"];
       }
       
       // 조회수 증가
