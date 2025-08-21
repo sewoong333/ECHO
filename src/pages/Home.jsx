@@ -11,8 +11,6 @@ import TopBar from "../components/TopBar";
 import { ProductContext } from "../store/ProductContext";
 import { UserContext } from "../store/UserContext";
 import { INSTRUMENT_CATEGORIES, REGIONS } from "../utils/firebase";
-// 개발 시에만 사용 - 브라우저 콘솔에서 window.addRealProducts() 실행
-import { addRealProductsToFirebase } from "../utils/addRealData";
 import {
   FaHeart,
   FaRegHeart,
@@ -1062,12 +1060,7 @@ export default function Home() {
   const [recentSearches, setRecentSearches] = useState([]);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
-  // 개발자 도구용 - 소비자가 직접 사용하지 않음
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.addRealProducts = addRealProductsToFirebase;
-    }
-  }, []);
+  // 개발자 도구 제거됨 - 실제 Firebase 데이터만 사용
   const [tempFilters, setTempFilters] = useState(filters);
   const [sortBy, setSortBy] = useState('latest');
   

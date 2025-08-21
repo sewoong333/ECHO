@@ -937,7 +937,12 @@ export const musiclifeService = {
       const snap = await getDocs(q);
       const posts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       
-      // 실제 게시글이 없거나 적을 때 샘플 데이터 추가
+      // 실제 게시글만 반환 (샘플 데이터 제거)
+      console.log('📝 실제 음악생활 게시글:', posts.length, '개');
+      return posts;
+      
+      // 아래 샘플 데이터 제거됨
+      /*
       if (posts.length < 5) {
         console.log('📝 음악생활 게시글 샘플 데이터 생성');
         
@@ -1045,12 +1050,16 @@ export const musiclifeService = {
         // 기존 게시글과 샘플 게시글 합치기
         return [...posts, ...samplePosts];
       }
+      */
       
-      return posts;
     } catch (error) {
       console.error('게시글 목록 조회 오류:', error);
       
-      // 에러 발생 시에도 샘플 데이터 반환
+      // 에러 발생 시 빈 배열 반환 (샘플 데이터 제거)
+      return [];
+      
+      // 아래 샘플 데이터 제거됨
+      /*
       return [
         {
           id: "sample-post-1",
@@ -1064,6 +1073,7 @@ export const musiclifeService = {
           likes: 23
         }
       ];
+      */
     }
   },
   async getPost(id) {
@@ -1074,6 +1084,11 @@ export const musiclifeService = {
       if (!snap.exists()) {
         console.log(`🚫 게시글 ID ${id}를 찾을 수 없습니다.`);
         
+        // 실제 데이터가 없으면 null 반환
+        return null;
+        
+        // 아래 샘플 데이터 제거됨
+        /*
         // 특정 샘플 ID들에 대해 일치하는 데이터 반환
         const samplePosts = {
           "sample-post-1": {
@@ -1177,6 +1192,7 @@ export const musiclifeService = {
         
         // ID가 없으면 기본 샘플 데이터 반환
         return samplePosts["sample-post-1"];
+        */
       }
       
       // 조회수 증가
@@ -1185,27 +1201,8 @@ export const musiclifeService = {
     } catch (error) {
       console.error('게시글 조회 오류:', error);
       
-      // 네트워크 오류 등의 경우에도 샘플 데이터 반환
-      const samplePost = {
-        title: "🎹 피아노 연습 일기",
-        content: `오늘은 피아노 연습 3주차!
-
-기초 스케일 연습을 열심히 하고 있어요. C메이저 스케일은 이제 자연스럽게 칠 수 있게 됐고, 이번 주부터는 G메이저 스케일에 도전하고 있어요.
-
-아직 검은 건반 누르는 게 어색하지만, 매일 30분씩 연습하니까 손가락이 점점 익숙해지는 게 느껴져요.
-
-다음 달엔 간단한 곡도 도전해보려고 해요. 캐논 변주곡이나 엘리제를 위하여 같은 유명한 곡 말이에요!
-
-피아노 배우시는 분들, 같이 힘내요~ 🎼`,
-        authorId: "sample-user-2",
-        authorName: "피아니스트 지망생",
-        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2일 전
-        viewCount: 89,
-        commentCount: 5,
-        likes: 15
-      };
-      
-      return samplePost;
+      // 에러 발생 시 null 반환 (샘플 데이터 제거)
+      return null;
     }
   },
   async updatePost(id, data) {
@@ -1232,6 +1229,12 @@ export const musiclifeService = {
       
       const comments = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       
+      // 실제 댓글만 반환 (샘플 댓글 제거)
+      console.log(`📝 게시글 ${postId}의 실제 댓글:`, comments.length, '개');
+      return comments;
+      
+      // 아래 샘플 댓글 제거됨
+      /*
       // 댓글이 없거나 적을 때 샘플 댓글 추가
       if (comments.length === 0) {
         console.log(`📝 게시글 ${postId}에 샘플 댓글 생성`);
@@ -1282,28 +1285,13 @@ export const musiclifeService = {
           createdAt: new Date(Date.now() - (selectedComments.length - index) * 60 * 60 * 1000), // 시간 순서대로
         }));
       }
+      */
       
-      return comments;
     } catch (error) {
       console.error('댓글 조회 오류:', error);
       
-      // 에러가 발생해도 샘플 댓글 반환
-      return [
-        {
-          id: "sample-comment-1",
-          content: "좋은 글 감사해요! 많이 도움됐어요 😊",
-          authorId: "sample-commenter-1",
-          authorName: "감사한사람",
-          createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5시간 전
-        },
-        {
-          id: "sample-comment-2",
-          content: "저도 비슷한 경험 있어요. 꾸준히 하시면 분명 늘 거예요!",
-          authorId: "sample-commenter-2", 
-          authorName: "경험자",
-          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2시간 전
-        }
-      ];
+      // 에러 발생 시 빈 배열 반환 (샘플 댓글 제거)
+      return [];
     }
   },
   async deleteComment(postId, commentId) {
