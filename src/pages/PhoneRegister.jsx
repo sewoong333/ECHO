@@ -237,6 +237,39 @@ const InfoBox = styled.div`
   gap: 12px;
 `;
 
+const RecaptchaContainer = styled.div`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.5);
+  width: 100vw;
+  height: 100vh;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  
+  &.show {
+    display: flex;
+  }
+  
+  .recaptcha-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    max-width: 400px;
+    
+    .loading-text {
+      margin-top: 16px;
+      color: #666;
+      font-size: 14px;
+    }
+  }
+`;
+
 const SuccessBox = styled.div`
   background: #f0fff4;
   border: 1px solid #9ae6b4;
@@ -251,7 +284,7 @@ const SuccessBox = styled.div`
 
 export default function PhoneRegister() {
   const navigate = useNavigate();
-  const { updateUserProfile } = useContext(UserContext);
+  const { user: _user, updateUserProfile } = useContext(UserContext);
   const { showSuccess, showError } = useToast();
   
   const [step, setStep] = useState(1); // 1: 전화번호 입력, 2: 인증코드 입력
@@ -273,6 +306,18 @@ export default function PhoneRegister() {
     }
     return () => clearInterval(interval);
   }, [isCodeSent, timer]);
+
+  // 컴포넌트 마운트/언마운트 시 reCAPTCHA 정리
+  useEffect(() => {
+    return () => {
+      // 컴포넌트 언마운트 시 reCAPTCHA 정리
+      try {
+        phoneAuthService.resetRecaptcha();
+      } catch (error) {
+        console.warn('reCAPTCHA 정리 중 오류:', error);
+      }
+    };
+  }, []);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
@@ -305,6 +350,13 @@ export default function PhoneRegister() {
 
     setLoading(true);
     try {
+      // reCAPTCHA 컨테이너 준비
+      const recaptchaContainer = document.getElementById('recaptcha-container');
+      if (recaptchaContainer) {
+        recaptchaContainer.innerHTML = ''; // 기존 내용 정리
+        recaptchaContainer.style.display = 'block';
+      }
+
       // Firebase Phone Auth 사용
       const confirmation = await phoneAuthService.sendVerificationCode(phoneNumber);
       setConfirmationResult(confirmation);
@@ -313,17 +365,35 @@ export default function PhoneRegister() {
       setStep(2);
       setTimer(180); // 3분 리셋
       showSuccess('인증번호가 전송되었습니다.');
+      
+      // reCAPTCHA 컨테이너 숨기기
+      if (recaptchaContainer) {
+        recaptchaContainer.style.display = 'none';
+      }
     } catch (error) {
       console.error('인증번호 전송 실패:', error);
-      let errorMessage = '인증번호 전송에 실패했습니다.';
       
+      // 에러 메시지 처리
+      let errorMessage = error.message || '인증번호 전송에 실패했습니다.';
+      
+      // Firebase 에러 코드 별 처리
       if (error.code === 'auth/too-many-requests') {
-        errorMessage = '너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요.';
+        errorMessage = '너무 많은 요청이 발생했습니다. 5분 후 다시 시도해주세요.';
       } else if (error.code === 'auth/invalid-phone-number') {
         errorMessage = '올바르지 않은 전화번호입니다.';
+      } else if (error.code === 'auth/quota-exceeded') {
+        errorMessage = '일일 SMS 할당량을 초과했습니다. 내일 다시 시도해주세요.';
+      } else if (error.message.includes('reCAPTCHA')) {
+        errorMessage = '보안 인증에 실패했습니다. 페이지를 새로고침 후 다시 시도해주세요.';
       }
       
       showError(errorMessage);
+      
+      // reCAPTCHA 컨테이너 숨기기
+      const recaptchaContainer = document.getElementById('recaptcha-container');
+      if (recaptchaContainer) {
+        recaptchaContainer.style.display = 'none';
+      }
     } finally {
       setLoading(false);
     }
@@ -392,8 +462,16 @@ export default function PhoneRegister() {
         </Header>
 
         <Content>
-          {/* reCAPTCHA 컨테이너 */}
-          <div id="recaptcha-container"></div>
+          {/* reCAPTCHA 컨테이너 - 개선된 버전 */}
+          <RecaptchaContainer id="recaptcha-modal" className={loading ? 'show' : ''}>
+            <div className="recaptcha-content">
+              <div id="recaptcha-container"></div>
+              <div className="loading-text">
+                보안 확인 중입니다...<br/>
+                잠시만 기다려주세요.
+              </div>
+            </div>
+          </RecaptchaContainer>
           
           <StepIndicator>
             <StepContainer>
@@ -486,9 +564,12 @@ export default function PhoneRegister() {
                 {timer === 0 && !verified && (
                   <VerifyButton
                     onClick={() => {
+                      // reCAPTCHA 초기화 후 재전송
+                      phoneAuthService.resetRecaptcha();
                       setStep(1);
                       setIsCodeSent(false);
                       setVerificationCode('');
+                      setConfirmationResult(null);
                     }}
                     style={{ marginTop: '12px', width: '100%', background: '#666' }}
                   >

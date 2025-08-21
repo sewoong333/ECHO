@@ -1317,38 +1317,93 @@ export const musiclifeService = {
 export const phoneAuthService = {
   recaptchaVerifier: null,
 
-  // reCAPTCHA 설정
+  // reCAPTCHA 설정 - 개선된 버전
   setupRecaptcha(elementId = 'recaptcha-container') {
     try {
-      if (!this.recaptchaVerifier) {
-        this.recaptchaVerifier = new RecaptchaVerifier(auth, elementId, {
-          size: 'invisible',
-          callback: (response) => {
-            console.log('reCAPTCHA 완료:', response);
-          },
-          'expired-callback': () => {
-            console.log('reCAPTCHA 만료됨');
-          }
-        });
+      // 기존 verifier가 있으면 정리
+      if (this.recaptchaVerifier) {
+        this.resetRecaptcha();
       }
+
+      // DOM 요소 존재 확인
+      const container = document.getElementById(elementId);
+      if (!container) {
+        console.warn(`reCAPTCHA 컨테이너 ${elementId}를 찾을 수 없습니다. 동적으로 생성합니다.`);
+        const newContainer = document.createElement('div');
+        newContainer.id = elementId;
+        newContainer.style.display = 'none';
+        document.body.appendChild(newContainer);
+      }
+
+      this.recaptchaVerifier = new RecaptchaVerifier(auth, elementId, {
+        size: 'invisible',
+        callback: (response) => {
+          console.log('reCAPTCHA 완료:', response);
+        },
+        'expired-callback': () => {
+          console.log('reCAPTCHA 만료됨 - 재설정 필요');
+          this.resetRecaptcha();
+        },
+        'error-callback': (error) => {
+          console.error('reCAPTCHA 오류:', error);
+          this.resetRecaptcha();
+        }
+      });
+      
       return this.recaptchaVerifier;
     } catch (error) {
       console.error('reCAPTCHA 설정 실패:', error);
+      this.resetRecaptcha();
       throw error;
     }
   },
 
-  // 인증 번호 전송
+  // 인증 번호 전송 - 개선된 버전
   async sendVerificationCode(phoneNumber) {
     try {
-      // 전화번호 형식 검증 (+82로 변환)
-      const formattedPhone = phoneNumber.startsWith('+82') 
-        ? phoneNumber 
-        : '+82' + phoneNumber.replace(/^0/, '');
+      // 전화번호 형식 검증 및 정리
+      const cleanedPhone = phoneNumber.replace(/[^0-9]/g, '');
+      let formattedPhone;
+      
+      if (cleanedPhone.startsWith('010')) {
+        formattedPhone = '+82' + cleanedPhone.substring(1);
+      } else if (cleanedPhone.startsWith('82')) {
+        formattedPhone = '+' + cleanedPhone;
+      } else {
+        throw new Error('올바르지 않은 전화번호 형식입니다.');
+      }
 
       console.log('전화번호 인증 요청:', formattedPhone);
 
-      const appVerifier = this.setupRecaptcha();
+      // reCAPTCHA 설정 및 재시도 로직
+      let appVerifier;
+      let maxRetries = 3;
+      let attempt = 0;
+      
+      while (attempt < maxRetries) {
+        try {
+          appVerifier = this.setupRecaptcha();
+          
+          // reCAPTCHA 렌더링 대기
+          if (appVerifier && typeof appVerifier.render === 'function') {
+            await appVerifier.render();
+          }
+          
+          break;
+        } catch (setupError) {
+          console.warn(`reCAPTCHA 설정 시도 ${attempt + 1} 실패:`, setupError);
+          this.resetRecaptcha();
+          attempt++;
+          
+          if (attempt >= maxRetries) {
+            throw new Error('reCAPTCHA 설정에 실패했습니다. 페이지를 새로고침해주세요.');
+          }
+          
+          // 잠시 대기 후 재시도
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+
       const confirmationResult = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
       
       console.log('인증번호 전송 성공');
@@ -1356,6 +1411,16 @@ export const phoneAuthService = {
     } catch (error) {
       console.error('인증번호 전송 실패:', error);
       this.resetRecaptcha();
+      
+      // 사용자 친화적 에러 메시지 제공
+      if (error.code === 'auth/too-many-requests') {
+        throw new Error('너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요.');
+      } else if (error.code === 'auth/invalid-phone-number') {
+        throw new Error('올바르지 않은 전화번호입니다.');
+      } else if (error.code === 'auth/quota-exceeded') {
+        throw new Error('SMS 할당량을 초과했습니다. 내일 다시 시도해주세요.');
+      }
+      
       throw error;
     }
   },
@@ -1385,11 +1450,25 @@ export const phoneAuthService = {
     }
   },
 
-  // reCAPTCHA 초기화
+  // reCAPTCHA 초기화 - 개선된 버전
   resetRecaptcha() {
-    if (this.recaptchaVerifier) {
-      this.recaptchaVerifier.clear();
-      this.recaptchaVerifier = null;
+    try {
+      if (this.recaptchaVerifier) {
+        this.recaptchaVerifier.clear();
+        this.recaptchaVerifier = null;
+      }
+      
+      // reCAPTCHA DOM 요소 정리
+      const containers = document.querySelectorAll('[id^="recaptcha"]');
+      containers.forEach(container => {
+        if (container.innerHTML) {
+          container.innerHTML = '';
+        }
+      });
+      
+      console.log('reCAPTCHA 초기화 완료');
+    } catch (error) {
+      console.warn('reCAPTCHA 초기화 중 오류:', error);
     }
   },
 
