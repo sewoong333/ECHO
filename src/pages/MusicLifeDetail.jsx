@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { musiclifeService } from "../utils/firebase";
 import { useParams, useNavigate } from "react-router-dom";
 import { UserContext } from "../store/UserContext";
+import { ChatContext } from "../store/ChatContext";
 import TopBar from "../components/TopBar";
 import {
   FaArrowLeft,
@@ -16,6 +17,7 @@ import {
   FaRegHeart,
   FaShare,
   FaFlag,
+  FaCommentDots,
 } from "react-icons/fa";
 
 // Styled Components
@@ -148,16 +150,32 @@ const ActionButton = styled.button`
   gap: 8px;
   padding: 10px 16px;
   border-radius: 12px;
-  border: 1px solid ${props => props.variant === 'danger' ? '#ef4444' : 'rgba(46, 216, 182, 0.3)'};
-  background: ${props => props.variant === 'danger' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(46, 216, 182, 0.1)'};
-  color: ${props => props.variant === 'danger' ? '#ef4444' : '#2ed8b6'};
+  border: 1px solid ${props => {
+    if (props.variant === 'danger') return '#ef4444';
+    if (props.variant === 'chat') return 'rgba(74, 144, 226, 0.3)';
+    return 'rgba(46, 216, 182, 0.3)';
+  }};
+  background: ${props => {
+    if (props.variant === 'danger') return 'rgba(239, 68, 68, 0.1)';
+    if (props.variant === 'chat') return 'rgba(74, 144, 226, 0.1)';
+    return 'rgba(46, 216, 182, 0.1)';
+  }};
+  color: ${props => {
+    if (props.variant === 'danger') return '#ef4444';
+    if (props.variant === 'chat') return '#4a90e2';
+    return '#2ed8b6';
+  }};
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 0.9rem;
 
   &:hover {
-    background: ${props => props.variant === 'danger' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(46, 216, 182, 0.2)'};
+    background: ${props => {
+      if (props.variant === 'danger') return 'rgba(239, 68, 68, 0.2)';
+      if (props.variant === 'chat') return 'rgba(74, 144, 226, 0.2)';
+      return 'rgba(46, 216, 182, 0.2)';
+    }};
     transform: translateY(-1px);
   }
 `;
@@ -322,6 +340,7 @@ export default function MusicLifeDetail() {
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(true);
   const { user } = useContext(UserContext);
+  const { createOrGetChatRoom } = useContext(ChatContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -410,6 +429,80 @@ export default function MusicLifeDetail() {
     }
   };
 
+  // 게시글 작성자와 채팅하기
+  const handleChatWithAuthor = async () => {
+    if (!user.isLoggedIn) {
+      alert('로그인이 필요합니다.');
+      navigate('/login');
+      return;
+    }
+
+    if (user.uid === post.authorId) {
+      alert('자신과는 채팅할 수 없습니다.');
+      return;
+    }
+
+    try {
+      // 음악생활 게시글을 가상의 상품으로 처리
+      const musicPostInfo = {
+        title: `[음악생활] ${post.title}`,
+        price: 0, // 음악생활 게시글이므로 가격은 0
+        images: [],
+        status: "discussion", // 토론/소통 상태
+        type: "musiclife" // 음악생활 타입 표시
+      };
+
+      const chatRoomId = await createOrGetChatRoom(
+        `musiclife-${id}`, // 음악생활 게시글 ID를 기반으로 한 고유 ID
+        post.authorId, // 게시글 작성자 (판매자 역할)
+        user.uid, // 현재 사용자 (구매자 역할) 
+        musicPostInfo
+      );
+
+      navigate(`/chat/${chatRoomId}`);
+    } catch (error) {
+      console.error('채팅방 생성 실패:', error);
+      alert('채팅방 생성에 실패했습니다.');
+    }
+  };
+
+  // 댓글 작성자와 채팅하기
+  const handleChatWithCommenter = async (commenterInfo) => {
+    if (!user.isLoggedIn) {
+      alert('로그인이 필요합니다.');
+      navigate('/login');
+      return;
+    }
+
+    if (user.uid === commenterInfo.authorId) {
+      alert('자신과는 채팅할 수 없습니다.');
+      return;
+    }
+
+    try {
+      // 댓글에 대한 채팅을 위한 정보
+      const commentChatInfo = {
+        title: `[댓글 채팅] ${post.title}`,
+        price: 0,
+        images: [],
+        status: "discussion",
+        type: "comment-chat"
+      };
+
+      const chatRoomId = await createOrGetChatRoom(
+        `comment-${id}-${commenterInfo.authorId}`, // 댓글 기반 고유 ID
+        commenterInfo.authorId, // 댓글 작성자
+        user.uid, // 현재 사용자
+        commentChatInfo
+      );
+
+      navigate(`/chat/${chatRoomId}`);
+    } catch (error) {
+      console.error('댓글 작성자와 채팅방 생성 실패:', error);
+      alert('채팅방 생성에 실패했습니다.');
+    }
+  };
+
   if (loading) {
     return (
       <Container>
@@ -476,6 +569,11 @@ export default function MusicLifeDetail() {
               <ActionButton>
                 <FaFlag /> 신고
               </ActionButton>
+              {user && user.uid !== post.authorId && (
+                <ActionButton onClick={handleChatWithAuthor} variant="chat">
+                  <FaCommentDots /> 채팅하기
+                </ActionButton>
+              )}
             </ActionGroup>
             
             {user && user.uid === post.authorId && (
@@ -524,6 +622,14 @@ export default function MusicLifeDetail() {
                     </CommentAuthor>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <CommentTime>{formatTime(c.createdAt)}</CommentTime>
+                      {user && user.uid !== c.authorId && (
+                        <ActionButton 
+                          onClick={() => handleChatWithCommenter(c)}
+                          style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                        >
+                          <FaCommentDots /> 채팅
+                        </ActionButton>
+                      )}
                       {user && user.uid === c.authorId && (
                         <ActionButton 
                           variant="danger" 
