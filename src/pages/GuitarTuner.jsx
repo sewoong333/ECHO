@@ -487,41 +487,65 @@ const SafetyDetails = styled.div`
   font-family: monospace;
 `;
 
-const DamageIndicator = styled.div`
+const InstrumentHealthCard = styled.div`
   position: fixed;
-  top: 60px;
+  top: 80px;
   right: 20px;
   background: ${props => {
     switch(props.level) {
-      case 'severe': return '#e74c3c';
-      case 'high': return '#ff4757';
-      case 'medium': return '#ffa502';
-      case 'low': return '#3742fa';
-      default: return '#2ed8b6';
+      case 'severe': return 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+      case 'high': return 'linear-gradient(135deg, #ff4757 0%, #e84393 100%)';
+      case 'medium': return 'linear-gradient(135deg, #ffa502 0%, #ff6348 100%)';
+      case 'low': return 'linear-gradient(135deg, #3742fa 0%, #2f3542 100%)';
+      default: return 'linear-gradient(135deg, #2ed8b6 0%, #00b894 100%)';
     }
   }};
   color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: bold;
+  padding: 12px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  min-width: 140px;
   z-index: 999;
-  animation: ${props => props.level === 'severe' ? 'severeDamage' : 'fadeIn'} 0.3s ease;
+  transition: all 0.3s ease;
+  animation: ${props => props.level === 'severe' ? 'pulse 1s infinite' : 'none'};
   
-  @keyframes severeDamage {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.02);
+    }
   }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
+`;
+
+const HealthTitle = styled.div`
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 4px;
+  opacity: 0.9;
+`;
+
+const HealthStatus = styled.div`
+  font-size: 14px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+`;
+
+const HealthDetail = styled.div`
+  font-size: 10px;
+  opacity: 0.8;
+  margin-top: 4px;
+  font-family: monospace;
 `;
 
 const VolumeIndicator = styled.div`
   position: fixed;
-  top: 140px;
+  top: 200px;
   right: 20px;
   width: 60px;
   height: 8px;
@@ -634,15 +658,25 @@ export default function GuitarTuner() {
     <Wrapper>
       <TopBar />
       
-      {/* 악기 손상 상태 표시기 */}
-      {safetyWarning?.damageLevel && (
-        <DamageIndicator level={safetyWarning.damageLevel}>
-          {safetyWarning.damageLevel === 'severe' && '🚨 심각'}
-          {safetyWarning.damageLevel === 'high' && '⚠️ 위험'}
-          {safetyWarning.damageLevel === 'medium' && '⚠️ 주의'}
-          {safetyWarning.damageLevel === 'low' && 'ℹ️ 확인'}
-        </DamageIndicator>
-      )}
+      {/* 악기 상태 모니터링 카드 - 항상 표시 */}
+      <InstrumentHealthCard level={safetyWarning?.damageLevel || 'normal'}>
+        <HealthTitle>기타 상태</HealthTitle>
+        <HealthStatus>
+          {(() => {
+            const level = safetyWarning?.damageLevel || 'normal';
+            switch(level) {
+              case 'severe': return '🚨 심각한 손상';
+              case 'high': return '⚠️ 위험 감지';
+              case 'medium': return '⚠️ 주의 필요';
+              case 'low': return 'ℹ️ 상태 확인';
+              default: return '✅ 정상 상태';
+            }
+          })()}
+        </HealthStatus>
+        {safetyWarning?.details && (
+          <HealthDetail>{safetyWarning.details}</HealthDetail>
+        )}
+      </InstrumentHealthCard>
       
       {/* 안전 경고 알림 */}
       {safetyWarning && (
