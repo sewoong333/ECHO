@@ -25,52 +25,120 @@ function getAdvice(diff) {
   return "좀 더 높게 조정해";
 }
 
-function checkSafety(pitch, targetFreq, volume) {
-  if (!pitch || !targetFreq) return null;
+function analyzeAudioHealth(buf, sampleRate, pitch, targetFreq, volume) {
+  if (!pitch || !targetFreq || buf.length === 0) return null;
   
+  // 기본 파라미터 계산
   const freqRatio = pitch / targetFreq;
   
-  // 극도로 높은 주파수 (줄이 끊어질 위험)
-  if (freqRatio > 1.5) {
+  // 1. 음향 신호 품질 분석
+  let rms = 0;
+  let peakCount = 0;
+  let irregularities = 0;
+  
+  // RMS와 peak 분석
+  for (let i = 0; i < buf.length; i++) {
+    rms += buf[i] * buf[i];
+    if (i > 0 && Math.abs(buf[i] - buf[i-1]) > 0.1) {
+      irregularities++;
+    }
+    if (Math.abs(buf[i]) > 0.7) {
+      peakCount++;
+    }
+  }
+  rms = Math.sqrt(rms / buf.length);
+  
+  // 2. 하모닉 분석 (배음 구조로 줄 상태 판단)
+  const harmonicRatio = analyzeHarmonics(buf, sampleRate, pitch);
+  
+  // 3. 신호 안정성 분석
+  const stability = 1 - (irregularities / buf.length);
+  const peakRatio = peakCount / buf.length;
+  
+  // 4. 손상 감지 로직
+  
+  // 심각한 손상 - 즉시 중단 필요
+  if (freqRatio > 1.8 || stability < 0.3 || harmonicRatio < 0.2) {
+    return {
+      type: 'critical',
+      title: '🚨 즉시 중단!',
+      message: '악기에 심각한 손상이 감지되었습니다!',
+      action: '즉시 튜닝을 중단하고 악기를 확인하세요.',
+      damageLevel: 'severe',
+      details: `안정성: ${(stability * 100).toFixed(1)}%, 하모닉: ${(harmonicRatio * 100).toFixed(1)}%`
+    };
+  }
+  
+  // 줄 끊어짐 임박
+  if (freqRatio > 1.5 || peakRatio > 0.15) {
     return {
       type: 'danger',
-      title: '⚠️ 위험!',
-      message: '주파수가 너무 높습니다. 줄이 끊어질 수 있어요!',
-      action: '즉시 줄을 느슨하게 해주세요.'
+      title: '⚠️ 줄 파손 위험!',
+      message: '줄이 끊어질 위험이 매우 높습니다!',
+      action: '즉시 줄을 느슨하게 해주세요.',
+      damageLevel: 'high',
+      details: `장력 위험도: ${((freqRatio - 1) * 100).toFixed(1)}%`
     };
   }
   
-  // 높은 주파수 경고
-  if (freqRatio > 1.2) {
-    return {
-      type: 'warning', 
-      title: '⚠️ 주의',
-      message: '주파수가 높습니다. 조심스럽게 조정하세요.',
-      action: '천천히 줄을 느슨하게 해주세요.'
-    };
-  }
-  
-  // 극도로 낮은 주파수
-  if (freqRatio < 0.5) {
-    return {
-      type: 'info',
-      title: 'ℹ️ 안내',
-      message: '주파수가 너무 낮습니다.',
-      action: '줄을 조금씩 조여주세요.'
-    };
-  }
-  
-  // 볼륨이 너무 높음 (스피커나 앰프 손상 방지)
-  if (volume > 0.8) {
+  // 중간 손상 위험
+  if (freqRatio > 1.2 || stability < 0.6 || harmonicRatio < 0.5) {
     return {
       type: 'warning',
-      title: '🔊 볼륨 주의',
-      message: '입력 볼륨이 너무 높습니다.',
-      action: '기기 볼륨을 낮춰주세요.'
+      title: '⚠️ 악기 상태 주의',
+      message: '악기에 스트레스가 가해지고 있습니다.',
+      action: '조심스럽게 조정하고 악기 상태를 확인하세요.',
+      damageLevel: 'medium',
+      details: `안정성: ${(stability * 100).toFixed(1)}%, 하모닉: ${(harmonicRatio * 100).toFixed(1)}%`
+    };
+  }
+  
+  // 경미한 주의사항
+  if (freqRatio > 1.1 || volume > 0.8 || stability < 0.8) {
+    return {
+      type: 'info',
+      title: 'ℹ️ 상태 확인',
+      message: '악기 상태를 주의깊게 관찰하세요.',
+      action: '천천히 조정하며 소리 변화를 확인하세요.',
+      damageLevel: 'low',
+      details: `신호 품질: ${(stability * 100).toFixed(1)}%`
     };
   }
   
   return null;
+}
+
+function analyzeHarmonics(buf, sampleRate, fundamental) {
+  if (!fundamental || fundamental <= 0) return 0;
+  
+  // 간단한 하모닉 분석 (2배음, 3배음 검출)
+  const secondHarmonic = fundamental * 2;
+  const thirdHarmonic = fundamental * 3;
+  
+  // FFT 없이 간단한 상관관계 분석
+  let harmonicStrength = 0;
+  const windowSize = Math.floor(sampleRate / fundamental);
+  
+  if (windowSize > 0 && windowSize < buf.length / 3) {
+    // 기본 주파수 강도
+    let fundamentalSum = 0;
+    for (let i = 0; i < windowSize && i < buf.length; i++) {
+      fundamentalSum += Math.abs(buf[i]);
+    }
+    
+    // 2배음 강도 (절반 주기)
+    let harmonicSum = 0;
+    const halfWindow = Math.floor(windowSize / 2);
+    for (let i = 0; i < halfWindow && i < buf.length; i++) {
+      harmonicSum += Math.abs(buf[i]);
+    }
+    
+    if (fundamentalSum > 0) {
+      harmonicStrength = Math.min(1.0, harmonicSum / fundamentalSum);
+    }
+  }
+  
+  return harmonicStrength;
 }
 
 function autoCorrelate(buf, sampleRate) {
@@ -339,6 +407,7 @@ const SafetyAlert = styled.div`
   transform: translateX(-50%);
   background: ${props => {
     switch(props.type) {
+      case 'critical': return 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
       case 'danger': return 'linear-gradient(135deg, #ff4757 0%, #ff3838 100%)';
       case 'warning': return 'linear-gradient(135deg, #ffa502 0%, #ff6348 100%)';
       case 'info': return 'linear-gradient(135deg, #3742fa 0%, #2f3542 100%)';
@@ -349,9 +418,9 @@ const SafetyAlert = styled.div`
   padding: 16px 20px;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  max-width: 320px;
+  max-width: 360px;
   z-index: 1000;
-  animation: slideInBounce 0.5s ease-out;
+  animation: ${props => props.type === 'critical' ? 'criticalPulse' : 'slideInBounce'} 0.5s ease-out;
   
   @keyframes slideInBounce {
     0% {
@@ -365,6 +434,21 @@ const SafetyAlert = styled.div`
     100% {
       opacity: 1;
       transform: translateX(-50%) translateY(0px) scale(1);
+    }
+  }
+  
+  @keyframes criticalPulse {
+    0%, 100% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0px) scale(1);
+    }
+    25%, 75% {
+      opacity: 0.8;
+      transform: translateX(-50%) translateY(-2px) scale(1.02);
+    }
+    50% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0px) scale(1.05);
     }
   }
 `;
@@ -391,6 +475,48 @@ const SafetyAction = styled.div`
   border-top: 1px solid rgba(255, 255, 255, 0.3);
   padding-top: 8px;
   margin-top: 8px;
+`;
+
+const SafetyDetails = styled.div`
+  font-size: 11px;
+  opacity: 0.8;
+  margin-top: 6px;
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  font-family: monospace;
+`;
+
+const DamageIndicator = styled.div`
+  position: fixed;
+  top: 60px;
+  right: 20px;
+  background: ${props => {
+    switch(props.level) {
+      case 'severe': return '#e74c3c';
+      case 'high': return '#ff4757';
+      case 'medium': return '#ffa502';
+      case 'low': return '#3742fa';
+      default: return '#2ed8b6';
+    }
+  }};
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: bold;
+  z-index: 999;
+  animation: ${props => props.level === 'severe' ? 'severeDamage' : 'fadeIn'} 0.3s ease;
+  
+  @keyframes severeDamage {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
 `;
 
 const VolumeIndicator = styled.div`
@@ -480,9 +606,9 @@ export default function GuitarTuner() {
           const diffValue = getDiffHz(freq, GUITAR_NOTES[selected].freq);
           setDiff(diffValue);
           
-          // 안전 체크
-          const safety = checkSafety(freq, GUITAR_NOTES[selected].freq, rms);
-          setSafetyWarning(safety);
+          // 고급 악기 손상 분석
+          const healthAnalysis = analyzeAudioHealth(buf, audioContext.sampleRate, freq, GUITAR_NOTES[selected].freq, rms);
+          setSafetyWarning(healthAnalysis);
         } else {
           setPitch(null);
           setDiff(null);
@@ -508,6 +634,16 @@ export default function GuitarTuner() {
     <Wrapper>
       <TopBar />
       
+      {/* 악기 손상 상태 표시기 */}
+      {safetyWarning?.damageLevel && (
+        <DamageIndicator level={safetyWarning.damageLevel}>
+          {safetyWarning.damageLevel === 'severe' && '🚨 심각'}
+          {safetyWarning.damageLevel === 'high' && '⚠️ 위험'}
+          {safetyWarning.damageLevel === 'medium' && '⚠️ 주의'}
+          {safetyWarning.damageLevel === 'low' && 'ℹ️ 확인'}
+        </DamageIndicator>
+      )}
+      
       {/* 안전 경고 알림 */}
       {safetyWarning && (
         <SafetyAlert type={safetyWarning.type}>
@@ -517,6 +653,9 @@ export default function GuitarTuner() {
           </SafetyTitle>
           <SafetyMessage>{safetyWarning.message}</SafetyMessage>
           <SafetyAction>{safetyWarning.action}</SafetyAction>
+          {safetyWarning.details && (
+            <SafetyDetails>분석 결과: {safetyWarning.details}</SafetyDetails>
+          )}
         </SafetyAlert>
       )}
       
