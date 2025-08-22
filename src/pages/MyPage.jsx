@@ -14,7 +14,6 @@ import {
   FaCog,
   FaLock,
   FaStore,
-  FaCamera,
   FaEdit,
   FaSignOutAlt,
   FaPhone,
@@ -76,26 +75,6 @@ const ProfileImage = styled.div`
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 `;
 
-const CameraButton = styled.button`
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #2ed8b6;
-  border: 2px solid white;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 12px;
-  
-  &:hover {
-    background: #26c4a8;
-  }
-`;
 
 const ProfileInfo = styled.div`
   flex: 1;
@@ -479,9 +458,6 @@ export default function MyPage() {
             >
               {!user.profileImage && getInitials(user.nickname)}
             </ProfileImage>
-            <CameraButton onClick={() => navigate('/profile/photo')}>
-              <FaCamera />
-            </CameraButton>
           </ProfileImageContainer>
           
           <ProfileInfo>
