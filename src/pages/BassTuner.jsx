@@ -389,8 +389,8 @@ const InstrumentHealthCard = styled.div`
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   min-width: 140px;
   z-index: 999;
-  transition: all 0.5s ease;
-  animation: ${props => props.level === 'severe' ? 'subtlePulse 2s infinite' : 'none'};
+  transition: background 0.5s ease, box-shadow 0.5s ease;
+  animation: ${props => props.level === 'severe' ? 'subtlePulse 3s infinite' : 'none'};
   
   @keyframes subtlePulse {
     0%, 100% {
@@ -558,9 +558,9 @@ export default function BassTuner() {
             }
           })()}
         </HealthStatus>
-        {safetyWarning?.details && (
-          <HealthDetail>{safetyWarning.details}</HealthDetail>
-        )}
+        <HealthDetail>
+          {safetyWarning?.details || '모니터링 중...'}
+        </HealthDetail>
       </InstrumentHealthCard>
       
       
