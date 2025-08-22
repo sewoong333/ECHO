@@ -369,92 +369,6 @@ const HeadSVGWrap = styled.div`
   z-index: 1;
 `;
 
-const SafetyAlert = styled.div`
-  position: fixed;
-  top: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: ${props => {
-    switch(props.type) {
-      case 'critical': return 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
-      case 'danger': return 'linear-gradient(135deg, #ff4757 0%, #ff3838 100%)';
-      case 'warning': return 'linear-gradient(135deg, #ffa502 0%, #ff6348 100%)';
-      case 'info': return 'linear-gradient(135deg, #3742fa 0%, #2f3542 100%)';
-      default: return 'linear-gradient(135deg, #2ed8b6 0%, #1976d2 100%)';
-    }
-  }};
-  color: white;
-  padding: 16px 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  max-width: 360px;
-  z-index: 1000;
-  animation: ${props => props.type === 'critical' ? 'criticalPulse' : 'slideInBounce'} 0.5s ease-out;
-  
-  @keyframes slideInBounce {
-    0% {
-      opacity: 0;
-      transform: translateX(-50%) translateY(-20px) scale(0.9);
-    }
-    60% {
-      opacity: 1;
-      transform: translateX(-50%) translateY(5px) scale(1.05);
-    }
-    100% {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0px) scale(1);
-    }
-  }
-  
-  @keyframes criticalPulse {
-    0%, 100% {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0px) scale(1);
-    }
-    25%, 75% {
-      opacity: 0.8;
-      transform: translateX(-50%) translateY(-2px) scale(1.02);
-    }
-    50% {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0px) scale(1.05);
-    }
-  }
-`;
-
-const SafetyTitle = styled.div`
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-const SafetyMessage = styled.div`
-  font-size: 14px;
-  margin-bottom: 8px;
-  line-height: 1.4;
-`;
-
-const SafetyAction = styled.div`
-  font-size: 13px;
-  font-weight: 600;
-  opacity: 0.9;
-  border-top: 1px solid rgba(255, 255, 255, 0.3);
-  padding-top: 8px;
-  margin-top: 8px;
-`;
-
-const SafetyDetails = styled.div`
-  font-size: 11px;
-  opacity: 0.8;
-  margin-top: 6px;
-  padding: 6px 8px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 6px;
-  font-family: monospace;
-`;
 
 const InstrumentHealthCard = styled.div`
   position: fixed;
@@ -475,17 +389,17 @@ const InstrumentHealthCard = styled.div`
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   min-width: 140px;
   z-index: 999;
-  transition: all 0.3s ease;
-  animation: ${props => props.level === 'severe' ? 'pulse 1s infinite' : 'none'};
+  transition: all 0.5s ease;
+  animation: ${props => props.level === 'severe' ? 'subtlePulse 2s infinite' : 'none'};
   
-  @keyframes pulse {
+  @keyframes subtlePulse {
     0%, 100% {
       opacity: 1;
-      transform: scale(1);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
     50% {
-      opacity: 0.8;
-      transform: scale(1.02);
+      opacity: 0.9;
+      box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
     }
   }
 `;
@@ -649,20 +563,6 @@ export default function BassTuner() {
         )}
       </InstrumentHealthCard>
       
-      {/* 안전 경고 알림 */}
-      {safetyWarning && (
-        <SafetyAlert type={safetyWarning.type}>
-          <SafetyTitle>
-            <FaExclamationTriangle />
-            {safetyWarning.title}
-          </SafetyTitle>
-          <SafetyMessage>{safetyWarning.message}</SafetyMessage>
-          <SafetyAction>{safetyWarning.action}</SafetyAction>
-          {safetyWarning.details && (
-            <SafetyDetails>분석 결과: {safetyWarning.details}</SafetyDetails>
-          )}
-        </SafetyAlert>
-      )}
       
       {/* 볼륨 레벨 표시기 */}
       <VolumeIndicator>
