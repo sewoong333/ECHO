@@ -372,32 +372,8 @@ export default function PhoneRegister() {
           recaptchaContainer.style.display = 'none';
         }
       } catch (firebaseError) {
-        console.warn('Firebase Phone Auth 비활성화됨:', firebaseError);
-        
-        if (firebaseError.code === 'auth/operation-not-allowed') {
-          // Firebase Console에서 Phone Auth가 비활성화된 경우
-          // 간단한 대체 인증 방식 사용
-          console.log('현재 Firebase Console에서 Phone Authentication이 비활성화되어 있습니다.');
-          
-          // 데모용 간단 인증
-          const demoCode = Math.floor(100000 + Math.random() * 900000).toString();
-          setConfirmationResult({
-            confirm: async (code) => {
-              if (code === demoCode || code === '123456') { // 데모용 코드
-                return { user: { uid: 'demo-user', phoneNumber: phoneNumber } };
-              } else {
-                throw new Error('인증번호가 올바르지 않습니다.');
-              }
-            }
-          });
-          
-          setIsCodeSent(true);
-          setStep(2);
-          setTimer(180);
-          showSuccess(`데모 인증번호: ${demoCode} (또는 123456 사용 가능)`);
-        } else {
-          throw firebaseError;
-        }
+        console.error('Firebase Phone Auth 오류:', firebaseError);
+        throw firebaseError;
       }
       
     } catch (error) {
@@ -437,14 +413,8 @@ export default function PhoneRegister() {
 
     setLoading(true);
     try {
-      // Firebase Phone Auth 검증 또는 데모 인증 처리
-      if (typeof confirmationResult.confirm === 'function') {
-        // 데모 모드 또는 실제 Firebase 인증
-        await confirmationResult.confirm(verificationCode);
-      } else {
-        // 기존 Firebase Phone Auth 방식
-        await phoneAuthService.verifyCode(confirmationResult, verificationCode);
-      }
+      // Firebase Phone Auth 검증
+      await phoneAuthService.verifyCode(confirmationResult, verificationCode);
       setVerified(true);
       showSuccess('전화번호 인증이 완료되었습니다!');
     } catch (error) {
@@ -466,6 +436,11 @@ export default function PhoneRegister() {
   const completeRegistration = async () => {
     setLoading(true);
     try {
+      // 사용자 로그인 상태 확인
+      if (!user?.uid) {
+        throw new Error('사용자 인증 정보가 없습니다. 다시 로그인해주세요.');
+      }
+      
       // 사용자 정보 업데이트
       await updateUserProfile({
         phoneNumber: phoneNumber.replace(/-/g, ''),
@@ -475,7 +450,14 @@ export default function PhoneRegister() {
       showSuccess('전화번호가 성공적으로 등록되었습니다!');
       navigate('/mypage');
     } catch (error) {
-      showError('전화번호 등록에 실패했습니다.');
+      console.error('등록완료 오류:', error);
+      let errorMessage = '전화번호 등록에 실패했습니다.';
+      
+      if (error.message.includes('사용자 인증')) {
+        errorMessage = '사용자 인증 정보가 없습니다. 다시 로그인해주세요.';
+      }
+      
+      showError(errorMessage);
     } finally {
       setLoading(false);
     }
