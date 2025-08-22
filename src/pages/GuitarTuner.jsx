@@ -318,6 +318,11 @@ const GaugeBox = styled.div`
   width: 100%;
   max-width: 340px;
   height: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   margin: 0 auto 18px auto;
   position: relative;
   display: flex;
@@ -418,7 +423,11 @@ const InstrumentHealthCard = styled.div`
   padding: 12px 16px;
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  min-width: 140px;
+  width: 160px;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   z-index: 999;
   transition: background 0.5s ease, box-shadow 0.5s ease;
   animation: ${props => props.level === 'severe' ? 'subtlePulse 3s infinite' : 'none'};
@@ -455,6 +464,11 @@ const HealthDetail = styled.div`
   opacity: 0.8;
   margin-top: 4px;
   font-family: monospace;
+  text-align: center;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const VolumeIndicator = styled.div`
