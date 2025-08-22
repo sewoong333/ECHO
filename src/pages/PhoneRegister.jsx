@@ -438,7 +438,13 @@ export default function PhoneRegister() {
     try {
       // 사용자 로그인 상태 확인
       if (!user?.uid) {
-        throw new Error('사용자 인증 정보가 없습니다. 다시 로그인해주세요.');
+        console.warn('사용자 인증 정보가 없어서 전화번호 정보를 로컬에 저장합니다.');
+        // 로컬 스토리지에 저장
+        localStorage.setItem('phone_number', phoneNumber.replace(/-/g, ''));
+        localStorage.setItem('phone_verified', 'true');
+        showSuccess('전화번호가 등록되었습니다!');
+        navigate('/mypage');
+        return;
       }
       
       // 사용자 정보 업데이트

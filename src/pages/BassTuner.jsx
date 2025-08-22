@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import styled from "styled-components";
 import TopBar from "../components/TopBar";
+import { FaExclamationTriangle } from "react-icons/fa";
 
 const ECHO_COLOR = "#2ed8b6";
 const ECHO_ACCENT = "#1976d2";
@@ -20,6 +21,54 @@ function getAdvice(diff) {
   if (Math.abs(diff) < 1) return "정확합니다!";
   if (diff > 0) return "좀 더 낮게 조정해";
   return "좀 더 높게 조정해";
+}
+
+function checkSafety(pitch, targetFreq, volume) {
+  if (!pitch || !targetFreq) return null;
+  
+  const freqRatio = pitch / targetFreq;
+  
+  // 극도로 높은 주파수 (줄이 끊어질 위험)
+  if (freqRatio > 1.5) {
+    return {
+      type: 'danger',
+      title: '⚠️ 위험!',
+      message: '주파수가 너무 높습니다. 베이스줄이 끊어질 수 있어요!',
+      action: '즉시 줄을 느슨하게 해주세요.'
+    };
+  }
+  
+  // 높은 주파수 경고
+  if (freqRatio > 1.2) {
+    return {
+      type: 'warning', 
+      title: '⚠️ 주의',
+      message: '주파수가 높습니다. 조심스럽게 조정하세요.',
+      action: '천천히 줄을 느슨하게 해주세요.'
+    };
+  }
+  
+  // 극도로 낮은 주파수
+  if (freqRatio < 0.5) {
+    return {
+      type: 'info',
+      title: 'ℹ️ 안내',
+      message: '주파수가 너무 낮습니다.',
+      action: '줄을 조금씩 조여주세요.'
+    };
+  }
+  
+  // 볼륨이 너무 높음 (스피커나 앰프 손상 방지)
+  if (volume > 0.8) {
+    return {
+      type: 'warning',
+      title: '🔊 볼륨 주의',
+      message: '입력 볼륨이 너무 높습니다.',
+      action: '기기 볼륨을 낮춰주세요.'
+    };
+  }
+  
+  return null;
 }
 
 function autoCorrelate(buf, sampleRate) {
@@ -256,6 +305,91 @@ const HeadSVGWrap = styled.div`
   z-index: 1;
 `;
 
+const SafetyAlert = styled.div`
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: ${props => {
+    switch(props.type) {
+      case 'danger': return 'linear-gradient(135deg, #ff4757 0%, #ff3838 100%)';
+      case 'warning': return 'linear-gradient(135deg, #ffa502 0%, #ff6348 100%)';
+      case 'info': return 'linear-gradient(135deg, #3742fa 0%, #2f3542 100%)';
+      default: return 'linear-gradient(135deg, #2ed8b6 0%, #1976d2 100%)';
+    }
+  }};
+  color: white;
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  max-width: 320px;
+  z-index: 1000;
+  animation: slideInBounce 0.5s ease-out;
+  
+  @keyframes slideInBounce {
+    0% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-20px) scale(0.9);
+    }
+    60% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(5px) scale(1.05);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0px) scale(1);
+    }
+  }
+`;
+
+const SafetyTitle = styled.div`
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const SafetyMessage = styled.div`
+  font-size: 14px;
+  margin-bottom: 8px;
+  line-height: 1.4;
+`;
+
+const SafetyAction = styled.div`
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.9;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  padding-top: 8px;
+  margin-top: 8px;
+`;
+
+const VolumeIndicator = styled.div`
+  position: fixed;
+  top: 140px;
+  right: 20px;
+  width: 60px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  z-index: 100;
+`;
+
+const VolumeLevel = styled.div`
+  height: 100%;
+  width: ${props => Math.min(100, props.level * 100)}%;
+  background: ${props => {
+    if (props.level > 0.8) return '#ff4757';
+    if (props.level > 0.6) return '#ffa502';
+    return '#2ed8b6';
+  }};
+  transition: width 0.1s ease;
+  border-radius: 4px;
+`;
+
 // 바늘 애니메이션(이징)
 const useAnimatedAngle = (value, duration = 120) => {
   const [animated, setAnimated] = useState(value);
@@ -281,6 +415,8 @@ export default function BassTuner() {
   const [pitch, setPitch] = useState(null);
   const [diff, setDiff] = useState(null);
   const [selected, setSelected] = useState(0); // 0: G2, 1: D2, 2: A1, 3: E1
+  const [safetyWarning, setSafetyWarning] = useState(null);
+  const [volumeLevel, setVolumeLevel] = useState(0);
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
   const sourceRef = useRef(null);
@@ -303,13 +439,28 @@ export default function BassTuner() {
       const detect = () => {
         if (stopped) return;
         analyser.getFloatTimeDomainData(buf);
+        
+        // RMS 볼륨 계산
+        let rms = 0;
+        for (let i = 0; i < buf.length; i++) {
+          rms += buf[i] * buf[i];
+        }
+        rms = Math.sqrt(rms / buf.length);
+        setVolumeLevel(rms);
+        
         const freq = autoCorrelate(buf, audioContext.sampleRate);
         if (freq > 0) {
           setPitch(freq);
-          setDiff(getDiffHz(freq, BASS_NOTES[selected].freq));
+          const diffValue = getDiffHz(freq, BASS_NOTES[selected].freq);
+          setDiff(diffValue);
+          
+          // 안전 체크
+          const safety = checkSafety(freq, BASS_NOTES[selected].freq, rms);
+          setSafetyWarning(safety);
         } else {
           setPitch(null);
           setDiff(null);
+          setSafetyWarning(null);
         }
         rafRef.current = requestAnimationFrame(detect);
       };
@@ -331,6 +482,24 @@ export default function BassTuner() {
   return (
     <Wrapper>
       <TopBar />
+      
+      {/* 안전 경고 알림 */}
+      {safetyWarning && (
+        <SafetyAlert type={safetyWarning.type}>
+          <SafetyTitle>
+            <FaExclamationTriangle />
+            {safetyWarning.title}
+          </SafetyTitle>
+          <SafetyMessage>{safetyWarning.message}</SafetyMessage>
+          <SafetyAction>{safetyWarning.action}</SafetyAction>
+        </SafetyAlert>
+      )}
+      
+      {/* 볼륨 레벨 표시기 */}
+      <VolumeIndicator>
+        <VolumeLevel level={volumeLevel} />
+      </VolumeIndicator>
+      
       <Frame>
         {/* 상단 드롭다운 */}
         <TopRow>
