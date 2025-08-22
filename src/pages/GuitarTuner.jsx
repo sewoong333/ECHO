@@ -3,8 +3,23 @@ import styled from "styled-components";
 import TopBar from "../components/TopBar";
 import { FaExclamationTriangle } from "react-icons/fa";
 
-const ECHO_COLOR = "#2ed8b6";
-const ECHO_ACCENT = "#1976d2";
+// Premium color scheme
+const COLORS = {
+  primary: '#0a0e1a',
+  secondary: '#1a1f3a', 
+  accent: '#2a3154',
+  highlight: '#ff6b6b',
+  success: '#4ecdc4',
+  warning: '#ffd93d',
+  danger: '#ff4757',
+  text: '#ffffff',
+  textSecondary: '#b8bcc8',
+  glass: 'rgba(255, 255, 255, 0.08)',
+  glassBorder: 'rgba(255, 255, 255, 0.15)',
+  shadow: 'rgba(0, 0, 0, 0.4)',
+  glow: 'rgba(78, 205, 196, 0.3)'
+};
+
 const GUITAR_NOTES = [
   { name: "E₄", freq: 329.63, label: "1번줄 (E4)" },
   { name: "B₃", freq: 246.94, label: "2번줄 (B3)" },
@@ -20,9 +35,9 @@ function getDiffHz(freq, target) {
 
 function getAdvice(diff) {
   if (diff == null) return "";
-  if (Math.abs(diff) < 1) return "정확합니다!";
-  if (diff > 0) return "좀 더 낮게 조정해";
-  return "좀 더 높게 조정해";
+  if (Math.abs(diff) < 1) return "🎯 완벽합니다!";
+  if (diff > 0) return "🔽 음정을 낮춰주세요";
+  return "🔼 음정을 높여주세요";
 }
 
 function analyzeAudioHealth(buf, sampleRate, pitch, targetFreq, volume) {
@@ -98,47 +113,47 @@ function analyzeAudioHealth(buf, sampleRate, pitch, targetFreq, volume) {
     return {
       type: 'info',
       title: 'ℹ️ 상태 확인',
-      message: '악기 상태를 주의깊게 관찰하세요.',
-      action: '천천히 조정하며 소리 변화를 확인하세요.',
+      message: '악기 상태를 확인해보세요.',
+      action: '계속 모니터링하며 조심스럽게 진행하세요.',
       damageLevel: 'low',
-      details: `신호 품질: ${(stability * 100).toFixed(1)}%`
+      details: `볼륨: ${(volume * 100).toFixed(0)}%, 안정성: ${(stability * 100).toFixed(1)}%`
     };
   }
   
-  return null;
+  return {
+    type: 'normal',
+    title: '✅ 정상',
+    message: '악기 상태가 양호합니다.',
+    action: '안전하게 튜닝을 계속하세요.',
+    damageLevel: 'normal',
+    details: `상태 양호 - 안정성: ${(stability * 100).toFixed(1)}%`
+  };
 }
 
 function analyzeHarmonics(buf, sampleRate, fundamental) {
-  if (!fundamental || fundamental <= 0) return 0;
-  
-  // 간단한 하모닉 분석 (2배음, 3배음 검출)
-  const secondHarmonic = fundamental * 2;
-  const thirdHarmonic = fundamental * 3;
-  
-  // FFT 없이 간단한 상관관계 분석
+  // 간단한 하모닉 분석 - FFT 없이 기본적인 배음 강도 계산
+  const bufLength = buf.length;
   let harmonicStrength = 0;
-  const windowSize = Math.floor(sampleRate / fundamental);
   
-  if (windowSize > 0 && windowSize < buf.length / 3) {
-    // 기본 주파수 강도
-    let fundamentalSum = 0;
-    for (let i = 0; i < windowSize && i < buf.length; i++) {
-      fundamentalSum += Math.abs(buf[i]);
-    }
+  // 2차, 3차 하모닉 주파수에서의 신호 강도 측정
+  const harmonicFreqs = [fundamental * 2, fundamental * 3];
+  
+  for (let harmonic of harmonicFreqs) {
+    const period = sampleRate / harmonic;
+    const samplesPerPeriod = Math.round(period);
     
-    // 2배음 강도 (절반 주기)
-    let harmonicSum = 0;
-    const halfWindow = Math.floor(windowSize / 2);
-    for (let i = 0; i < halfWindow && i < buf.length; i++) {
-      harmonicSum += Math.abs(buf[i]);
-    }
-    
-    if (fundamentalSum > 0) {
-      harmonicStrength = Math.min(1.0, harmonicSum / fundamentalSum);
+    if (samplesPerPeriod < bufLength / 4) {
+      let correlation = 0;
+      const testLength = Math.min(samplesPerPeriod * 3, bufLength - samplesPerPeriod);
+      
+      for (let i = 0; i < testLength; i++) {
+        correlation += buf[i] * buf[i + samplesPerPeriod];
+      }
+      harmonicStrength += Math.abs(correlation) / testLength;
     }
   }
   
-  return harmonicStrength;
+  return Math.min(1, harmonicStrength);
 }
 
 function autoCorrelate(buf, sampleRate) {
@@ -182,290 +197,364 @@ function autoCorrelate(buf, sampleRate) {
 const Wrapper = styled.div`
   width: 100vw;
   min-height: 100vh;
-  background: #f7f8fa;
+  background: linear-gradient(135deg, ${COLORS.primary} 0%, ${COLORS.secondary} 50%, ${COLORS.accent} 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
-  padding-bottom: 180px;
+  padding-bottom: 80px;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 80%, ${COLORS.glow} 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 107, 107, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(255, 217, 61, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
 `;
+
 const Frame = styled.div`
-  width: 100%;
+  width: calc(100vw - 32px);
   max-width: 480px;
   margin: 0 auto;
-  padding: 0 0 0 0;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   box-sizing: border-box;
-  background: none;
-  z-index: 2;
-`;
-const TopRow = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  width: 100%;
-  margin: 18px 0 10px 0;
-`;
-const Pill = styled.div`
-  background: #1976d2;
-  border-radius: 22px;
-  display: flex;
-  align-items: center;
-  padding: 0 22px 0 22px;
-  height: 44px;
-  box-shadow: 0 2px 8px #b2f0e6;
-  font-size: 20px;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 1px;
-  position: relative;
-`;
-const PillArrow = styled.span`
-  display: inline-block;
-  margin-left: 10px;
-  font-size: 22px;
-  font-weight: 700;
-  color: #fff;
-`;
-const PillSub = styled.div`
-  font-size: 15px;
-  color: #e0e2e6;
-  font-weight: 500;
-  margin-top: 2px;
-  text-align: center;
-`;
-const TuningSelect = styled.div`
-  background: ${ECHO_ACCENT};
-  border-radius: 22px;
-  display: flex;
-  align-items: center;
-  padding: 0 18px;
-  height: 44px;
-  box-shadow: 0 2px 8px #b2f0e6;
-  cursor: pointer;
-`;
-const Select = styled.select`
-  font-size: 18px;
-  font-weight: 700;
-  border-radius: 22px;
-  background: transparent;
-  color: #fff;
-  border: none;
-  outline: none;
-  padding: 10px 0 10px 0;
-  appearance: none;
-  min-width: 110px;
-`;
-const Standard = styled.span`
-  color: ${ECHO_ACCENT};
-  font-weight: 600;
-  font-size: 15px;
-  margin-left: 12px;
-`;
-const TunerRow = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  max-width: 420px;
-`;
-const StringCol = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 22px;
-  margin-right: 24px;
-  margin-top: 8px;
-`;
-const StringBtn = styled.button`
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  border: 2.5px solid ${({ $active }) => ($active ? "#1976d2" : "#e0e2e6")};
-  background: ${({ $active }) => ($active ? "#1976d2" : "#fff")};
-  color: ${({ $active }) => ($active ? "#fff" : "#222")};
-  font-weight: 900;
-  font-size: 24px;
-  outline: none;
-  cursor: pointer;
-  box-shadow: ${({ $active }) => ($active ? "0 2px 8px #b2f0e6" : "none")};
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transition:
-    background 0.18s,
-    color 0.18s,
-    border 0.18s;
-  letter-spacing: 1px;
-  padding: 0;
-`;
-const GaugeWrap = styled.div`
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-`;
-const GaugeBox = styled.div`
-  width: 100%;
-  max-width: 340px;
-  height: 220px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 18px auto;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: #fff;
+  background: ${COLORS.glass};
+  backdrop-filter: blur(25px);
   border-radius: 32px;
-  box-shadow:
-    0 4px 32px 0 rgba(46, 216, 182, 0.1),
-    0 1.5px 8px 0 #b2f0e6;
-  padding-top: 12px;
-  padding-bottom: 18px;
-  @media (max-width: 480px) {
-    max-width: 98vw;
-    height: 180px;
-    border-radius: 18px;
-    padding-top: 6px;
-    padding-bottom: 10px;
+  border: 1px solid ${COLORS.glassBorder};
+  box-shadow: 0 25px 50px ${COLORS.shadow}, 0 0 0 1px rgba(255,255,255,0.05) inset;
+  z-index: 2;
+  margin-top: 20px;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    border-radius: 31px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
+    pointer-events: none;
   }
 `;
-const NoteName = styled.div`
-  font-size: 32px;
-  font-weight: 800;
-  color: ${ECHO_ACCENT};
-  letter-spacing: 2px;
-  margin-bottom: 2px;
-`;
-const NoteFreq = styled.div`
-  font-size: 18px;
-  color: #222;
-  font-weight: 700;
-  margin-bottom: 0;
-`;
-const PitchRow = styled.div`
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  margin-top: 18px;
-  margin-bottom: 2px;
-`;
-const PitchNum = styled.span`
-  font-size: 38px;
-  font-weight: 900;
-  color: ${ECHO_COLOR};
-  line-height: 1;
-`;
-const PitchHz = styled.span`
-  font-size: 22px;
-  color: #888;
-  font-weight: 600;
-  margin-left: 4px;
-  margin-bottom: 3px;
-`;
-const Advice = styled.div`
-  font-size: 19px;
-  color: #444;
-  margin-bottom: 18px;
-  margin-top: 2px;
-  font-weight: 600;
+
+const Header = styled.div`
   text-align: center;
-`;
-const StandardText = styled.div`
-  margin-top: 10px;
-  color: #888;
-  font-size: 15px;
-  font-weight: 500;
-  text-align: center;
-`;
-const HeadSVGWrap = styled.div`
-  position: fixed;
-  left: 50%;
-  bottom: 24px;
-  transform: translateX(-50%);
-  width: 180px;
-  height: 180px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  pointer-events: none;
-  z-index: 1;
+  margin-bottom: 32px;
+  width: 100%;
 `;
 
+const Title = styled.h1`
+  color: ${COLORS.text};
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, ${COLORS.success} 0%, ${COLORS.highlight} 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+`;
+
+const Subtitle = styled.p`
+  color: ${COLORS.textSecondary};
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+  opacity: 0.9;
+`;
+
+const TuningSelector = styled.div`
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid ${COLORS.glassBorder};
+  border-radius: 20px;
+  padding: 16px 24px;
+  margin-bottom: 32px;
+  width: 100%;
+  backdrop-filter: blur(10px);
+`;
+
+const SelectorLabel = styled.div`
+  color: ${COLORS.textSecondary};
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  text-align: center;
+`;
+
+const Select = styled.select`
+  width: 100%;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  color: ${COLORS.text};
+  border: 1px solid ${COLORS.glassBorder};
+  outline: none;
+  padding: 16px 20px;
+  appearance: none;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  
+  &:focus {
+    border-color: ${COLORS.success};
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
+  }
+  
+  option {
+    background: ${COLORS.secondary};
+    color: ${COLORS.text};
+    padding: 12px;
+  }
+`;
+
+const MainDisplay = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  align-items: center;
+`;
+
+const StringButtons = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+  max-width: 300px;
+`;
+
+const StringBtn = styled.button`
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid ${({ $active }) => ($active ? COLORS.success : COLORS.glassBorder)};
+  background: ${({ $active }) => 
+    $active 
+      ? `linear-gradient(135deg, ${COLORS.success} 0%, ${COLORS.highlight} 100%)` 
+      : COLORS.glass
+  };
+  color: ${COLORS.text};
+  font-weight: 800;
+  font-size: 18px;
+  outline: none;
+  cursor: pointer;
+  box-shadow: ${({ $active }) => 
+    $active 
+      ? `0 12px 30px ${COLORS.glow}, 0 0 20px rgba(78, 205, 196, 0.4)` 
+      : `0 8px 25px ${COLORS.shadow}`
+  };
+  backdrop-filter: blur(15px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: ${({ $active }) => 
+      $active 
+        ? `0 20px 40px ${COLORS.glow}, 0 0 30px rgba(78, 205, 196, 0.6)` 
+        : `0 15px 35px ${COLORS.shadow}`
+    };
+  }
+  
+  &:active {
+    transform: translateY(-2px) scale(1.02);
+  }
+`;
+
+const StringNote = styled.div`
+  font-size: 24px;
+  font-weight: 900;
+  margin-bottom: 4px;
+`;
+
+const StringFreq = styled.div`
+  font-size: 12px;
+  opacity: 0.8;
+  font-weight: 600;
+`;
+
+const TunerGauge = styled.div`
+  width: 100%;
+  max-width: 400px;
+  height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 32px 24px;
+  position: relative;
+  backdrop-filter: blur(15px);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, transparent 100%);
+    pointer-events: none;
+  }
+`;
+
+const FrequencyDisplay = styled.div`
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 20px 32px;
+  background: rgba(78, 205, 196, 0.1);
+  border-radius: 20px;
+  border: 1px solid rgba(78, 205, 196, 0.3);
+  backdrop-filter: blur(10px);
+`;
+
+const FrequencyNumber = styled.span`
+  color: ${COLORS.text};
+  font-size: 48px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -2px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, ${COLORS.success} 0%, ${COLORS.highlight} 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+`;
+
+const FrequencyUnit = styled.span`
+  color: ${COLORS.textSecondary};
+  font-size: 20px;
+  font-weight: 700;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+`;
+
+const TargetFrequency = styled.div`
+  text-align: center;
+  color: ${COLORS.textSecondary};
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  
+  span {
+    color: ${COLORS.success};
+    font-weight: 800;
+  }
+`;
+
+const TuningAdvice = styled.div`
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: ${COLORS.text};
+  margin-top: 16px;
+  letter-spacing: 0.3px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  background: rgba(255, 107, 107, 0.1);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 107, 107, 0.2);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+`;
+
+const StatusInfo = styled.div`
+  text-align: center;
+  color: ${COLORS.textSecondary};
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 20px;
+  margin-top: 24px;
+  border: 1px solid ${COLORS.glassBorder};
+  backdrop-filter: blur(10px);
+`;
 
 const InstrumentHealthCard = styled.div`
   position: fixed;
-  top: 80px;
-  right: 20px;
+  top: 100px;
+  right: 24px;
   background: ${props => {
     switch(props.level) {
-      case 'severe': return 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
-      case 'high': return 'linear-gradient(135deg, #ff4757 0%, #e84393 100%)';
-      case 'medium': return 'linear-gradient(135deg, #ffa502 0%, #ff6348 100%)';
-      case 'low': return 'linear-gradient(135deg, #3742fa 0%, #2f3542 100%)';
-      default: return 'linear-gradient(135deg, #2ed8b6 0%, #00b894 100%)';
+      case 'severe': return `linear-gradient(135deg, ${COLORS.danger} 0%, #c0392b 100%)`;
+      case 'high': return `linear-gradient(135deg, ${COLORS.warning} 0%, #e84393 100%)`;
+      case 'medium': return `linear-gradient(135deg, #ffa502 0%, ${COLORS.warning} 100%)`;
+      case 'low': return `linear-gradient(135deg, ${COLORS.accent} 0%, ${COLORS.secondary} 100%)`;
+      default: return `linear-gradient(135deg, ${COLORS.success} 0%, #00b894 100%)`;
     }
   }};
   color: white;
-  padding: 12px 16px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  width: 160px;
-  height: 80px;
+  padding: 16px 20px;
+  border-radius: 20px;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 180px;
+  height: 90px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   z-index: 999;
-  transition: background 0.5s ease, box-shadow 0.5s ease;
-  animation: ${props => props.level === 'severe' ? 'subtlePulse 3s infinite' : 'none'};
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: ${props => props.level === 'severe' ? 'premiumPulse 3s infinite' : 'none'};
   
-  @keyframes subtlePulse {
+  @keyframes premiumPulse {
     0%, 100% {
-      opacity: 1;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      transform: scale(1);
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3);
     }
     50% {
-      opacity: 0.9;
-      box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
+      transform: scale(1.03);
+      box-shadow: 0 25px 60px rgba(231, 76, 60, 0.5), 0 10px 25px rgba(231, 76, 60, 0.4);
     }
   }
 `;
 
 const HealthTitle = styled.div`
-  font-size: 12px;
-  font-weight: bold;
-  margin-bottom: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 6px;
   opacity: 0.9;
+  text-align: center;
 `;
 
 const HealthStatus = styled.div`
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 800;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+  text-align: center;
 `;
 
 const HealthDetail = styled.div`
   font-size: 10px;
   opacity: 0.8;
-  margin-top: 4px;
-  font-family: monospace;
+  margin-top: 6px;
+  font-family: 'SF Mono', 'Monaco', monospace;
   text-align: center;
-  line-height: 1.2;
+  line-height: 1.3;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -473,26 +562,30 @@ const HealthDetail = styled.div`
 
 const VolumeIndicator = styled.div`
   position: fixed;
-  top: 200px;
-  right: 20px;
-  width: 60px;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
+  top: 210px;
+  right: 24px;
+  width: 180px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
   overflow: hidden;
   z-index: 100;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 `;
 
 const VolumeLevel = styled.div`
   height: 100%;
   width: ${props => Math.min(100, props.level * 100)}%;
   background: ${props => {
-    if (props.level > 0.8) return '#ff4757';
-    if (props.level > 0.6) return '#ffa502';
-    return '#2ed8b6';
+    if (props.level > 0.8) return `linear-gradient(90deg, ${COLORS.warning} 0%, ${COLORS.danger} 100%)`;
+    if (props.level > 0.6) return `linear-gradient(90deg, ${COLORS.success} 0%, ${COLORS.warning} 100%)`;
+    return `linear-gradient(90deg, ${COLORS.success} 0%, ${COLORS.highlight} 100%)`;
   }};
-  transition: width 0.1s ease;
-  border-radius: 4px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 20px;
+  box-shadow: 0 0 15px rgba(78, 205, 196, 0.6);
 `;
 
 const useAnimatedAngle = (value, duration = 120) => {
@@ -564,23 +657,21 @@ export default function GuitarTuner() {
         } else {
           setPitch(null);
           setDiff(null);
-          setSafetyWarning(null);
         }
         rafRef.current = requestAnimationFrame(detect);
       };
-      detect();
+      rafRef.current = requestAnimationFrame(detect);
     }
-    listen();
+    listen().catch(console.error);
     return () => {
       stopped = true;
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      if (audioContextRef.current) audioContextRef.current.close();
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
     };
-     
   }, [selected]);
 
-  const angle = Math.max(-100, Math.min(100, diff || 0));
-  const _animatedAngle = useAnimatedAngle(angle);
+  const animatedAngle = useAnimatedAngle(Math.max(-100, Math.min(100, diff || 0)) * 0.9);
 
   return (
     <Wrapper>
@@ -588,7 +679,7 @@ export default function GuitarTuner() {
       
       {/* 악기 상태 모니터링 카드 - 항상 표시 */}
       <InstrumentHealthCard level={safetyWarning?.damageLevel || 'normal'}>
-        <HealthTitle>기타 상태</HealthTitle>
+        <HealthTitle>🎸 기타 상태</HealthTitle>
         <HealthStatus>
           {(() => {
             const level = safetyWarning?.damageLevel || 'normal';
@@ -606,85 +697,76 @@ export default function GuitarTuner() {
         </HealthDetail>
       </InstrumentHealthCard>
       
-      
       {/* 볼륨 레벨 표시기 */}
       <VolumeIndicator>
         <VolumeLevel level={volumeLevel} />
       </VolumeIndicator>
-      
+
       <Frame>
-        <TopRow>
-          <Pill>
-            기타 6현
-            <PillArrow>▶</PillArrow>
-          </Pill>
-          <PillSub>표준</PillSub>
-        </TopRow>
-        <TunerRow>
-          <StringCol>
-            {GUITAR_NOTES.map((n, i) => (
-              <StringBtn
-                key={n.name}
-                $active={i === selected}
+        <Header>
+          <Title>🎸 기타 튜너</Title>
+          <Subtitle>정확한 음정으로 완벽한 연주를</Subtitle>
+        </Header>
+
+        <TuningSelector>
+          <SelectorLabel>튜닝 타입 선택</SelectorLabel>
+          <Select value="standard" onChange={() => {}}>
+            <option value="standard">표준 튜닝 (E-A-D-G-B-E)</option>
+            <option value="drop_d">Drop D 튜닝</option>
+            <option value="open_g">오픈 G 튜닝</option>
+          </Select>
+        </TuningSelector>
+
+        <MainDisplay>
+          <StringButtons>
+            {GUITAR_NOTES.map((note, i) => (
+              <StringBtn 
+                key={i} 
+                $active={selected === i} 
                 onClick={() => setSelected(i)}
               >
-                <span style={{ fontSize: 22, fontWeight: 900, lineHeight: 1 }}>
-                  {
-                    n.name
-                      .split("₁")[0]
-                      .split("₂")[0]
-                      .split("₃")[0]
-                      .split("₄")[0]
-                  }
-                </span>
-                <span
-                  style={{
-                    fontSize: 15,
-                    fontWeight: 500,
-                    lineHeight: 1,
-                    marginTop: 1,
-                  }}
-                >
-                  {n.name.match(/₁|₂|₃|₄/) ? n.name.match(/₁|₂|₃|₄/)[0] : ""}
-                </span>
+                <StringNote>{note.name}</StringNote>
+                <StringFreq>{note.freq.toFixed(0)}Hz</StringFreq>
               </StringBtn>
             ))}
-          </StringCol>
-          <GaugeWrap>
-            <GaugeBox
-              style={{
-                background: "none",
-                boxShadow: "none",
-                borderRadius: 0,
-                padding: 0,
-                margin: "0 auto 18px auto",
-                width: "100%",
-                maxWidth: 420,
-                height: 220,
-              }}
-            >
+          </StringButtons>
+
+          <TunerGauge>
+            <TargetFrequency>
+              목표: <span>{GUITAR_NOTES[selected].name} - {GUITAR_NOTES[selected].freq.toFixed(1)}Hz</span>
+            </TargetFrequency>
+            
+            <FrequencyDisplay>
+              <FrequencyNumber>{pitch ? pitch.toFixed(1) : "--"}</FrequencyNumber>
+              <FrequencyUnit>Hz</FrequencyUnit>
+            </FrequencyDisplay>
+
+            {/* SVG 게이지 */}
+            <div style={{ width: '100%', height: '180px', position: 'relative' }}>
               <svg
                 width="100%"
                 height="180"
                 viewBox="0 0 340 180"
-                style={{ maxWidth: 420, display: "block", margin: "0 auto" }}
+                style={{ maxWidth: 380, display: "block", margin: "0 auto" }}
               >
-                {/* 반원형 회색 눈금 */}
+                {/* 반원형 배경 게이지 */}
                 <path
                   d="M20 150 A150 150 0 0 1 320 150"
                   fill="none"
-                  stroke="#e0e2e6"
-                  strokeWidth="14"
+                  stroke="rgba(255, 255, 255, 0.1)"
+                  strokeWidth="12"
                 />
-                {/* 파란 부채꼴: 중앙(정확)일 때만 표시, ±10도(합산 20도) */}
-                {Math.abs(diff) < 1 && (
+                
+                {/* 정확한 구간 표시 */}
+                {Math.abs(diff || 0) < 1 && (
                   <path
                     d="M170 150 L153.16 52.64 A100 100 0 0 1 186.84 52.64 L170 150 Z"
-                    fill="#1976d2"
-                    opacity="0.22"
+                    fill={COLORS.success}
+                    opacity="0.3"
                   />
                 )}
-                {/* 눈금선/숫자 */}
+                
+                {/* 눈금선과 숫자 */}
                 {[...Array(11)].map((_, i) => {
                   const val = -100 + i * 20;
                   const angle = (val / 200) * 180;
@@ -700,110 +782,66 @@ export default function GuitarTuner() {
                         y1={y1}
                         x2={x2}
                         y2={y2}
-                        stroke={val === 0 ? "#1976d2" : "#b0b3b8"}
+                        stroke={val === 0 ? COLORS.success : "rgba(255, 255, 255, 0.3)"}
                         strokeWidth={val === 0 ? 4 : 2}
                       />
                       <text
                         x={170 + 105 * Math.cos(rad)}
                         y={150 + 105 * Math.sin(rad) + 7}
                         textAnchor="middle"
-                        fontSize="18"
-                        fontWeight={val === 0 ? 700 : 400}
-                        fill={val === 0 ? "#222" : "#b0b3b8"}
+                        fontSize="16"
+                        fontWeight={val === 0 ? 800 : 500}
+                        fill={val === 0 ? COLORS.success : COLORS.textSecondary}
                       >
                         {val}
                       </text>
                     </g>
                   );
                 })}
+                
                 {/* 바늘 */}
                 <g
                   style={{
-                    transform: `rotate(${Math.max(-100, Math.min(100, diff || 0)) * 0.9}deg)`,
+                    transform: `rotate(${animatedAngle}deg)`,
                     transformOrigin: "170px 150px",
+                    transition: 'transform 0.1s ease-out'
                   }}
                 >
                   <rect
                     x="167"
                     y="150"
                     width="6"
-                    height="-70"
+                    height="-75"
                     rx="3"
-                    fill="#222"
+                    fill={COLORS.highlight}
                   />
                   <circle
                     cx="170"
                     cy="150"
-                    r="16"
-                    fill="#fff"
-                    stroke="#222"
-                    strokeWidth="5"
+                    r="18"
+                    fill={COLORS.glass}
+                    stroke={COLORS.success}
+                    strokeWidth="3"
                   />
-                  <circle cx="170" cy="150" r="9" fill="#222" />
+                  <circle 
+                    cx="170" 
+                    cy="150" 
+                    r="8" 
+                    fill={COLORS.highlight} 
+                  />
                 </g>
               </svg>
-              {/* 음표/기준주파수 */}
-              <div
-                style={{
-                  position: "absolute",
-                  top: 10,
-                  left: 0,
-                  width: "100%",
-                  textAlign: "center",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 38,
-                    fontWeight: 900,
-                    color: "#222",
-                    letterSpacing: 2,
-                  }}
-                >
-                  {GUITAR_NOTES[selected].name}
-                </div>
-                <div style={{ fontSize: 22, color: "#222", fontWeight: 900 }}>
-                  {GUITAR_NOTES[selected].freq.toFixed(1)}
-                </div>
-              </div>
-            </GaugeBox>
-            <PitchRow>
-              <PitchNum>{pitch ? pitch.toFixed(1) : "--"}</PitchNum>
-              <PitchHz>Hz</PitchHz>
-            </PitchRow>
-            <Advice>{getAdvice(diff)}</Advice>
-          </GaugeWrap>
-        </TunerRow>
-        <StandardText>
-          표준튜닝: E₄(329.6) - B₃(246.9) - G₃(196.0) - D₃(146.8) - A₂(110.0) -
-          E₂(82.4)
-        </StandardText>
+            </div>
+
+            <TuningAdvice>{getAdvice(diff)}</TuningAdvice>
+          </TunerGauge>
+
+          <StatusInfo>
+            표준 튜닝: E₄(329.6) - B₃(246.9) - G₃(196.0) - D₃(146.8) - A₂(110.0) - E₂(82.4)<br/>
+            악기를 마이크에 가까이 하고 줄을 하나씩 튕겨주세요
+          </StatusInfo>
+        </MainDisplay>
       </Frame>
-      <HeadSVGWrap>
-        <svg width="180" height="180" viewBox="0 0 180 180">
-          <rect x="70" y="60" width="40" height="90" rx="20" fill="#bfa07a" />
-          {GUITAR_NOTES.map((n, i) => (
-            <line
-              key={n.name}
-              x1={90 + (i - 2.5) * 10}
-              y1={150}
-              x2={90 + (i - 2.5) * 10}
-              y2={60}
-              stroke={i === selected ? ECHO_ACCENT : "#bbb"}
-              strokeWidth={i === selected ? 4 : 2.5}
-            />
-          ))}
-          {GUITAR_NOTES.map((n, i) => (
-            <circle
-              key={n.name}
-              cx={90 + (i - 2.5) * 10}
-              cy={60}
-              r={7}
-              fill={i === selected ? ECHO_ACCENT : "#888"}
-            />
-          ))}
-        </svg>
-      </HeadSVGWrap>
     </Wrapper>
   );
 }
