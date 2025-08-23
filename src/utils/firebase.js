@@ -17,6 +17,7 @@ import {
   addDoc,
   getDocs,
   doc,
+  setDoc,
   updateDoc,
   deleteDoc,
   query,
@@ -1493,6 +1494,10 @@ export const kakaoAuthService = {
       
       console.log('📍 Redirect URI:', redirectUri);
       
+      // 세션 스토리지에 로그인 시도 표시 저장
+      sessionStorage.setItem('kakao_login_attempt', 'true');
+      sessionStorage.setItem('kakao_login_time', Date.now().toString());
+      
       window.Kakao.Auth.authorize({
         redirectUri: redirectUri,
       });
@@ -1506,10 +1511,34 @@ export const kakaoAuthService = {
   // 페이지 로드 시 카카오 토큰 확인 및 처리
   async handleKakaoCallback() {
     try {
+      console.log('🔍 카카오 콜백 처리 시작...');
+      
+      // 로그인 시도 확인
+      const loginAttempt = sessionStorage.getItem('kakao_login_attempt');
+      const loginTime = sessionStorage.getItem('kakao_login_time');
+      
+      // 로그인 시도가 5분 이내가 아니면 무시
+      if (!loginAttempt || !loginTime || (Date.now() - parseInt(loginTime)) > 300000) {
+        console.log('❌ 유효하지 않은 카카오 로그인 시도');
+        return null;
+      }
+      
+      // URL 파라미터에서 code 확인
+      const urlParams = new URLSearchParams(window.location.search);
+      const authCode = urlParams.get('code');
+      
+      if (!authCode) {
+        console.log('❌ 카카오 인증 코드 없음');
+        return null;
+      }
+      
+      console.log('✅ 카카오 인증 코드 발견:', authCode);
+      
+      // 쿠키에서 토큰 확인
       const token = this.getCookie('authorize-access-token');
       
       if (token) {
-        console.log('📱 카카오 토큰 발견:', token);
+        console.log('📱 카카오 토큰 발견:', token.substring(0, 20) + '...');
         
         window.Kakao.Auth.setAccessToken(token);
         
@@ -1525,6 +1554,15 @@ export const kakaoAuthService = {
           // Firebase에서 사용자 정보 확인/생성
           const user = await this.createOrUpdateUser(userInfo);
           
+          // 로컬 스토리지에 카카오 로그인 상태 저장
+          localStorage.setItem('kakao_login_status', 'true');
+          localStorage.setItem('kakao_user_info', JSON.stringify(user));
+          
+          // 세션 스토리지 정리
+          sessionStorage.removeItem('kakao_login_attempt');
+          sessionStorage.removeItem('kakao_login_time');
+          
+          console.log('✅ 카카오 로그인 완료:', user.uid);
           return user;
         }
       }
@@ -1533,8 +1571,53 @@ export const kakaoAuthService = {
     } catch (error) {
       console.error('❌ 카카오 콜백 처리 실패:', error);
       // 토큰이 유효하지 않은 경우 제거
-      window.Kakao.Auth.setAccessToken(null);
+      if (window.Kakao && window.Kakao.Auth) {
+        window.Kakao.Auth.setAccessToken(null);
+      }
+      // 에러 시 세션 정리
+      sessionStorage.removeItem('kakao_login_attempt');
+      sessionStorage.removeItem('kakao_login_time');
+      localStorage.removeItem('kakao_login_status');
+      localStorage.removeItem('kakao_user_info');
       throw error;
+    }
+  },
+
+  // 저장된 카카오 로그인 상태 확인
+  async checkSavedKakaoLogin() {
+    try {
+      const loginStatus = localStorage.getItem('kakao_login_status');
+      const savedUserInfo = localStorage.getItem('kakao_user_info');
+      
+      if (loginStatus === 'true' && savedUserInfo) {
+        const userInfo = JSON.parse(savedUserInfo);
+        console.log('📱 저장된 카카오 로그인 상태 발견:', userInfo.uid);
+        
+        // 카카오 SDK가 초기화되어 있는지 확인
+        if (window.Kakao && window.Kakao.isInitialized()) {
+          // 현재 토큰이 유효한지 확인
+          try {
+            const statusInfo = await window.Kakao.Auth.getStatusInfo();
+            if (statusInfo.status === 'connected') {
+              console.log('✅ 저장된 카카오 로그인 유효함');
+              return userInfo;
+            }
+          } catch (error) {
+            console.warn('⚠️ 저장된 카카오 토큰 검증 실패:', error);
+          }
+        }
+        
+        // 토큰이 유효하지 않으면 저장된 정보 제거
+        localStorage.removeItem('kakao_login_status');
+        localStorage.removeItem('kakao_user_info');
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('❌ 저장된 카카오 로그인 확인 실패:', error);
+      localStorage.removeItem('kakao_login_status');
+      localStorage.removeItem('kakao_user_info');
+      return null;
     }
   },
 

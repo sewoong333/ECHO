@@ -69,8 +69,31 @@ export function UserProvider({ children }) {
     let unsubscribeToken = null;
 
     const setupAuthListeners = () => {
-      // 인증 상태 변경 리스너
-      unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
+      // 초기화 시 카카오 로그인 상태 확인
+      const checkInitialKakaoLogin = async () => {
+        try {
+          const savedKakaoUser = await kakaoAuthService.checkSavedKakaoLogin();
+          if (savedKakaoUser) {
+            console.log('🔄 저장된 카카오 로그인 상태로 복원');
+            loginWithKakao(savedKakaoUser);
+            return true;
+          }
+        } catch (error) {
+          console.warn('⚠️ 초기 카카오 로그인 확인 실패:', error);
+        }
+        return false;
+      };
+
+      // 카카오 로그인 상태 확인 후 Firebase 인증 설정
+      checkInitialKakaoLogin().then((hasKakaoLogin) => {
+        if (hasKakaoLogin) {
+          // 카카오 로그인이 있는 경우 Firebase 인증 리스너는 건너뛰고 로딩만 해제
+          setUser(prev => ({ ...prev, loading: false }));
+          return;
+        }
+
+        // 인증 상태 변경 리스너
+        unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
         try {
           if (firebaseUser) {
             // 사용자가 로그인한 경우
@@ -634,16 +657,35 @@ export function UserProvider({ children }) {
   // 로그아웃
   const logout = async () => {
     try {
-      // 카카오 로그아웃도 같이 처리
+      console.log("🚪 로그아웃 시작...");
+      
+      // 카카오 로그아웃 처리
       if (user.providerId === 'kakao') {
+        console.log("📱 카카오 로그아웃 처리 중...");
         await kakaoAuthService.logout();
+        
+        // 카카오 관련 로컬 스토리지 정리
+        localStorage.removeItem('kakao_login_status');
+        localStorage.removeItem('kakao_user_info');
       }
       
       // Firebase 로그아웃
       await signOut(auth);
+      
+      // 모든 인증 관련 스토리지 정리
+      localStorage.removeItem('kakao_login_status');
+      localStorage.removeItem('kakao_user_info');
+      sessionStorage.removeItem('kakao_login_attempt');
+      sessionStorage.removeItem('kakao_login_time');
+      
       console.log("✅ 로그아웃 완료");
     } catch (error) {
       console.error("❌ 로그아웃 실패:", error);
+      // 에러가 발생해도 로컬 상태는 정리
+      localStorage.removeItem('kakao_login_status');
+      localStorage.removeItem('kakao_user_info');
+      sessionStorage.removeItem('kakao_login_attempt');
+      sessionStorage.removeItem('kakao_login_time');
       throw error;
     }
   };

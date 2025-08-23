@@ -279,10 +279,12 @@ export default function Login() {
   useEffect(() => {
     const handleLoginCallbacks = async () => {
       try {
+        console.log('🔍 로그인 콜백 처리 시작...');
+        
         // 1. Google 리다이렉트 결과 확인
         const result = await getRedirectResult(auth);
         if (result?.user) {
-          console.log("Google Redirect login successful:", result.user);
+          console.log("✅ Google Redirect 로그인 성공:", result.user);
           navigate("/", { replace: true });
           return;
         }
@@ -292,10 +294,13 @@ export default function Login() {
         const kakaoCode = urlParams.get('code');
         
         if (kakaoCode) {
-          console.log("카카오 인증 코드 감지:", kakaoCode);
+          console.log("📱 카카오 인증 코드 감지:", kakaoCode);
           setIsLoading(true);
           
           try {
+            // 짧은 지연으로 카카오 SDK 초기화 대기
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
             const kakaoUser = await kakaoAuthService.handleKakaoCallback();
             if (kakaoUser) {
               console.log("✅ 카카오 콜백 로그인 성공:", kakaoUser.uid);
@@ -308,10 +313,15 @@ export default function Login() {
               // URL에서 코드 파라미터 제거
               window.history.replaceState({}, document.title, window.location.pathname);
               
-              // 리다이렉트
+              // 상태 업데이트를 위한 약간의 지연 후 리다이렉트
               setTimeout(() => {
+                console.log('🏠 홈으로 리다이렉트 실행');
                 navigate("/", { replace: true });
-              }, 1000);
+              }, 1500);
+              
+              return; // 성공 시 여기서 종료
+            } else {
+              throw new Error('카카오 사용자 정보를 가져올 수 없습니다.');
             }
           } catch (error) {
             console.error("❌ 카카오 콜백 처리 실패:", error);
@@ -320,17 +330,42 @@ export default function Login() {
             // URL에서 에러 파라미터 제거
             window.history.replaceState({}, document.title, window.location.pathname);
           } finally {
-            setIsLoading(false);
+            // 로딩 상태는 약간 지연 후 해제
+            setTimeout(() => {
+              setIsLoading(false);
+            }, 500);
           }
         }
+
+        // 3. 페이지 로드 시 저장된 카카오 로그인 상태 확인
+        try {
+          const savedKakaoUser = await kakaoAuthService.checkSavedKakaoLogin();
+          if (savedKakaoUser && !user.isLoggedIn) {
+            console.log('📱 저장된 카카오 로그인 복원:', savedKakaoUser.uid);
+            loginWithKakao(savedKakaoUser);
+            
+            setTimeout(() => {
+              navigate("/", { replace: true });
+            }, 1000);
+          }
+        } catch (error) {
+          console.warn('⚠️ 저장된 카카오 로그인 확인 실패:', error);
+        }
+
       } catch (error) {
-        console.error("Login callback error:", error);
+        console.error("❌ 로그인 콜백 전체 오류:", error);
         handleAuthError(error);
       }
     };
 
-    handleLoginCallbacks();
-  }, [navigate, loginWithKakao, addToast]);
+    // DOM이 준비된 후에 실행
+    if (document.readyState === 'complete') {
+      handleLoginCallbacks();
+    } else {
+      window.addEventListener('load', handleLoginCallbacks);
+      return () => window.removeEventListener('load', handleLoginCallbacks);
+    }
+  }, [navigate, loginWithKakao, addToast, user.isLoggedIn]);
 
   // 로그인 상태 체크 (개선된 로직)
   useEffect(() => {
