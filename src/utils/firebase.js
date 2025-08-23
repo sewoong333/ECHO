@@ -1487,8 +1487,11 @@ export const kakaoAuthService = {
 
       console.log('🚀 카카오 로그인 시작 (Redirect 방식)...');
       
-      // Redirect URI는 현재 도메인의 로그인 페이지로 설정
-      const redirectUri = `${window.location.origin}/login`;
+      // 현재 도메인에 따라 리다이렉트 URI 설정
+      const currentOrigin = window.location.origin;
+      const redirectUri = `${currentOrigin}/login`;
+      
+      console.log('📍 Redirect URI:', redirectUri);
       
       window.Kakao.Auth.authorize({
         redirectUri: redirectUri,
@@ -1542,6 +1545,18 @@ export const kakaoAuthService = {
       return parts[1].split(';')[0];
     }
     return null;
+  },
+
+  // 로그아웃
+  logout() {
+    try {
+      if (window.Kakao && window.Kakao.Auth) {
+        window.Kakao.Auth.logout();
+        console.log('✅ 카카오 로그아웃 완료');
+      }
+    } catch (error) {
+      console.error('❌ 카카오 로그아웃 실패:', error);
+    }
   },
 
   // 사용자 정보 가져오기

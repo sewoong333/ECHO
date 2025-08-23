@@ -198,28 +198,89 @@ export default function SalesHistory() {
   useEffect(() => {
     const fetchSalesHistory = async () => {
       try {
+        console.log("📦 판매내역 로딩 시작...", {
+          userId: user.uid,
+          isLoggedIn: user.isLoggedIn,
+          loading: user.loading
+        });
+
+        if (!user.uid) {
+          console.log("❌ 사용자 UID가 없음");
+          setLoading(false);
+          return;
+        }
+
         const q = query(
           collection(db, "products"),
           where("sellerId", "==", user.uid),
           orderBy("createdAt", "desc"),
         );
+        
+        console.log("🔍 Firebase 쿼리 실행...");
         const querySnapshot = await getDocs(q);
-        const salesList = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        console.log(`📊 Firebase 결과: ${querySnapshot.docs.length}개 상품 발견`);
+        
+        const salesList = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          console.log("📝 상품 데이터:", {
+            id: doc.id,
+            title: data.title,
+            sellerId: data.sellerId,
+            createdAt: data.createdAt
+          });
+          return {
+            id: doc.id,
+            ...data,
+          };
+        });
+        
         setList(salesList);
+        console.log("✅ 판매내역 로딩 완료:", salesList.length, "개 상품");
       } catch (err) {
-        console.error("판매내역 불러오기 실패:", err);
+        console.error("❌ 판매내역 불러오기 실패:", err);
+        
+        // 인덱스 문제일 경우 대체 쿼리 시도
+        try {
+          console.log("🔄 대체 쿼리 시도 (인덱스 없는 버전)...");
+          const q2 = query(
+            collection(db, "products"),
+            where("sellerId", "==", user.uid)
+          );
+          const querySnapshot2 = await getDocs(q2);
+          const salesList2 = querySnapshot2.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          // 수동으로 정렬
+          salesList2.sort((a, b) => {
+            const timeA = a.createdAt?.toDate?.() || new Date(a.createdAt) || new Date(0);
+            const timeB = b.createdAt?.toDate?.() || new Date(b.createdAt) || new Date(0);
+            return timeB - timeA;
+          });
+          
+          setList(salesList2);
+          console.log("✅ 대체 쿼리 성공:", salesList2.length, "개 상품");
+        } catch (err2) {
+          console.error("❌ 대체 쿼리도 실패:", err2);
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    if (user.isLoggedIn) {
+    if (user.isLoggedIn && user.uid && !user.loading) {
       fetchSalesHistory();
+    } else {
+      console.log("⏳ 사용자 로딩 대기 중...", {
+        isLoggedIn: user.isLoggedIn,
+        uid: user.uid,
+        loading: user.loading
+      });
+      if (!user.loading) {
+        setLoading(false);
+      }
     }
-  }, [user]);
+  }, [user.isLoggedIn, user.uid, user.loading]);
 
   const filteredList = list.filter((item) => {
     if (filter === "all") return true;
@@ -263,18 +324,56 @@ export default function SalesHistory() {
           판매완료
         </FilterBtn>
       </FilterRow>
+      {/* 디버깅 정보 - 나중에 제거 */}
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{ 
+          padding: "10px", 
+          background: "#f0f0f0", 
+          margin: "10px",
+          borderRadius: "8px",
+          fontSize: "12px",
+          fontFamily: "monospace"
+        }}>
+          Debug Info: UserID={user.uid}, LoggedIn={user.isLoggedIn.toString()}, Loading={user.loading.toString()}, ListLength={list.length}
+        </div>
+      )}
+      
       <List>
-        {filteredList.length === 0 && (
-          <div style={{ color: "#bbb", textAlign: "center", marginTop: 40 }}>
-            상품이 없습니다.
+        {filteredList.length === 0 && !loading && (
+          <div style={{ 
+            color: "#bbb", 
+            textAlign: "center", 
+            marginTop: 40,
+            padding: "20px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "8px"
+          }}>
+            <div style={{ fontSize: "48px" }}>📦</div>
+            <div style={{ fontSize: "16px", fontWeight: "600" }}>
+              {filter === "all" && "등록한 상품이 없습니다."}
+              {filter === "active" && "판매중인 상품이 없습니다."}  
+              {filter === "sold" && "판매완료된 상품이 없습니다."}
+            </div>
+            <div style={{ fontSize: "14px", marginTop: "4px" }}>
+              새로운 상품을 등록해보세요!
+            </div>
           </div>
         )}
         {filteredList.map((item, i) => (
           <div key={i}>
-            <Item>
+            <Item onClick={() => navigate(`/product/${item.id}`)} style={{ cursor: 'pointer' }}>
               <Thumb
-                src={item.image || "https://via.placeholder.com/90"}
+                src={
+                  item.images && item.images.length > 0 
+                    ? item.images[0] 
+                    : item.image || "https://via.placeholder.com/90x90?text=No+Image"
+                }
                 alt="썸네일"
+                onError={(e) => {
+                  e.target.src = "https://via.placeholder.com/90x90?text=No+Image";
+                }}
               />
               <Info>
                 <ItemTitle>{item.title}</ItemTitle>

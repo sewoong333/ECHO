@@ -413,6 +413,8 @@ export default function Login() {
     if (isLoading) return;
     
     console.log("🚀 카카오톡 리다이렉트 로그인 시작...");
+    console.log("현재 도메인:", window.location.origin);
+    console.log("예상 리다이렉트 URI:", `${window.location.origin}/login`);
     
     try {
       kakaoAuthService.loginWithKakao();
