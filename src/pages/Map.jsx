@@ -211,7 +211,10 @@ export default function MapPage() {
           style={{ 
             width: '100%', 
             height: '100%',
-            borderRadius: '12px'
+            borderRadius: '12px',
+            // 지도 스크롤 처리
+            touchAction: 'pan-x pan-y',
+            overflow: 'hidden'
           }} 
         />
         {loading && (
@@ -267,6 +270,7 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  padding-bottom: 100px; /* 하단 여백으로 전체 스크롤 가능하게 */
 `;
 
 const FilterContainer = styled.div`
@@ -295,12 +299,17 @@ const FilterButton = styled.button`
 `;
 
 const MapContainer = styled.div`
-  flex: 1;
   position: relative;
   margin: 20px;
+  margin-bottom: 30px; /* 지도 아래 추가 여백 */
+  height: 60vh; /* 고정 높이로 설정 */
+  min-height: 400px; /* 최소 높이 보장 */
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  
+  /* 지도 터치/스크롤 이벤트 격리 */
+  touch-action: pan-x pan-y;
 `;
 
 const LoadingOverlay = styled.div`
@@ -319,12 +328,17 @@ const LoadingOverlay = styled.div`
 
 const PostPopup = styled.div`
   position: fixed;
-  bottom: 100px;
+  bottom: 120px; /* 탭바와 충분한 간격 */
   left: 20px;
   right: 20px;
   z-index: 1000;
   max-width: 400px;
   margin: 0 auto;
+  
+  /* 모바일에서 범례와 겹치지 않도록 */
+  @media (max-height: 700px) {
+    bottom: 140px;
+  }
 `;
 
 const PopupContent = styled.div`
@@ -401,10 +415,12 @@ const ViewButton = styled.button`
 
 const Legend = styled.div`
   margin: 20px;
+  margin-bottom: 40px; /* 범례 아래 추가 여백 */
   padding: 16px;
   background: white;
   border-radius: 12px;
   border: 1px solid #e9ecef;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 `;
 
 const LegendTitle = styled.div`

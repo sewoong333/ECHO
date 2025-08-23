@@ -925,60 +925,55 @@ const EmptyState = styled.div`
 
 const FAB = styled.button`
   position: fixed;
-  bottom: 80px; /* 하단 네비게이션 바(64px) + 여백(16px) */
-  right: calc(50vw - 250px + 20px); /* 리스트 섹션(500px) 우측 끝에서 20px 안쪽 */
-  width: 60px;
-  height: 60px;
+  bottom: 90px; /* 하단바(60px) + 여백(30px) */
+  right: 20px; /* 우측 고정 여백 */
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-mint-main) 0%, var(--color-mint-dark) 100%);
+  background: linear-gradient(135deg, #2ed8b6 0%, #26c4a8 100%);
   border: none;
-  color: var(--color-text-inverse);
-  font-size: 1.5rem;
+  color: white;
+  font-size: 1.2rem;
   cursor: pointer;
-  box-shadow: var(--shadow-xl);
+  box-shadow: 0 4px 20px rgba(46, 216, 182, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 60; /* 하단 네비게이션보다 위 */
-  transition: all var(--transition-normal);
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--color-mint-main), var(--color-mint-dark));
-    z-index: -1;
-    transition: all var(--transition-normal);
-  }
+  z-index: 100; /* 최상위 레이어 */
+  transition: all 0.3s ease;
   
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 20px 40px rgba(0, 217, 182, 0.4);
-    
-    &::before {
-      /* transform: scale removed to prevent screen breakage */
-      opacity: 0.8;
-    }
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(46, 216, 182, 0.6);
+    background: linear-gradient(135deg, #26c4a8 0%, #2ed8b6 100%);
   }
   
   &:active {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(0) scale(1);
+    box-shadow: 0 2px 12px rgba(46, 216, 182, 0.5);
   }
   
   &:focus-visible {
-    outline: 3px solid rgba(0, 217, 182, 0.3);
-    outline-offset: 3px;
+    outline: 2px solid rgba(46, 216, 182, 0.5);
+    outline-offset: 2px;
   }
   
-  /* 모바일에서는 화면 우측 기준으로 */
-  @media (max-width: 500px) {
-    right: 20px !important;
-    bottom: 80px !important;
+  /* 모바일 최적화 */
+  @media (max-width: 768px) {
+    width: 52px;
+    height: 52px;
+    bottom: 80px;
+    right: 16px;
+    font-size: 1.1rem;
+  }
+  
+  /* 아주 작은 화면 */
+  @media (max-width: 480px) {
+    width: 48px;
+    height: 48px;
+    bottom: 75px;
+    right: 12px;
+    font-size: 1rem;
   }
 `;
 

@@ -196,12 +196,13 @@ export default function SalesHistory() {
   const [filter, setFilter] = useState("all");
 
   useEffect(() => {
-    const fetchSalesHistory = async () => {
+    const fetchSalesHistory = async (retryCount = 0) => {
       try {
         console.log("📦 판매내역 로딩 시작...", {
           userId: user.uid,
           isLoggedIn: user.isLoggedIn,
-          loading: user.loading
+          loading: user.loading,
+          retry: retryCount
         });
 
         if (!user.uid) {
@@ -210,14 +211,21 @@ export default function SalesHistory() {
           return;
         }
 
+        // 더 안정적인 쿼리 (orderBy 제거하여 인덱스 문제 방지)
         const q = query(
           collection(db, "products"),
-          where("sellerId", "==", user.uid),
-          orderBy("createdAt", "desc"),
+          where("sellerId", "==", user.uid)
         );
         
-        console.log("🔍 Firebase 쿼리 실행...");
-        const querySnapshot = await getDocs(q);
+        console.log("🔍 Firebase 쿼리 실행 (안정화 버전)...");
+        
+        // 타임아웃을 추가하여 긴 연결 방지
+        const queryPromise = getDocs(q);
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Query timeout')), 10000)
+        );
+        
+        const querySnapshot = await Promise.race([queryPromise, timeoutPromise]);
         console.log(`📊 Firebase 결과: ${querySnapshot.docs.length}개 상품 발견`);
         
         const salesList = querySnapshot.docs.map((doc) => {
@@ -233,36 +241,31 @@ export default function SalesHistory() {
             ...data,
           };
         });
+
+        // 클라이언트에서 날짜순으로 수동 정렬
+        salesList.sort((a, b) => {
+          const timeA = a.createdAt?.toDate?.() || new Date(a.createdAt) || new Date(0);
+          const timeB = b.createdAt?.toDate?.() || new Date(b.createdAt) || new Date(0);
+          return timeB - timeA;
+        });
         
         setList(salesList);
         console.log("✅ 판매내역 로딩 완료:", salesList.length, "개 상품");
       } catch (err) {
         console.error("❌ 판매내역 불러오기 실패:", err);
         
-        // 인덱스 문제일 경우 대체 쿼리 시도
-        try {
-          console.log("🔄 대체 쿼리 시도 (인덱스 없는 버전)...");
-          const q2 = query(
-            collection(db, "products"),
-            where("sellerId", "==", user.uid)
-          );
-          const querySnapshot2 = await getDocs(q2);
-          const salesList2 = querySnapshot2.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          // 수동으로 정렬
-          salesList2.sort((a, b) => {
-            const timeA = a.createdAt?.toDate?.() || new Date(a.createdAt) || new Date(0);
-            const timeB = b.createdAt?.toDate?.() || new Date(b.createdAt) || new Date(0);
-            return timeB - timeA;
-          });
-          
-          setList(salesList2);
-          console.log("✅ 대체 쿼리 성공:", salesList2.length, "개 상품");
-        } catch (err2) {
-          console.error("❌ 대체 쿼리도 실패:", err2);
+        // 네트워크 오류나 타임아웃인 경우 재시도
+        if (retryCount < 2 && (err.code === 'unavailable' || err.message === 'Query timeout' || err.code === 'failed-precondition')) {
+          console.log(`🔄 재시도 ${retryCount + 1}/3 ...`);
+          setTimeout(() => {
+            fetchSalesHistory(retryCount + 1);
+          }, 1000 * (retryCount + 1)); // 점진적 백오프
+          return;
         }
+        
+        // 모든 재시도가 실패한 경우 빈 배열로 설정
+        setList([]);
+        console.log("❌ 모든 재시도 실패 - 빈 목록 표시");
       } finally {
         setLoading(false);
       }
