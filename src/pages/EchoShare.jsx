@@ -128,16 +128,21 @@ const OptionCardRow = styled.div`
   gap: 0.7rem;
   margin-bottom: 1.2rem;
   flex-wrap: wrap;
-  overflow: hidden;
+  justify-content: center;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 const OptionCard = styled.button`
-  flex: 1 1 0;
-  min-width: 120px;
+  flex: 1;
+  min-width: 140px;
+  max-width: 200px;
   background: ${({ active }) =>
-    active ? "linear-gradient(90deg, #2ed8b6 60%, #26c4a8 100%)" : "#fff"}};
+    active ? "linear-gradient(90deg, #2ed8b6 60%, #26c4a8 100%)" : "#fff"};
   color: ${({ active }) => (active ? "#fff" : "#1a4740")};
-  border: none;
+  border: 2px solid ${({ active }) => (active ? "#2ed8b6" : "#e9ecef")};
   border-radius: 18px;
   box-shadow: ${({ active }) =>
     active
@@ -147,17 +152,22 @@ const OptionCard = styled.button`
   font-size: 1.13rem;
   font-weight: 800;
   cursor: pointer;
-  transition:
-    background 0.18s,
-    color 0.18s,
-    box-shadow 0.18s;
-  outline: ${({ active }) => (active ? "2px solid #26c4a8" : "none")};
-  /* 확대 효과 제거 - 화면 깨짐 방지 */
+  transition: all 0.18s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  /* 호버 색상 변화 제거 */
+  
+  &:hover {
+    border-color: #2ed8b6;
+    box-shadow: 0 4px 16px rgba(46,216,182,0.12);
+  }
+  
+  @media (max-width: 768px) {
+    min-width: 100%;
+    max-width: 100%;
+    margin: 0;
+  }
 `;
 
 const OptionDesc = styled.div`
@@ -592,7 +602,12 @@ export default function EchoShare() {
                   setShowResult(false);
                 }}
               >
-                {opt.label}
+                <div style={{ fontSize: '1.13rem', fontWeight: 800 }}>
+                  {opt.label}
+                </div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 400, opacity: 0.8, textAlign: 'center', lineHeight: 1.3 }}>
+                  {opt.desc}
+                </div>
               </OptionCard>
             ))}
           </OptionCardRow>
