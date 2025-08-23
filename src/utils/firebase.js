@@ -1659,10 +1659,45 @@ export const kakaoAuthService = {
     });
   },
 
-  // Firebase에 사용자 정보 저장/업데이트
+  // Firebase에 사용자 정보 저장/업데이트 (이메일 중복 체크 포함)
   async createOrUpdateUser(kakaoUserInfo) {
     try {
+      const kakaoEmail = kakaoUserInfo.kakao_account?.email;
       const userId = `kakao_${kakaoUserInfo.id}`;
+      
+      // 1. 이메일이 있는 경우 중복 계정 확인
+      if (kakaoEmail) {
+        console.log('📧 이메일 중복 확인:', kakaoEmail);
+        
+        const emailQuery = query(
+          collection(db, 'users'), 
+          where('email', '==', kakaoEmail)
+        );
+        const emailSnapshot = await getDocs(emailQuery);
+        
+        if (!emailSnapshot.empty) {
+          const existingUser = emailSnapshot.docs[0];
+          const existingData = existingUser.data();
+          
+          console.log('⚠️ 중복 이메일 발견:', {
+            existingProvider: existingData.providerId || 'google',
+            email: kakaoEmail
+          });
+          
+          // 기존 사용자가 구글 계정인 경우
+          if (!existingData.providerId || existingData.providerId === 'google') {
+            throw {
+              code: 'DUPLICATE_EMAIL',
+              message: `이미 ${kakaoEmail}로 구글 계정이 가입되어 있습니다.`,
+              existingProvider: 'google',
+              email: kakaoEmail,
+              existingData: existingData
+            };
+          }
+        }
+      }
+      
+      // 2. 카카오 계정 생성/업데이트
       const userRef = doc(db, 'users', userId);
       const userSnap = await getDoc(userRef);
 
@@ -1672,7 +1707,7 @@ export const kakaoAuthService = {
         kakaoId: kakaoUserInfo.id,
         nickname: kakaoUserInfo.kakao_account?.profile?.nickname || '카카오 사용자',
         profileImage: kakaoUserInfo.kakao_account?.profile?.profile_image_url || null,
-        email: kakaoUserInfo.kakao_account?.email || null,
+        email: kakaoEmail || null,
         phoneNumber: kakaoUserInfo.kakao_account?.phone_number || null,
         isVerified: kakaoUserInfo.kakao_account?.is_email_verified || false,
         phoneVerified: kakaoUserInfo.kakao_account?.is_phone_number_verified || false,
@@ -1697,10 +1732,10 @@ export const kakaoAuthService = {
 
       await setDoc(userRef, userData, { merge: true });
       
-      console.log('사용자 정보 저장 완료:', userId);
+      console.log('✅ 카카오 사용자 정보 저장 완료:', userId);
       return userData;
     } catch (error) {
-      console.error('사용자 정보 저장 실패:', error);
+      console.error('❌ 사용자 정보 저장 실패:', error);
       throw error;
     }
   },
