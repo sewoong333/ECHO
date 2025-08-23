@@ -68,32 +68,21 @@ export function UserProvider({ children }) {
     let unsubscribeAuth = null;
     let unsubscribeToken = null;
 
-    const setupAuthListeners = () => {
-      // 초기화 시 카카오 로그인 상태 확인
-      const checkInitialKakaoLogin = async () => {
-        try {
-          const savedKakaoUser = await kakaoAuthService.checkSavedKakaoLogin();
-          if (savedKakaoUser) {
-            console.log('🔄 저장된 카카오 로그인 상태로 복원');
-            loginWithKakao(savedKakaoUser);
-            return true;
-          }
-        } catch (error) {
-          console.warn('⚠️ 초기 카카오 로그인 확인 실패:', error);
-        }
-        return false;
-      };
-
-      // 카카오 로그인 상태 확인 후 Firebase 인증 설정
-      checkInitialKakaoLogin().then((hasKakaoLogin) => {
-        if (hasKakaoLogin) {
-          // 카카오 로그인이 있는 경우 Firebase 인증 리스너는 건너뛰고 로딩만 해제
-          setUser(prev => ({ ...prev, loading: false }));
+    const setupAuthListeners = async () => {
+      try {
+        // 초기화 시 카카오 로그인 상태 확인
+        const savedKakaoUser = await kakaoAuthService.checkSavedKakaoLogin();
+        if (savedKakaoUser) {
+          console.log('🔄 저장된 카카오 로그인 상태로 복원');
+          loginWithKakao(savedKakaoUser);
           return;
         }
+      } catch (error) {
+        console.warn('⚠️ 초기 카카오 로그인 확인 실패:', error);
+      }
 
-        // 인증 상태 변경 리스너
-        unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
+      // 인증 상태 변경 리스너
+      unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
         try {
           if (firebaseUser) {
             // 사용자가 로그인한 경우
@@ -234,7 +223,6 @@ export function UserProvider({ children }) {
               isLoggedIn: userState.isLoggedIn
             });
 
-            // 리다이렉트는 Login 컴포넌트에서 처리하도록 변경
           } else {
             // 사용자가 로그아웃한 경우
             console.log("❌ 사용자 로그아웃됨");
