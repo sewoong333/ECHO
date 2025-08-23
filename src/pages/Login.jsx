@@ -11,7 +11,7 @@ import {
   signInWithPopup,
   getRedirectResult,
 } from "firebase/auth";
-import { auth, googleProvider } from "../utils/firebase";
+import { auth, googleProvider, kakaoAuthService } from "../utils/firebase";
 
 const Container = styled.div`
   width: 100%;
@@ -258,7 +258,7 @@ const LoadingText = styled.div`
 `;
 
 export default function Login() {
-  const { user, loginWithEmail } = useContext(UserContext);
+  const { user, loginWithEmail, loginWithKakao } = useContext(UserContext);
   const { addToast } = useToast();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -275,23 +275,62 @@ export default function Login() {
     setError("");
   };
 
-  // 리다이렉트 결과 확인
+  // 카카오 로그인 콜백 처리 및 리다이렉트 결과 확인
   useEffect(() => {
-    const checkRedirectResult = async () => {
+    const handleLoginCallbacks = async () => {
       try {
+        // 1. Google 리다이렉트 결과 확인
         const result = await getRedirectResult(auth);
         if (result?.user) {
-          console.log("Redirect login successful:", result.user);
+          console.log("Google Redirect login successful:", result.user);
           navigate("/", { replace: true });
+          return;
+        }
+
+        // 2. 카카오 로그인 콜백 처리
+        const urlParams = new URLSearchParams(window.location.search);
+        const kakaoCode = urlParams.get('code');
+        
+        if (kakaoCode) {
+          console.log("카카오 인증 코드 감지:", kakaoCode);
+          setIsLoading(true);
+          
+          try {
+            const kakaoUser = await kakaoAuthService.handleKakaoCallback();
+            if (kakaoUser) {
+              console.log("✅ 카카오 콜백 로그인 성공:", kakaoUser.uid);
+              
+              // UserContext에 카카오 사용자 정보 설정
+              loginWithKakao(kakaoUser);
+              
+              addToast(`${kakaoUser.nickname}님, 환영합니다!`, "success");
+              
+              // URL에서 코드 파라미터 제거
+              window.history.replaceState({}, document.title, window.location.pathname);
+              
+              // 리다이렉트
+              setTimeout(() => {
+                navigate("/", { replace: true });
+              }, 1000);
+            }
+          } catch (error) {
+            console.error("❌ 카카오 콜백 처리 실패:", error);
+            addToast("카카오 로그인 중 오류가 발생했습니다.", "error");
+            
+            // URL에서 에러 파라미터 제거
+            window.history.replaceState({}, document.title, window.location.pathname);
+          } finally {
+            setIsLoading(false);
+          }
         }
       } catch (error) {
-        console.error("Redirect login error:", error);
+        console.error("Login callback error:", error);
         handleAuthError(error);
       }
     };
 
-    checkRedirectResult();
-  }, [navigate]);
+    handleLoginCallbacks();
+  }, [navigate, loginWithKakao, addToast]);
 
   // 로그인 상태 체크 (개선된 로직)
   useEffect(() => {
@@ -366,6 +405,25 @@ export default function Login() {
     } finally {
       // 로딩 상태를 조금 더 유지하여 깜빡임 방지
       setTimeout(() => setIsLoading(false), 500);
+    }
+  };
+
+  const handleKakaoLogin = (e) => {
+    e.preventDefault();
+    if (isLoading) return;
+    
+    console.log("🚀 카카오톡 리다이렉트 로그인 시작...");
+    
+    try {
+      kakaoAuthService.loginWithKakao();
+    } catch (error) {
+      console.error("❌ 카카오톡 로그인 리다이렉트 실패:", error);
+      
+      if (error.message?.includes('카카오 SDK가 초기화되지 않았습니다')) {
+        addToast("카카오톡 서비스 연결에 실패했습니다. 잠시 후 다시 시도해주세요.", "error");
+      } else {
+        addToast("카카오톡 로그인 중 오류가 발생했습니다.", "error");
+      }
     }
   };
 
@@ -506,11 +564,11 @@ export default function Login() {
 
       <SocialLoginButton 
         className="kakao" 
-        disabled={true}
-        style={{ opacity: 0.5, cursor: 'not-allowed' }}
+        onClick={handleKakaoLogin}
+        disabled={isLoading}
       >
         <SiKakaotalk size={24} />
-        카카오로 로그인 (준비중)
+        카카오로 로그인
       </SocialLoginButton>
 
       <SocialLoginButton 

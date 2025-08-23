@@ -35,6 +35,9 @@ export default function ProductRegister() {
   const [category, setCategory] = useState("");
   const [condition, setCondition] = useState("");
   const [location, setLocation] = useState("");
+  const [detailAddress, setDetailAddress] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
   const [images, setImages] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -42,6 +45,35 @@ export default function ProductRegister() {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
   const { addToast } = useToast();
+
+  // 카카오 주소 검색 함수
+  const searchAddress = () => {
+    if (!window.kakao || !window.kakao.maps) {
+      addToast("지도 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.", "warning");
+      return;
+    }
+
+    window.kakao.maps.load(() => {
+      const geocoder = new window.kakao.maps.services.Geocoder();
+      
+      if (!location.trim()) {
+        addToast("주소를 입력해주세요.", "warning");
+        return;
+      }
+
+      geocoder.addressSearch(location, (result, status) => {
+        if (status === window.kakao.maps.services.Status.OK) {
+          const coords = result[0];
+          setLatitude(coords.y);
+          setLongitude(coords.x);
+          setDetailAddress(coords.address_name);
+          addToast("주소가 확인되었습니다.", "success");
+        } else {
+          addToast("주소를 찾을 수 없습니다. 다시 입력해주세요.", "error");
+        }
+      });
+    });
+  };
 
   // 로그인 확인
   useEffect(() => {
@@ -110,6 +142,9 @@ export default function ProductRegister() {
         category,
         condition,
         location,
+        detailAddress,
+        latitude: parseFloat(latitude) || null,
+        longitude: parseFloat(longitude) || null,
         images: imageUrls,
         createdAt: new Date(),
         sellerId: user.uid,
@@ -199,11 +234,24 @@ export default function ProductRegister() {
           
           <InputGroup>
             <Label>거래 지역 *</Label>
-            <Input 
-              value={location} 
-              onChange={e => setLocation(e.target.value)} 
-              placeholder="예: 서울 강남구" 
-            />
+            <AddressInputContainer>
+              <Input 
+                value={location} 
+                onChange={e => setLocation(e.target.value)} 
+                placeholder="예: 서울 강남구 논현동" 
+              />
+              <SearchAddressButton type="button" onClick={searchAddress}>
+                주소 검색
+              </SearchAddressButton>
+            </AddressInputContainer>
+            {detailAddress && (
+              <AddressResult>
+                📍 {detailAddress}
+                {latitude && longitude && (
+                  <CoordInfo>좌표: {latitude}, {longitude}</CoordInfo>
+                )}
+              </AddressResult>
+            )}
           </InputGroup>
         </Section>
         
@@ -528,4 +576,42 @@ const SuccessMessage = styled.div`
     color: #666;
     font-size: 14px;
   }
+`;
+
+const AddressInputContainer = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
+const SearchAddressButton = styled.button`
+  background: #2ed8b6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  
+  &:hover {
+    background: #26c4a8;
+  }
+`;
+
+const AddressResult = styled.div`
+  margin-top: 8px;
+  padding: 12px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #495057;
+`;
+
+const CoordInfo = styled.div`
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6c757d;
 `;

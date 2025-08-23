@@ -1476,12 +1476,185 @@ export const phoneAuthService = {
   }
 };
 
+// 카카오톡 로그인 서비스 (Redirect 방식)
+export const kakaoAuthService = {
+  // 카카오톡 로그인 시작 (Redirect 방식)
+  loginWithKakao() {
+    try {
+      if (!window.Kakao || !window.Kakao.isInitialized()) {
+        throw new Error('카카오 SDK가 초기화되지 않았습니다.');
+      }
+
+      console.log('🚀 카카오 로그인 시작 (Redirect 방식)...');
+      
+      // Redirect URI는 현재 도메인의 로그인 페이지로 설정
+      const redirectUri = `${window.location.origin}/login`;
+      
+      window.Kakao.Auth.authorize({
+        redirectUri: redirectUri,
+      });
+      
+    } catch (error) {
+      console.error('카카오 로그인 오류:', error);
+      throw error;
+    }
+  },
+
+  // 페이지 로드 시 카카오 토큰 확인 및 처리
+  async handleKakaoCallback() {
+    try {
+      const token = this.getCookie('authorize-access-token');
+      
+      if (token) {
+        console.log('📱 카카오 토큰 발견:', token);
+        
+        window.Kakao.Auth.setAccessToken(token);
+        
+        // 연결 상태 확인
+        const statusInfo = await window.Kakao.Auth.getStatusInfo();
+        
+        if (statusInfo.status === 'connected') {
+          console.log('✅ 카카오 연결 상태 확인됨');
+          
+          // 사용자 정보 가져오기
+          const userInfo = await this.getUserInfo();
+          
+          // Firebase에서 사용자 정보 확인/생성
+          const user = await this.createOrUpdateUser(userInfo);
+          
+          return user;
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('❌ 카카오 콜백 처리 실패:', error);
+      // 토큰이 유효하지 않은 경우 제거
+      window.Kakao.Auth.setAccessToken(null);
+      throw error;
+    }
+  },
+
+  // 쿠키에서 값 가져오기
+  getCookie(name) {
+    const parts = document.cookie.split(name + '=');
+    if (parts.length === 2) {
+      return parts[1].split(';')[0];
+    }
+    return null;
+  },
+
+  // 사용자 정보 가져오기
+  async getUserInfo() {
+    return new Promise((resolve, reject) => {
+      window.Kakao.API.request({
+        url: '/v2/user/me',
+        success: (response) => {
+          console.log('카카오 사용자 정보:', response);
+          resolve(response);
+        },
+        fail: (error) => {
+          console.error('카카오 사용자 정보 가져오기 실패:', error);
+          reject(error);
+        }
+      });
+    });
+  },
+
+  // Firebase에 사용자 정보 저장/업데이트
+  async createOrUpdateUser(kakaoUserInfo) {
+    try {
+      const userId = `kakao_${kakaoUserInfo.id}`;
+      const userRef = doc(db, 'users', userId);
+      const userSnap = await getDoc(userRef);
+
+      const userData = {
+        uid: userId,
+        providerId: 'kakao',
+        kakaoId: kakaoUserInfo.id,
+        nickname: kakaoUserInfo.kakao_account?.profile?.nickname || '카카오 사용자',
+        profileImage: kakaoUserInfo.kakao_account?.profile?.profile_image_url || null,
+        email: kakaoUserInfo.kakao_account?.email || null,
+        phoneNumber: kakaoUserInfo.kakao_account?.phone_number || null,
+        isVerified: kakaoUserInfo.kakao_account?.is_email_verified || false,
+        phoneVerified: kakaoUserInfo.kakao_account?.is_phone_number_verified || false,
+        
+        // ECHO 기본 정보
+        mannerScore: userSnap.exists() ? userSnap.data().mannerScore : 100,
+        rating: userSnap.exists() ? userSnap.data().rating : 0,
+        reviewCount: userSnap.exists() ? userSnap.data().reviewCount : 0,
+        transactionCount: userSnap.exists() ? userSnap.data().transactionCount : 0,
+        favoriteCount: userSnap.exists() ? userSnap.data().favoriteCount : 0,
+        following: userSnap.exists() ? userSnap.data().following : [],
+        
+        // 타임스탬프
+        updatedAt: serverTimestamp(),
+        lastLoginAt: serverTimestamp()
+      };
+
+      // 신규 사용자인 경우 생성일시 추가
+      if (!userSnap.exists()) {
+        userData.createdAt = serverTimestamp();
+      }
+
+      await setDoc(userRef, userData, { merge: true });
+      
+      console.log('사용자 정보 저장 완료:', userId);
+      return userData;
+    } catch (error) {
+      console.error('사용자 정보 저장 실패:', error);
+      throw error;
+    }
+  },
+
+  // 카카오 로그아웃
+  async logout() {
+    try {
+      if (window.Kakao && window.Kakao.Auth) {
+        await new Promise((resolve) => {
+          window.Kakao.Auth.logout(() => {
+            console.log('카카오 로그아웃 완료');
+            resolve();
+          });
+        });
+      }
+    } catch (error) {
+      console.error('카카오 로그아웃 실패:', error);
+    }
+  },
+
+  // 카카오 연결 해제
+  async unlink() {
+    try {
+      if (window.Kakao && window.Kakao.API) {
+        await new Promise((resolve, reject) => {
+          window.Kakao.API.request({
+            url: '/v1/user/unlink',
+            success: (response) => {
+              console.log('카카오 연결 해제 완료:', response);
+              resolve(response);
+            },
+            fail: (error) => {
+              console.error('카카오 연결 해제 실패:', error);
+              reject(error);
+            }
+          });
+        });
+      }
+    } catch (error) {
+      console.error('카카오 연결 해제 오류:', error);
+      throw error;
+    }
+  }
+};
+
 export default {
   productService,
   imageService,
   userService,
   subscriptionService,
   phoneAuthService,
+  kakaoAuthService,
   PRODUCT_STATUS,
   TRANSACTION_STATUS,
   INSTRUMENT_CATEGORIES,

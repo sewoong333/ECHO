@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from "react";
-import { auth, googleProvider, db } from "../utils/firebase";
+import { auth, googleProvider, db, kakaoAuthService } from "../utils/firebase";
 import {
   signInWithPopup,
   signInWithEmailAndPassword,
@@ -329,6 +329,54 @@ export function UserProvider({ children }) {
     }
   };
 
+  // 카카오 사용자 정보를 UserContext 상태에 설정
+  const loginWithKakao = (kakaoUserData) => {
+    try {
+      console.log("📱 카카오 사용자 정보를 UserContext에 설정:", kakaoUserData);
+      
+      setUser({
+        nickname: kakaoUserData.nickname,
+        email: kakaoUserData.email || "",
+        uid: kakaoUserData.uid,
+        isLoggedIn: true,
+        loading: false,
+        emailVerified: kakaoUserData.isVerified || false,
+        phoneNumber: kakaoUserData.phoneNumber || "",
+        profileImage: kakaoUserData.profileImage || "",
+        providerId: 'kakao',
+        mannerScore: kakaoUserData.mannerScore || 100,
+        transactionCount: kakaoUserData.transactionCount || 0,
+        reviewCount: kakaoUserData.reviewCount || 0,
+        favoriteCount: kakaoUserData.favoriteCount || 0,
+        isVerified: kakaoUserData.isVerified || false,
+        isBusiness: false,
+        businessInfo: null,
+        lastLoginAt: new Date(),
+        createdAt: kakaoUserData.createdAt || new Date(),
+        preferences: {
+          pushNotifications: true,
+          emailNotifications: true,
+          smsNotifications: false,
+          marketingEmails: false,
+        },
+        blockedUsers: kakaoUserData.blockedUsers || [],
+        following: kakaoUserData.following || [],
+        followers: [],
+        address: kakaoUserData.address || "",
+        region: kakaoUserData.region || "",
+        district: kakaoUserData.district || "",
+      });
+      
+      setUserProfile(kakaoUserData);
+      setAuthError(null);
+      
+      console.log("✅ 카카오 사용자 정보 설정 완료");
+    } catch (error) {
+      console.error("❌ 카카오 사용자 정보 설정 실패:", error);
+      setAuthError(error);
+    }
+  };
+
   const loginWithEmail = async ({ email, password }) => {
     try {
       const userCredential = await signInWithEmailAndPassword(
@@ -586,6 +634,12 @@ export function UserProvider({ children }) {
   // 로그아웃
   const logout = async () => {
     try {
+      // 카카오 로그아웃도 같이 처리
+      if (user.providerId === 'kakao') {
+        await kakaoAuthService.logout();
+      }
+      
+      // Firebase 로그아웃
       await signOut(auth);
       console.log("✅ 로그아웃 완료");
     } catch (error) {
@@ -629,6 +683,7 @@ export function UserProvider({ children }) {
     authError,
     users,
     loginWithGoogle,
+    loginWithKakao,
     loginWithEmail,
     signupWithEmail,
     logout,

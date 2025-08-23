@@ -20,12 +20,45 @@ export default function MusicLifeWrite() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("free");
+  const [location, setLocation] = useState("");
+  const [detailAddress, setDetailAddress] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
   const [images, setImages] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const { user } = useContext(UserContext);
   const navigate = useNavigate();
+
+  // 카카오 주소 검색 함수
+  const searchAddress = () => {
+    if (!window.kakao || !window.kakao.maps) {
+      alert("지도 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+
+    window.kakao.maps.load(() => {
+      const geocoder = new window.kakao.maps.services.Geocoder();
+      
+      if (!location.trim()) {
+        alert("주소를 입력해주세요.");
+        return;
+      }
+
+      geocoder.addressSearch(location, (result, status) => {
+        if (status === window.kakao.maps.services.Status.OK) {
+          const coords = result[0];
+          setLatitude(coords.y);
+          setLongitude(coords.x);
+          setDetailAddress(coords.address_name);
+          alert("주소가 확인되었습니다.");
+        } else {
+          alert("주소를 찾을 수 없습니다. 다시 입력해주세요.");
+        }
+      });
+    });
+  };
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -76,6 +109,10 @@ export default function MusicLifeWrite() {
         title,
         content,
         category,
+        location: location || null,
+        detailAddress: detailAddress || null,
+        latitude: parseFloat(latitude) || null,
+        longitude: parseFloat(longitude) || null,
         images: imageUrls,
         authorId: user.uid,
         authorName: user.nickname || user.displayName || "익명",
@@ -148,6 +185,28 @@ export default function MusicLifeWrite() {
               maxLength={100}
             />
             <CharCount>{title.length}/100</CharCount>
+          </InputGroup>
+
+          <InputGroup>
+            <Label>위치 (선택사항)</Label>
+            <AddressInputContainer>
+              <Input 
+                value={location} 
+                onChange={e => setLocation(e.target.value)} 
+                placeholder="예: 서울 강남구 논현동 (연주/모임 장소 등)" 
+              />
+              <SearchAddressButton type="button" onClick={searchAddress}>
+                주소 검색
+              </SearchAddressButton>
+            </AddressInputContainer>
+            {detailAddress && (
+              <AddressResult>
+                📍 {detailAddress}
+                {latitude && longitude && (
+                  <CoordInfo>좌표: {latitude}, {longitude}</CoordInfo>
+                )}
+              </AddressResult>
+            )}
           </InputGroup>
         </Section>
 
@@ -497,4 +556,42 @@ const SuccessMessage = styled.div`
     color: #666;
     font-size: 14px;
   }
+`;
+
+const AddressInputContainer = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
+const SearchAddressButton = styled.button`
+  background: #2ed8b6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  
+  &:hover {
+    background: #26c4a8;
+  }
+`;
+
+const AddressResult = styled.div`
+  margin-top: 8px;
+  padding: 12px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #495057;
+`;
+
+const CoordInfo = styled.div`
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6c757d;
 `;

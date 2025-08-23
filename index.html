@@ -57,6 +57,7 @@
     <link rel="preconnect" href="https://storage.googleapis.com" />
     <link rel="preconnect" href="https://firebase.googleapis.com" />
     <link rel="preconnect" href="https://identitytoolkit.googleapis.com" />
+    <link rel="preconnect" href="https://dapi.kakao.com" />
     
     <!-- DNS Prefetch -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
@@ -160,8 +161,21 @@
     </div>
     
     <div id="root"></div>
+    
+    <!-- 카카오 API -->
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=c948ee0b6c8a31fc2192950ffd410784&libraries=services&autoload=false"></script>
+    <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.6/kakao.min.js" integrity="sha384-WAtVcQYcmTO/N+C1N+1m6Gp8qxh+3NlnP7X1U7qP6P5dQY/MsRBNTh+e1ahJrkEm" crossorigin="anonymous"></script>
     <script type="module" src="/src/main.jsx"></script>
     
+    <!-- 카카오 SDK 초기화 -->
+    <script>
+      // 카카오 SDK 초기화
+      if (window.Kakao) {
+        window.Kakao.init('8Oq43ramXf06d4DaF97eIuQsgmxCqV7S');
+        console.log('카카오 SDK 초기화 완료:', window.Kakao.isInitialized());
+      }
+    </script>
+
     <!-- Service Worker Registration - 임시 비활성화 -->
     <script>
       // Service Worker 임시 비활성화 - 캐시 문제 방지
