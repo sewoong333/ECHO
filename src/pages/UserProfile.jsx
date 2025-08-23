@@ -501,7 +501,7 @@ export default function UserProfile() {
     return null;
   }
 
-  const mannerGrade = reviewService.getMannerGrade(trustStats.mannerTemperature);
+  const mannerGrade = reviewService.getMannerGrade(trustStats.mannerScore);
   const totalReviews = trustStats.totalReviews;
 
   return (
@@ -540,11 +540,11 @@ export default function UserProfile() {
               {formatDate(userProfile.joinDate)} 가입
             </ProfileInfo>
 
-            {/* 매너온도 */}
+            {/* 매너점수 */}
             <MannerSection>
               <MannerTemp color={mannerGrade.color}>
                 <FaThermometerHalf />
-                {trustStats.mannerTemperature}°C
+                {trustStats.mannerScore}점
               </MannerTemp>
               <MannerGrade color={mannerGrade.color}>
                 {mannerGrade.label}

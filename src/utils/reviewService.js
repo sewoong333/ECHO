@@ -48,7 +48,7 @@ export const REVIEW_CRITERIA = {
   }
 };
 
-// 매너 온도 계산 가중치
+// 매너 점수 계산 가중치
 export const MANNER_WEIGHTS = {
   rating: 0.4,        // 평점 (40%)
   reviews: 0.3,       // 후기 수 (30%)
@@ -108,7 +108,7 @@ export const reviewService = {
     }
   },
   
-  // 사용자 평점 업데이트 (매너온도 계산)
+  // 사용자 평점 업데이트 (매너점수 계산)
   async updateUserRating(userId) {
     try {
       // 사용자가 받은 모든 리뷰 조회
@@ -129,31 +129,31 @@ export const reviewService = {
       const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
       const averageRating = totalRating / reviews.length;
       
-      // 매너온도 계산 (36.5도 기준, 0-100도 범위)
-      const baseTemp = 36.5;
-      const ratingBonus = (averageRating - 3) * 10; // 3점 기준으로 ±10도
-      const reviewCountBonus = Math.min(reviews.length * 0.5, 10); // 리뷰 수 보너스 (최대 10도)
+      // 매너점수 계산 (100점 기준, 0-100점 범위)
+      const baseScore = 100;
+      const ratingBonus = (averageRating - 3) * 10; // 3점 기준으로 ±10점
+      const reviewCountBonus = Math.min(reviews.length * 0.5, 10); // 리뷰 수 보너스 (최대 10점)
       const recommendedRatio = reviews.filter(r => r.isRecommended).length / reviews.length;
-      const recommendBonus = recommendedRatio * 5; // 추천 비율 보너스 (최대 5도)
+      const recommendBonus = recommendedRatio * 5; // 추천 비율 보너스 (최대 5점)
       
-      let mannerTemperature = baseTemp + ratingBonus + reviewCountBonus + recommendBonus;
+      let mannerScore = baseScore + ratingBonus + reviewCountBonus + recommendBonus;
       
-      // 온도 범위 제한 (0-100도)
-      mannerTemperature = Math.max(0, Math.min(100, mannerTemperature));
+      // 점수 범위 제한 (0-100점)
+      mannerScore = Math.max(0, Math.min(100, mannerScore));
       
       // 사용자 문서 업데이트
       const userRef = doc(db, 'users', userId);
       await updateDoc(userRef, {
         rating: parseFloat(averageRating.toFixed(1)),
         reviewCount: reviews.length,
-        mannerTemperature: parseFloat(mannerTemperature.toFixed(1)),
+        mannerScore: parseFloat(mannerScore.toFixed(1)),
         ratingUpdatedAt: serverTimestamp()
       });
       
       console.log('사용자 평점 업데이트 완료:', userId, {
         rating: averageRating,
         reviewCount: reviews.length,
-        mannerTemperature
+        mannerScore
       });
       
     } catch (error) {
@@ -309,7 +309,7 @@ export const reviewService = {
         // 기본 정보
         rating: userData.rating || 0,
         reviewCount: userData.reviewCount || 0,
-        mannerTemperature: userData.mannerTemperature || 36.5,
+        mannerScore: userData.mannerScore || 100,
         
         // 상세 통계
         ratingDistribution,
@@ -361,12 +361,12 @@ export const reviewService = {
     return type === 'seller' ? sellerTags : buyerTags;
   },
   
-  // 매너온도 등급 계산
-  getMannerGrade(temperature) {
-    if (temperature >= 60) return { grade: 'S', color: '#ff6b00', label: '최고 매너' };
-    if (temperature >= 50) return { grade: 'A', color: '#2ed8b6', label: '좋은 매너' };
-    if (temperature >= 40) return { grade: 'B', color: '#4caf50', label: '보통 매너' };
-    if (temperature >= 30) return { grade: 'C', color: '#ffc107', label: '주의 필요' };
+  // 매너점수 등급 계산
+  getMannerGrade(score) {
+    if (score >= 90) return { grade: 'S', color: '#ff6b00', label: '최고 매너' };
+    if (score >= 80) return { grade: 'A', color: '#2ed8b6', label: '좋은 매너' };
+    if (score >= 70) return { grade: 'B', color: '#4caf50', label: '보통 매너' };
+    if (score >= 60) return { grade: 'C', color: '#ffc107', label: '주의 필요' };
     return { grade: 'D', color: '#f44336', label: '개선 필요' };
   }
 };

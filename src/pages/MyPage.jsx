@@ -517,8 +517,9 @@ export default function MyPage() {
             <MannerScore>{user.mannerScore}점</MannerScore>
           </MannerScoreHeader>
           <MannerScoreDesc>
-            {user.mannerScore >= 40 ? '매우 좋은 거래자예요!' :
-             user.mannerScore >= 36.5 ? '좋은 거래자예요!' :
+            {user.mannerScore >= 90 ? '매우 좋은 거래자예요!' :
+             user.mannerScore >= 70 ? '좋은 거래자예요!' :
+             user.mannerScore >= 50 ? '보통 거래자예요!' :
              '더 좋은 거래자가 되어보세요!'}
           </MannerScoreDesc>
         </MannerScoreSection>

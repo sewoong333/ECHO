@@ -1237,7 +1237,7 @@ export default function ProductDetail() {
             </SellerInfo>
             <MannerScore>
               <FaStar />
-              {product.sellerMannerScore || 36.5}°C
+              {product.sellerMannerScore || 100}점
             </MannerScore>
           </SellerHeader>
 
