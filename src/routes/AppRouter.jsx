@@ -22,6 +22,8 @@ const AddProduct = lazy(() => import("../pages/AddProduct"));
 const GuitarTuner = lazy(() => import("../pages/GuitarTuner"));
 const BassTuner = lazy(() => import("../pages/BassTuner"));
 const SalesHistory = lazy(() => import("../pages/SalesHistory"));
+const SoldHistory = lazy(() => import("../pages/SoldHistory"));
+const BuyingHistory = lazy(() => import("../pages/BuyingHistory"));
 const EchoShare = lazy(() => import("../pages/EchoShare"));
 const WishList = lazy(() => import("../pages/WishList"));
 const PhoneRegister = lazy(() => import("../pages/PhoneRegister"));
@@ -84,6 +86,8 @@ export default function AppRouter() {
         <Route path="/chat" element={<ChatList />} />
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/mypage/sales" element={<SalesHistory />} />
+        <Route path="/mypage/sold" element={<SoldHistory />} />
+        <Route path="/mypage/buying" element={<BuyingHistory />} />
         <Route path="/musiclife" element={<MusicLife />} />
         <Route path="/musiclife/write" element={<MusicLifeWrite />} />
         <Route path="/musiclife/:id" element={<MusicLifeDetail />} />

@@ -24,6 +24,8 @@ import {
   FaEye,
   FaAward,
 } from "react-icons/fa";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../utils/firebase";
 
 const Container = styled.div`
   width: 100vw;
@@ -348,16 +350,33 @@ export default function MyPage() {
       // 사용자 상품 로드
       await loadUserProducts();
       
-      // 통계 계산 (실제로는 API 호출)
+      // 실제 상품 통계 계산
+      const q = query(
+        collection(db, "products"),
+        where("sellerId", "==", user.uid)
+      );
+      const querySnapshot = await getDocs(q);
+      const userProducts = querySnapshot.docs.map(doc => doc.data());
+      
+      const sellingCount = userProducts.filter(p => !p.sold).length;
+      const soldCount = userProducts.filter(p => p.sold).length;
+      
       setStats({
-        selling: user.transactionCount || 0,
-        sold: Math.floor((user.transactionCount || 0) * 0.7),
-        buying: Math.floor((user.transactionCount || 0) * 0.3),
+        selling: sellingCount,
+        sold: soldCount,
+        buying: 0, // 실제 구매 내역은 별도 컬렉션 필요
         reviews: user.reviewCount || 0,
       });
       
     } catch (error) {
       console.error('데이터 로드 실패:', error);
+      // 실패 시 기본값 설정
+      setStats({
+        selling: 0,
+        sold: 0,
+        buying: 0,
+        reviews: user.reviewCount || 0,
+      });
     } finally {
       setLoading(false);
     }
