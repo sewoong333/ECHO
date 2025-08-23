@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import styled from "styled-components";
 import TopBar from "../components/TopBar";
 
-// Premium color scheme
+// Premium color scheme for bass
 const COLORS = {
   primary: '#0f0a1a',
   secondary: '#1f1a2e', 
@@ -32,166 +32,38 @@ function getDiffHz(freq, target) {
 
 function getAdvice(diff) {
   if (diff == null) return "";
-  if (Math.abs(diff) < 0.8) return "🎯 완벽합니다!";
+  if (Math.abs(diff) < 1.5) return "🎯 완벽합니다!";
   if (diff > 0) return "🔽 음정을 낮춰주세요";
   return "🔼 음정을 높여주세요";
 }
 
-function analyzeAudioHealth(buf, sampleRate, pitch, targetFreq, volume) {
-  if (!pitch || !targetFreq || buf.length === 0) return null;
+// Simple pitch detection optimized for bass frequencies
+function detectPitch(analyser) {
+  const bufferLength = analyser.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+  analyser.getByteFrequencyData(dataArray);
   
-  const freqRatio = pitch / targetFreq;
+  const sampleRate = analyser.context.sampleRate;
+  const nyquist = sampleRate / 2;
+  let maxValue = 0;
+  let maxIndex = 0;
   
-  let rms = 0;
-  let peakCount = 0;
-  let irregularities = 0;
-  
-  for (let i = 0; i < buf.length; i++) {
-    rms += buf[i] * buf[i];
-    if (i > 0 && Math.abs(buf[i] - buf[i-1]) > 0.1) {
-      irregularities++;
-    }
-    if (Math.abs(buf[i]) > 0.7) {
-      peakCount++;
-    }
-  }
-  rms = Math.sqrt(rms / buf.length);
-  
-  const harmonicRatio = analyzeHarmonics(buf, sampleRate, pitch);
-  const stability = 1 - (irregularities / buf.length);
-  const peakRatio = peakCount / buf.length;
-  
-  if (freqRatio > 1.8 || stability < 0.3 || harmonicRatio < 0.2) {
-    return {
-      type: 'critical',
-      title: '🚨 즉시 중단!',
-      message: '베이스에 심각한 손상이 감지되었습니다!',
-      action: '즉시 튜닝을 중단하고 악기를 확인하세요.',
-      damageLevel: 'severe',
-      details: `안정성: ${(stability * 100).toFixed(1)}%, 하모닉: ${(harmonicRatio * 100).toFixed(1)}%`
-    };
-  }
-  
-  if (freqRatio > 1.5 || peakRatio > 0.15) {
-    return {
-      type: 'danger',
-      title: '⚠️ 줄 파손 위험!',
-      message: '줄이 끊어질 위험이 매우 높습니다!',
-      action: '즉시 줄을 느슨하게 해주세요.',
-      damageLevel: 'high',
-      details: `장력 위험도: ${((freqRatio - 1) * 100).toFixed(1)}%`
-    };
-  }
-  
-  if (freqRatio > 1.2 || stability < 0.6 || harmonicRatio < 0.5) {
-    return {
-      type: 'warning',
-      title: '⚠️ 악기 상태 주의',
-      message: '베이스에 스트레스가 가해지고 있습니다.',
-      action: '조심스럽게 조정하고 악기 상태를 확인하세요.',
-      damageLevel: 'medium',
-      details: `안정성: ${(stability * 100).toFixed(1)}%, 하모닉: ${(harmonicRatio * 100).toFixed(1)}%`
-    };
-  }
-  
-  if (freqRatio > 1.1 || volume > 0.8 || stability < 0.8) {
-    return {
-      type: 'info',
-      title: 'ℹ️ 상태 확인',
-      message: '베이스 상태를 확인해보세요.',
-      action: '계속 모니터링하며 조심스럽게 진행하세요.',
-      damageLevel: 'low',
-      details: `볼륨: ${(volume * 100).toFixed(0)}%, 안정성: ${(stability * 100).toFixed(1)}%`
-    };
-  }
-  
-  return {
-    type: 'normal',
-    title: '✅ 정상',
-    message: '베이스 상태가 양호합니다.',
-    action: '안전하게 튜닝을 계속하세요.',
-    damageLevel: 'normal',
-    details: `상태 양호 - 안정성: ${(stability * 100).toFixed(1)}%`
-  };
-}
-
-function analyzeHarmonics(buf, sampleRate, fundamental) {
-  const bufLength = buf.length;
-  let harmonicStrength = 0;
-  
-  const harmonicFreqs = [fundamental * 2, fundamental * 3];
-  
-  for (let harmonic of harmonicFreqs) {
-    const period = sampleRate / harmonic;
-    const samplesPerPeriod = Math.round(period);
-    
-    if (samplesPerPeriod < bufLength / 4) {
-      let correlation = 0;
-      const testLength = Math.min(samplesPerPeriod * 3, bufLength - samplesPerPeriod);
-      
-      for (let i = 0; i < testLength; i++) {
-        correlation += buf[i] * buf[i + samplesPerPeriod];
-      }
-      harmonicStrength += Math.abs(correlation) / testLength;
+  // Find the frequency with maximum amplitude (bass range focus)
+  for (let i = 5; i < bufferLength / 6; i++) { // Lower frequency focus
+    if (dataArray[i] > maxValue && dataArray[i] > 40) { // Lower threshold for bass
+      maxValue = dataArray[i];
+      maxIndex = i;
     }
   }
   
-  return Math.min(1, harmonicStrength);
-}
-
-function autoCorrelate(buf, sampleRate) {
-  // Chris Wilson's improved ACF2+ algorithm for bass frequencies
-  let SIZE = buf.length;
-  let rms = 0;
-
-  // Calculate RMS for signal strength check
-  for (let i = 0; i < SIZE; i++) {
-    let val = buf[i];
-    rms += val * val;
-  }
-  rms = Math.sqrt(rms / SIZE);
-  if (rms < 0.005) return -1; // Lower threshold for bass frequencies
-
-  // Find signal boundaries using threshold
-  let r1 = 0, r2 = SIZE - 1, thres = 0.15; // Lower threshold for bass
-  for (let i = 0; i < SIZE / 2; i++)
-    if (Math.abs(buf[i]) < thres) { r1 = i; break; }
-  for (let i = 1; i < SIZE / 2; i++)
-    if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; }
-
-  // Trim buffer to signal boundaries
-  buf = buf.slice(r1, r2);
-  SIZE = buf.length;
-
-  // Calculate autocorrelation
-  let c = new Array(SIZE).fill(0);
-  for (let i = 0; i < SIZE; i++)
-    for (let j = 0; j < SIZE - i; j++)
-      c[i] = c[i] + buf[j] * buf[j + i];
-
-  // Find first minimum (avoid octave errors)
-  let d = 0; 
-  while (c[d] > c[d + 1]) d++;
+  if (maxValue < 40) return -1; // Lower threshold for bass signals
   
-  // Find maximum correlation after first minimum
-  let maxval = -1, maxpos = -1;
-  for (let i = d; i < SIZE; i++) {
-    if (c[i] > maxval) {
-      maxval = c[i];
-      maxpos = i;
-    }
-  }
-  let T0 = maxpos;
-
-  // Parabolic interpolation for better accuracy
-  if (T0 > 0 && T0 < SIZE - 1) {
-    let x1 = c[T0 - 1], x2 = c[T0], x3 = c[T0 + 1];
-    let a = (x1 + x3 - 2 * x2) / 2;
-    let b = (x3 - x1) / 2;
-    if (a) T0 = T0 - b / (2 * a);
-  }
-
-  return sampleRate / T0;
+  const frequency = (maxIndex * nyquist) / bufferLength;
+  
+  // Bass frequency range filter
+  if (frequency < 35 || frequency > 120) return -1;
+  
+  return frequency;
 }
 
 const Wrapper = styled.div`
@@ -275,50 +147,6 @@ const Subtitle = styled.p`
   opacity: 0.9;
 `;
 
-const TuningSelector = styled.div`
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid ${COLORS.glassBorder};
-  border-radius: 20px;
-  padding: 16px 24px;
-  margin-bottom: 32px;
-  width: 100%;
-  backdrop-filter: blur(10px);
-`;
-
-const SelectorLabel = styled.div`
-  color: ${COLORS.textSecondary};
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  text-align: center;
-`;
-
-const Select = styled.select`
-  width: 100%;
-  font-size: 18px;
-  font-weight: 700;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.1);
-  color: ${COLORS.text};
-  border: 1px solid ${COLORS.glassBorder};
-  outline: none;
-  padding: 16px 20px;
-  appearance: none;
-  text-align: center;
-  backdrop-filter: blur(10px);
-  
-  &:focus {
-    border-color: ${COLORS.success};
-    box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
-  }
-  
-  option {
-    background: ${COLORS.secondary};
-    color: ${COLORS.text};
-    padding: 12px;
-  }
-`;
-
 const MainDisplay = styled.div`
   width: 100%;
   display: flex;
@@ -388,10 +216,9 @@ const StringFreq = styled.div`
   font-weight: 600;
 `;
 
-const TunerGauge = styled.div`
+const TunerDisplay = styled.div`
   width: 100%;
   max-width: 400px;
-  height: 300px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -410,6 +237,19 @@ const TunerGauge = styled.div`
     border-radius: 24px;
     background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, transparent 100%);
     pointer-events: none;
+  }
+`;
+
+const TargetFrequency = styled.div`
+  text-align: center;
+  color: ${COLORS.textSecondary};
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  
+  span {
+    color: ${COLORS.success};
+    font-weight: 800;
   }
 `;
 
@@ -446,17 +286,17 @@ const FrequencyUnit = styled.span`
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 `;
 
-const TargetFrequency = styled.div`
+const DifferenceDisplay = styled.div`
   text-align: center;
-  color: ${COLORS.textSecondary};
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
-  margin-bottom: 20px;
-  
-  span {
-    color: ${COLORS.success};
-    font-weight: 800;
-  }
+  color: ${props => {
+    if (!props.diff) return COLORS.textSecondary;
+    if (Math.abs(props.diff) < 1.5) return COLORS.success;
+    if (Math.abs(props.diff) < 3) return COLORS.warning;
+    return COLORS.danger;
+  }};
+  margin-bottom: 16px;
 `;
 
 const TuningAdvice = styled.div`
@@ -490,129 +330,40 @@ const StatusInfo = styled.div`
   backdrop-filter: blur(10px);
 `;
 
-const InstrumentHealthCard = styled.div`
+const VolumeIndicator = styled.div`
   position: fixed;
   top: 100px;
   right: 24px;
-  background: ${props => {
-    switch(props.level) {
-      case 'severe': return `linear-gradient(135deg, ${COLORS.danger} 0%, #c0392b 100%)`;
-      case 'high': return `linear-gradient(135deg, ${COLORS.warning} 0%, #e84393 100%)`;
-      case 'medium': return `linear-gradient(135deg, #ffa502 0%, ${COLORS.warning} 100%)`;
-      case 'low': return `linear-gradient(135deg, ${COLORS.accent} 0%, ${COLORS.secondary} 100%)`;
-      default: return `linear-gradient(135deg, ${COLORS.success} 0%, #00b894 100%)`;
-    }
-  }};
-  color: white;
-  padding: 16px 20px;
-  border-radius: 20px;
-  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3);
-  width: 180px;
-  height: 90px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  z-index: 999;
-  backdrop-filter: blur(25px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: ${props => props.level === 'severe' ? 'premiumPulse 3s infinite' : 'none'};
-  
-  @keyframes premiumPulse {
-    0%, 100% {
-      transform: scale(1);
-      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3);
-    }
-    50% {
-      transform: scale(1.03);
-      box-shadow: 0 25px 60px rgba(231, 76, 60, 0.5), 0 10px 25px rgba(231, 76, 60, 0.4);
-    }
-  }
-`;
-
-const HealthTitle = styled.div`
-  font-size: 13px;
-  font-weight: 700;
-  margin-bottom: 6px;
-  opacity: 0.9;
-  text-align: center;
-`;
-
-const HealthStatus = styled.div`
-  font-size: 16px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  text-align: center;
-`;
-
-const HealthDetail = styled.div`
-  font-size: 10px;
-  opacity: 0.8;
-  margin-top: 6px;
-  font-family: 'SF Mono', 'Monaco', monospace;
-  text-align: center;
-  line-height: 1.3;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
-
-const VolumeIndicator = styled.div`
-  position: fixed;
-  top: 210px;
-  right: 24px;
-  width: 180px;
-  height: 12px;
+  width: 60px;
+  height: 200px;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 20px;
-  overflow: hidden;
   z-index: 100;
   border: 1px solid rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(15px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: flex-end;
+  padding: 10px;
 `;
 
 const VolumeLevel = styled.div`
-  height: 100%;
-  width: ${props => Math.min(100, props.level * 100)}%;
+  width: 100%;
+  height: ${props => Math.min(90, props.level * 100)}%;
   background: ${props => {
-    if (props.level > 0.8) return `linear-gradient(90deg, ${COLORS.warning} 0%, ${COLORS.danger} 100%)`;
-    if (props.level > 0.6) return `linear-gradient(90deg, ${COLORS.success} 0%, ${COLORS.warning} 100%)`;
-    return `linear-gradient(90deg, ${COLORS.success} 0%, ${COLORS.highlight} 100%)`;
+    if (props.level > 0.8) return `linear-gradient(0deg, ${COLORS.danger} 0%, ${COLORS.warning} 100%)`;
+    if (props.level > 0.6) return `linear-gradient(0deg, ${COLORS.warning} 0%, ${COLORS.success} 100%)`;
+    return `linear-gradient(0deg, ${COLORS.success} 0%, ${COLORS.highlight} 100%)`;
   }};
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 20px;
+  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 15px;
   box-shadow: 0 0 15px rgba(46, 204, 113, 0.6);
 `;
-
-const useAnimatedAngle = (value, duration = 150) => {
-  const [animated, setAnimated] = useState(value);
-  useEffect(() => {
-    let raf;
-    let start = null;
-    let from = animated;
-    let to = value;
-    const animate = (timestamp) => {
-      if (!start) start = timestamp;
-      const progress = Math.min((timestamp - start) / duration, 1);
-      setAnimated(from + (to - from) * progress);
-      if (progress < 1) raf = requestAnimationFrame(animate);
-    };
-    if (from !== to) raf = requestAnimationFrame(animate);
-    return () => raf && cancelAnimationFrame(raf);
-    // eslint-disable-next-line
-  }, [value]);
-  return animated;
-};
 
 export default function BassTuner() {
   const [pitch, setPitch] = useState(null);
   const [diff, setDiff] = useState(null);
-  const [selected, setSelected] = useState(0); // 0: 1번줄(G2)
-  const [safetyWarning, setSafetyWarning] = useState(null);
+  const [selected, setSelected] = useState(0);
   const [volumeLevel, setVolumeLevel] = useState(0);
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
@@ -621,49 +372,58 @@ export default function BassTuner() {
 
   useEffect(() => {
     let stopped = false;
-    async function listen() {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const audioContext = new (window.AudioContext ||
-        window.webkitAudioContext)();
-      audioContextRef.current = audioContext;
-      const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 2048;
-      analyserRef.current = analyser;
-      const source = audioContext.createMediaStreamSource(stream);
-      source.connect(analyser);
-      sourceRef.current = source;
-      const buf = new Float32Array(analyser.fftSize);
-      const detect = () => {
-        if (stopped) return;
-        analyser.getFloatTimeDomainData(buf);
+    async function startAudio() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        audioContextRef.current = audioContext;
         
-        // RMS 볼륨 계산
-        let rms = 0;
-        for (let i = 0; i < buf.length; i++) {
-          rms += buf[i] * buf[i];
-        }
-        rms = Math.sqrt(rms / buf.length);
-        setVolumeLevel(rms);
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 4096; // Higher resolution for bass frequencies
+        analyser.smoothingTimeConstant = 0.9; // More smoothing for bass
+        analyserRef.current = analyser;
         
-        const freq = autoCorrelate(buf, audioContext.sampleRate);
-        // Bass frequency range: ~40Hz (E1) to ~100Hz (G2)
-        if (freq > 0 && freq >= 35 && freq <= 120) {
-          setPitch(freq);
-          const diffValue = getDiffHz(freq, BASS_NOTES[selected].freq);
-          setDiff(diffValue);
+        const source = audioContext.createMediaStreamSource(stream);
+        source.connect(analyser);
+        sourceRef.current = source;
+        
+        const detectAudio = () => {
+          if (stopped) return;
           
-          // 베이스 손상 분석
-          const healthAnalysis = analyzeAudioHealth(buf, audioContext.sampleRate, freq, BASS_NOTES[selected].freq, rms);
-          setSafetyWarning(healthAnalysis);
-        } else {
-          setPitch(null);
-          setDiff(null);
-        }
-        rafRef.current = requestAnimationFrame(detect);
-      };
-      rafRef.current = requestAnimationFrame(detect);
+          // Volume level calculation
+          const bufferLength = analyser.frequencyBinCount;
+          const dataArray = new Uint8Array(bufferLength);
+          analyser.getByteFrequencyData(dataArray);
+          
+          let sum = 0;
+          for (let i = 0; i < bufferLength; i++) {
+            sum += dataArray[i];
+          }
+          const average = sum / bufferLength;
+          setVolumeLevel(average / 255);
+          
+          // Pitch detection
+          const freq = detectPitch(analyser);
+          if (freq > 0) {
+            setPitch(freq);
+            const diffValue = getDiffHz(freq, BASS_NOTES[selected].freq);
+            setDiff(diffValue);
+          } else {
+            setPitch(null);
+            setDiff(null);
+          }
+          
+          rafRef.current = requestAnimationFrame(detectAudio);
+        };
+        
+        rafRef.current = requestAnimationFrame(detectAudio);
+      } catch (error) {
+        console.error('Audio access error:', error);
+      }
     }
-    listen().catch(console.error);
+    
+    startAudio();
+    
     return () => {
       stopped = true;
       if (rafRef.current) {
@@ -672,33 +432,10 @@ export default function BassTuner() {
     };
   }, [selected]);
 
-  const animatedAngle = useAnimatedAngle(Math.max(-100, Math.min(100, diff || 0)) * 0.9);
-
   return (
     <Wrapper>
       <TopBar />
       
-      {/* 베이스 상태 모니터링 카드 - 항상 표시 */}
-      <InstrumentHealthCard level={safetyWarning?.damageLevel || 'normal'}>
-        <HealthTitle>🎸 베이스 상태</HealthTitle>
-        <HealthStatus>
-          {(() => {
-            const level = safetyWarning?.damageLevel || 'normal';
-            switch(level) {
-              case 'severe': return '🚨 심각한 손상';
-              case 'high': return '⚠️ 위험 감지';
-              case 'medium': return '⚠️ 주의 필요';
-              case 'low': return 'ℹ️ 상태 확인';
-              default: return '✅ 정상 상태';
-            }
-          })()}
-        </HealthStatus>
-        <HealthDetail>
-          {safetyWarning?.details || '모니터링 중...'}
-        </HealthDetail>
-      </InstrumentHealthCard>
-      
-      {/* 볼륨 레벨 표시기 */}
       <VolumeIndicator>
         <VolumeLevel level={volumeLevel} />
       </VolumeIndicator>
@@ -708,15 +445,6 @@ export default function BassTuner() {
           <Title>🎸 베이스 튜너</Title>
           <Subtitle>깊고 풍부한 저음으로 완벽한 리듬을</Subtitle>
         </Header>
-
-        <TuningSelector>
-          <SelectorLabel>튜닝 타입 선택</SelectorLabel>
-          <Select value="standard" onChange={() => {}}>
-            <option value="standard">표준 베이스 튜닝 (E-A-D-G)</option>
-            <option value="drop_d">Drop D 베이스 튜닝</option>
-            <option value="five_string">5현 베이스 튜닝</option>
-          </Select>
-        </TuningSelector>
 
         <MainDisplay>
           <StringButtons>
@@ -732,7 +460,7 @@ export default function BassTuner() {
             ))}
           </StringButtons>
 
-          <TunerGauge>
+          <TunerDisplay>
             <TargetFrequency>
               목표: <span>{BASS_NOTES[selected].name} - {BASS_NOTES[selected].freq.toFixed(1)}Hz</span>
             </TargetFrequency>
@@ -742,100 +470,12 @@ export default function BassTuner() {
               <FrequencyUnit>Hz</FrequencyUnit>
             </FrequencyDisplay>
 
-            {/* SVG 게이지 */}
-            <div style={{ width: '100%', height: '180px', position: 'relative' }}>
-              <svg
-                width="100%"
-                height="180"
-                viewBox="0 0 340 180"
-                style={{ maxWidth: 380, display: "block", margin: "0 auto" }}
-              >
-                {/* 반원형 배경 게이지 */}
-                <path
-                  d="M20 150 A150 150 0 0 1 320 150"
-                  fill="none"
-                  stroke="rgba(255, 255, 255, 0.1)"
-                  strokeWidth="12"
-                />
-                
-                {/* 정확한 구간 표시 */}
-                {Math.abs(diff || 0) < 0.8 && (
-                  <path
-                    d="M170 150 L153.16 52.64 A100 100 0 0 1 186.84 52.64 L170 150 Z"
-                    fill={COLORS.success}
-                    opacity="0.3"
-                  />
-                )}
-                
-                {/* 눈금선과 숫자 */}
-                {[...Array(11)].map((_, i) => {
-                  const val = -100 + i * 20;
-                  const angle = (val / 200) * 180;
-                  const rad = ((angle - 90) * Math.PI) / 180;
-                  const x1 = 170 + 120 * Math.cos(rad);
-                  const y1 = 150 + 120 * Math.sin(rad);
-                  const x2 = 170 + 140 * Math.cos(rad);
-                  const y2 = 150 + 140 * Math.sin(rad);
-                  return (
-                    <g key={val}>
-                      <line
-                        x1={x1}
-                        y1={y1}
-                        x2={x2}
-                        y2={y2}
-                        stroke={val === 0 ? COLORS.success : "rgba(255, 255, 255, 0.3)"}
-                        strokeWidth={val === 0 ? 4 : 2}
-                      />
-                      <text
-                        x={170 + 105 * Math.cos(rad)}
-                        y={150 + 105 * Math.sin(rad) + 7}
-                        textAnchor="middle"
-                        fontSize="16"
-                        fontWeight={val === 0 ? 800 : 500}
-                        fill={val === 0 ? COLORS.success : COLORS.textSecondary}
-                      >
-                        {val}
-                      </text>
-                    </g>
-                  );
-                })}
-                
-                {/* 바늘 */}
-                <g
-                  style={{
-                    transform: `rotate(${animatedAngle}deg)`,
-                    transformOrigin: "170px 150px",
-                    transition: 'transform 0.1s ease-out'
-                  }}
-                >
-                  <rect
-                    x="167"
-                    y="150"
-                    width="6"
-                    height="-75"
-                    rx="3"
-                    fill={COLORS.highlight}
-                  />
-                  <circle
-                    cx="170"
-                    cy="150"
-                    r="18"
-                    fill={COLORS.glass}
-                    stroke={COLORS.success}
-                    strokeWidth="3"
-                  />
-                  <circle 
-                    cx="170" 
-                    cy="150" 
-                    r="8" 
-                    fill={COLORS.highlight} 
-                  />
-                </g>
-              </svg>
-            </div>
+            <DifferenceDisplay diff={diff}>
+              {diff ? `${diff > 0 ? '+' : ''}${diff.toFixed(1)} Hz` : '음을 내주세요'}
+            </DifferenceDisplay>
 
             <TuningAdvice>{getAdvice(diff)}</TuningAdvice>
-          </TunerGauge>
+          </TunerDisplay>
 
           <StatusInfo>
             표준 베이스 튜닝: G₂(98.0) - D₂(73.4) - A₁(55.0) - E₁(41.2)<br/>
