@@ -6,6 +6,7 @@ import Toast from "./components/Toast";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ToastProvider, useToast } from "./store/ToastContext";
 import { UserContext } from "./store/UserContext";
+import { useKakaoCallback } from "./hooks/useKakaoCallback";
 import { createGlobalStyle } from "styled-components";
 
 const GlobalStyle = createGlobalStyle`
@@ -24,12 +25,15 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-function AppContent() {
+function AppWithRouter() {
   const { toasts, removeToast } = useToast();
   const { user } = React.useContext(UserContext);
   
+  // React Router 내부에서 카카오 콜백 처리
+  useKakaoCallback();
+  
   return (
-    <BrowserRouter>
+    <>
       <GlobalStyle />
       <ErrorBoundary userId={user?.uid}>
         <div className="App">
@@ -38,6 +42,14 @@ function AppContent() {
           <Toast toasts={toasts} removeToast={removeToast} />
         </div>
       </ErrorBoundary>
+    </>
+  );
+}
+
+function AppContent() {
+  return (
+    <BrowserRouter>
+      <AppWithRouter />
     </BrowserRouter>
   );
 }

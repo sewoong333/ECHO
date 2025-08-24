@@ -258,7 +258,11 @@ const LoadingText = styled.div`
 `;
 
 export default function Login() {
-  const { user, loginWithEmail, loginWithKakao } = useContext(UserContext);
+  console.log('🚀 Login 컴포넌트 렌더링됨');
+  console.log('현재 URL:', window.location.href);
+  console.log('URL search params:', window.location.search);
+  
+  const { user, loginWithEmail, loginWithKakao, logout } = useContext(UserContext);
   const { addToast } = useToast();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -268,6 +272,13 @@ export default function Login() {
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  
+  console.log('사용자 상태:', {
+    isLoggedIn: user.isLoggedIn,
+    loading: user.loading,
+    uid: user.uid,
+    nickname: user.nickname
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -452,8 +463,19 @@ export default function Login() {
       case "auth/unauthorized-domain":
         addToast("현재 도메인에서 구글 로그인이 허용되지 않습니다.", "error");
         break;
+      case "auth/operation-not-allowed":
+        addToast("구글 로그인이 비활성화되어 있습니다. 관리자에게 문의해주세요.", "error");
+        break;
+      case "auth/user-disabled":
+        addToast("비활성화된 계정입니다. 관리자에게 문의해주세요.", "error");
+        break;
       default:
-        addToast(`로그인 중 오류가 발생했습니다. (${error.code})`, "error");
+        // User-Agent 제한 오류 감지
+        if (error.message?.includes('disallowed_useragent') || error.message?.includes('403')) {
+          addToast("현재 브라우저에서는 구글 로그인이 제한됩니다. 카카오 로그인을 사용해주세요.", "warning");
+        } else {
+          addToast(`로그인 중 오류가 발생했습니다. (${error.code})`, "error");
+        }
     }
   };
 
@@ -461,11 +483,24 @@ export default function Login() {
     e.preventDefault();
     if (isLoading) return;
 
+    // 모바일 환경 감지
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isInAppBrowser = /FBAN|FBAV|Instagram|Line|KakaoTalk|wv/i.test(navigator.userAgent);
+    
+    if (isMobile || isInAppBrowser) {
+      addToast("모바일에서는 카카오 로그인을 추천합니다. 구글 로그인이 제한될 수 있습니다.", "info");
+    }
+
     setIsLoading(true);
     setError("");
 
     try {
       console.log("🚀 Google 로그인 시작...");
+      console.log("환경 정보:", {
+        isMobile,
+        isInAppBrowser,
+        userAgent: navigator.userAgent
+      });
       
       // 기존 로그인이 있으면 먼저 로그아웃
       if (user.isLoggedIn) {
@@ -501,7 +536,13 @@ export default function Login() {
       }
     } catch (error) {
       console.error("❌ Google 로그인 실패:", error);
-      handleAuthError(error);
+      
+      // User-Agent 오류일 경우 카카오 로그인 제안
+      if (error.message?.includes('disallowed_useragent') || error.message?.includes('403')) {
+        addToast("현재 환경에서는 구글 로그인이 제한됩니다. 카카오 로그인을 이용해주세요.", "warning");
+      } else {
+        handleAuthError(error);
+      }
     } finally {
       // 로딩 상태를 조금 더 유지하여 깜빡임 방지
       setTimeout(() => setIsLoading(false), 500);
@@ -653,8 +694,25 @@ export default function Login() {
           disabled={isLoading}
         >
           <SiKakaotalk size={24} />
-          카카오로 로그인
+          카카오로 로그인 (권장)
         </SocialLoginButton>
+        
+        {/* 모바일 환경일 때 안내 메시지 */}
+        {/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && (
+          <div style={{
+            fontSize: "13px",
+            color: "#666",
+            textAlign: "center",
+            marginTop: "10px",
+            padding: "8px",
+            backgroundColor: "#f8f9fa",
+            borderRadius: "6px",
+            border: "1px solid #e9ecef"
+          }}>
+            📱 모바일에서는 카카오 로그인을 권장합니다<br/>
+            (구글 로그인이 일부 브라우저에서 제한될 수 있습니다)
+          </div>
+        )}
         
         <div style={{ 
           textAlign: "center", 
