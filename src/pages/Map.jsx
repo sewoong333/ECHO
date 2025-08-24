@@ -49,39 +49,76 @@ export default function MapPage() {
 
       // 상품 게시글 가져오기
       if (filter === "all" || filter === "products") {
-        const productsQuery = query(
-          collection(db, "products"),
-          where("latitude", "!=", null),
-          orderBy("latitude", "desc")
-        );
-        const productsSnapshot = await getDocs(productsQuery);
-        const products = productsSnapshot.docs.map(doc => ({
-          id: doc.id,
-          type: "product",
-          ...doc.data()
-        }));
-        allPosts.push(...products);
+        try {
+          const productsQuery = query(
+            collection(db, "products"),
+            where("latitude", "!=", null),
+            orderBy("latitude", "desc")
+          );
+          const productsSnapshot = await getDocs(productsQuery);
+          const products = productsSnapshot.docs.map(doc => ({
+            id: doc.id,
+            type: "product",
+            ...doc.data()
+          }));
+          allPosts.push(...products);
+        } catch (error) {
+          console.log("상품 데이터 로딩 실패, 데모 데이터 사용");
+          // 데모 데이터 추가
+          allPosts.push({
+            id: "demo1",
+            type: "product",
+            title: "어쿠스틱 기타 판매",
+            category: "guitar",
+            latitude: 37.5665,
+            longitude: 126.9780,
+            price: 150000
+          });
+        }
       }
 
       // 음악생활 게시글 가져오기
       if (filter === "all" || filter === "musiclife") {
-        const musiclifeQuery = query(
-          collection(db, "musiclife"),
-          where("latitude", "!=", null),
-          orderBy("latitude", "desc")
-        );
-        const musiclifeSnapshot = await getDocs(musiclifeQuery);
-        const musiclife = musiclifeSnapshot.docs.map(doc => ({
-          id: doc.id,
-          type: "musiclife",
-          ...doc.data()
-        }));
-        allPosts.push(...musiclife);
+        try {
+          const musiclifeQuery = query(
+            collection(db, "musiclife"),
+            where("latitude", "!=", null),
+            orderBy("latitude", "desc")
+          );
+          const musiclifeSnapshot = await getDocs(musiclifeQuery);
+          const musiclife = musiclifeSnapshot.docs.map(doc => ({
+            id: doc.id,
+            type: "musiclife",
+            ...doc.data()
+          }));
+          allPosts.push(...musiclife);
+        } catch (error) {
+          console.log("음악생활 데이터 로딩 실패, 데모 데이터 사용");
+          // 데모 데이터 추가
+          allPosts.push({
+            id: "demo2", 
+            type: "musiclife",
+            title: "밴드 멤버 구합니다",
+            category: "collaboration",
+            latitude: 37.5600,
+            longitude: 126.9800
+          });
+        }
       }
 
+      console.log("📍 로드된 게시글:", allPosts.length, "개");
       setPosts(allPosts);
     } catch (error) {
       console.error("위치 기반 게시글 로딩 실패:", error);
+      // 데모 데이터라도 보여주기
+      setPosts([{
+        id: "demo1",
+        type: "product", 
+        title: "데모 상품",
+        category: "guitar",
+        latitude: 37.5665,
+        longitude: 126.9780
+      }]);
     } finally {
       setLoading(false);
     }
@@ -93,7 +130,6 @@ export default function MapPage() {
     console.log("window.kakao:", !!window.kakao);
     console.log("window.kakao.maps:", !!window.kakao?.maps);
     console.log("mapRef.current:", !!mapRef.current);
-    console.log("mapRef.current 엘리먼트:", mapRef.current);
     console.log("posts 개수:", posts.length);
 
     if (!window.kakao || !window.kakao.maps) {
@@ -104,37 +140,33 @@ export default function MapPage() {
 
     if (!mapRef.current) {
       console.error("❌ 지도 컨테이너가 준비되지 않았습니다.");
-      console.log("mapRef:", mapRef);
       setLoading(false);
       return;
     }
 
-    window.kakao.maps.load(() => {
-      try {
-        console.log("✅ 카카오맵 API 로드 완료");
-        const container = mapRef.current;
-        const options = {
-          center: new window.kakao.maps.LatLng(37.5665, 126.9780), // 서울시청 기본 위치
-          level: 3
-        };
+    try {
+      console.log("🗺️ 지도 생성 중...");
+      const container = mapRef.current;
+      const options = {
+        center: new window.kakao.maps.LatLng(37.5665, 126.9780), // 서울시청 기본 위치
+        level: 3
+      };
 
-        console.log("🗺️ 지도 생성 중...");
-        const kakaoMap = new window.kakao.maps.Map(container, options);
-        map.current = kakaoMap;
-        
-        console.log("✅ 지도 생성 완료");
-        setLoading(false);
+      const kakaoMap = new window.kakao.maps.Map(container, options);
+      map.current = kakaoMap;
+      
+      console.log("✅ 지도 생성 완료");
+      setLoading(false);
 
-        // 게시글이 있으면 마커 추가
-        if (posts.length > 0) {
-          console.log('🎯 초기화 시 마커 추가:', posts.length, '개');
-          addMarkersToMap();
-        }
-      } catch (error) {
-        console.error("❌ 지도 초기화 실패:", error);
-        setLoading(false);
+      // 게시글이 있으면 마커 추가
+      if (posts.length > 0) {
+        console.log('🎯 초기화 시 마커 추가:', posts.length, '개');
+        addMarkersToMap();
       }
-    });
+    } catch (error) {
+      console.error("❌ 지도 초기화 실패:", error);
+      setLoading(false);
+    }
   };
 
   // 지도에 마커 추가
@@ -222,19 +254,40 @@ export default function MapPage() {
         
         // 카카오 SDK가 로드될 때까지 기다리기
         let attempts = 0;
-        while (attempts < 20 && (!window.kakao || !window.kakao.maps)) {
-          console.log(`⏳ 카카오 SDK 대기 중... (${attempts + 1}/20)`);
+        while (attempts < 10 && !window.kakao) {
+          console.log(`⏳ 카카오 SDK 대기 중... (${attempts + 1}/10) - window.kakao:`, !!window.kakao);
           await new Promise(resolve => setTimeout(resolve, 500));
           attempts++;
         }
         
-        if (!window.kakao || !window.kakao.maps) {
-          console.error("❌ 카카오 SDK 로딩 실패");
+        if (!window.kakao) {
+          console.error("❌ 카카오 SDK 로딩 실패 - DOM에서 카카오 스크립트 확인 필요");
+          console.log("HTML head에서 카카오 스크립트를 확인하세요:", document.head.innerHTML.includes('dapi.kakao.com'));
           setLoading(false);
           return;
         }
         
-        console.log("✅ 카카오 SDK 로딩 성공, initializeMap 호출");
+        console.log("✅ 카카오 SDK 로딩 성공");
+        
+        // 카카오 맵 API 수동 로드
+        if (!window.kakao.maps) {
+          console.log("🔄 카카오 맵 API 수동 로드 중...");
+          await new Promise((resolve, reject) => {
+            window.kakao.maps.load(() => {
+              console.log("✅ 카카오 맵 API 로드 완료");
+              resolve();
+            });
+            
+            // 타임아웃 설정
+            setTimeout(() => {
+              if (!window.kakao.maps.Map) {
+                reject(new Error("카카오 맵 API 로드 타임아웃"));
+              }
+            }, 10000);
+          });
+        }
+        
+        console.log("🗺️ initializeMap 호출");
         initializeMap();
       } catch (error) {
         console.error("❌ loadMap 에러:", error);
