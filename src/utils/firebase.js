@@ -1740,21 +1740,6 @@ export const kakaoAuthService = {
     }
   },
 
-  // 카카오 로그아웃
-  async logout() {
-    try {
-      if (window.Kakao && window.Kakao.Auth) {
-        await new Promise((resolve) => {
-          window.Kakao.Auth.logout(() => {
-            console.log('카카오 로그아웃 완료');
-            resolve();
-          });
-        });
-      }
-    } catch (error) {
-      console.error('카카오 로그아웃 실패:', error);
-    }
-  },
 
   // 카카오 연결 해제
   async unlink() {

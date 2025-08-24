@@ -9,7 +9,7 @@ import {
   FiHeart,
   FiMessageCircle,
 } from "react-icons/fi";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../utils/firebase";
 import TopBar from "../components/TopBar";
 

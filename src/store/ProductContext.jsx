@@ -12,7 +12,7 @@ import {
   PRODUCT_STATUS,
   INSTRUMENT_CATEGORIES,
 } from "../utils/firebase";
-import { loadDummyProductsForDev } from "../utils/createDummyData";
+// import { loadDummyProductsForDev } from "../utils/createDummyData";
 
 export const ProductContext = createContext();
 
@@ -220,7 +220,6 @@ export function ProductProvider({ children }) {
           console.log("🔄 기존 데이터와 실시간 데이터 병합");
           
           // 실시간 데이터에서 새로운 상품이나 업데이트된 상품 찾기
-          const existingIds = new Set(prevProducts.map(p => p.id));
           const newOrUpdatedProducts = realtimeProducts.filter(rtProduct => {
             const existingProduct = prevProducts.find(p => p.id === rtProduct.id);
             // 새 상품이거나 업데이트된 상품만 포함

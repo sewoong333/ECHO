@@ -437,7 +437,7 @@ export default function PhoneRegister() {
     setLoading(true);
     try {
       // 사용자 로그인 상태 확인
-      if (!user?.uid) {
+      if (!_user?.uid) {
         console.warn('사용자 인증 정보가 없어서 전화번호 정보를 로컬에 저장합니다.');
         // 로컬 스토리지에 저장
         localStorage.setItem('phone_number', phoneNumber.replace(/-/g, ''));

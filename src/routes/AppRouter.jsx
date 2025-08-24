@@ -5,6 +5,7 @@ import styled from 'styled-components';
 // Critical pages - loaded immediately
 import Home from "../pages/Home";
 import Login from "../pages/Login";
+import MapPage from "../pages/Map";
 
 // Non-critical pages - lazy loaded
 const Signup = lazy(() => import("../pages/Signup"));
@@ -16,7 +17,7 @@ const MyPage = lazy(() => import("../pages/MyPage"));
 const MusicLife = lazy(() => import("../pages/MusicLife"));
 const MusicLifeDetail = lazy(() => import("../pages/MusicLifeDetail"));
 const MusicLifeWrite = lazy(() => import("../pages/MusicLifeWrite"));
-const MapPage = lazy(() => import("../pages/Map"));
+// MapPage는 이미 위에서 import됨
 const ChatList = lazy(() => import("../pages/ChatList"));
 const AddProduct = lazy(() => import("../pages/AddProduct"));
 const GuitarTuner = lazy(() => import("../pages/GuitarTuner"));

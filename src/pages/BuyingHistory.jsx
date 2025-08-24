@@ -150,7 +150,7 @@ const EmptyDesc = styled.div`
 export default function BuyingHistory() {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
-  const { likes, chatRooms } = useContext(ProductContext);
+  const { chatRooms } = useContext(ProductContext);
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
 

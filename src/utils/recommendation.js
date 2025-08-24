@@ -251,7 +251,7 @@ export class RecommendationEngine {
   }
 
   // 추천 설명 생성
-  getRecommendationReason(userId, productId) {
+  getRecommendationReason(userId) {
     const userPrefs = this.userPreferences.get(userId);
     if (!userPrefs) return '인기 상품입니다';
 

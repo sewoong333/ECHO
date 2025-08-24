@@ -1,8 +1,7 @@
-import React, { useEffect, useRef, useState, useContext } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import TopBar from "../components/TopBar";
 import { ProductContext } from "../store/ProductContext";
-import { UserContext } from "../store/UserContext";
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { db } from "../utils/firebase";
 import { useNavigate } from "react-router-dom";
@@ -31,13 +30,15 @@ const CATEGORY_ICONS = {
 };
 
 export default function MapPage() {
+  console.log("🎯 MapPage 컴포넌트 렌더링 시작!");
+  
   const mapRef = useRef(null);
   const map = useRef(null);
+  const markers = useRef([]); // 마커들을 저장할 ref 추가
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState([]);
   const [selectedPost, setSelectedPost] = useState(null);
   const [filter, setFilter] = useState("all"); // all, products, musiclife
-  const { user } = useContext(UserContext);
   const navigate = useNavigate();
 
   // Firebase에서 좌표가 있는 게시글들 가져오기
@@ -88,30 +89,73 @@ export default function MapPage() {
 
   // 카카오맵 초기화
   const initializeMap = () => {
+    console.log("🗺️ 지도 초기화 시작...");
+    console.log("window.kakao:", !!window.kakao);
+    console.log("window.kakao.maps:", !!window.kakao?.maps);
+    console.log("mapRef.current:", !!mapRef.current);
+    console.log("mapRef.current 엘리먼트:", mapRef.current);
+    console.log("posts 개수:", posts.length);
+
     if (!window.kakao || !window.kakao.maps) {
-      console.error("카카오맵 API가 로드되지 않았습니다.");
+      console.error("❌ 카카오맵 API가 로드되지 않았습니다.");
+      setLoading(false);
+      return;
+    }
+
+    if (!mapRef.current) {
+      console.error("❌ 지도 컨테이너가 준비되지 않았습니다.");
+      console.log("mapRef:", mapRef);
+      setLoading(false);
       return;
     }
 
     window.kakao.maps.load(() => {
-      const container = mapRef.current;
-      const options = {
-        center: new window.kakao.maps.LatLng(37.5665, 126.9780), // 서울시청 기본 위치
-        level: 3
-      };
+      try {
+        console.log("✅ 카카오맵 API 로드 완료");
+        const container = mapRef.current;
+        const options = {
+          center: new window.kakao.maps.LatLng(37.5665, 126.9780), // 서울시청 기본 위치
+          level: 3
+        };
 
-      const kakaoMap = new window.kakao.maps.Map(container, options);
-      map.current = kakaoMap;
+        console.log("🗺️ 지도 생성 중...");
+        const kakaoMap = new window.kakao.maps.Map(container, options);
+        map.current = kakaoMap;
+        
+        console.log("✅ 지도 생성 완료");
+        setLoading(false);
 
-      // 게시글 마커 추가
-      addMarkersToMap();
+        // 게시글이 있으면 마커 추가
+        if (posts.length > 0) {
+          console.log('🎯 초기화 시 마커 추가:', posts.length, '개');
+          addMarkersToMap();
+        }
+      } catch (error) {
+        console.error("❌ 지도 초기화 실패:", error);
+        setLoading(false);
+      }
     });
   };
 
   // 지도에 마커 추가
   const addMarkersToMap = () => {
-    if (!map.current || posts.length === 0) return;
+    if (!map.current) {
+      console.log('❌ 지도가 준비되지 않음');
+      return;
+    }
+    
+    // 기존 마커들 제거
+    markers.current.forEach(marker => {
+      marker.setMap(null);
+    });
+    markers.current = [];
+    
+    if (posts.length === 0) {
+      console.log('📍 표시할 게시글 없음');
+      return;
+    }
 
+    console.log('🎯 마커 추가 시작:', posts.length, '개');
     posts.forEach(post => {
       if (!post.latitude || !post.longitude) return;
 
@@ -150,6 +194,9 @@ export default function MapPage() {
       });
 
       customOverlay.setMap(map.current);
+      
+      // 마커 배열에 추가
+      markers.current.push(customOverlay);
 
       // 마커 클릭 이벤트
       const markerElement = customOverlay.getContent();
@@ -157,6 +204,8 @@ export default function MapPage() {
         setSelectedPost(post);
       });
     });
+    
+    console.log('✅ 마커 추가 완료:', markers.current.length, '개');
   };
 
   useEffect(() => {
@@ -164,8 +213,43 @@ export default function MapPage() {
   }, [filter]);
 
   useEffect(() => {
-    if (posts.length > 0) {
-      initializeMap();
+    console.log("🚀 Map 컴포넌트 useEffect 실행됨");
+    
+    // 지도 초기화 - 카카오 API 로딩 완료까지 기다리기
+    const loadMap = async () => {
+      try {
+        console.log("📍 loadMap 함수 시작");
+        
+        // 카카오 SDK가 로드될 때까지 기다리기
+        let attempts = 0;
+        while (attempts < 20 && (!window.kakao || !window.kakao.maps)) {
+          console.log(`⏳ 카카오 SDK 대기 중... (${attempts + 1}/20)`);
+          await new Promise(resolve => setTimeout(resolve, 500));
+          attempts++;
+        }
+        
+        if (!window.kakao || !window.kakao.maps) {
+          console.error("❌ 카카오 SDK 로딩 실패");
+          setLoading(false);
+          return;
+        }
+        
+        console.log("✅ 카카오 SDK 로딩 성공, initializeMap 호출");
+        initializeMap();
+      } catch (error) {
+        console.error("❌ loadMap 에러:", error);
+        setLoading(false);
+      }
+    };
+    
+    loadMap();
+  }, []); // 빈 의존성 배열로 한 번만 실행
+
+  useEffect(() => {
+    // posts가 로드되면 마커만 추가
+    if (posts.length > 0 && map.current) {
+      console.log('🎯 포스트 로드됨, 마커 추가:', posts.length);
+      addMarkersToMap();
     }
   }, [posts]);
 
@@ -178,6 +262,8 @@ export default function MapPage() {
     }
   };
 
+  console.log("📦 MapPage return 실행, loading:", loading, "posts:", posts.length);
+  
   return (
     <Container>
       <TopBar title="동네지도" />
