@@ -9,6 +9,7 @@ import { SiKakaotalk } from "react-icons/si";
 import { FaN } from "react-icons/fa6";
 import {
   signInWithPopup,
+  signInWithRedirect,
   getRedirectResult,
 } from "firebase/auth";
 import { auth, googleProvider, kakaoAuthService } from "../utils/firebase";
@@ -298,11 +299,26 @@ export default function Login() {
         console.log('사용자 상태:', { isLoggedIn: user.isLoggedIn, loading: user.loading });
         
         // 1. Google 리다이렉트 결과 확인
-        const result = await getRedirectResult(auth);
-        if (result?.user) {
-          console.log("✅ Google Redirect 로그인 성공:", result.user);
-          navigate("/", { replace: true });
-          return;
+        try {
+          const result = await getRedirectResult(auth);
+          if (result?.user) {
+            console.log("✅ Google Redirect 로그인 성공:", {
+              uid: result.user.uid,
+              email: result.user.email,
+              displayName: result.user.displayName
+            });
+            
+            addToast(`${result.user.displayName || '사용자'}님, 환영합니다!`, "success");
+            
+            // 약간의 지연 후 리다이렉트
+            setTimeout(() => {
+              navigate("/", { replace: true });
+            }, 1500);
+            return;
+          }
+        } catch (redirectError) {
+          console.warn("⚠️ Google 리다이렉트 결과 처리 중 오류:", redirectError);
+          // 리다이렉트 오류는 무시하고 계속 진행
         }
 
         // 2. 카카오 로그인 콜백 처리
@@ -483,18 +499,14 @@ export default function Login() {
     e.preventDefault();
     if (isLoading) return;
 
-    // 모바일 환경 감지
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const isInAppBrowser = /FBAN|FBAV|Instagram|Line|KakaoTalk|wv/i.test(navigator.userAgent);
-    
-    if (isMobile || isInAppBrowser) {
-      addToast("모바일에서는 카카오 로그인을 추천합니다. 구글 로그인이 제한될 수 있습니다.", "info");
-    }
-
     setIsLoading(true);
     setError("");
 
     try {
+      // 환경 감지
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isInAppBrowser = /FBAN|FBAV|Instagram|Line|KakaoTalk|wv/i.test(navigator.userAgent);
+      
       console.log("🚀 Google 로그인 시작...");
       console.log("환경 정보:", {
         isMobile,
@@ -506,11 +518,19 @@ export default function Login() {
       if (user.isLoggedIn) {
         console.log("🔄 기존 계정에서 로그아웃 후 Google 로그인");
         await logout();
-        // 로그아웃 후 잠시 대기
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
       
-      // 타임아웃 설정 (30초)
+      // 모바일이나 인앱 브라우저에서는 리다이렉트 방식 사용
+      if (isMobile || isInAppBrowser) {
+        console.log("📱 모바일 환경 감지 - 리다이렉트 방식 사용");
+        await signInWithRedirect(auth, googleProvider);
+        // 리다이렉트는 페이지를 떠나므로 여기서 끝
+        return;
+      }
+      
+      // 데스크톱에서는 팝업 방식 사용
+      console.log("💻 데스크톱 환경 - 팝업 방식 사용");
       const loginTimeout = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('로그인 시간 초과')), 30000)
       );
@@ -523,28 +543,33 @@ export default function Login() {
       if (result.user) {
         addToast("로그인이 완료되었습니다!", "success");
         
-        // UserContext의 onAuthStateChanged가 처리하므로 여기서는 기다리기만
-        console.log("⏳ 사용자 상태 동기화 대기 중...");
-        
-        // 최대 5초까지 대기하다가 강제 리다이렉트
         setTimeout(() => {
           if (window.location.pathname === "/login") {
-            console.log("🔄 강제 리다이렉트 실행");
+            console.log("🔄 홈으로 리다이렉트");
             navigate("/", { replace: true });
           }
-        }, 5000);
+        }, 2000);
       }
+      
     } catch (error) {
       console.error("❌ Google 로그인 실패:", error);
       
-      // User-Agent 오류일 경우 카카오 로그인 제안
-      if (error.message?.includes('disallowed_useragent') || error.message?.includes('403')) {
-        addToast("현재 환경에서는 구글 로그인이 제한됩니다. 카카오 로그인을 이용해주세요.", "warning");
+      // 403 오류나 User-Agent 오류 처리
+      if (error.message?.includes('disallowed_useragent') || 
+          error.message?.includes('403') ||
+          error.code === 'auth/unauthorized-domain') {
+        console.log("🔄 팝업 실패 - 리다이렉트 방식으로 재시도");
+        try {
+          await signInWithRedirect(auth, googleProvider);
+          return;
+        } catch (redirectError) {
+          console.error("❌ 리다이렉트도 실패:", redirectError);
+          addToast("구글 로그인에 문제가 있습니다. 잠시 후 다시 시도해주세요.", "error");
+        }
       } else {
         handleAuthError(error);
       }
     } finally {
-      // 로딩 상태를 조금 더 유지하여 깜빡임 방지
       setTimeout(() => setIsLoading(false), 500);
     }
   };
@@ -694,25 +719,8 @@ export default function Login() {
           disabled={isLoading}
         >
           <SiKakaotalk size={24} />
-          카카오로 로그인 (권장)
+          카카오로 로그인
         </SocialLoginButton>
-        
-        {/* 모바일 환경일 때 안내 메시지 */}
-        {/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && (
-          <div style={{
-            fontSize: "13px",
-            color: "#666",
-            textAlign: "center",
-            marginTop: "10px",
-            padding: "8px",
-            backgroundColor: "#f8f9fa",
-            borderRadius: "6px",
-            border: "1px solid #e9ecef"
-          }}>
-            📱 모바일에서는 카카오 로그인을 권장합니다<br/>
-            (구글 로그인이 일부 브라우저에서 제한될 수 있습니다)
-          </div>
-        )}
         
         <div style={{ 
           textAlign: "center", 
@@ -785,7 +793,11 @@ export default function Login() {
         <span>또는</span>
       </Divider>
 
-      <SocialLoginButton className="google" onClick={handleGoogleLogin}>
+      <SocialLoginButton 
+        className="google" 
+        onClick={handleGoogleLogin}
+        disabled={isLoading}
+      >
         <FcGoogle size={24} />
         Google로 로그인
       </SocialLoginButton>
