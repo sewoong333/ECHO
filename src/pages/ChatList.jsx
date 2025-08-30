@@ -18,7 +18,7 @@ const Container = styled.div`
   width: 100vw;
   max-width: 100vw;
   min-height: 100vh;
-  background: #f8f9fa;
+  background: var(--color-bg-primary, #1a1a1a);
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
@@ -37,12 +37,12 @@ const ChatItem = styled.div`
   display: flex;
   align-items: center;
   padding: 16px 20px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border, #333);
   cursor: pointer;
   transition: background-color 0.2s;
   
   &:hover {
-    background: #f8f9fa;
+    background: var(--color-wood-glass, rgba(139, 114, 89, 0.1));
   }
   
   &:last-child {
@@ -106,7 +106,7 @@ const UserInfo = styled.div`
 const UserName = styled.div`
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-wood-light, #d2b896);
 `;
 
 const UserAvatar = styled.div`
@@ -130,7 +130,7 @@ const UserAvatar = styled.div`
 
 const ProductInfo = styled.div`
   font-size: 12px;
-  color: #666;
+  color: var(--color-wood-medium, #b89e7e);
   margin-bottom: 4px;
   display: flex;
   align-items: center;
@@ -139,7 +139,7 @@ const ProductInfo = styled.div`
 
 const LastMessage = styled.div`
   font-size: 14px;
-  color: #666;
+  color: var(--color-text-secondary, #999);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

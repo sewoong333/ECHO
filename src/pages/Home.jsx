@@ -924,23 +924,36 @@ const EmptyState = styled.div`
 `;
 
 const FAB = styled.button`
-  position: fixed;
-  bottom: 90px; /* 하단바(60px) + 여백(30px) */
-  right: 20px; /* 우측 고정 여백 */
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #2ed8b6 0%, #26c4a8 100%);
-  border: none;
-  color: white;
-  font-size: 1.2rem;
-  cursor: pointer;
-  box-shadow: 0 4px 20px rgba(46, 216, 182, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100; /* 최상위 레이어 */
-  transition: all 0.3s ease;
+  position: fixed !important;
+  bottom: 88px !important;
+  right: 20px !important;
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #2ed8b6 0%, #26c4a8 100%) !important;
+  border: none !important;
+  color: white !important;
+  font-size: 1.5rem !important;
+  cursor: pointer !important;
+  box-shadow: 0 8px 32px rgba(46, 216, 182, 0.3) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 9999 !important;
+  transition: all 0.2s ease !important;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-mint-main), var(--color-mint-dark));
+    z-index: -1;
+    transition: all var(--transition-normal);
+  }
   
   &:hover {
     transform: translateY(-2px) scale(1.05);
@@ -1264,6 +1277,7 @@ export default function Home() {
   const activeFilterCount = Object.values(filters).filter(v => v && v !== '').length;
 
   return (
+    <>
     <Container className="main-content">
       <TopBar />
       
@@ -1511,15 +1525,6 @@ export default function Home() {
           )}
         </ProductGrid>
         
-        {/* 상품 등록 플로팅 버튼 - 하단바 기준 고정 */}
-        <FAB 
-          onClick={() => navigate('/add')}
-          aria-label="상품 등록하기"
-          title="상품 등록하기"
-        >
-          <FaPlus />
-        </FAB>
-        
       </MainContent>
 
       {/* 필터 모달 */}
@@ -1622,5 +1627,33 @@ export default function Home() {
         </FilterModal>
       )}
     </Container>
+    
+    {/* 상품 등록 플로팅 버튼 - Container 외부에 완전 독립 */}
+    <FAB 
+      onClick={() => navigate('/add')}
+      aria-label="상품 등록하기"
+      title="상품 등록하기"
+      style={{
+        position: 'fixed',
+        bottom: '88px',
+        right: '20px',
+        width: '60px',
+        height: '60px',
+        borderRadius: '50%',
+        background: 'linear-gradient(135deg, #2ed8b6 0%, #26c4a8 100%)',
+        border: 'none',
+        color: 'white',
+        fontSize: '1.5rem',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+        boxShadow: '0 8px 32px rgba(46, 216, 182, 0.3)'
+      }}
+    >
+      <FaPlus />
+    </FAB>
+    </>
   );
 }

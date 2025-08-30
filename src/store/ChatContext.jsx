@@ -49,8 +49,25 @@ export function ChatProvider({ children }) {
         });
       });
       
+      // 참가자 정보 보완 (임시로 기본값 사용)
+      const roomsWithParticipantInfo = rooms.map(room => {
+        if (!room.participantInfo) {
+          const participantInfo = {};
+          room.participants?.forEach(pid => {
+            if (pid !== user.uid) {
+              participantInfo[pid] = {
+                nickname: '사용자',
+                profileImage: ''
+              };
+            }
+          });
+          return { ...room, participantInfo };
+        }
+        return room;
+      });
+      
       // 클라이언트 사이드에서 시간 순으로 정렬
-      const sortedRooms = rooms.sort((a, b) => {
+      const sortedRooms = roomsWithParticipantInfo.sort((a, b) => {
         const aTime = a.lastMessageAt?.toMillis?.() || 0;
         const bTime = b.lastMessageAt?.toMillis?.() || 0;
         return bTime - aTime; // 최신순
@@ -111,7 +128,7 @@ export function ChatProvider({ children }) {
             });
           });
           
-          // 참가자 정보 보완
+          // 참가자 정보 보완 (임시로 기본값 사용)
           const roomsWithParticipantInfo = rooms.map(room => {
             if (!room.participantInfo) {
               const participantInfo = {};

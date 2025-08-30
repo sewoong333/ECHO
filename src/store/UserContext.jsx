@@ -474,17 +474,50 @@ export function UserProvider({ children }) {
     try {
       if (!user.uid) throw new Error("로그인이 필요합니다.");
       
+      // 허용된 필드만 업데이트 가능 (보안)
+      const allowedFields = ['nickname', 'bio', 'profileImage', 'address', 'region', 'district'];
+      const sanitizedUpdates = {};
+      
+      Object.keys(updates).forEach(key => {
+        if (allowedFields.includes(key)) {
+          let value = updates[key];
+          
+          // XSS 방지를 위한 HTML 태그 제거
+          if (typeof value === 'string') {
+            value = value.replace(/<[^>]*>/g, '').trim();
+          }
+          
+          // 필드별 검증
+          if (key === 'nickname') {
+            if (value.length < 2 || value.length > 20) {
+              throw new Error("닉네임은 2-20자여야 합니다.");
+            }
+            value = value.replace(/[<>{}]/g, '');
+          } else if (key === 'bio') {
+            if (value.length > 200) {
+              throw new Error("소개는 200자 이하여야 합니다.");
+            }
+          }
+          
+          sanitizedUpdates[key] = value;
+        }
+      });
+      
+      if (Object.keys(sanitizedUpdates).length === 0) {
+        throw new Error("업데이트할 유효한 필드가 없습니다.");
+      }
+      
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, {
-        ...updates,
+        ...sanitizedUpdates,
         updatedAt: serverTimestamp(),
       });
       
       // 로컬 상태 업데이트
-      setUser(prev => ({ ...prev, ...updates }));
-      setUserProfile(prev => ({ ...prev, ...updates }));
+      setUser(prev => ({ ...prev, ...sanitizedUpdates }));
+      setUserProfile(prev => ({ ...prev, ...sanitizedUpdates }));
       
-      console.log("✅ 프로필 업데이트 완료:", updates);
+      console.log("✅ 프로필 업데이트 완료:", sanitizedUpdates);
     } catch (error) {
       console.error("❌ 프로필 업데이트 실패:", error);
       throw error;

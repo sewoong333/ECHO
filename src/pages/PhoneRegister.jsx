@@ -296,6 +296,25 @@ export default function PhoneRegister() {
   const [verified, setVerified] = useState(false);
   const [confirmationResult, setConfirmationResult] = useState(null);
 
+  // 컴포넌트 초기화 및 정리
+  useEffect(() => {
+    // 컴포넌트 마운트 시 recaptcha 초기화
+    phoneAuthService.resetRecaptcha();
+    
+    return () => {
+      // 컴포넌트 언마운트 시 모든 상태 정리
+      phoneAuthService.resetRecaptcha();
+      setStep(1);
+      setPhoneNumber('');
+      setVerificationCode('');
+      setIsCodeSent(false);
+      setTimer(180);
+      setLoading(false);
+      setVerified(false);
+      setConfirmationResult(null);
+    };
+  }, []);
+
   // 타이머 카운트다운
   useEffect(() => {
     let interval;

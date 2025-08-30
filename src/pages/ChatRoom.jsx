@@ -25,7 +25,7 @@ import {
 const Container = styled.div`
   width: 100vw;
   min-height: 100vh;
-  background: #f8f9fa;
+  background: var(--color-bg-primary, #1a1a1a);
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
@@ -40,13 +40,13 @@ const Header = styled.div`
   width: 100%;
   max-width: 500px;
   height: 60px;
-  background: white;
+  background: var(--color-bg-secondary, #2a2a2a);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
   z-index: 100;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--color-border, #333);
 `;
 
 const HeaderLeft = styled.div`
@@ -93,7 +93,7 @@ const UserDetails = styled.div``;
 const UserName = styled.div`
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-wood-light, #d2b896);
 `;
 
 const OnlineStatus = styled.div`
@@ -506,6 +506,14 @@ export default function ChatRoom() {
   const urlParams = new URLSearchParams(window.location.search);
   const purchaseIntent = urlParams.get('intent') === 'purchase';
 
+  // 등록된 전화번호로 초기화
+  useEffect(() => {
+    if (user.phoneNumber && !userPhone) {
+      const formattedPhone = user.phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+      setUserPhone(formattedPhone);
+    }
+  }, [user.phoneNumber, userPhone]);
+
   // 채팅방 정보 로드 및 메시지 구독
   useEffect(() => {
     const loadChatRoom = async () => {
@@ -628,7 +636,7 @@ export default function ChatRoom() {
       const phoneMessage = `💁‍♀️ 연락처를 공유합니다.\n📞 전화번호: ${userPhone}\n\n거래 관련 문의사항은 언제든지 연락주세요!`;
       await sendMessage(chatRoomId, phoneMessage);
       setShowPhoneModal(false);
-      setUserPhone("");
+      // 전화번호는 초기화하지 않고 유지 (다음에도 사용할 수 있도록)
       setError(null);
     } catch (error) {
       console.error("전화번호 공유 실패:", error);
