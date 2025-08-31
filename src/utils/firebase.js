@@ -1079,11 +1079,13 @@ export const musiclifeService = {
   },
   async getPost(id) {
     try {
+      console.log(`🔍 게시글 ID ${id} 조회 시도 중...`);
       const ref = doc(db, "musiclife_posts", id);
       const snap = await getDoc(ref);
       
       if (!snap.exists()) {
         console.log(`🚫 게시글 ID ${id}를 찾을 수 없습니다.`);
+        console.log(`📝 컬렉션: musiclife_posts, 문서 ID: ${id}`);
         
         // 실제 데이터가 없으면 null 반환
         return null;
@@ -1198,7 +1200,9 @@ export const musiclifeService = {
       
       // 조회수 증가
       await updateDoc(ref, { viewCount: increment(1) });
-      return { id: snap.id, ...snap.data() };
+      const postData = { id: snap.id, ...snap.data() };
+      console.log(`✅ 게시글 찾았습니다:`, postData.title, `(ID: ${id})`);
+      return postData;
     } catch (error) {
       console.error('게시글 조회 오류:', error);
       

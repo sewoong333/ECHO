@@ -181,16 +181,13 @@ service cloud.firestore {
       allow read, write: if isOwner(resource.data.userId);
     }
     
-    // 음악생활 게시글 규칙
+    // 음악생활 게시글 규칙 (임시로 완전 개방)
     match /musiclife_posts/{postId} {
-      // 읽기: 모든 사용자가 조회 가능
+      // 읽기: 완전 개방 (임시)
       allow read: if true;
       
-      // 생성: 인증된 사용자만 게시글 작성 가능
-      allow create: if isAuthenticated() && validateMusicLifePost();
-      
-      // 수정/삭제: 게시글 작성자만 가능
-      allow update, delete: if isOwner(resource.data.authorId);
+      // 쓰기: 완전 개방 (임시 - 나중에 제한 필요)
+      allow write: if true;
       
       // 게시글 데이터 유효성 검사
       function validateMusicLifePost() {
@@ -203,17 +200,10 @@ service cloud.firestore {
                data.authorId == request.auth.uid;
       }
       
-      // 댓글 규칙
+      // 댓글 규칙 (임시로 완전 개방)
       match /comments/{commentId} {
-        // 읽기: 모든 사용자가 조회 가능
-        allow read: if true;
-        
-        // 생성: 인증된 사용자만 댓글 작성 가능
-        allow create: if isAuthenticated() && 
-                         request.resource.data.authorId == request.auth.uid;
-        
-        // 수정/삭제: 댓글 작성자만 가능
-        allow update, delete: if isOwner(resource.data.authorId);
+        // 읽기/쓰기: 완전 개방 (임시)
+        allow read, write: if true;
       }
     }
     

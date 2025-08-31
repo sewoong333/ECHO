@@ -347,10 +347,21 @@ export default function MusicLifeDetail() {
     const fetchData = async () => {
       try {
         setLoading(true);
+        
+        // 디버깅 정보 출력
+        console.log(`🔍 MusicLifeDetail: 게시글 ID ${id} 로딩 시작`);
+        console.log(`👤 현재 사용자:`, user);
+        console.log(`🔐 로그인 상태:`, user?.isLoggedIn);
+        console.log(`🆔 사용자 UID:`, user?.uid);
+        
         const [postData, commentsData] = await Promise.all([
           musiclifeService.getPost(id),
           musiclifeService.getComments(id)
         ]);
+        
+        console.log(`📝 받아온 게시글 데이터:`, postData);
+        console.log(`💬 받아온 댓글 데이터:`, commentsData);
+        
         setPost(postData);
         setComments(commentsData);
       } catch (error) {
@@ -361,7 +372,7 @@ export default function MusicLifeDetail() {
     };
     
     fetchData();
-  }, [id]);
+  }, [id, user]);
 
   // 시간 포맷팅 함수
   const formatTime = (timestamp) => {
