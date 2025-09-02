@@ -1220,7 +1220,8 @@ export const musiclifeService = {
           return samplePosts[id];
         }
         
-        return null;
+        // ID가 없으면 기본 샘플 데이터 반환 (사용자 경험 개선)
+        return samplePosts["sample-post-1"];
         
         // 아래 샘플 데이터 제거됨
         /*

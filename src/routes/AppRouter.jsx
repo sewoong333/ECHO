@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import MapPage from "../pages/Map";
+import MapTest from "../pages/MapTest";
 
 // Non-critical pages - lazy loaded
 const Signup = lazy(() => import("../pages/Signup"));
@@ -76,6 +77,7 @@ export default function AppRouter() {
         {/* Critical routes - no lazy loading */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/map-test" element={<MapTest />} />
         
         {/* Non-critical routes - lazy loaded */}
         <Route path="/signup" element={<Signup />} />

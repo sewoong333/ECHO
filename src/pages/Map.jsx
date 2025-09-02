@@ -31,6 +31,8 @@ const CATEGORY_ICONS = {
 
 export default function MapPage() {
   console.log("🎯 MapPage 컴포넌트 렌더링 시작!");
+  console.log("🔍 window.kakao 상태:", typeof window !== 'undefined' ? !!window.kakao : 'window undefined');
+  console.log("🔍 window.kakao.maps 상태:", typeof window !== 'undefined' ? !!window.kakao?.maps : 'window undefined');
   
   const mapRef = useRef(null);
   const map = useRef(null);
@@ -124,52 +126,48 @@ export default function MapPage() {
     }
   };
 
-  // 카카오맵 초기화
+  // 카카오맵 초기화 (공식 가이드 방식)
   const initializeMap = () => {
-    console.log("🗺️ 지도 초기화 시작...");
-    console.log("window.kakao:", !!window.kakao);
-    console.log("window.kakao.maps:", !!window.kakao?.maps);
-    console.log("mapRef.current:", !!mapRef.current);
-    console.log("posts 개수:", posts.length);
-
-    if (!window.kakao || !window.kakao.maps) {
-      console.error("❌ 카카오맵 API가 로드되지 않았습니다.");
+    console.log("🗺️ 카카오맵 초기화 시작 (공식 가이드 방식)");
+    
+    if (!mapRef.current) {
+      console.error("❌ 지도 컨테이너가 없습니다");
       setLoading(false);
       return;
     }
 
-    if (!mapRef.current) {
-      console.error("❌ 지도 컨테이너가 준비되지 않았습니다.");
+    if (!window.kakao || !window.kakao.maps) {
+      console.error("❌ 카카오맵 SDK가 로드되지 않았습니다");
       setLoading(false);
       return;
     }
 
     try {
-      console.log("🗺️ 지도 생성 중...");
-      const container = mapRef.current;
-      const options = {
-        center: new window.kakao.maps.LatLng(37.5665, 126.9780), // 서울시청 기본 위치
-        level: 3
+      // 지도 컨테이너와 옵션 설정 (공식 가이드대로)
+      var container = mapRef.current;
+      var options = {
+        center: new kakao.maps.LatLng(37.5665, 126.9780), // 서울시청
+        level: 3 // 확대 레벨
       };
 
-      const kakaoMap = new window.kakao.maps.Map(container, options);
+      // 지도 생성 (공식 가이드 방식)
+      var kakaoMap = new kakao.maps.Map(container, options);
       map.current = kakaoMap;
-      
-      console.log("✅ 지도 생성 완료");
+
+      console.log("✅ 카카오맵 생성 성공");
       setLoading(false);
 
       // 게시글이 있으면 마커 추가
       if (posts.length > 0) {
-        console.log('🎯 초기화 시 마커 추가:', posts.length, '개');
         addMarkersToMap();
       }
     } catch (error) {
-      console.error("❌ 지도 초기화 실패:", error);
+      console.error("❌ 지도 생성 실패:", error);
       setLoading(false);
     }
   };
 
-  // 지도에 마커 추가
+  // 지도에 마커 추가 (공식 가이드 방식)
   const addMarkersToMap = () => {
     if (!map.current) {
       console.log('❌ 지도가 준비되지 않음');
@@ -188,51 +186,46 @@ export default function MapPage() {
     }
 
     console.log('🎯 마커 추가 시작:', posts.length, '개');
+    
     posts.forEach(post => {
       if (!post.latitude || !post.longitude) return;
 
-      const position = new window.kakao.maps.LatLng(post.latitude, post.longitude);
-      const icon = CATEGORY_ICONS[post.category] || "📍";
+      // 마커 위치 설정 (공식 가이드 방식)
+      var markerPosition = new kakao.maps.LatLng(post.latitude, post.longitude);
       
-      // 커스텀 마커 생성
-      const markerContent = `
-        <div style="
-          background: white;
-          border: 2px solid #2ed8b6;
-          border-radius: 20px;
-          padding: 8px 12px;
-          font-size: 16px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          max-width: 150px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        ">
-          <span>${icon}</span>
-          <span style="font-size: 12px; font-weight: 500; color: #333;">
-            ${post.title?.substring(0, 15)}${post.title?.length > 15 ? '...' : ''}
-          </span>
-        </div>
-      `;
-
-      const customOverlay = new window.kakao.maps.CustomOverlay({
-        content: markerContent,
-        position: position,
-        yAnchor: 1
+      // 기본 마커 생성
+      var marker = new kakao.maps.Marker({
+        position: markerPosition
       });
 
-      customOverlay.setMap(map.current);
-      
-      // 마커 배열에 추가
-      markers.current.push(customOverlay);
+      // 지도에 마커 표시
+      marker.setMap(map.current);
+      markers.current.push(marker);
 
-      // 마커 클릭 이벤트
-      const markerElement = customOverlay.getContent();
-      markerElement.addEventListener('click', () => {
+      // 인포윈도우 내용 생성
+      const icon = CATEGORY_ICONS[post.category] || "📍";
+      var infowindow = new kakao.maps.InfoWindow({
+        content: `<div style="
+          padding: 8px 12px;
+          font-size: 12px;
+          background: white;
+          border-radius: 8px;
+          border: 1px solid #ddd;
+          min-width: 150px;
+        ">
+          <div style="font-weight: 600; color: #333; margin-bottom: 4px;">
+            ${icon} ${post.title?.substring(0, 20)}${post.title?.length > 20 ? '...' : ''}
+          </div>
+          <div style="color: #666; font-size: 11px;">
+            ${post.type === 'product' ? '💰 악기거래' : '🎵 음악생활'}
+            ${post.price ? ` · ${Number(post.price).toLocaleString()}원` : ''}
+          </div>
+        </div>`
+      });
+
+      // 마커 클릭시 인포윈도우 표시
+      kakao.maps.event.addListener(marker, 'click', function() {
+        infowindow.open(map.current, marker);
         setSelectedPost(post);
       });
     });
@@ -245,58 +238,28 @@ export default function MapPage() {
   }, [filter]);
 
   useEffect(() => {
-    console.log("🚀 Map 컴포넌트 useEffect 실행됨");
+    console.log("🚀 카카오맵 초기화 시작");
     
-    // 지도 초기화 - 카카오 API 로딩 완료까지 기다리기
-    const loadMap = async () => {
-      try {
-        console.log("📍 loadMap 함수 시작");
-        
-        // 카카오 SDK가 로드될 때까지 기다리기
-        let attempts = 0;
-        while (attempts < 10 && !window.kakao) {
-          console.log(`⏳ 카카오 SDK 대기 중... (${attempts + 1}/10) - window.kakao:`, !!window.kakao);
-          await new Promise(resolve => setTimeout(resolve, 500));
-          attempts++;
-        }
-        
-        if (!window.kakao) {
-          console.error("❌ 카카오 SDK 로딩 실패 - DOM에서 카카오 스크립트 확인 필요");
-          console.log("HTML head에서 카카오 스크립트를 확인하세요:", document.head.innerHTML.includes('dapi.kakao.com'));
-          setLoading(false);
-          return;
-        }
-        
-        console.log("✅ 카카오 SDK 로딩 성공");
-        
-        // 카카오 맵 API 수동 로드
-        if (!window.kakao.maps) {
-          console.log("🔄 카카오 맵 API 수동 로드 중...");
-          await new Promise((resolve, reject) => {
-            window.kakao.maps.load(() => {
-              console.log("✅ 카카오 맵 API 로드 완료");
-              resolve();
-            });
-            
-            // 타임아웃 설정
-            setTimeout(() => {
-              if (!window.kakao.maps.Map) {
-                reject(new Error("카카오 맵 API 로드 타임아웃"));
-              }
-            }, 10000);
-          });
-        }
-        
-        console.log("🗺️ initializeMap 호출");
+    // 단순한 로딩 체크 로직
+    const initMap = () => {
+      console.log("🔍 SDK 상태 체크:");
+      console.log("  - window.kakao:", !!window.kakao);
+      console.log("  - window.kakao.maps:", !!window.kakao?.maps);
+      console.log("  - kakao.maps.Map:", !!window.kakao?.maps?.Map);
+      
+      if (window.kakao && window.kakao.maps && window.kakao.maps.Map) {
+        console.log("✅ 카카오맵 SDK 준비됨");
         initializeMap();
-      } catch (error) {
-        console.error("❌ loadMap 에러:", error);
+      } else {
+        console.log("❌ 카카오맵 SDK 미준비");
         setLoading(false);
       }
     };
-    
-    loadMap();
-  }, []); // 빈 의존성 배열로 한 번만 실행
+
+    // 페이지 로드 후 잠시 대기
+    const timer = setTimeout(initMap, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     // posts가 로드되면 마커만 추가

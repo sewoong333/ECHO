@@ -6,6 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import { UserContext } from "./UserContext";
+import notificationService from "../utils/notificationService";
 import {
   productService,
   subscriptionService,
@@ -336,6 +337,14 @@ export function ProductProvider({ children }) {
           setUserProducts((prev) => [newProduct, ...prev]);
         }
 
+        // 상품 등록 성공 알림
+        try {
+          notificationService.showProductRegisteredNotification(newProduct.title);
+          console.log("📢 상품 등록 알림 전송:", newProduct.title);
+        } catch (notificationError) {
+          console.warn("상품 등록 알림 전송 실패:", notificationError);
+        }
+
         return newProduct;
       } catch (error) {
         console.error("❌ ProductContext 상품 등록 실패:", error);
@@ -513,6 +522,22 @@ export function ProductProvider({ children }) {
           }
         } else {
           setLikedProducts((prev) => prev.filter((p) => p.id !== productId));
+        }
+
+        // 찜하기 알림 (찜한 경우에만)
+        if (isLiked) {
+          const product = products.find((p) => p.id === productId);
+          if (product && product.sellerId !== user.uid) {
+            try {
+              notificationService.showLikeNotification(
+                product.title,
+                user.nickname || '익명의 사용자'
+              );
+              console.log("📢 찜하기 알림 전송:", product.title);
+            } catch (notificationError) {
+              console.warn("찜하기 알림 전송 실패:", notificationError);
+            }
+          }
         }
 
         console.log("✅ 찜하기 토글 완료:", isLiked ? "추가" : "제거");

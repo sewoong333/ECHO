@@ -8,6 +8,7 @@ import React, {
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import TopBar from "../components/TopBar";
+import SimpleMap from "../components/SimpleMap";
 import { ProductContext } from "../store/ProductContext";
 import { UserContext } from "../store/UserContext";
 import { INSTRUMENT_CATEGORIES, REGIONS } from "../utils/firebase";

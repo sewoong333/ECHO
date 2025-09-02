@@ -162,17 +162,30 @@
     
     <div id="root"></div>
     
-    <!-- 카카오 API -->
-    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=8Oq43ramXf06d4DaF97eIuQsgmxCqV7S&libraries=services&autoload=false"></script>
+    <!-- 카카오맵 API (자동 로드) -->
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=c948ee0b6c8a31fc2192950ffd410784&libraries=services"></script>
+    
+    <!-- 카카오 SDK 디버깅 -->
+    <script>
+      // 카카오 SDK 로딩 확인
+      window.addEventListener('load', function() {
+        console.log('🔍 페이지 로드 완료');
+        console.log('🔍 window.kakao:', !!window.kakao);
+        console.log('🔍 window.kakao.maps:', !!window.kakao?.maps);
+        console.log('🔍 kakao.maps.Map:', !!window.kakao?.maps?.Map);
+      });
+    </script>
+    
+    <!-- 카카오 로그인 SDK -->
     <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.6/kakao.min.js" integrity="sha384-WAtVcQYcmTO/N+C1N+1m6Gp8qxh+3NlnP7X1U7qP6P5dQY/MsRBNTh+e1ahJrkEm" crossorigin="anonymous"></script>
     <script type="module" src="/src/main.jsx"></script>
     
-    <!-- 카카오 SDK 초기화 -->
+    <!-- 카카오 로그인 SDK 초기화 -->
     <script>
-      // 카카오 SDK 초기화
+      // 카카오 로그인 SDK 초기화 (지도 API와 별개)
       if (window.Kakao) {
         window.Kakao.init('c948ee0b6c8a31fc2192950ffd410784');
-        console.log('카카오 SDK 초기화 완료:', window.Kakao.isInitialized());
+        console.log('✅ 카카오 로그인 SDK 초기화:', window.Kakao.isInitialized());
       }
     </script>
 

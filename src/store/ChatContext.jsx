@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { db, productService } from "../utils/firebase";
 import { UserContext } from "./UserContext";
+import notificationService from "../utils/notificationService";
 import {
   collection,
   query,
@@ -381,6 +382,37 @@ export function ChatProvider({ children }) {
           chatRooms.find(room => room.id === chatRoomId)?.unreadCount?.[otherParticipant] || 0
         ) + 1,
       });
+
+      // 상대방에게 알림 전송 (본인 메시지는 알림 제외)
+      if (otherParticipant && otherParticipant !== user.uid) {
+        try {
+          // 상대방 정보 가져오기
+          const participantInfo = participantInfo || {};
+          const receiverNickname = participantInfo[otherParticipant]?.nickname || '사용자';
+          
+          // 메시지 내용에 따른 알림 표시
+          let notificationBody = content.trim();
+          if (messageType === "image") {
+            notificationBody = "사진을 보냈습니다";
+          } else if (content.length > 30) {
+            notificationBody = content.substring(0, 30) + "...";
+          }
+          
+          // 브라우저 알림 전송
+          notificationService.showChatNotification(
+            notificationBody,
+            user.nickname || '익명',
+            chatRoomId
+          );
+          
+          console.log("📢 채팅 알림 전송:", {
+            to: receiverNickname,
+            message: notificationBody
+          });
+        } catch (notificationError) {
+          console.warn("알림 전송 실패:", notificationError);
+        }
+      }
 
       console.log("✅ 메시지 전송 완료");
     } catch (error) {
