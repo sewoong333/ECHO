@@ -8,7 +8,8 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     host: true,
-    open: true
+    open: true,
+    cors: true
   },
   build: {
     // 청크 사이즈 최적화

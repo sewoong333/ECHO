@@ -232,112 +232,212 @@ export default function MapPage() {
     }
   };
 
-  // 현재 위치 가져오기
+  // 현재 위치 가져오기 (GPS 중심)
   const getCurrentLocation = () => {
+    console.log("📍 현재 위치 요청 시작");
+    
+    // 1. 기본 체크
     if (!navigator.geolocation) {
+      console.error("❌ Geolocation API 미지원");
       alert("이 브라우저에서는 위치 서비스를 지원하지 않습니다.");
       return;
     }
 
     if (!map.current) {
+      console.error("❌ 지도가 준비되지 않음");
       alert("지도가 아직 로드되지 않았습니다. 잠시 후 다시 시도해주세요.");
       return;
     }
 
+    // 2. 중복 요청 방지
+    if (isGettingLocation) {
+      console.log("📍 이미 위치 요청 중...");
+      return;
+    }
+
     setIsGettingLocation(true);
-    console.log("📍 현재 위치 요청 시작");
+    setLocationPermission(null);
+    
+    // 3. GPS 위치 요청 (macOS CoreLocation 대응)
+    const options = {
+      enableHighAccuracy: false,  // 일반 정밀도로 시도
+      timeout: 60000,            // 60초 타임아웃 (macOS는 더 오래 걸림)
+      maximumAge: 0              // 캐시 사용 안함 (새로운 위치 요청)
+    };
+    
+    console.log("📍 GPS 위치 요청 시작:", options);
+    console.log("📍 macOS 환경 체크:", {
+      isMac: navigator.platform.indexOf('Mac') > -1,
+      userAgent: navigator.userAgent,
+      protocol: window.location.protocol
+    });
+    
+    // macOS에서 위치 서비스 상태 확인
+    if (navigator.platform.indexOf('Mac') > -1) {
+      console.log("🍎 macOS 감지 - 위치 서비스 확인 필요");
+    }
+    
+    // 로컬 개발 환경에서의 추가 처리
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      console.log("🏠 로컬 개발 환경 감지 - 위치 서비스 최적화");
+    }
     
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
+        const accuracy = position.coords.accuracy;
         
-        console.log("📍 위치 정보 받음:", lat, lng);
+        console.log("✅ GPS 위치 정보 받음:", { lat, lng, accuracy });
+        
+        // 위치 정확도 확인
+        if (accuracy > 100) {
+          console.warn("⚠️ 위치 정확도가 낮음:", accuracy, "m");
+        }
+        
         setUserLocation({ lat, lng });
         setLocationPermission("granted");
         
         // 지도 중심을 현재 위치로 이동
         if (map.current) {
-          const currentPosition = new kakao.maps.LatLng(lat, lng);
-          map.current.setCenter(currentPosition);
-          map.current.setLevel(3);
-          
-          // 현재 위치 마커 추가
-          addCurrentLocationMarker(lat, lng);
-          console.log("✅ 지도 중심을 현재 위치로 이동 완료");
+          try {
+            const currentPosition = new kakao.maps.LatLng(lat, lng);
+            map.current.setCenter(currentPosition);
+            map.current.setLevel(3);
+            
+            // 현재 위치 마커 추가
+            addCurrentLocationMarker(lat, lng);
+            console.log("✅ 지도 중심을 현재 위치로 이동 완료");
+          } catch (error) {
+            console.error("❌ 지도 이동 실패:", error);
+          }
         }
         
         setIsGettingLocation(false);
-        console.log("✅ 현재 위치 설정 완료:", lat, lng);
+        console.log("✅ 현재 위치 설정 완료");
       },
       (error) => {
-        console.error("❌ 위치 정보 가져오기 실패:", error);
-        setLocationPermission("denied");
-        setIsGettingLocation(false);
-        
-        switch(error.code) {
-          case error.PERMISSION_DENIED:
-            alert("위치 접근이 거부되었습니다. 브라우저 설정에서 위치 권한을 허용해주세요.");
-            break;
-          case error.POSITION_UNAVAILABLE:
-            alert("위치 정보를 사용할 수 없습니다.");
-            break;
-          case error.TIMEOUT:
-            alert("위치 정보 요청 시간이 초과되었습니다.");
-            break;
-          default:
-            alert("알 수 없는 오류가 발생했습니다.");
-            break;
-        }
+        console.error("❌ GPS 위치 정보 가져오기 실패:", error);
+        handleLocationError(error);
       },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 60000
-      }
+      options
     );
   };
 
-  // 현재 위치 마커 추가
-  const addCurrentLocationMarker = (lat, lng) => {
-    if (!map.current) return;
+  // 오류 처리 함수
+  const handleLocationError = (error) => {
+    console.error("❌ GPS 위치 정보 가져오기 실패:", error);
+    console.error("❌ 오류 코드:", error.code);
+    console.error("❌ 오류 메시지:", error.message);
+    console.error("❌ 브라우저 정보:", navigator.userAgent);
+    console.error("❌ 현재 URL:", window.location.href);
+    console.error("❌ HTTPS 여부:", window.location.protocol === 'https:');
     
-    // 기존 현재 위치 마커 제거
-    if (markers.current.currentLocationMarker) {
-      markers.current.currentLocationMarker.setMap(null);
+    setLocationPermission("denied");
+    setIsGettingLocation(false);
+    
+    let errorMessage = "";
+    switch(error.code) {
+      case error.PERMISSION_DENIED:
+        errorMessage = "위치 접근이 거부되었습니다.\n\n브라우저 설정에서 위치 권한을 허용해주세요:\n\n• Chrome: 주소창 왼쪽 자물쇠 아이콘 → 위치 → 허용\n• Safari: Safari → 환경설정 → 웹사이트 → 위치 서비스 → 허용\n• Firefox: 주소창 왼쪽 자물쇠 아이콘 → 권한 → 위치 → 허용";
+        break;
+      case error.POSITION_UNAVAILABLE:
+        if (navigator.platform.indexOf('Mac') > -1) {
+          errorMessage = "macOS에서 위치 정보를 사용할 수 없습니다.\n\n다음을 확인해주세요:\n\n• 시스템 환경설정 → 보안 및 개인정보보호 → 개인정보보호 → 위치 서비스가 켜져 있는지 확인\n• Chrome이 위치 서비스에 접근할 수 있도록 허용되어 있는지 확인\n• Wi-Fi가 켜져 있는지 확인 (Wi-Fi로 위치를 추정합니다)\n\n💡 로컬 개발 환경에서는 위치 서비스가 제한될 수 있습니다.\n배포된 사이트(https://echo-5385e.web.app)에서 테스트해보세요.";
+        } else {
+          errorMessage = "위치 정보를 사용할 수 없습니다.\n\n다음을 확인해주세요:\n\n• GPS가 켜져 있는지 확인\n• 인터넷 연결 상태 확인\n• 실외에서 시도해보세요\n• 잠시 후 다시 시도해주세요";
+        }
+        break;
+      case error.TIMEOUT:
+        errorMessage = "위치 정보 요청 시간이 초과되었습니다.\n\n다시 시도해주세요.\n\n• GPS 신호가 약한 곳에서는 시간이 오래 걸릴 수 있습니다";
+        break;
+      default:
+        errorMessage = "알 수 없는 오류가 발생했습니다.\n\n다시 시도해주세요.\n\n💡 개발자 도구(F12) → Console에서 자세한 오류 정보를 확인할 수 있습니다.";
+        break;
     }
     
-    const currentPosition = new kakao.maps.LatLng(lat, lng);
+    alert(errorMessage);
+  };
+
+
+  // 현재 위치 마커 추가 (강화된 버전)
+  const addCurrentLocationMarker = (lat, lng) => {
+    if (!map.current) {
+      console.error("❌ 지도가 준비되지 않음");
+      return;
+    }
     
-    // 현재 위치 마커 생성 (다른 색상으로 구분)
-    const currentLocationMarker = new kakao.maps.Marker({
-      position: currentPosition,
-      image: new kakao.maps.MarkerImage(
-        'data:image/svg+xml;base64,' + btoa(`
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="8" fill="#4285F4" stroke="white" stroke-width="2"/>
-            <circle cx="12" cy="12" r="3" fill="white"/>
-          </svg>
-        `),
-        new kakao.maps.Size(24, 24),
-        new kakao.maps.Point(12, 12)
-      )
-    });
+    console.log("📍 현재 위치 마커 추가:", lat, lng);
     
-    currentLocationMarker.setMap(map.current);
-    markers.current.currentLocationMarker = currentLocationMarker;
-    
-    // 현재 위치 인포윈도우
-    const currentLocationInfo = new kakao.maps.InfoWindow({
-      content: '<div style="padding: 8px; font-size: 12px; text-align: center;">📍 현재 위치</div>'
-    });
-    
-    currentLocationInfo.open(map.current, currentLocationMarker);
-    
-    // 3초 후 인포윈도우 자동 닫기
-    setTimeout(() => {
-      currentLocationInfo.close();
-    }, 3000);
+    try {
+      // 기존 현재 위치 마커 제거
+      if (markers.current.currentLocationMarker) {
+        markers.current.currentLocationMarker.setMap(null);
+        console.log("🗑️ 기존 현재 위치 마커 제거");
+      }
+      
+      const currentPosition = new kakao.maps.LatLng(lat, lng);
+      
+      // 현재 위치 마커 생성 (파란색 원형 마커)
+      const currentLocationMarker = new kakao.maps.Marker({
+        position: currentPosition,
+        image: new kakao.maps.MarkerImage(
+          'data:image/svg+xml;base64,' + btoa(`
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="16" cy="16" r="12" fill="#4285F4" stroke="white" stroke-width="3" opacity="0.9"/>
+              <circle cx="16" cy="16" r="6" fill="white"/>
+              <circle cx="16" cy="16" r="2" fill="#4285F4"/>
+            </svg>
+          `),
+          new kakao.maps.Size(32, 32),
+          new kakao.maps.Point(16, 16)
+        ),
+        zIndex: 1000 // 다른 마커보다 위에 표시
+      });
+      
+      currentLocationMarker.setMap(map.current);
+      markers.current.currentLocationMarker = currentLocationMarker;
+      
+      console.log("✅ 현재 위치 마커 추가 완료");
+      
+      // 현재 위치 인포윈도우
+      const currentLocationInfo = new kakao.maps.InfoWindow({
+        content: `
+          <div style="
+            padding: 10px 12px; 
+            font-size: 13px; 
+            text-align: center;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #4285F4;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            min-width: 120px;
+          ">
+            <div style="color: #4285F4; font-weight: 600; margin-bottom: 4px;">
+              📍 현재 위치
+            </div>
+            <div style="color: #666; font-size: 11px;">
+              ${lat.toFixed(6)}, ${lng.toFixed(6)}
+            </div>
+          </div>
+        `,
+        removable: false
+      });
+      
+      currentLocationInfo.open(map.current, currentLocationMarker);
+      
+      // 5초 후 인포윈도우 자동 닫기
+      setTimeout(() => {
+        try {
+          currentLocationInfo.close();
+        } catch (error) {
+          console.log("인포윈도우 닫기 실패:", error);
+        }
+      }, 5000);
+      
+    } catch (error) {
+      console.error("❌ 현재 위치 마커 추가 실패:", error);
+    }
   };
 
   // 지도 확대/축소
@@ -475,21 +575,7 @@ export default function MapPage() {
 
       // 초기 지도 타입 설정
       setMapType("ROADMAP");
-      console.log("✅ 카카오맵 생성 성공 + 컨트롤 추가 (기본: 일반지도)");
-      
-      // 위성지도 타입 테스트
-      setTimeout(() => {
-        console.log("🧪 위성지도 타입 테스트 시작");
-        try {
-          const testResult = kakaoMap.setMapTypeId(kakao.maps.MapTypeId.SATELLITE);
-          console.log("🧪 위성지도 테스트 결과:", testResult);
-          // 다시 일반지도로 되돌리기
-          kakaoMap.setMapTypeId(kakao.maps.MapTypeId.ROADMAP);
-          console.log("🧪 테스트 완료, 일반지도로 복원");
-        } catch (error) {
-          console.error("🧪 위성지도 테스트 실패:", error);
-        }
-      }, 1000);
+      console.log("✅ 카카오맵 생성 성공 (기본: 일반지도)");
       
       setLoading(false);
 
@@ -674,51 +760,9 @@ export default function MapPage() {
         </MapTypeButton>
         <MapTypeButton 
           active={mapType === "SATELLITE"} 
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
+          onClick={() => {
             console.log("🛰️ 위성지도 버튼 클릭");
-            console.log("🔍 현재 지도 객체:", map.current);
-            console.log("🔍 카카오맵 API 사용 가능 여부:", !!window.kakao?.maps?.MapTypeId?.SATELLITE);
-            console.log("🔍 현재 지도 타입:", map.current?.getMapTypeId());
-            
-            // 여러 방법으로 위성지도 설정 시도
-            if (map.current) {
-              // 방법 1: 기본 방법
-              try {
-                map.current.setMapTypeId(kakao.maps.MapTypeId.SATELLITE);
-                setMapType("SATELLITE");
-                console.log("✅ 위성지도 방법 1 성공");
-                
-                // 확인
-                setTimeout(() => {
-                  const currentType = map.current.getMapTypeId();
-                  console.log("🔍 설정 후 지도 타입:", currentType);
-                  if (currentType !== kakao.maps.MapTypeId.SATELLITE) {
-                    console.log("⚠️ 방법 1 실패, 방법 2 시도");
-                    // 방법 2: 숫자로 설정
-                    map.current.setMapTypeId(2);
-                    console.log("✅ 위성지도 방법 2 시도");
-                  }
-                }, 200);
-                
-              } catch (error) {
-                console.error("❌ 위성지도 방법 1 실패:", error);
-                // 방법 2: 숫자로 설정
-                try {
-                  map.current.setMapTypeId(2);
-                  setMapType("SATELLITE");
-                  console.log("✅ 위성지도 방법 2 성공");
-                } catch (e2) {
-                  console.error("❌ 위성지도 방법 2도 실패:", e2);
-                  changeMapType("SATELLITE");
-                }
-              }
-            } else {
-              console.log("❌ 지도 객체가 없음");
-              changeMapType("SATELLITE");
-            }
+            changeMapType("SATELLITE");
           }}
         >
           🛰️ 위성지도
@@ -727,8 +771,6 @@ export default function MapPage() {
           active={mapType === "TRAFFIC"} 
           onClick={() => {
             console.log("🏘️ 지적도 버튼 클릭");
-            console.log("🔍 현재 지도 객체:", map.current);
-            console.log("🔍 카카오맵 API 사용 가능 여부:", !!window.kakao?.maps?.MapTypeId?.USE_DISTRICT);
             changeMapType("TRAFFIC");
           }}
         >
