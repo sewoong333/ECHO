@@ -267,6 +267,8 @@ export default function MapPage() {
     };
     
     console.log("📍 GPS 위치 요청 시작:", options);
+    console.log("📍 현재 프로토콜:", window.location.protocol);
+    console.log("📍 HTTPS 환경:", window.location.protocol === 'https:');
     
     // macOS에서 CoreLocation 오류 방지를 위한 재시도 로직
     let retryCount = 0;
