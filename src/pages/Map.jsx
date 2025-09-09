@@ -322,6 +322,13 @@ export default function MapPage() {
           return;
         }
         
+        // HTTP 환경에서 IP 기반 위치 서비스 시도
+        if (window.location.protocol === 'http:' && error.code === error.POSITION_UNAVAILABLE) {
+          console.log("🌐 HTTP 환경에서 IP 기반 위치 서비스 시도");
+          tryIPBasedLocation();
+          return;
+        }
+        
         handleLocationError(error);
       },
       options
@@ -330,6 +337,52 @@ export default function MapPage() {
     
     // 첫 번째 시도 시작
     attemptGetLocation();
+  };
+
+  // IP 기반 위치 서비스 (HTTP 환경용)
+  const tryIPBasedLocation = async () => {
+    try {
+      console.log("🌐 IP 기반 위치 정보 요청 시작");
+      
+      const response = await fetch('https://ipapi.co/json/');
+      const data = await response.json();
+      
+      if (data.latitude && data.longitude) {
+        const lat = parseFloat(data.latitude);
+        const lng = parseFloat(data.longitude);
+        
+        console.log("✅ IP 기반 위치 정보 받음:", { lat, lng, city: data.city });
+        
+        setUserLocation({ lat, lng });
+        setLocationPermission("granted");
+        
+        // 지도 중심을 현재 위치로 이동
+        if (map.current) {
+          try {
+            const currentPosition = new kakao.maps.LatLng(lat, lng);
+            map.current.setCenter(currentPosition);
+            map.current.setLevel(5); // IP 기반이므로 확대 레벨을 낮춤
+            
+            // 현재 위치 마커 추가
+            addCurrentLocationMarker(lat, lng);
+            console.log("✅ 지도 중심을 IP 기반 위치로 이동 완료");
+          } catch (error) {
+            console.error("❌ 지도 이동 실패:", error);
+          }
+        }
+        
+        setIsGettingLocation(false);
+        console.log("✅ IP 기반 위치 설정 완료");
+        
+        // IP 기반 위치임을 알리는 알림
+        alert(`IP 기반 위치 서비스를 사용합니다.\n\n위치: ${data.city}, ${data.country}\n정확도: 대략적 위치\n\n더 정확한 위치를 원하시면 HTTPS 환경에서 테스트해주세요.`);
+      } else {
+        throw new Error('IP 기반 위치 정보를 가져올 수 없습니다.');
+      }
+    } catch (error) {
+      console.error("❌ IP 기반 위치 서비스 실패:", error);
+      handleLocationError({ code: 2, message: 'Position update is unavailable' });
+    }
   };
 
   // 오류 처리 함수

@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import fs from 'fs'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -10,11 +9,7 @@ export default defineConfig({
     strictPort: true,
     host: true,
     open: true,
-    cors: true,
-    https: {
-      key: fs.readFileSync('key.pem'),
-      cert: fs.readFileSync('cert.pem')
-    }
+    cors: true
   },
   build: {
     // 청크 사이즈 최적화
