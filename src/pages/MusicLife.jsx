@@ -32,20 +32,28 @@ export default function MusicLife() {
   const loadPosts = async () => {
     setLoading(true);
     try {
+      console.log('🔄 음악생활 게시글 로딩 시작...');
       const allPosts = await musiclifeService.getPosts();
+      console.log('📝 받아온 게시글 수:', allPosts.length);
+      console.log('📝 게시글 목록:', allPosts.map(p => p.title));
+      
       let filteredPosts = allPosts;
 
       // 카테고리 필터링
       if (selectedCategory !== "all") {
+        console.log('🔍 카테고리 필터링:', selectedCategory);
         filteredPosts = filteredPosts.filter(post => post.category === selectedCategory);
+        console.log('📝 필터링 후 게시글 수:', filteredPosts.length);
       }
 
       // 검색어 필터링
       if (searchTerm) {
+        console.log('🔍 검색어 필터링:', searchTerm);
         filteredPosts = filteredPosts.filter(post => 
           post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
           post.content.toLowerCase().includes(searchTerm.toLowerCase())
         );
+        console.log('📝 검색 필터링 후 게시글 수:', filteredPosts.length);
       }
 
       // 정렬
@@ -57,9 +65,10 @@ export default function MusicLife() {
         filteredPosts.sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
       }
 
+      console.log('✅ 최종 게시글 수:', filteredPosts.length);
       setPosts(filteredPosts);
     } catch (error) {
-      console.error("게시글 로딩 실패:", error);
+      console.error("❌ 게시글 로딩 실패:", error);
     } finally {
       setLoading(false);
     }

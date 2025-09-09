@@ -936,14 +936,28 @@ export const musiclifeService = {
     try {
       const q = query(musiclifeCollection, orderBy("createdAt", "desc"));
       const snap = await getDocs(q);
-      const posts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const posts = snap.docs.map(doc => {
+        const data = doc.data();
+        return { 
+          id: doc.id, 
+          ...data,
+          // createdAt이 Timestamp 객체인 경우 Date로 변환
+          createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt,
+          updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt
+        };
+      });
       
       console.log('📝 실제 음악생활 게시글:', posts.length, '개');
+      console.log('📝 게시글 목록:', posts.map(p => p.title));
+      
+      // 실제 게시글이 있으면 그대로 반환
+      if (posts.length > 0) {
+        return posts;
+      }
       
       // 실제 게시글이 없을 때만 샘플 데이터 제공 (초기 사용자 경험을 위해)
-      if (posts.length === 0) {
-        console.log('📝 초기 사용자 경험을 위한 샘플 게시글 제공');
-        return [
+      console.log('📝 초기 사용자 경험을 위한 샘플 게시글 제공');
+      return [
           {
             id: "sample-post-1",
             title: "🎸 첫 번째 기타 연주 후기",
