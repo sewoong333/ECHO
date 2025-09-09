@@ -965,7 +965,7 @@ export const musiclifeService = {
 
 처음엔 손가락이 아프고 코드 잡는 게 어려웠지만, 계속 연습하니까 조금씩 소리가 나더라고요.
 
-특히 C코드에서 G코드로 넘어가는 부분이 제일 어려웠는데, 유튜브 강의를 보면서 천천히 따라하니까 이제 조금은 할 수 있게 됐어요!
+특히 C코드에서 G코드로 넘어가는 부분이 제일 어려웠는데, 유튜브 강의를 보면서 천천히 따라하니까 이제 조금은 할 수 있게 됐어요!                                                                                          
 
 다음 목표는 스트럼 패턴을 익혀서 간단한 노래라도 쳐보는 거예요. 
 
@@ -985,7 +985,7 @@ export const musiclifeService = {
 
 처음엔 건반 위치도 모르고 악보 읽는 것도 어려웠는데, 지금은 간단한 곡 정도는 칠 수 있게 됐어요!
 
-요즘 연습하고 있는 곡은 '캐논 변주곡'인데, 왼손 반주가 정말 어려워요 ㅠㅠ 그래도 매일 조금씩 연습하니까 실력이 늘고 있는 걸 느껴요.
+요즘 연습하고 있는 곡은 '캐논 변주곡'인데, 왼손 반주가 정말 어려워요 ㅠㅠ 그래도 매일 조금씩 연습하니까 실력이 늘고 있는 걸 느껴요.                                                                                     
 
 온라인 강의도 많이 도움이 되지만, 역시 직접 손으로 치면서 익히는 게 제일 중요한 것 같아요.
 
@@ -1003,7 +1003,7 @@ export const musiclifeService = {
             title: "🥁 드럼 레슨 시작했어요!",
             content: `드럼을 배우고 싶다고 생각만 하다가 드디어 레슨을 시작했어요!
 
-첫 날엔 스틱 잡는 법부터 배웠는데, 생각보다 어렵더라고요. 팔의 힘을 빼고 손목을 사용해서 쳐야 한다는데 익숙해지는데 시간이 좀 걸릴 것 같아요.
+첫 날엔 스틱 잡는 법부터 배웠는데, 생각보다 어렵더라고요. 팔의 힘을 빼고 손목을 사용해서 쳐야 한다는데 익숙해지는데 시간이 좀 걸릴 것 같아요.                                                                          
 
 그래도 간단한 8비트 패턴 정도는 칠 수 있게 됐어요! 킥, 스네어, 하이햇 조합이 생각보다 재밌더라고요.
 
@@ -1019,486 +1019,43 @@ export const musiclifeService = {
             category: "lesson"
           }
         ];
-      }
-      
-      return posts;
-      
-      // 아래 샘플 데이터 제거됨
-      /*
-      if (posts.length < 5) {
-        console.log('📝 음악생활 게시글 샘플 데이터 생성');
-        
-        // 상세페이지와 동일한 샘플 데이터 사용 - 완전히 일치시킴
-        const samplePosts = [
-          {
-            id: "sample-post-1",
-            title: "🎸 첫 번째 기타 연주 후기",
-            content: `안녕하세요! 오늘 드디어 첫 기타 연주를 해봤어요.
-
-처음엔 손가락이 아프고 코드 잡는 게 어려웠지만, 계속 연습하니까 조금씩 소리가 나더라고요.
-
-특히 C코드에서 G코드로 넘어가는 부분이 제일 어려웠는데, 유튜브 강의를 보면서 천천히 따라하니까 이제 조금은 할 수 있게 됐어요!
-
-다음 목표는 스트럼 패턴을 익혀서 간단한 노래라도 쳐보는 거예요. 
-
-음악생활 시작한 분들, 모두 화이팅해요! 🎵`,
-            authorId: "sample-user-1",
-            authorName: "음악러버",
-            createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1일 전
-            viewCount: 127,
-            commentCount: 8,
-            likes: 23
-          },
-          {
-            id: "sample-post-2", 
-            title: "🎹 피아노 독학 3개월 후기",
-            content: `안녕하세요! 피아노 독학을 시작한 지 3개월이 되었어요.
-
-처음엔 건반 위치도 모르고 악보 읽는 것도 어려웠는데, 지금은 간단한 곡 정도는 칠 수 있게 됐어요!
-
-요즘 연습하고 있는 곡은 '캐논 변주곡'인데, 왼손 반주가 정말 어려워요 ㅠㅠ 그래도 매일 조금씩 연습하니까 실력이 늘고 있는 걸 느껴요.
-
-온라인 강의도 많이 도움이 되지만, 역시 직접 손으로 치면서 익히는 게 제일 중요한 것 같아요.
-
-다음 목표는 쇼팽의 '녹턴'에 도전해보는 거예요! 🎼`,
-            authorId: "sample-user-2",
-            authorName: "피아니스트 지망생", 
-            createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2일 전
-            viewCount: 89,
-            commentCount: 12,
-            likes: 34
-          },
-          {
-            id: "sample-post-3",
-            title: "🥁 드럼 레슨 시작했어요!",
-            content: `드럼을 배우고 싶다고 생각만 하다가 드디어 레슨을 시작했어요!
-
-첫 날엔 스틱 잡는 법부터 배웠는데, 생각보다 어렵더라고요. 팔의 힘을 빼고 손목을 사용해서 쳐야 한다는데 익숙해지는데 시간이 좀 걸릴 것 같아요.
-
-그래도 간단한 8비트 패턴 정도는 칠 수 있게 됐어요! 킥, 스네어, 하이햇 조합이 생각보다 재밌더라고요.
-
-다음 주부터는 필인(fill-in) 연습을 시작한다고 하니 기대돼요!
-
-드럼 치시는 분들, 초보자에게 조언 부탁드려요~ 🥁`,
-            authorId: "sample-user-3",
-            authorName: "드러머 지망생",
-            createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3일 전
-            viewCount: 156,
-            commentCount: 6,
-            likes: 19
-          },
-          {
-            id: "sample-post-4",
-            title: "🎺 색소폰의 매력에 빠졌어요",
-            content: `우연히 재즈바에서 들은 색소폰 소리에 매료되어서 배우기 시작했어요.
-
-처음엔 소리 내는 것부터 어려웠어요. 입술 모양, 혀의 위치, 숨쉬는 법까지 신경 써야 할 게 너무 많더라고요.
-
-하지만 한 달 정도 연습하니까 드디어 깨끗한 소리가 나기 시작했어요! 'Amazing Grace'를 연주할 수 있게 됐을 때의 그 감동은 정말 잊을 수 없어요.
-
-지금은 재즈 스탠다드 곡들을 연습하고 있어요. 'Autumn Leaves'가 목표예요!
-
-관악기 연주하시는 분들 계시면 연습 팁 공유해주세요~ 🎷`,
-            authorId: "sample-user-4",
-            authorName: "재즈러버",
-            createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), // 4일 전
-            viewCount: 203,
-            commentCount: 9,
-            likes: 42
-          },
-          {
-            id: "sample-post-5",
-            title: "🎻 바이올린의 아픈 손가락들...",
-            content: `바이올린을 시작한 지 2주가 됐는데, 손가락이 정말 아파요 ㅠㅠ
-
-현을 누르는 왼손 손가락 끝이 아프고, 활을 잡는 오른손도 계속 긴장돼서 피곤해요. 자세도 어색하고 턱받이도 불편하고...
-
-그런데 가끔 깨끗한 소리가 날 때가 있어요. 그때의 그 기분은 정말 최고예요! 
-
-선생님께서 바이올린은 인내의 악기라고 하시더라고요. 정말 맞는 말인 것 같아요.
-
-지금은 '작은 별' 정도만 겨우 칠 수 있지만, 언젠가는 아름다운 클래식 곡들을 연주하고 싶어요.
-
-바이올린 연주자 분들, 초보 때 어떻게 버티셨나요? 🎻`,
-            authorId: "sample-user-5",
-            authorName: "현악기 도전자",
-            createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5일 전
-            viewCount: 78,
-            commentCount: 15,
-            likes: 27
-          }
-        ];
-        
-        // 기존 게시글과 샘플 게시글 합치기
-        return [...posts, ...samplePosts];
-      }
-      */
-      
     } catch (error) {
-      console.error('게시글 목록 조회 오류:', error);
-      
-      // 에러 발생 시 빈 배열 반환 (샘플 데이터 제거)
+      console.error('음악생활 게시글 로딩 오류:', error);
       return [];
-      
-      // 아래 샘플 데이터 제거됨
-      /*
-      return [
-        {
-          id: "sample-post-1",
-          title: "🎸 첫 번째 기타 연주 후기", 
-          content: "안녕하세요! 오늘 드디어 첫 기타 연주를 해봤어요...",
-          authorId: "sample-user-1",
-          authorName: "음악러버",
-          createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-          viewCount: 127,
-          commentCount: 8,
-          likes: 23
-        }
-      ];
-      */
     }
   },
+  
   async getPost(id) {
     try {
-      const ref = doc(db, "musiclife_posts", id);
-      const snap = await getDoc(ref);
+      const docRef = doc(musiclifeCollection, id);
+      const docSnap = await getDoc(docRef);
       
-      if (!snap.exists()) {
-        console.log(`🚫 게시글 ID ${id}를 찾을 수 없습니다.`);
-        
-        // 샘플 게시글 ID인 경우 해당 데이터 반환
-        const samplePosts = {
-          "sample-post-1": {
-            id: "sample-post-1",
-            title: "🎸 첫 번째 기타 연주 후기",
-            content: `안녕하세요! 오늘 드디어 첫 기타 연주를 해봤어요.
-
-처음엔 손가락이 아프고 코드 잡는 게 어려웠지만, 계속 연습하니까 조금씩 소리가 나더라고요.
-
-특히 C코드에서 G코드로 넘어가는 부분이 제일 어려웠는데, 유튜브 강의를 보면서 천천히 따라하니까 이제 조금은 할 수 있게 됐어요!
-
-다음 목표는 스트럼 패턴을 익혀서 간단한 노래라도 쳐보는 거예요. 
-
-음악생활 시작한 분들, 모두 화이팅해요! 🎵`,
-            authorId: "sample-user-1",
-            authorName: "음악러버",
-            createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-            viewCount: 127,
-            commentCount: 8,
-            likes: 23,
-            category: "tips"
-          },
-          "sample-post-2": {
-            id: "sample-post-2", 
-            title: "🎹 피아노 독학 3개월 후기",
-            content: `안녕하세요! 피아노 독학을 시작한 지 3개월이 되었어요.
-
-처음엔 건반 위치도 모르고 악보 읽는 것도 어려웠는데, 지금은 간단한 곡 정도는 칠 수 있게 됐어요!
-
-요즘 연습하고 있는 곡은 '캐논 변주곡'인데, 왼손 반주가 정말 어려워요 ㅠㅠ 그래도 매일 조금씩 연습하니까 실력이 늘고 있는 걸 느껴요.
-
-온라인 강의도 많이 도움이 되지만, 역시 직접 손으로 치면서 익히는 게 제일 중요한 것 같아요.
-
-다음 목표는 쇼팽의 '녹턴'에 도전해보는 거예요! 🎼`,
-            authorId: "sample-user-2",
-            authorName: "피아니스트 지망생", 
-            createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-            viewCount: 89,
-            commentCount: 12,
-            likes: 34,
-            category: "lesson"
-          },
-          "sample-post-3": {
-            id: "sample-post-3",
-            title: "🥁 드럼 레슨 시작했어요!",
-            content: `드럼을 배우고 싶다고 생각만 하다가 드디어 레슨을 시작했어요!
-
-첫 날엔 스틱 잡는 법부터 배웠는데, 생각보다 어렵더라고요. 팔의 힘을 빼고 손목을 사용해서 쳐야 한다는데 익숙해지는데 시간이 좀 걸릴 것 같아요.
-
-그래도 간단한 8비트 패턴 정도는 칠 수 있게 됐어요! 킥, 스네어, 하이햇 조합이 생각보다 재밌더라고요.
-
-다음 주부터는 필인(fill-in) 연습을 시작한다고 하니 기대돼요!
-
-드럼 치시는 분들, 초보자에게 조언 부탁드려요~ 🥁`,
-            authorId: "sample-user-3",
-            authorName: "드러머 지망생",
-            createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-            viewCount: 156,
-            commentCount: 6,
-            likes: 19,
-            category: "lesson"
-          }
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          ...data,
+          createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt,
+          updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt
         };
-        
-        if (samplePosts[id]) {
-          return samplePosts[id];
-        }
-        
-        // ID가 없으면 기본 샘플 데이터 반환 (사용자 경험 개선)
-        return samplePosts["sample-post-1"];
-        
-        // 아래 샘플 데이터 제거됨
-        /*
-        // 특정 샘플 ID들에 대해 일치하는 데이터 반환
-        const samplePosts = {
-          "sample-post-1": {
-            title: "🎸 첫 번째 기타 연주 후기",
-            content: `안녕하세요! 오늘 드디어 첫 기타 연주를 해봤어요.
-
-처음엔 손가락이 아프고 코드 잡는 게 어려웠지만, 계속 연습하니까 조금씩 소리가 나더라고요.
-
-특히 C코드에서 G코드로 넘어가는 부분이 제일 어려웠는데, 유튜브 강의를 보면서 천천히 따라하니까 이제 조금은 할 수 있게 됐어요!
-
-다음 목표는 스트럼 패턴을 익혀서 간단한 노래라도 쳐보는 거예요. 
-
-음악생활 시작한 분들, 모두 화이팅해요! 🎵`,
-            authorName: "음악러버",
-            authorId: "sample-user-1",
-            createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-            viewCount: 127,
-            commentCount: 8,
-            likes: 23
-          },
-          "sample-post-2": {
-            title: "🎹 피아노 독학 3개월 후기",
-            content: `안녕하세요! 피아노 독학을 시작한 지 3개월이 되었어요.
-
-처음엔 건반 위치도 모르고 악보 읽는 것도 어려웠는데, 지금은 간단한 곡 정도는 칠 수 있게 됐어요!
-
-요즘 연습하고 있는 곡은 '캐논 변주곡'인데, 왼손 반주가 정말 어려워요 ㅠㅠ 그래도 매일 조금씩 연습하니까 실력이 늘고 있는 걸 느껴요.
-
-온라인 강의도 많이 도움이 되지만, 역시 직접 손으로 치면서 익히는 게 제일 중요한 것 같아요.
-
-다음 목표는 쇼팽의 '녹턴'에 도전해보는 거예요! 🎼`,
-            authorName: "피아니스트 지망생",
-            authorId: "sample-user-2",
-            createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-            viewCount: 89,
-            commentCount: 12,
-            likes: 34
-          },
-          "sample-post-3": {
-            title: "🥁 드럼 레슨 시작했어요!",
-            content: `드럼을 배우고 싶다고 생각만 하다가 드디어 레슨을 시작했어요!
-
-첫 날엔 스틱 잡는 법부터 배웠는데, 생각보다 어렵더라고요. 팔의 힘을 빼고 손목을 사용해서 쳐야 한다는데 익숙해지는데 시간이 좀 걸릴 것 같아요.
-
-그래도 간단한 8비트 패턴 정도는 칠 수 있게 됐어요! 킥, 스네어, 하이햇 조합이 생각보다 재밌더라고요.
-
-다음 주부터는 필인(fill-in) 연습을 시작한다고 하니 기대돼요!
-
-드럼 치시는 분들, 초보자에게 조언 부탁드려요~ 🥁`,
-            authorName: "드러머 지망생",
-            authorId: "sample-user-3",
-            createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-            viewCount: 156,
-            commentCount: 6,
-            likes: 19
-          },
-          "sample-post-4": {
-            title: "🎺 색소폰의 매력에 빠졌어요",
-            content: `우연히 재즈바에서 들은 색소폰 소리에 매료되어서 배우기 시작했어요.
-
-처음엔 소리 내는 것부터 어려웠어요. 입술 모양, 혀의 위치, 숨쉬는 법까지 신경 써야 할 게 너무 많더라고요.
-
-하지만 한 달 정도 연습하니까 드디어 깨끗한 소리가 나기 시작했어요! 'Amazing Grace'를 연주할 수 있게 됐을 때의 그 감동은 정말 잊을 수 없어요.
-
-지금은 재즈 스탠다드 곡들을 연습하고 있어요. 'Autumn Leaves'가 목표예요!
-
-관악기 연주하시는 분들 계시면 연습 팁 공유해주세요~ 🎷`,
-            authorName: "재즈러버",
-            authorId: "sample-user-4",
-            createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
-            viewCount: 203,
-            commentCount: 9,
-            likes: 42
-          },
-          "sample-post-5": {
-            title: "🎻 바이올린의 아픈 손가락들...",
-            content: `바이올린을 시작한 지 2주가 됐는데, 손가락이 정말 아파요 ㅠㅠ
-
-현을 누르는 왼손 손가락 끝이 아프고, 활을 잡는 오른손도 계속 긴장돼서 피곤해요. 자세도 어색하고 턱받이도 불편하고...
-
-그런데 가끔 깨끗한 소리가 날 때가 있어요. 그때의 그 기분은 정말 최고예요! 
-
-선생님께서 바이올린은 인내의 악기라고 하시더라고요. 정말 맞는 말인 것 같아요.
-
-지금은 '작은 별' 정도만 겨우 칠 수 있지만, 언젠가는 아름다운 클래식 곡들을 연주하고 싶어요.
-
-바이올린 연주자 분들, 초보 때 어떻게 버티셨나요? 🎻`,
-            authorName: "현악기 도전자", 
-            authorId: "sample-user-5",
-            createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-            viewCount: 78,
-            commentCount: 15,
-            likes: 27
-          }
-        };
-        
-        // 해당 ID의 샘플 데이터가 있으면 반환
-        if (samplePosts[id]) {
-          return samplePosts[id];
-        }
-        
-        // ID가 없으면 기본 샘플 데이터 반환
-        return samplePosts["sample-post-1"];
-        */
+      } else {
+        return null;
       }
-      
-      // 조회수 증가
-      await updateDoc(ref, { viewCount: increment(1) });
-      return { id: snap.id, ...snap.data() };
     } catch (error) {
-      console.error('게시글 조회 오류:', error);
-      
-      // 에러 발생 시 null 반환 (샘플 데이터 제거)
+      console.error('음악생활 게시글 조회 오류:', error);
       return null;
     }
   },
-  async updatePost(id, data) {
-    const ref = doc(db, "musiclife_posts", id);
-    await updateDoc(ref, { ...data, updatedAt: serverTimestamp() });
-  },
-  async deletePost(id) {
-    const ref = doc(db, "musiclife_posts", id);
-    await deleteDoc(ref);
-  },
-  async addComment(postId, data) {
-    const commentsCol = collection(db, "musiclife_posts", postId, "comments");
-    await addDoc(commentsCol, {
-      ...data,
-      createdAt: serverTimestamp(),
-    });
-    await updateDoc(doc(db, "musiclife_posts", postId), { commentCount: increment(1) });
-  },
-  async getComments(postId) {
+  
+  async updateViewCount(id) {
     try {
-      const commentsCol = collection(db, "musiclife_posts", postId, "comments");
-      const q = query(commentsCol, orderBy("createdAt", "asc"));
-      const snap = await getDocs(q);
-      
-      const comments = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      
-      console.log(`📝 게시글 ${postId}의 실제 댓글:`, comments.length, '개');
-      
-      // 샘플 게시글에 대해서는 샘플 댓글 제공
-      if (comments.length === 0 && postId.startsWith('sample-post-')) {
-        console.log(`📝 샘플 게시글 ${postId}에 샘플 댓글 제공`);
-        
-        const sampleComments = {
-          "sample-post-1": [
-            { 
-              id: "comment-1",
-              content: "와 정말 멋져요! 저도 기타 배우고 싶어졌어요 🎸", 
-              authorName: "음악초보자",
-              authorId: "commenter-1",
-              createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000)
-            },
-            { 
-              id: "comment-2",
-              content: "C코드에서 G코드 넘어가는 거 저도 어려워해요ㅠㅠ 연습만이 답인 것 같아요!", 
-              authorName: "기타치는사람",
-              authorId: "commenter-2", 
-              createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000)
-            }
-          ],
-          "sample-post-2": [
-            { 
-              id: "comment-1",
-              content: "피아노 3개월이면 정말 빠른 거예요! 대단하세요 👏", 
-              authorName: "피아노선생님",
-              authorId: "commenter-1",
-              createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000)
-            },
-            { 
-              id: "comment-2",
-              content: "캐논 변주곡 저도 연습 중인데 왼손이 정말 어렵죠 ㅠㅠ 화이팅해요!", 
-              authorName: "건반러버",
-              authorId: "commenter-2",
-              createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000)
-            }
-          ],
-          "sample-post-3": [
-            { 
-              id: "comment-1",
-              content: "드럼 레슨 시작하신 거 축하해요! 8비트면 벌써 많이 늘으신 거예요 🥁", 
-              authorName: "드럼마스터",
-              authorId: "commenter-1",
-              createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000)
-            }
-          ]
-        };
-        
-        return sampleComments[postId] || [];
-      }
-      
-      return comments;
-      
-      // 아래 샘플 댓글 제거됨
-      /*
-      // 댓글이 없거나 적을 때 샘플 댓글 추가
-      if (comments.length === 0) {
-        console.log(`📝 게시글 ${postId}에 샘플 댓글 생성`);
-        
-        // 다양한 샘플 댓글 세트
-        const commentSets = [
-          // 기타 관련
-          [
-            { content: "와 정말 멋져요! 저도 기타 배우고 싶어졌어요 🎸", authorName: "음악초보자" },
-            { content: "C코드에서 G코드 넘어가는 거 저도 어려워해요ㅠㅠ 연습만이 답인 것 같아요!", authorName: "기타치는사람" },
-            { content: "혹시 어떤 유튜브 채널 보고 계시나요? 추천해주세요~", authorName: "뮤직러버" }
-          ],
-          // 피아노 관련  
-          [
-            { content: "피아노 3개월이면 정말 빠른 거예요! 대단하세요 👏", authorName: "피아노선생님" },
-            { content: "캐논 변주곡 저도 연습 중인데 왼손이 정말 어렵죠 ㅠㅠ 화이팅해요!", authorName: "건반러버" },
-            { content: "쇼팽 녹턴은 정말 아름다운 곡이에요. 꼭 성공하시길!", authorName: "클래식마니아" }
-          ],
-          // 드럼 관련
-          [
-            { content: "드럼 레슨 시작하신 거 축하해요! 8비트면 벌써 많이 늘으신 거예요 🥁", authorName: "드럼마스터" },
-            { content: "스틱 잡는 법이 진짜 중요해요. 처음에 제대로 배워두시면 나중에 도움 많이 돼요", authorName: "리듬메이커" },
-            { content: "필인 연습하실 때 메트로놈 꼭 사용하세요! 초보 때부터 박자 맞추는 습관 중요해요", authorName: "베테랑드러머" }
-          ],
-          // 색소폰 관련
-          [
-            { content: "재즈바에서 색소폰 소리 들으면 정말 매력적이죠 🎷✨", authorName: "재즈팬" },
-            { content: "Amazing Grace 연주하셨다니 대단해요! Autumn Leaves도 좋은 곡이에요", authorName: "색소폰연주자" },
-            { content: "관악기는 숨쉬기가 정말 중요한데, 복식호흡 연습도 같이 하시면 좋아요", authorName: "관악기선생님" }
-          ],
-          // 바이올린 관련
-          [
-            { content: "바이올린 초반이 제일 힘들어요 ㅠㅠ 손가락 아픈 거 정말 공감돼요", authorName: "바이올리니스트" },
-            { content: "저도 처음엔 턱받이가 너무 불편했는데, 익숙해지면 괜찮아져요! 힘내세요 💪", authorName: "현악기러버" },
-            { content: "작은 별부터 차근차근 하시는 게 맞아요. 기초가 탄탄해야 나중에 어려운 곡도 할 수 있어요", authorName: "클래식전공자" }
-          ]
-        ];
-        
-        // postId 해시로 댓글 세트 선택 (일관성 위해)
-        const hash = postId.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-        const selectedComments = commentSets[hash % commentSets.length];
-        
-        return selectedComments.map((comment, index) => ({
-          id: `comment-${index + 1}`,
-          content: comment.content,
-          authorId: `commenter-${index + 1}`,
-          authorName: comment.authorName,
-          createdAt: new Date(Date.now() - (selectedComments.length - index) * 60 * 60 * 1000), // 시간 순서대로
-        }));
-      }
-      */
-      
+      const docRef = doc(musiclifeCollection, id);
+      await updateDoc(docRef, {
+        viewCount: increment(1)
+      });
     } catch (error) {
-      console.error('댓글 조회 오류:', error);
-      
-      // 에러 발생 시 빈 배열 반환 (샘플 댓글 제거)
-      return [];
+      console.error('조회수 업데이트 오류:', error);
     }
-  },
-  async deleteComment(postId, commentId) {
-    const ref = doc(db, "musiclife_posts", postId, "comments", commentId);
-    await deleteDoc(ref);
-    await updateDoc(doc(db, "musiclife_posts", postId), { commentCount: increment(-1) });
   }
 };
 
@@ -1506,170 +1063,55 @@ export const musiclifeService = {
 export const phoneAuthService = {
   recaptchaVerifier: null,
 
-  // reCAPTCHA 설정 - 개선된 버전
-  setupRecaptcha(elementId = 'recaptcha-container') {
-    try {
-      // 기존 verifier가 있으면 정리
-      if (this.recaptchaVerifier) {
-        this.resetRecaptcha();
-      }
-
-      // DOM 요소 존재 확인
-      const container = document.getElementById(elementId);
-      if (!container) {
-        console.warn(`reCAPTCHA 컨테이너 ${elementId}를 찾을 수 없습니다. 동적으로 생성합니다.`);
-        const newContainer = document.createElement('div');
-        newContainer.id = elementId;
-        newContainer.style.display = 'none';
-        document.body.appendChild(newContainer);
-      }
-
-      this.recaptchaVerifier = new RecaptchaVerifier(auth, elementId, {
+  // reCAPTCHA 초기화
+  initializeRecaptcha() {
+    if (!this.recaptchaVerifier) {
+      this.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
         size: 'invisible',
         callback: (response) => {
-          console.log('reCAPTCHA 완료:', response);
+          console.log('reCAPTCHA 인증 완료');
         },
         'expired-callback': () => {
-          console.log('reCAPTCHA 만료됨 - 재설정 필요');
-          this.resetRecaptcha();
-        },
-        'error-callback': (error) => {
-          console.error('reCAPTCHA 오류:', error);
-          this.resetRecaptcha();
+          console.log('reCAPTCHA 만료');
         }
-      });
-      
-      return this.recaptchaVerifier;
-    } catch (error) {
-      console.error('reCAPTCHA 설정 실패:', error);
-      this.resetRecaptcha();
-      throw error;
+      }, auth);
     }
+    return this.recaptchaVerifier;
   },
 
-  // 인증 번호 전송 - 개선된 버전
+  // 전화번호 인증 코드 전송
   async sendVerificationCode(phoneNumber) {
     try {
-      // 전화번호 형식 검증 및 정리
-      const cleanedPhone = phoneNumber.replace(/[^0-9]/g, '');
-      let formattedPhone;
-      
-      if (cleanedPhone.startsWith('010')) {
-        formattedPhone = '+82' + cleanedPhone.substring(1);
-      } else if (cleanedPhone.startsWith('82')) {
-        formattedPhone = '+' + cleanedPhone;
-      } else {
-        throw new Error('올바르지 않은 전화번호 형식입니다.');
-      }
-
-      console.log('전화번호 인증 요청:', formattedPhone);
-
-      // reCAPTCHA 설정 및 재시도 로직
-      let appVerifier;
-      let maxRetries = 3;
-      let attempt = 0;
-      
-      while (attempt < maxRetries) {
-        try {
-          appVerifier = this.setupRecaptcha();
-          
-          // reCAPTCHA 렌더링 대기
-          if (appVerifier && typeof appVerifier.render === 'function') {
-            await appVerifier.render();
-          }
-          
-          break;
-        } catch (setupError) {
-          console.warn(`reCAPTCHA 설정 시도 ${attempt + 1} 실패:`, setupError);
-          this.resetRecaptcha();
-          attempt++;
-          
-          if (attempt >= maxRetries) {
-            throw new Error('reCAPTCHA 설정에 실패했습니다. 페이지를 새로고침해주세요.');
-          }
-          
-          // 잠시 대기 후 재시도
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-      }
-
-      const confirmationResult = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
-      
-      console.log('인증번호 전송 성공');
+      const appVerifier = this.initializeRecaptcha();
+      const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+      console.log('인증 코드 전송 완료');
       return confirmationResult;
     } catch (error) {
-      console.error('인증번호 전송 실패:', error);
-      this.resetRecaptcha();
-      
-      // 사용자 친화적 에러 메시지 제공
-      if (error.code === 'auth/too-many-requests') {
-        throw new Error('너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요.');
-      } else if (error.code === 'auth/invalid-phone-number') {
-        throw new Error('올바르지 않은 전화번호입니다.');
-      } else if (error.code === 'auth/quota-exceeded') {
-        throw new Error('SMS 할당량을 초과했습니다. 내일 다시 시도해주세요.');
-      }
-      
+      console.error('인증 코드 전송 실패:', error);
       throw error;
     }
   },
 
-  // 인증 번호 확인
+  // 인증 코드 확인
   async verifyCode(confirmationResult, code) {
     try {
       const result = await confirmationResult.confirm(code);
-      console.log('전화번호 인증 성공:', result.user);
-      return result.user;
-    } catch (error) {
-      console.error('인증번호 확인 실패:', error);
-      throw error;
-    }
-  },
-
-  // 기존 계정에 전화번호 연결
-  async linkPhoneNumber(phoneNumber, verificationCode) {
-    try {
-      const credential = PhoneAuthProvider.credential(verificationCode, phoneNumber);
-      const result = await linkWithCredential(auth.currentUser, credential);
-      console.log('전화번호 연결 성공:', result);
+      console.log('인증 코드 확인 완료');
       return result;
     } catch (error) {
-      console.error('전화번호 연결 실패:', error);
+      console.error('인증 코드 확인 실패:', error);
       throw error;
     }
-  },
-
-  // reCAPTCHA 초기화 - 개선된 버전
-  resetRecaptcha() {
-    try {
-      if (this.recaptchaVerifier) {
-        this.recaptchaVerifier.clear();
-        this.recaptchaVerifier = null;
-      }
-      
-      // reCAPTCHA DOM 요소 정리
-      const containers = document.querySelectorAll('[id^="recaptcha"]');
-      containers.forEach(container => {
-        if (container.innerHTML) {
-          container.innerHTML = '';
-        }
-      });
-      
-      console.log('reCAPTCHA 초기화 완료');
-    } catch (error) {
-      console.warn('reCAPTCHA 초기화 중 오류:', error);
-    }
-  },
-
-  // 전화번호 형식 검증
-  validatePhoneNumber(phoneNumber) {
-    const phoneRegex = /^01[0-9]-\d{4}-\d{4}$/;
-    return phoneRegex.test(phoneNumber);
   },
 
   // 전화번호 포맷팅
   formatPhoneNumber(phoneNumber) {
     const cleaned = phoneNumber.replace(/\D/g, '');
+    
+    if (cleaned.length === 10) {
+      return cleaned.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+    }
+    
     if (cleaned.length === 11 && cleaned.startsWith('010')) {
       return cleaned.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
     }
@@ -1681,254 +1123,83 @@ export const phoneAuthService = {
 export const kakaoAuthService = {
   // 카카오톡 로그인 시작 (Redirect 방식)
   loginWithKakao() {
+    const KAKAO_REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY;
+    const REDIRECT_URI = `${window.location.origin}/auth/kakao/callback`;
+    
+    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`;
+    
+    window.location.href = kakaoAuthUrl;
+  },
+
+  // 카카오톡 로그인 콜백 처리
+  async handleKakaoCallback(code) {
     try {
-      if (!window.Kakao || !window.Kakao.isInitialized()) {
-        throw new Error('카카오 SDK가 초기화되지 않았습니다.');
-      }
-
-      console.log('🚀 카카오 로그인 시작 (Redirect 방식)...');
+      const KAKAO_REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY;
+      const REDIRECT_URI = `${window.location.origin}/auth/kakao/callback`;
       
-      // 현재 도메인에 따라 리다이렉트 URI 설정
-      const currentOrigin = window.location.origin;
-      const redirectUri = `${currentOrigin}/login`;
-      
-      console.log('📍 Redirect URI:', redirectUri);
-      
-      // 세션 스토리지에 로그인 시도 표시 저장
-      sessionStorage.setItem('kakao_login_attempt', 'true');
-      sessionStorage.setItem('kakao_login_time', Date.now().toString());
-      
-      window.Kakao.Auth.authorize({
-        redirectUri: redirectUri,
-      });
-      
-    } catch (error) {
-      console.error('카카오 로그인 오류:', error);
-      throw error;
-    }
-  },
-
-  // 페이지 로드 시 카카오 토큰 확인 및 처리
-  async handleKakaoCallback() {
-    try {
-      console.log('🔍 카카오 콜백 처리 시작...');
-      
-      // 로그인 시도 확인
-      const loginAttempt = sessionStorage.getItem('kakao_login_attempt');
-      const loginTime = sessionStorage.getItem('kakao_login_time');
-      
-      // 로그인 시도가 5분 이내가 아니면 무시
-      if (!loginAttempt || !loginTime || (Date.now() - parseInt(loginTime)) > 300000) {
-        console.log('❌ 유효하지 않은 카카오 로그인 시도');
-        return null;
-      }
-      
-      // URL 파라미터에서 code 확인
-      const urlParams = new URLSearchParams(window.location.search);
-      const authCode = urlParams.get('code');
-      
-      if (!authCode) {
-        console.log('❌ 카카오 인증 코드 없음');
-        return null;
-      }
-      
-      console.log('✅ 카카오 인증 코드 발견:', authCode);
-      
-      // 쿠키에서 토큰 확인
-      const token = this.getCookie('authorize-access-token');
-      
-      if (token) {
-        console.log('📱 카카오 토큰 발견:', token.substring(0, 20) + '...');
-        
-        window.Kakao.Auth.setAccessToken(token);
-        
-        // 연결 상태 확인
-        const statusInfo = await window.Kakao.Auth.getStatusInfo();
-        
-        if (statusInfo.status === 'connected') {
-          console.log('✅ 카카오 연결 상태 확인됨');
-          
-          // 사용자 정보 가져오기
-          const userInfo = await this.getUserInfo();
-          
-          // Firebase에서 사용자 정보 확인/생성
-          const user = await this.createOrUpdateUser(userInfo);
-          
-          // 로컬 스토리지에 카카오 로그인 상태 저장
-          localStorage.setItem('kakao_login_status', 'true');
-          localStorage.setItem('kakao_user_info', JSON.stringify(user));
-          
-          // 세션 스토리지 정리
-          sessionStorage.removeItem('kakao_login_attempt');
-          sessionStorage.removeItem('kakao_login_time');
-          
-          console.log('✅ 카카오 로그인 완료:', user.uid);
-          return user;
-        }
-      }
-      
-      return null;
-    } catch (error) {
-      console.error('❌ 카카오 콜백 처리 실패:', error);
-      // 토큰이 유효하지 않은 경우 제거
-      if (window.Kakao && window.Kakao.Auth) {
-        window.Kakao.Auth.setAccessToken(null);
-      }
-      // 에러 시 세션 정리
-      sessionStorage.removeItem('kakao_login_attempt');
-      sessionStorage.removeItem('kakao_login_time');
-      localStorage.removeItem('kakao_login_status');
-      localStorage.removeItem('kakao_user_info');
-      throw error;
-    }
-  },
-
-  // 저장된 카카오 로그인 상태 확인
-  async checkSavedKakaoLogin() {
-    try {
-      const loginStatus = localStorage.getItem('kakao_login_status');
-      const savedUserInfo = localStorage.getItem('kakao_user_info');
-      
-      if (loginStatus === 'true' && savedUserInfo) {
-        const userInfo = JSON.parse(savedUserInfo);
-        console.log('📱 저장된 카카오 로그인 상태 발견:', userInfo.uid);
-        
-        // 카카오 SDK가 초기화되어 있는지 확인
-        if (window.Kakao && window.Kakao.isInitialized()) {
-          // 현재 토큰이 유효한지 확인
-          try {
-            const statusInfo = await window.Kakao.Auth.getStatusInfo();
-            if (statusInfo.status === 'connected') {
-              console.log('✅ 저장된 카카오 로그인 유효함');
-              return userInfo;
-            }
-          } catch (error) {
-            console.warn('⚠️ 저장된 카카오 토큰 검증 실패:', error);
-          }
-        }
-        
-        // 토큰이 유효하지 않으면 저장된 정보 제거
-        localStorage.removeItem('kakao_login_status');
-        localStorage.removeItem('kakao_user_info');
-      }
-      
-      return null;
-    } catch (error) {
-      console.error('❌ 저장된 카카오 로그인 확인 실패:', error);
-      localStorage.removeItem('kakao_login_status');
-      localStorage.removeItem('kakao_user_info');
-      return null;
-    }
-  },
-
-  // 쿠키에서 값 가져오기
-  getCookie(name) {
-    const parts = document.cookie.split(name + '=');
-    if (parts.length === 2) {
-      return parts[1].split(';')[0];
-    }
-    return null;
-  },
-
-  // 로그아웃
-  logout() {
-    try {
-      if (window.Kakao && window.Kakao.Auth) {
-        window.Kakao.Auth.logout();
-        console.log('✅ 카카오 로그아웃 완료');
-      }
-    } catch (error) {
-      console.error('❌ 카카오 로그아웃 실패:', error);
-    }
-  },
-
-  // 사용자 정보 가져오기
-  async getUserInfo() {
-    return new Promise((resolve, reject) => {
-      window.Kakao.API.request({
-        url: '/v2/user/me',
-        success: (response) => {
-          console.log('카카오 사용자 정보:', response);
-          resolve(response);
+      // 1. 인증 코드로 액세스 토큰 요청
+      const tokenResponse = await fetch('https://kauth.kakao.com/oauth/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        fail: (error) => {
-          console.error('카카오 사용자 정보 가져오기 실패:', error);
-          reject(error);
-        }
+        body: new URLSearchParams({
+          grant_type: 'authorization_code',
+          client_id: KAKAO_REST_API_KEY,
+          redirect_uri: REDIRECT_URI,
+          code: code,
+        }),
       });
-    });
+
+      if (!tokenResponse.ok) {
+        throw new Error('카카오 토큰 요청 실패');
+      }
+
+      const tokenData = await tokenResponse.json();
+      const accessToken = tokenData.access_token;
+
+      // 2. 액세스 토큰으로 사용자 정보 요청
+      const userResponse = await fetch('https://kapi.kakao.com/v2/user/me', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!userResponse.ok) {
+        throw new Error('카카오 사용자 정보 요청 실패');
+      }
+
+      const userData = await userResponse.json();
+      
+      // 3. Firebase 커스텀 토큰 생성 (서버에서 처리해야 함)
+      // 여기서는 임시로 사용자 정보만 반환
+      return {
+        uid: `kakao_${userData.id}`,
+        email: userData.kakao_account?.email || '',
+        displayName: userData.kakao_account?.profile?.nickname || '',
+        photoURL: userData.kakao_account?.profile?.profile_image_url || '',
+        provider: 'kakao',
+        accessToken: accessToken,
+      };
+    } catch (error) {
+      console.error('카카오 로그인 처리 오류:', error);
+      throw error;
+    }
   },
 
-  // Firebase에 사용자 정보 저장/업데이트 (이메일 중복 체크 포함)
-  async createOrUpdateUser(kakaoUserInfo) {
+  // 카카오 사용자 정보를 Firebase에 저장
+  async saveKakaoUserToFirebase(userId, kakaoUserData) {
     try {
-      const kakaoEmail = kakaoUserInfo.kakao_account?.email;
-      const userId = `kakao_${kakaoUserInfo.id}`;
-      
-      // 1. 이메일이 있는 경우 중복 계정 확인
-      if (kakaoEmail) {
-        console.log('📧 이메일 중복 확인:', kakaoEmail);
-        
-        const emailQuery = query(
-          collection(db, 'users'), 
-          where('email', '==', kakaoEmail)
-        );
-        const emailSnapshot = await getDocs(emailQuery);
-        
-        if (!emailSnapshot.empty) {
-          const existingUser = emailSnapshot.docs[0];
-          const existingData = existingUser.data();
-          
-          console.log('⚠️ 중복 이메일 발견:', {
-            existingProvider: existingData.providerId || 'google',
-            email: kakaoEmail
-          });
-          
-          // 기존 사용자가 구글 계정인 경우
-          if (!existingData.providerId || existingData.providerId === 'google') {
-            throw {
-              code: 'DUPLICATE_EMAIL',
-              message: `이미 ${kakaoEmail}로 구글 계정이 가입되어 있습니다.`,
-              existingProvider: 'google',
-              email: kakaoEmail,
-              existingData: existingData
-            };
-          }
-        }
-      }
-      
-      // 2. 카카오 계정 생성/업데이트
-      const userRef = doc(db, 'users', userId);
-      const userSnap = await getDoc(userRef);
-
+      const userRef = doc(db, "users", userId);
       const userData = {
         uid: userId,
-        providerId: 'kakao',
-        kakaoId: kakaoUserInfo.id,
-        nickname: kakaoUserInfo.kakao_account?.profile?.nickname || '카카오 사용자',
-        profileImage: kakaoUserInfo.kakao_account?.profile?.profile_image_url || null,
-        email: kakaoEmail || null,
-        phoneNumber: kakaoUserInfo.kakao_account?.phone_number || null,
-        isVerified: kakaoUserInfo.kakao_account?.is_email_verified || false,
-        phoneVerified: kakaoUserInfo.kakao_account?.is_phone_number_verified || false,
-        
-        // ECHO 기본 정보
-        mannerScore: userSnap.exists() ? userSnap.data().mannerScore : 100,
-        rating: userSnap.exists() ? userSnap.data().rating : 0,
-        reviewCount: userSnap.exists() ? userSnap.data().reviewCount : 0,
-        transactionCount: userSnap.exists() ? userSnap.data().transactionCount : 0,
-        favoriteCount: userSnap.exists() ? userSnap.data().favoriteCount : 0,
-        following: userSnap.exists() ? userSnap.data().following : [],
-        
-        // 타임스탬프
+        email: kakaoUserData.email,
+        displayName: kakaoUserData.displayName,
+        photoURL: kakaoUserData.photoURL,
+        provider: 'kakao',
+        createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-        lastLoginAt: serverTimestamp()
       };
-
-      // 신규 사용자인 경우 생성일시 추가
-      if (!userSnap.exists()) {
-        userData.createdAt = serverTimestamp();
-      }
 
       await setDoc(userRef, userData, { merge: true });
       
@@ -1939,7 +1210,6 @@ export const kakaoAuthService = {
       throw error;
     }
   },
-
 
   // 카카오 연결 해제
   async unlink() {
@@ -2030,3 +1300,4 @@ export const generateSeoulAddress = () => {
   
   return `서울 ${district} ${dong}`;
 };
+
