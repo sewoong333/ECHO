@@ -236,6 +236,13 @@ export default function MapPage() {
   const getCurrentLocation = () => {
     console.log("📍 현재 위치 요청 시작");
     
+    // 0. 로컬 개발 환경 체크 - 위치 서비스 비활성화
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      console.log("🏠 로컬 개발 환경 감지 - 위치 서비스 비활성화");
+      alert("로컬 개발 환경에서는 위치 서비스가 제한됩니다.\n\n배포된 사이트에서 테스트해주세요:\nhttps://echo-5385e.web.app/map");
+      return;
+    }
+    
     // 1. 기본 체크
     if (!navigator.geolocation) {
       console.error("❌ Geolocation API 미지원");
@@ -266,21 +273,7 @@ export default function MapPage() {
     };
     
     console.log("📍 GPS 위치 요청 시작:", options);
-    console.log("📍 macOS 환경 체크:", {
-      isMac: navigator.platform.indexOf('Mac') > -1,
-      userAgent: navigator.userAgent,
-      protocol: window.location.protocol
-    });
     
-    // macOS에서 위치 서비스 상태 확인
-    if (navigator.platform.indexOf('Mac') > -1) {
-      console.log("🍎 macOS 감지 - 위치 서비스 확인 필요");
-    }
-    
-    // 로컬 개발 환경에서의 추가 처리
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      console.log("🏠 로컬 개발 환경 감지 - 위치 서비스 최적화");
-    }
     
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -327,11 +320,6 @@ export default function MapPage() {
   // 오류 처리 함수
   const handleLocationError = (error) => {
     console.error("❌ GPS 위치 정보 가져오기 실패:", error);
-    console.error("❌ 오류 코드:", error.code);
-    console.error("❌ 오류 메시지:", error.message);
-    console.error("❌ 브라우저 정보:", navigator.userAgent);
-    console.error("❌ 현재 URL:", window.location.href);
-    console.error("❌ HTTPS 여부:", window.location.protocol === 'https:');
     
     setLocationPermission("denied");
     setIsGettingLocation(false);
@@ -342,17 +330,13 @@ export default function MapPage() {
         errorMessage = "위치 접근이 거부되었습니다.\n\n브라우저 설정에서 위치 권한을 허용해주세요:\n\n• Chrome: 주소창 왼쪽 자물쇠 아이콘 → 위치 → 허용\n• Safari: Safari → 환경설정 → 웹사이트 → 위치 서비스 → 허용\n• Firefox: 주소창 왼쪽 자물쇠 아이콘 → 권한 → 위치 → 허용";
         break;
       case error.POSITION_UNAVAILABLE:
-        if (navigator.platform.indexOf('Mac') > -1) {
-          errorMessage = "macOS에서 위치 정보를 사용할 수 없습니다.\n\n다음을 확인해주세요:\n\n• 시스템 환경설정 → 보안 및 개인정보보호 → 개인정보보호 → 위치 서비스가 켜져 있는지 확인\n• Chrome이 위치 서비스에 접근할 수 있도록 허용되어 있는지 확인\n• Wi-Fi가 켜져 있는지 확인 (Wi-Fi로 위치를 추정합니다)\n\n💡 로컬 개발 환경에서는 위치 서비스가 제한될 수 있습니다.\n배포된 사이트(https://echo-5385e.web.app)에서 테스트해보세요.";
-        } else {
-          errorMessage = "위치 정보를 사용할 수 없습니다.\n\n다음을 확인해주세요:\n\n• GPS가 켜져 있는지 확인\n• 인터넷 연결 상태 확인\n• 실외에서 시도해보세요\n• 잠시 후 다시 시도해주세요";
-        }
+        errorMessage = "위치 정보를 사용할 수 없습니다.\n\n다음을 확인해주세요:\n\n• GPS가 켜져 있는지 확인\n• 인터넷 연결 상태 확인\n• 실외에서 시도해보세요\n• 잠시 후 다시 시도해주세요";
         break;
       case error.TIMEOUT:
         errorMessage = "위치 정보 요청 시간이 초과되었습니다.\n\n다시 시도해주세요.\n\n• GPS 신호가 약한 곳에서는 시간이 오래 걸릴 수 있습니다";
         break;
       default:
-        errorMessage = "알 수 없는 오류가 발생했습니다.\n\n다시 시도해주세요.\n\n💡 개발자 도구(F12) → Console에서 자세한 오류 정보를 확인할 수 있습니다.";
+        errorMessage = "알 수 없는 오류가 발생했습니다.\n\n다시 시도해주세요.";
         break;
     }
     
