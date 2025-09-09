@@ -236,12 +236,6 @@ export default function MapPage() {
   const getCurrentLocation = () => {
     console.log("📍 현재 위치 요청 시작");
     
-    // 0. 로컬 개발 환경 체크 - 위치 서비스 비활성화
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      console.log("🏠 로컬 개발 환경 감지 - 위치 서비스 비활성화");
-      alert("로컬 개발 환경에서는 위치 서비스가 제한됩니다.\n\n배포된 사이트에서 테스트해주세요:\nhttps://echo-5385e.web.app/map");
-      return;
-    }
     
     // 1. 기본 체크
     if (!navigator.geolocation) {
@@ -265,11 +259,11 @@ export default function MapPage() {
     setIsGettingLocation(true);
     setLocationPermission(null);
     
-    // 3. GPS 위치 요청 (macOS CoreLocation 대응)
+    // 3. GPS 위치 요청 (로컬 개발 환경 최적화)
     const options = {
-      enableHighAccuracy: false,  // 일반 정밀도로 시도
-      timeout: 60000,            // 60초 타임아웃 (macOS는 더 오래 걸림)
-      maximumAge: 0              // 캐시 사용 안함 (새로운 위치 요청)
+      enableHighAccuracy: true,   // 높은 정밀도로 시도
+      timeout: 30000,            // 30초 타임아웃
+      maximumAge: 300000         // 5분 캐시 사용 (로컬에서 더 안정적)
     };
     
     console.log("📍 GPS 위치 요청 시작:", options);
@@ -330,10 +324,10 @@ export default function MapPage() {
         errorMessage = "위치 접근이 거부되었습니다.\n\n브라우저 설정에서 위치 권한을 허용해주세요:\n\n• Chrome: 주소창 왼쪽 자물쇠 아이콘 → 위치 → 허용\n• Safari: Safari → 환경설정 → 웹사이트 → 위치 서비스 → 허용\n• Firefox: 주소창 왼쪽 자물쇠 아이콘 → 권한 → 위치 → 허용";
         break;
       case error.POSITION_UNAVAILABLE:
-        errorMessage = "위치 정보를 사용할 수 없습니다.\n\n다음을 확인해주세요:\n\n• GPS가 켜져 있는지 확인\n• 인터넷 연결 상태 확인\n• 실외에서 시도해보세요\n• 잠시 후 다시 시도해주세요";
+        errorMessage = "위치 정보를 사용할 수 없습니다.\n\n다음을 확인해주세요:\n\n• 시스템 환경설정 → 보안 및 개인정보보호 → 개인정보보호 → 위치 서비스가 켜져 있는지 확인\n• Chrome이 위치 서비스에 접근할 수 있도록 허용되어 있는지 확인\n• Wi-Fi가 켜져 있는지 확인\n• 잠시 후 다시 시도해주세요";
         break;
       case error.TIMEOUT:
-        errorMessage = "위치 정보 요청 시간이 초과되었습니다.\n\n다시 시도해주세요.\n\n• GPS 신호가 약한 곳에서는 시간이 오래 걸릴 수 있습니다";
+        errorMessage = "위치 정보 요청 시간이 초과되었습니다.\n\n다시 시도해주세요.";
         break;
       default:
         errorMessage = "알 수 없는 오류가 발생했습니다.\n\n다시 시도해주세요.";
