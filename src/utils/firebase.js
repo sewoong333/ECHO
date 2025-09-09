@@ -1964,3 +1964,55 @@ export default {
   INSTRUMENT_CATEGORIES,
   REGIONS,
 };
+
+// 주소를 좌표로 변환하는 함수
+export const geocodeAddress = async (address) => {
+  try {
+    if (!window.kakao || !window.kakao.maps) {
+      throw new Error('Kakao Maps API가 로드되지 않았습니다.');
+    }
+
+    return new Promise((resolve, reject) => {
+      const geocoder = new window.kakao.maps.services.Geocoder();
+      
+      geocoder.addressSearch(address, (result, status) => {
+        if (status === window.kakao.maps.services.Status.OK) {
+          const coords = {
+            lat: parseFloat(result[0].y),
+            lng: parseFloat(result[0].x),
+            address: result[0].address_name,
+            roadAddress: result[0].road_address_name
+          };
+          resolve(coords);
+        } else {
+          reject(new Error('주소를 찾을 수 없습니다.'));
+        }
+      });
+    });
+  } catch (error) {
+    console.error('주소 변환 오류:', error);
+    throw error;
+  }
+};
+
+// 서울 내 랜덤 주소 생성 함수
+export const generateSeoulAddress = () => {
+  const seoulDistricts = [
+    '강남구', '강동구', '강북구', '강서구', '관악구', '광진구', '구로구', '금천구',
+    '노원구', '도봉구', '동대문구', '동작구', '마포구', '서대문구', '서초구', '성동구',
+    '성북구', '송파구', '양천구', '영등포구', '용산구', '은평구', '종로구', '중구', '중랑구'
+  ];
+  
+  const dongs = [
+    '역삼동', '삼성동', '청담동', '압구정동', '신사동', '논현동', '대치동', '도곡동',
+    '개포동', '일원동', '수서동', '세곡동', '자곡동', '율현동', '상일동', '고덕동',
+    '명일동', '암사동', '성내동', '천호동', '길동', '둔촌동', '올림픽동', '방이동',
+    '오금동', '석촌동', '송파동', '문정동', '장지동', '위례동', '가락동', '거여동',
+    '마천동', '잠실동', '신천동', '풍납동', '삼전동', '가락동', '문정동', '장지동'
+  ];
+  
+  const district = seoulDistricts[Math.floor(Math.random() * seoulDistricts.length)];
+  const dong = dongs[Math.floor(Math.random() * dongs.length)];
+  
+  return `서울 ${district} ${dong}`;
+};

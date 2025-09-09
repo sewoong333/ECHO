@@ -17,7 +17,7 @@ import {
 import { MdDragIndicator } from "react-icons/md";
 import { ProductContext } from "../store/ProductContext";
 import { UserContext } from "../store/UserContext";
-import { INSTRUMENT_CATEGORIES, REGIONS, auth } from "../utils/firebase";
+import { INSTRUMENT_CATEGORIES, REGIONS, auth, geocodeAddress } from "../utils/firebase";
 
 const Container = styled.div`
   width: 100vw;
@@ -758,6 +758,18 @@ export default function AddProduct() {
     setLoading(true);
     
     try {
+      // 주소를 좌표로 변환
+      let coordinates = null;
+      if (formData.address.trim()) {
+        try {
+          coordinates = await geocodeAddress(formData.address);
+          console.log('📍 주소 좌표 변환 성공:', coordinates);
+        } catch (error) {
+          console.warn('⚠️ 주소 좌표 변환 실패:', error.message);
+          // 좌표 변환 실패해도 상품 등록은 진행
+        }
+      }
+
       const productData = {
         title: formData.title,
         description: formData.description,
@@ -766,6 +778,8 @@ export default function AddProduct() {
         condition: formData.condition,
         region: formData.region || "",
         district: formData.district || "",
+        address: formData.address || "",
+        coordinates: coordinates, // 좌표 정보 추가
         images: images.slice(0, 3).map(img => img.url), // 최대 3개, 압축된 이미지
         tags: tags,
         isPriceNegotiable: formData.negotiable || false,

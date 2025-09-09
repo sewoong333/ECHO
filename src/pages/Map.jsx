@@ -64,13 +64,20 @@ export default function MapPage() {
           const productsSnapshot = await getDocs(productsQuery);
           const products = productsSnapshot.docs.map(doc => {
             const data = doc.data();
-            // 주소가 없으면 서울 주소 추가
-            if (!data.latitude || !data.longitude) {
+            
+            // coordinates 필드가 있으면 사용, 없으면 기존 방식 사용
+            if (data.coordinates && data.coordinates.lat && data.coordinates.lng) {
+              data.latitude = data.coordinates.lat;
+              data.longitude = data.coordinates.lng;
+              data.address = data.coordinates.address || data.address;
+            } else if (!data.latitude || !data.longitude) {
+              // 좌표가 없으면 서울 주소 추가
               data.latitude = 37.5665 + (Math.random() - 0.5) * 0.1; // 서울 중심에서 약간씩 랜덤
               data.longitude = 126.9780 + (Math.random() - 0.5) * 0.1;
               data.location = data.location || "서울특별시";
               data.detailAddress = data.detailAddress || "서울특별시 중구";
             }
+            
             return {
               id: doc.id,
               type: "product",
