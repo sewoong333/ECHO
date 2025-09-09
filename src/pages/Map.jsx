@@ -259,17 +259,21 @@ export default function MapPage() {
     setIsGettingLocation(true);
     setLocationPermission(null);
     
-    // 3. GPS 위치 요청 (로컬 개발 환경 최적화)
+    // 3. GPS 위치 요청 (macOS CoreLocation 대응)
     const options = {
-      enableHighAccuracy: true,   // 높은 정밀도로 시도
-      timeout: 30000,            // 30초 타임아웃
-      maximumAge: 300000         // 5분 캐시 사용 (로컬에서 더 안정적)
+      enableHighAccuracy: false,  // 일반 정밀도로 시도 (macOS에서 더 안정적)
+      timeout: 10000,            // 10초 타임아웃
+      maximumAge: 600000         // 10분 캐시 사용
     };
     
     console.log("📍 GPS 위치 요청 시작:", options);
     
+    // macOS에서 CoreLocation 오류 방지를 위한 재시도 로직
+    let retryCount = 0;
+    const maxRetries = 2;
     
-    navigator.geolocation.getCurrentPosition(
+    const attemptGetLocation = () => {
+      navigator.geolocation.getCurrentPosition(
       (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
@@ -305,10 +309,25 @@ export default function MapPage() {
       },
       (error) => {
         console.error("❌ GPS 위치 정보 가져오기 실패:", error);
+        
+        // 재시도 로직
+        if (retryCount < maxRetries && error.code === error.POSITION_UNAVAILABLE) {
+          retryCount++;
+          console.log(`🔄 재시도 ${retryCount}/${maxRetries} - 2초 후 다시 시도`);
+          setTimeout(() => {
+            attemptGetLocation();
+          }, 2000);
+          return;
+        }
+        
         handleLocationError(error);
       },
       options
     );
+    };
+    
+    // 첫 번째 시도 시작
+    attemptGetLocation();
   };
 
   // 오류 처리 함수
