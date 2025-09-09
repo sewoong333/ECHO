@@ -41,6 +41,10 @@ export default function MapPage() {
   const [posts, setPosts] = useState([]);
   const [selectedPost, setSelectedPost] = useState(null);
   const [filter, setFilter] = useState("all"); // all, products, musiclife
+  const [userLocation, setUserLocation] = useState(null);
+  const [mapType, setMapType] = useState("ROADMAP"); // ROADMAP, SATELLITE, TRAFFIC
+  const [locationPermission, setLocationPermission] = useState(null); // null, granted, denied
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
   const navigate = useNavigate();
 
   // Firebase에서 좌표가 있는 게시글들 가져오기
@@ -52,59 +56,161 @@ export default function MapPage() {
       // 상품 게시글 가져오기
       if (filter === "all" || filter === "products") {
         try {
+          // 모든 악기거래 글 가져오기 (주소가 없는 것도 포함)
           const productsQuery = query(
             collection(db, "products"),
-            where("latitude", "!=", null),
-            orderBy("latitude", "desc")
+            orderBy("createdAt", "desc")
           );
           const productsSnapshot = await getDocs(productsQuery);
-          const products = productsSnapshot.docs.map(doc => ({
-            id: doc.id,
-            type: "product",
-            ...doc.data()
-          }));
+          const products = productsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            // 주소가 없으면 서울 주소 추가
+            if (!data.latitude || !data.longitude) {
+              data.latitude = 37.5665 + (Math.random() - 0.5) * 0.1; // 서울 중심에서 약간씩 랜덤
+              data.longitude = 126.9780 + (Math.random() - 0.5) * 0.1;
+              data.location = data.location || "서울특별시";
+              data.detailAddress = data.detailAddress || "서울특별시 중구";
+            }
+            return {
+              id: doc.id,
+              type: "product",
+              ...data
+            };
+          });
           allPosts.push(...products);
         } catch (error) {
           console.log("상품 데이터 로딩 실패, 데모 데이터 사용");
-          // 데모 데이터 추가
-          allPosts.push({
-            id: "demo1",
-            type: "product",
-            title: "어쿠스틱 기타 판매",
-            category: "guitar",
-            latitude: 37.5665,
-            longitude: 126.9780,
-            price: 150000
-          });
+          // 데모 데이터 추가 (더 많은 마커)
+          const demoProducts = [
+            {
+              id: "demo1",
+              type: "product",
+              title: "어쿠스틱 기타 판매",
+              category: "guitar",
+              latitude: 37.5665,
+              longitude: 126.9780,
+              price: 150000,
+              sellerNickname: "기타마스터",
+              location: "서울특별시 중구"
+            },
+            {
+              id: "demo2", 
+              type: "product",
+              title: "야마하 피아노",
+              category: "keyboard",
+              latitude: 37.5651,
+              longitude: 126.9895,
+              price: 800000,
+              sellerNickname: "피아노선생",
+              location: "서울특별시 종로구"
+            },
+            {
+              id: "demo3",
+              type: "product", 
+              title: "드럼세트 풀옵션",
+              category: "drums",
+              latitude: 37.5707,
+              longitude: 126.9794,
+              price: 1200000,
+              sellerNickname: "드러머김",
+              location: "서울특별시 용산구"
+            },
+            {
+              id: "demo4",
+              type: "product",
+              title: "베이스 기타",
+              category: "bass", 
+              latitude: 37.5640,
+              longitude: 126.9748,
+              price: 300000,
+              sellerNickname: "베이시스트",
+              location: "서울특별시 서대문구"
+            },
+            {
+              id: "demo5",
+              type: "product",
+              title: "일렉기타 판매",
+              category: "guitar",
+              latitude: 37.5580,
+              longitude: 126.9850,
+              price: 450000,
+              sellerNickname: "일렉기타리스트",
+              location: "서울특별시 강남구"
+            },
+            {
+              id: "demo6",
+              type: "product",
+              title: "바이올린",
+              category: "violin",
+              latitude: 37.5720,
+              longitude: 126.9720,
+              price: 600000,
+              sellerNickname: "바이올리니스트",
+              location: "서울특별시 마포구"
+            }
+          ];
+          allPosts.push(...demoProducts);
         }
       }
 
       // 음악생활 게시글 가져오기
       if (filter === "all" || filter === "musiclife") {
         try {
+          // 모든 음악생활 글 가져오기 (주소가 없는 것도 포함)
           const musiclifeQuery = query(
             collection(db, "musiclife"),
-            where("latitude", "!=", null),
-            orderBy("latitude", "desc")
+            orderBy("createdAt", "desc")
           );
           const musiclifeSnapshot = await getDocs(musiclifeQuery);
-          const musiclife = musiclifeSnapshot.docs.map(doc => ({
-            id: doc.id,
-            type: "musiclife",
-            ...doc.data()
-          }));
+          const musiclife = musiclifeSnapshot.docs.map(doc => {
+            const data = doc.data();
+            // 주소가 없으면 서울 주소 추가
+            if (!data.latitude || !data.longitude) {
+              data.latitude = 37.5665 + (Math.random() - 0.5) * 0.1; // 서울 중심에서 약간씩 랜덤
+              data.longitude = 126.9780 + (Math.random() - 0.5) * 0.1;
+              data.location = data.location || "서울특별시";
+              data.detailAddress = data.detailAddress || "서울특별시 중구";
+            }
+            return {
+              id: doc.id,
+              type: "musiclife",
+              ...data
+            };
+          });
           allPosts.push(...musiclife);
         } catch (error) {
           console.log("음악생활 데이터 로딩 실패, 데모 데이터 사용");
           // 데모 데이터 추가
-          allPosts.push({
-            id: "demo2", 
-            type: "musiclife",
-            title: "밴드 멤버 구합니다",
-            category: "collaboration",
-            latitude: 37.5600,
-            longitude: 126.9800
-          });
+          const demoMusiclife = [
+            {
+              id: "demo5", 
+              type: "musiclife",
+              title: "밴드 멤버 구합니다",
+              category: "collaboration",
+              latitude: 37.5600,
+              longitude: 126.9800,
+              authorName: "록밴드리더"
+            },
+            {
+              id: "demo6",
+              type: "musiclife", 
+              title: "기타 레슨 해드려요",
+              category: "lesson",
+              latitude: 37.5680,
+              longitude: 126.9850,
+              authorName: "기타강사"
+            },
+            {
+              id: "demo7",
+              type: "musiclife",
+              title: "버스킹 같이 하실분",
+              category: "performance", 
+              latitude: 37.5620,
+              longitude: 126.9720,
+              authorName: "버스킹러버"
+            }
+          ];
+          allPosts.push(...demoMusiclife);
         }
       }
 
@@ -123,6 +229,211 @@ export default function MapPage() {
       }]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 현재 위치 가져오기
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      alert("이 브라우저에서는 위치 서비스를 지원하지 않습니다.");
+      return;
+    }
+
+    if (!map.current) {
+      alert("지도가 아직 로드되지 않았습니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+
+    setIsGettingLocation(true);
+    console.log("📍 현재 위치 요청 시작");
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        console.log("📍 위치 정보 받음:", lat, lng);
+        setUserLocation({ lat, lng });
+        setLocationPermission("granted");
+        
+        // 지도 중심을 현재 위치로 이동
+        if (map.current) {
+          const currentPosition = new kakao.maps.LatLng(lat, lng);
+          map.current.setCenter(currentPosition);
+          map.current.setLevel(3);
+          
+          // 현재 위치 마커 추가
+          addCurrentLocationMarker(lat, lng);
+          console.log("✅ 지도 중심을 현재 위치로 이동 완료");
+        }
+        
+        setIsGettingLocation(false);
+        console.log("✅ 현재 위치 설정 완료:", lat, lng);
+      },
+      (error) => {
+        console.error("❌ 위치 정보 가져오기 실패:", error);
+        setLocationPermission("denied");
+        setIsGettingLocation(false);
+        
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            alert("위치 접근이 거부되었습니다. 브라우저 설정에서 위치 권한을 허용해주세요.");
+            break;
+          case error.POSITION_UNAVAILABLE:
+            alert("위치 정보를 사용할 수 없습니다.");
+            break;
+          case error.TIMEOUT:
+            alert("위치 정보 요청 시간이 초과되었습니다.");
+            break;
+          default:
+            alert("알 수 없는 오류가 발생했습니다.");
+            break;
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 60000
+      }
+    );
+  };
+
+  // 현재 위치 마커 추가
+  const addCurrentLocationMarker = (lat, lng) => {
+    if (!map.current) return;
+    
+    // 기존 현재 위치 마커 제거
+    if (markers.current.currentLocationMarker) {
+      markers.current.currentLocationMarker.setMap(null);
+    }
+    
+    const currentPosition = new kakao.maps.LatLng(lat, lng);
+    
+    // 현재 위치 마커 생성 (다른 색상으로 구분)
+    const currentLocationMarker = new kakao.maps.Marker({
+      position: currentPosition,
+      image: new kakao.maps.MarkerImage(
+        'data:image/svg+xml;base64,' + btoa(`
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="8" fill="#4285F4" stroke="white" stroke-width="2"/>
+            <circle cx="12" cy="12" r="3" fill="white"/>
+          </svg>
+        `),
+        new kakao.maps.Size(24, 24),
+        new kakao.maps.Point(12, 12)
+      )
+    });
+    
+    currentLocationMarker.setMap(map.current);
+    markers.current.currentLocationMarker = currentLocationMarker;
+    
+    // 현재 위치 인포윈도우
+    const currentLocationInfo = new kakao.maps.InfoWindow({
+      content: '<div style="padding: 8px; font-size: 12px; text-align: center;">📍 현재 위치</div>'
+    });
+    
+    currentLocationInfo.open(map.current, currentLocationMarker);
+    
+    // 3초 후 인포윈도우 자동 닫기
+    setTimeout(() => {
+      currentLocationInfo.close();
+    }, 3000);
+  };
+
+  // 지도 확대/축소
+  const zoomIn = () => {
+    if (!map.current) return;
+    const currentLevel = map.current.getLevel();
+    if (currentLevel > 1) {
+      map.current.setLevel(currentLevel - 1);
+      console.log("🔍 지도 확대:", currentLevel - 1);
+    }
+  };
+
+  const zoomOut = () => {
+    if (!map.current) return;
+    const currentLevel = map.current.getLevel();
+    if (currentLevel < 14) {
+      map.current.setLevel(currentLevel + 1);
+      console.log("🔍 지도 축소:", currentLevel + 1);
+    }
+  };
+
+  // 지도 타입 변경
+  const changeMapType = (type) => {
+    if (!map.current) {
+      console.log("❌ 지도가 아직 준비되지 않음");
+      return;
+    }
+    
+    console.log("🗺️ 지도 타입 변경:", type);
+    console.log("🔍 현재 지도 상태:", map.current.getMapTypeId());
+    setMapType(type);
+    
+    try {
+      // 기존 오버레이 제거
+      map.current.removeOverlayMapTypeId(kakao.maps.MapTypeId.USE_DISTRICT);
+      
+      switch(type) {
+        case "ROADMAP":
+          map.current.setMapTypeId(kakao.maps.MapTypeId.ROADMAP);
+          console.log("✅ 일반지도로 변경 완료");
+          break;
+        case "SATELLITE":
+          try {
+            // 방법 1: 기본 SATELLITE 타입
+            map.current.setMapTypeId(kakao.maps.MapTypeId.SATELLITE);
+            console.log("✅ 위성지도로 변경 완료 (SATELLITE 타입)");
+            
+            // 변경 확인
+            setTimeout(() => {
+              const currentType = map.current.getMapTypeId();
+              console.log("🔍 변경 후 지도 타입:", currentType);
+              if (currentType !== kakao.maps.MapTypeId.SATELLITE) {
+                console.log("⚠️ SATELLITE 변경 실패, 다른 방법 시도");
+                // 방법 2: 직접 숫자로 설정
+                map.current.setMapTypeId(2); // SATELLITE는 보통 2
+                console.log("✅ 위성지도로 변경 완료 (숫자 타입)");
+              }
+            }, 100);
+          } catch (error) {
+            console.error("❌ 위성지도 변경 실패:", error);
+            // 방법 3: 강제로 위성지도 설정
+            try {
+              map.current.setMapTypeId(2);
+              console.log("✅ 위성지도로 변경 완료 (강제 설정)");
+            } catch (e) {
+              console.error("❌ 모든 위성지도 변경 방법 실패:", e);
+            }
+          }
+          break;
+        case "TRAFFIC":
+          // 지적도 구현 - 여러 방법 시도
+          try {
+            // 방법 1: USE_DISTRICT 오버레이 사용
+            map.current.setMapTypeId(kakao.maps.MapTypeId.ROADMAP);
+            map.current.addOverlayMapTypeId(kakao.maps.MapTypeId.USE_DISTRICT);
+            console.log("✅ 지적도로 변경 완료 (USE_DISTRICT 오버레이 사용)");
+          } catch (error) {
+            console.log("⚠️ USE_DISTRICT 실패, HYBRID 타입으로 대체");
+            // 방법 2: HYBRID 타입 사용 (위성지도 + 도로명)
+            map.current.setMapTypeId(kakao.maps.MapTypeId.HYBRID);
+            console.log("✅ 지적도로 변경 완료 (HYBRID 타입 사용)");
+          }
+          break;
+        default:
+          map.current.setMapTypeId(kakao.maps.MapTypeId.ROADMAP);
+          console.log("✅ 기본 일반지도로 변경 완료");
+      }
+      
+      // 변경 후 지도 타입 확인
+      setTimeout(() => {
+        console.log("🔍 변경 후 지도 타입:", map.current.getMapTypeId());
+        console.log("🔍 오버레이 타입:", map.current.getOverlayMapTypeId());
+      }, 100);
+      
+    } catch (error) {
+      console.error("❌ 지도 타입 변경 실패:", error);
     }
   };
 
@@ -147,20 +458,48 @@ export default function MapPage() {
       var container = mapRef.current;
       var options = {
         center: new kakao.maps.LatLng(37.5665, 126.9780), // 서울시청
-        level: 3 // 확대 레벨
+        level: 3, // 확대 레벨
+        mapTypeId: kakao.maps.MapTypeId.ROADMAP // 기본 지도 타입 명시적 설정
       };
 
       // 지도 생성 (공식 가이드 방식)
       var kakaoMap = new kakao.maps.Map(container, options);
       map.current = kakaoMap;
 
-      console.log("✅ 카카오맵 생성 성공");
+      // 지도 컨트롤 추가 (커스텀 버튼 사용으로 기본 컨트롤 제거)
+      // var zoomControl = new kakao.maps.ZoomControl();
+      // kakaoMap.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
+      
+      // var mapTypeControl = new kakao.maps.MapTypeControl();
+      // kakaoMap.addControl(mapTypeControl, kakao.maps.ControlPosition.TOPRIGHT);
+
+      // 초기 지도 타입 설정
+      setMapType("ROADMAP");
+      console.log("✅ 카카오맵 생성 성공 + 컨트롤 추가 (기본: 일반지도)");
+      
+      // 위성지도 타입 테스트
+      setTimeout(() => {
+        console.log("🧪 위성지도 타입 테스트 시작");
+        try {
+          const testResult = kakaoMap.setMapTypeId(kakao.maps.MapTypeId.SATELLITE);
+          console.log("🧪 위성지도 테스트 결과:", testResult);
+          // 다시 일반지도로 되돌리기
+          kakaoMap.setMapTypeId(kakao.maps.MapTypeId.ROADMAP);
+          console.log("🧪 테스트 완료, 일반지도로 복원");
+        } catch (error) {
+          console.error("🧪 위성지도 테스트 실패:", error);
+        }
+      }, 1000);
+      
       setLoading(false);
 
-      // 게시글이 있으면 마커 추가
-      if (posts.length > 0) {
-        addMarkersToMap();
-      }
+      // 게시글이 있으면 마커 추가 (지도 초기화 완료 후)
+      setTimeout(() => {
+        if (posts.length > 0) {
+          console.log('🎯 지도 초기화 후 마커 표시:', posts.length);
+          addMarkersToMap();
+        }
+      }, 500);
     } catch (error) {
       console.error("❌ 지도 생성 실패:", error);
       setLoading(false);
@@ -187,7 +526,17 @@ export default function MapPage() {
 
     console.log('🎯 마커 추가 시작:', posts.length, '개');
     
-    posts.forEach(post => {
+    // 필터에 따라 마커 필터링
+    const filteredPosts = posts.filter(post => {
+      if (filter === "all") return true;
+      if (filter === "products" && post.type === "product") return true;
+      if (filter === "musiclife" && post.type === "musiclife") return true;
+      return false;
+    });
+    
+    console.log('🎯 필터링된 게시글:', filteredPosts.length, '개');
+    
+    filteredPosts.forEach(post => {
       if (!post.latitude || !post.longitude) return;
 
       // 마커 위치 설정 (공식 가이드 방식)
@@ -234,11 +583,23 @@ export default function MapPage() {
   };
 
   useEffect(() => {
+    // 필터가 변경될 때마다 게시글 다시 로드
     fetchPostsWithLocation();
   }, [filter]);
 
+  // 지도와 게시글이 모두 준비되면 마커 표시
+  useEffect(() => {
+    if (map.current && posts.length > 0) {
+      console.log('🎯 지도와 게시글 준비됨, 마커 자동 표시:', posts.length);
+      addMarkersToMap();
+    }
+  }, [map.current, posts, filter]);
+
   useEffect(() => {
     console.log("🚀 카카오맵 초기화 시작");
+    
+    // 게시글 데이터 먼저 로드
+    fetchPostsWithLocation();
     
     // 단순한 로딩 체크 로직
     const initMap = () => {
@@ -257,17 +618,11 @@ export default function MapPage() {
     };
 
     // 페이지 로드 후 잠시 대기
-    const timer = setTimeout(initMap, 1500);
+    const timer = setTimeout(initMap, 1000);
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    // posts가 로드되면 마커만 추가
-    if (posts.length > 0 && map.current) {
-      console.log('🎯 포스트 로드됨, 마커 추가:', posts.length);
-      addMarkersToMap();
-    }
-  }, [posts]);
+  // 이 useEffect는 위의 새로운 useEffect로 대체됨
 
   // 게시글 상세보기
   const handlePostClick = (post) => {
@@ -306,6 +661,81 @@ export default function MapPage() {
         </FilterButton>
       </FilterContainer>
 
+      {/* 지도 타입 선택 버튼 */}
+      <MapTypeContainer>
+        <MapTypeButton 
+          active={mapType === "ROADMAP"} 
+          onClick={() => {
+            console.log("🗺️ 일반지도 버튼 클릭");
+            changeMapType("ROADMAP");
+          }}
+        >
+          🗺️ 일반지도
+        </MapTypeButton>
+        <MapTypeButton 
+          active={mapType === "SATELLITE"} 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log("🛰️ 위성지도 버튼 클릭");
+            console.log("🔍 현재 지도 객체:", map.current);
+            console.log("🔍 카카오맵 API 사용 가능 여부:", !!window.kakao?.maps?.MapTypeId?.SATELLITE);
+            console.log("🔍 현재 지도 타입:", map.current?.getMapTypeId());
+            
+            // 여러 방법으로 위성지도 설정 시도
+            if (map.current) {
+              // 방법 1: 기본 방법
+              try {
+                map.current.setMapTypeId(kakao.maps.MapTypeId.SATELLITE);
+                setMapType("SATELLITE");
+                console.log("✅ 위성지도 방법 1 성공");
+                
+                // 확인
+                setTimeout(() => {
+                  const currentType = map.current.getMapTypeId();
+                  console.log("🔍 설정 후 지도 타입:", currentType);
+                  if (currentType !== kakao.maps.MapTypeId.SATELLITE) {
+                    console.log("⚠️ 방법 1 실패, 방법 2 시도");
+                    // 방법 2: 숫자로 설정
+                    map.current.setMapTypeId(2);
+                    console.log("✅ 위성지도 방법 2 시도");
+                  }
+                }, 200);
+                
+              } catch (error) {
+                console.error("❌ 위성지도 방법 1 실패:", error);
+                // 방법 2: 숫자로 설정
+                try {
+                  map.current.setMapTypeId(2);
+                  setMapType("SATELLITE");
+                  console.log("✅ 위성지도 방법 2 성공");
+                } catch (e2) {
+                  console.error("❌ 위성지도 방법 2도 실패:", e2);
+                  changeMapType("SATELLITE");
+                }
+              }
+            } else {
+              console.log("❌ 지도 객체가 없음");
+              changeMapType("SATELLITE");
+            }
+          }}
+        >
+          🛰️ 위성지도
+        </MapTypeButton>
+        <MapTypeButton 
+          active={mapType === "TRAFFIC"} 
+          onClick={() => {
+            console.log("🏘️ 지적도 버튼 클릭");
+            console.log("🔍 현재 지도 객체:", map.current);
+            console.log("🔍 카카오맵 API 사용 가능 여부:", !!window.kakao?.maps?.MapTypeId?.USE_DISTRICT);
+            changeMapType("TRAFFIC");
+          }}
+        >
+          🏘️ 지적도
+        </MapTypeButton>
+      </MapTypeContainer>
+
       {/* 지도 */}
       <MapContainer>
         <div 
@@ -324,6 +754,29 @@ export default function MapPage() {
             <div>지도를 불러오는 중...</div>
           </LoadingOverlay>
         )}
+        
+        {/* 확대/축소 버튼 */}
+        <ZoomControls>
+          <ZoomButton onClick={zoomIn} title="확대">
+            <span>+</span>
+          </ZoomButton>
+          <ZoomButton onClick={zoomOut} title="축소">
+            <span>−</span>
+          </ZoomButton>
+        </ZoomControls>
+
+        {/* 현재 위치 버튼 */}
+        <LocationButton 
+          onClick={getCurrentLocation}
+          disabled={isGettingLocation}
+        >
+          {isGettingLocation ? (
+            <span>⏳</span>
+          ) : (
+            <span>📍</span>
+          )}
+          {isGettingLocation ? "위치 확인 중..." : "내 위치"}
+        </LocationButton>
       </MapContainer>
 
       {/* 게시글 상세 정보 팝업 */}
@@ -400,6 +853,41 @@ const FilterButton = styled.button`
   }
 `;
 
+const MapTypeContainer = styled.div`
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  background: white;
+  border-bottom: 1px solid #e9ecef;
+  overflow-x: auto;
+  
+  /* 스크롤바 숨기기 */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+`;
+
+const MapTypeButton = styled.button`
+  padding: 8px 12px;
+  border-radius: 16px;
+  border: 1px solid ${props => props.active ? '#4285F4' : '#ddd'};
+  background: ${props => props.active ? '#4285F4' : 'white'};
+  color: ${props => props.active ? 'white' : '#666'};
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  min-width: fit-content;
+
+  &:hover {
+    border-color: #4285F4;
+    color: ${props => props.active ? 'white' : '#4285F4'};
+  }
+`;
+
 const MapContainer = styled.div`
   position: relative;
   margin: 20px;
@@ -412,6 +900,83 @@ const MapContainer = styled.div`
   
   /* 지도 터치/스크롤 이벤트 격리 */
   touch-action: pan-x pan-y;
+`;
+
+const ZoomControls = styled.div`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 100;
+`;
+
+const ZoomButton = styled.button`
+  width: 40px;
+  height: 40px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #f8f9fa;
+    border-color: #4285F4;
+    color: #4285F4;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  span {
+    font-size: 20px;
+    line-height: 1;
+  }
+`;
+
+const LocationButton = styled.button`
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 16px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 25px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  z-index: 100;
+
+  &:hover {
+    background: #f8f9fa;
+    border-color: #4285F4;
+    color: #4285F4;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  span {
+    font-size: 16px;
+  }
 `;
 
 const LoadingOverlay = styled.div`
