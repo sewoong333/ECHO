@@ -577,29 +577,44 @@ export default function Login() {
   const handleKakaoLogin = async (e) => {
     e.preventDefault();
     if (isLoading) return;
-    
-    console.log("🚀 카카오톡 리다이렉트 로그인 시작...");
-    console.log("현재 도메인:", window.location.origin);
-    console.log("예상 리다이렉트 URI:", `${window.location.origin}/login`);
-    
+
+    setIsLoading(true);
+    setError("");
+
     try {
+      console.log("🚀 카카오 로그인 시작...");
+      
       // 기존 로그인이 있으면 먼저 로그아웃
       if (user.isLoggedIn) {
         console.log("🔄 기존 계정에서 로그아웃 후 카카오 로그인");
         await logout();
-        // 로그아웃 후 잠시 대기
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
       
-      kakaoAuthService.loginWithKakao();
-    } catch (error) {
-      console.error("❌ 카카오톡 로그인 리다이렉트 실패:", error);
+      // 개선된 카카오 로그인
+      const kakaoUser = await kakaoAuthService.loginWithKakao();
       
-      if (error.message?.includes('카카오 SDK가 초기화되지 않았습니다')) {
-        addToast("카카오톡 서비스 연결에 실패했습니다. 잠시 후 다시 시도해주세요.", "error");
-      } else {
-        addToast("카카오톡 로그인 중 오류가 발생했습니다.", "error");
+      if (kakaoUser) {
+        // UserContext에 카카오 사용자 정보 설정
+        loginWithKakao(kakaoUser);
+        addToast("카카오 로그인이 완료되었습니다!", "success");
+        navigate("/");
       }
+      
+    } catch (error) {
+      console.error("❌ 카카오 로그인 실패:", error);
+      
+      let errorMessage = "카카오 로그인에 실패했습니다.";
+      
+      if (error.code === 'DUPLICATE_EMAIL') {
+        errorMessage = `이미 ${error.email}로 ${error.existingProvider === 'google' ? '구글' : '다른'} 계정이 가입되어 있습니다.`;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 

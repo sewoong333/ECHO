@@ -52,9 +52,9 @@ service cloud.firestore {
       // 생성: 인증된 사용자만 상품 등록 가능
       allow create: if isAuthenticated() && validateProductData();
       
-      // 수정: 상품 소유자만 수정 가능
-      allow update: if isOwner(resource.data.sellerId) && 
-                       validateProductUpdate();
+      // 수정: 상품 소유자만 수정 가능 (단, likeCount 업데이트는 모든 인증된 사용자 허용)
+      allow update: if (isOwner(resource.data.sellerId) && validateProductUpdate()) ||
+                       (isAuthenticated() && isLikeCountUpdate());
       
       // 삭제: 상품 소유자만 삭제 가능 (실제로는 상태만 변경)
       allow delete: if isOwner(resource.data.sellerId);
@@ -118,6 +118,18 @@ service cloud.firestore {
                (oldStatus == 'reserved' && newStatus in ['active', 'sold', 'deleted']) ||
                (oldStatus == 'sold' && newStatus == 'active') ||
                (oldStatus == 'deleted' && newStatus == 'active');
+      }
+      
+      // 찜하기 수 업데이트인지 확인
+      function isLikeCountUpdate() {
+        let data = request.resource.data;
+        let prevData = resource.data;
+        let changedKeys = data.diff(prevData).affectedKeys();
+        
+        // likeCount만 변경되고 다른 필드는 변경되지 않은 경우
+        return changedKeys.hasOnly(['likeCount']) &&
+               data.likeCount is number &&
+               data.likeCount >= 0;
       }
     }
     

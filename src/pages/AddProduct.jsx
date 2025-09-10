@@ -18,6 +18,7 @@ import { MdDragIndicator } from "react-icons/md";
 import { ProductContext } from "../store/ProductContext";
 import { UserContext } from "../store/UserContext";
 import { INSTRUMENT_CATEGORIES, REGIONS, auth, geocodeAddress } from "../utils/firebase";
+import { productSchema, ValidationError, sanitizers } from "../utils/dataValidator";
 
 const Container = styled.div`
   width: 100vw;
@@ -726,22 +727,16 @@ export default function AddProduct() {
     return Math.round((completed / total) * 100);
   };
 
-  // 상품 등록
+  // 상품 등록 (강화된 검증 포함)
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // 기본 폼 검증
     if (!validateForm()) {
       return;
     }
     
-    console.log('🔍 현재 사용자 상태 확인:', {
-      user: user,
-      isLoggedIn: user?.isLoggedIn,
-      uid: user?.uid,
-      email: user?.email,
-      nickname: user?.nickname
-    });
-    
+    // 사용자 인증 확인
     if (!user?.isLoggedIn || !user?.uid) {
       console.log('❌ 로그인 체크 실패:', { 
         isLoggedIn: user?.isLoggedIn, 
@@ -770,7 +765,8 @@ export default function AddProduct() {
         }
       }
 
-      const productData = {
+      // 상품 데이터 준비
+      const rawProductData = {
         title: formData.title,
         description: formData.description,
         category: formData.category,
@@ -779,24 +775,36 @@ export default function AddProduct() {
         region: formData.region || "",
         district: formData.district || "",
         address: formData.address || "",
-        coordinates: coordinates, // 좌표 정보 추가
-        images: images.slice(0, 3).map(img => img.url), // 최대 3개, 압축된 이미지
+        coordinates: coordinates,
+        images: images.slice(0, 3).map(img => img.url),
         tags: tags,
         isPriceNegotiable: formData.negotiable || false,
         isDeliveryAvailable: formData.delivery || false,
         preferredTransactionType: formData.pickup ? "direct" : "delivery",
-        showPhoneNumber: formData.showPhoneNumber && user.phoneNumber ? true : false, // 전화번호 공개 여부
+        showPhoneNumber: formData.showPhoneNumber && user.phoneNumber ? true : false,
       };
+
+      // 강화된 데이터 검증
+      console.log('🔍 상품 데이터 검증 시작...');
+      const validation = productSchema.validate(rawProductData);
       
-      console.log('📦 전송할 상품 데이터:', productData);
-      console.log('👤 현재 사용자:', user);
-      console.log('🔐 Firebase Auth 상태:', {
-        currentUser: auth.currentUser,
-        uid: auth.currentUser?.uid,
-        email: auth.currentUser?.email
-      });
+      if (!validation.isValid) {
+        console.error('❌ 데이터 검증 실패:', validation.errors);
+        
+        // 첫 번째 오류 메시지 표시
+        const firstError = Object.values(validation.errors)[0]?.[0];
+        if (firstError) {
+          alert(`입력 데이터 오류: ${firstError}`);
+        } else {
+          alert('입력 데이터에 오류가 있습니다. 다시 확인해주세요.');
+        }
+        return;
+      }
+
+      console.log('✅ 데이터 검증 통과:', validation.data);
       
-      const newProduct = await addProduct(productData);
+      // 검증된 데이터로 상품 등록
+      const newProduct = await addProduct(validation.data);
       
       console.log('✅ 상품 등록 성공:', newProduct);
       alert('상품이 성공적으로 등록되었습니다!');
@@ -804,8 +812,14 @@ export default function AddProduct() {
       
     } catch (error) {
       console.error('❌ 상품 등록 실패:', error);
-      console.error('❌ 에러 스택:', error.stack);
-      alert(`상품 등록에 실패했습니다: ${error.message}`);
+      
+      // 검증 오류인 경우 특별 처리
+      if (error instanceof ValidationError) {
+        const firstError = Object.values(error.errors)[0]?.[0];
+        alert(`입력 데이터 오류: ${firstError || '데이터 검증에 실패했습니다.'}`);
+      } else {
+        alert(`상품 등록에 실패했습니다: ${error.message}`);
+      }
     } finally {
       setLoading(false);
     }
