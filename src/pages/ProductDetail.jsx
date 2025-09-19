@@ -1122,7 +1122,7 @@ export default function ProductDetail() {
         description={seoDescription}
         keywords={seoKeywords}
         image={product?.images?.[0]}
-        url={`https://echo-5385e.web.app/product/${productId}`}
+        url={`https://echo-5385e.web.app/product/${id}`}
         type="product"
         structuredData={structuredData}
       />

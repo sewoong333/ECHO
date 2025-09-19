@@ -620,7 +620,7 @@ export default function MusicLifeDetail() {
     },
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `https://echo-5385e.web.app/music-life/${postId}`
+      "@id": `https://echo-5385e.web.app/music-life/${id}`
     }
   } : null;
 
@@ -631,7 +631,7 @@ export default function MusicLifeDetail() {
         description={seoDescription}
         keywords={seoKeywords}
         image={post?.images?.[0]}
-        url={`https://echo-5385e.web.app/music-life/${postId}`}
+        url={`https://echo-5385e.web.app/music-life/${id}`}
         type="article"
         structuredData={structuredData}
       />
