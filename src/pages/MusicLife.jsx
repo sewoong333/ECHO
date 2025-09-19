@@ -4,6 +4,7 @@ import { musiclifeService } from "../utils/firebase";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../store/UserContext";
 import TopBar from "../components/TopBar";
+import UserDisplay from "../components/UserDisplay";
 import { FiSearch, FiEdit3, FiEye, FiMessageCircle, FiCalendar, FiUser } from "react-icons/fi";
 
 const categories = [
@@ -37,12 +38,17 @@ export default function MusicLife() {
       console.log('📝 받아온 게시글 수:', allPosts.length);
       console.log('📝 게시글 목록:', allPosts.map(p => p.title));
       
+      
       let filteredPosts = allPosts;
 
       // 카테고리 필터링
       if (selectedCategory !== "all") {
         console.log('🔍 카테고리 필터링:', selectedCategory);
-        filteredPosts = filteredPosts.filter(post => post.category === selectedCategory);
+        console.log('📝 필터링 전 게시글 카테고리들:', filteredPosts.map(p => ({ title: p.title, category: p.category })));
+        filteredPosts = filteredPosts.filter(post => {
+          // category가 없거나 undefined인 경우도 포함 (기본값으로 처리)
+          return !post.category || post.category === selectedCategory;
+        });
         console.log('📝 필터링 후 게시글 수:', filteredPosts.length);
       }
 
@@ -77,6 +83,7 @@ export default function MusicLife() {
   const handleSearch = () => {
     loadPosts();
   };
+
 
   const formatDate = (timestamp) => {
     const date = new Date(timestamp);
@@ -144,13 +151,6 @@ export default function MusicLife() {
       <PostList>
         {loading ? (
           <LoadingMessage>게시글을 불러오는 중...</LoadingMessage>
-        ) : posts.length === 0 ? (
-          <EmptyMessage>
-            <p>게시글이 없습니다.</p>
-            <EmptyButton onClick={() => navigate("/musiclife/write")}>
-              첫 게시글 작성하기
-            </EmptyButton>
-          </EmptyMessage>
         ) : (
           posts.map(post => (
             <PostCard key={post.id} onClick={() => navigate(`/musiclife/${post.id}`)}>
@@ -160,8 +160,12 @@ export default function MusicLife() {
                 </CategoryBadge>
                 <PostMeta>
                   <MetaItem>
-                    <FiUser size={12} />
-                    <span>{post.authorName}</span>
+                    <UserDisplay 
+                      userId={post.authorId}
+                      size="16px"
+                      maxWidth="120px"
+                      fallbackText="작성자"
+                    />
                   </MetaItem>
                   <MetaItem>
                     <FiCalendar size={12} />
@@ -425,30 +429,6 @@ const LoadingMessage = styled.div`
   padding: 40px;
 `;
 
-const EmptyMessage = styled.div`
-  text-align: center;
-  padding: 40px;
-  
-  p {
-    color: #666;
-    margin-bottom: 16px;
-  }
-`;
-
-const EmptyButton = styled.button`
-  background: #2ed8b6;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 24px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-  
-  &:hover {
-    background: #26c4a8;
-  }
-`;
 
 const LoadMoreButton = styled.button`
   display: block;
@@ -467,3 +447,4 @@ const LoadMoreButton = styled.button`
     color: white;
   }
 `;
+

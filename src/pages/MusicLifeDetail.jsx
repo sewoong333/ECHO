@@ -5,6 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { UserContext } from "../store/UserContext";
 import { ChatContext } from "../store/ChatContext";
 import TopBar from "../components/TopBar";
+import UserDisplay from "../components/UserDisplay";
 import {
   FaArrowLeft,
   FaEye,
@@ -102,11 +103,51 @@ const PostTitle = styled.h1`
 
 const PostMeta = styled.div`
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 16px;
   margin-bottom: 24px;
   padding-bottom: 20px;
   border-bottom: 1px solid rgba(46, 216, 182, 0.1);
+`;
+
+const AuthorInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`;
+
+const AuthorAvatar = styled.div`
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: ${props => props.imageUrl ? `url(${props.imageUrl})` : 'linear-gradient(135deg, #2ed8b6, #26c4a8)'};
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: white;
+  font-size: 18px;
+  border: 2px solid #fff;
+  box-shadow: 0 4px 12px rgba(46, 216, 182, 0.3);
+`;
+
+const AuthorDetails = styled.div`
+  flex: 1;
+`;
+
+const AuthorName = styled.div`
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+`;
+
+const AuthorBio = styled.div`
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
 `;
 
 const MetaItem = styled.div`
@@ -347,12 +388,9 @@ export default function MusicLifeDetail() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [postData, commentsData] = await Promise.all([
-          musiclifeService.getPost(id),
-          musiclifeService.getComments(id)
-        ]);
+        const postData = await musiclifeService.getPost(id);
         setPost(postData);
-        setComments(commentsData);
+        setComments([]); // 댓글 기능은 현재 비활성화
       } catch (error) {
         console.error('Failed to fetch data:', error);
       } finally {
@@ -437,6 +475,18 @@ export default function MusicLifeDetail() {
       return;
     }
 
+    if (!post) {
+      alert('게시글 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+
+    // authorId가 없는 경우 처리
+    if (!post.authorId) {
+      console.error('게시글 작성자 ID가 없습니다:', post);
+      alert('게시글 작성자 정보를 찾을 수 없습니다.');
+      return;
+    }
+
     if (user.uid === post.authorId) {
       alert('자신과는 채팅할 수 없습니다.');
       return;
@@ -451,6 +501,15 @@ export default function MusicLifeDetail() {
         status: "discussion", // 토론/소통 상태
         type: "musiclife" // 음악생활 타입 표시
       };
+
+      console.log('채팅방 생성 시도:', {
+        productId: `musiclife-${id}`,
+        sellerId: post.authorId,
+        buyerId: user.uid,
+        postTitle: post.title,
+        authorNickname: post.authorNickname,
+        authorProfileImage: post.authorProfileImage
+      });
 
       const chatRoomId = await createOrGetChatRoom(
         `musiclife-${id}`, // 음악생활 게시글 ID를 기반으로 한 고유 ID
@@ -545,9 +604,17 @@ export default function MusicLifeDetail() {
           <PostTitle>{post.title}</PostTitle>
           
           <PostMeta>
-            <MetaItem>
-              <FaUser /> {post.authorName}
-            </MetaItem>
+            <AuthorInfo>
+              <UserDisplay 
+                userId={post.authorId}
+                size="48px"
+                showBio={true}
+                showVerified={true}
+                maxWidth="200px"
+                gap="12px"
+                fallbackText="작성자"
+              />
+            </AuthorInfo>
             <MetaItem>
               <FaClock /> {formatTime(post.createdAt)}
             </MetaItem>
@@ -618,7 +685,15 @@ export default function MusicLifeDetail() {
                 <CommentItem key={c.id}>
                   <CommentHeader>
                     <CommentAuthor>
-                      <FaUser /> {c.authorName}
+                      <UserDisplay 
+                        userId={c.authorId}
+                        size="24px"
+                        showBio={false}
+                        showVerified={false}
+                        maxWidth="150px"
+                        gap="8px"
+                        fallbackText="댓글 작성자"
+                      />
                     </CommentAuthor>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <CommentTime>{formatTime(c.createdAt)}</CommentTime>

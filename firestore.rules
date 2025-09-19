@@ -29,8 +29,12 @@ service cloud.firestore {
         return data.keys().hasAll(['nickname', 'email']) &&
                data.nickname is string &&
                data.nickname.size() <= 50 &&
+               data.nickname.size() >= 2 &&
                data.email is string &&
-               data.email.matches('.*@.*\\..*');
+               data.email.matches('.*@.*\\..*') &&
+               // 닉네임에 특수문자나 위험한 패턴 차단
+               !data.nickname.matches('.*[<>"\'].*') &&
+               !data.nickname.matches('.*(admin|test|user\\d+|temp).*');
       }
       
       // 사용자의 찜 목록
@@ -44,7 +48,7 @@ service cloud.firestore {
       }
     }
     
-    // 상품 규칙 (임시로 완전 개방)
+    // 상품 규칙
     match /products/{productId} {
       // 읽기: 모든 사용자가 조회 가능
       allow read: if true;
@@ -55,6 +59,10 @@ service cloud.firestore {
       // 수정: 상품 소유자만 수정 가능 (단, likeCount 업데이트는 모든 인증된 사용자 허용)
       allow update: if (isOwner(resource.data.sellerId) && validateProductUpdate()) ||
                        (isAuthenticated() && isLikeCountUpdate());
+      
+      // 판매자 정보 업데이트: 상품 판매자만 가능 (프로필 이미지만 - 닉네임은 실시간 조회)
+      allow update: if isOwner(resource.data.sellerId) && 
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['sellerProfileImage', 'updatedAt']);
       
       // 삭제: 상품 소유자만 삭제 가능 (실제로는 상태만 변경)
       allow delete: if isOwner(resource.data.sellerId);
@@ -204,18 +212,11 @@ service cloud.firestore {
       // 수정/삭제: 게시글 작성자만 가능
       allow update, delete: if isOwner(resource.data.authorId);
       
-      // 게시글 데이터 유효성 검사
-      function validateMusicLifePost() {
-        let data = request.resource.data;
-        return data.keys().hasAll(['title', 'content', 'authorId']) &&
-               data.title is string &&
-               data.title.size() >= 1 && data.title.size() <= 100 &&
-               data.content is string &&
-               data.content.size() >= 1 && data.content.size() <= 5000 &&
-               data.authorId == request.auth.uid;
-      }
+      // 작성자 정보 업데이트: 게시글 작성자만 가능 (프로필 이미지, 자기소개만 - 닉네임은 실시간 조회)
+      allow update: if isOwner(resource.data.authorId) && 
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['authorProfileImage', 'authorBio', 'updatedAt']);
       
-      // 댓글 규칙
+      // 음악생활 댓글 규칙
       match /comments/{commentId} {
         // 읽기: 모든 사용자가 조회 가능
         allow read: if true;
@@ -226,7 +227,56 @@ service cloud.firestore {
         
         // 수정/삭제: 댓글 작성자만 가능
         allow update, delete: if isOwner(resource.data.authorId);
+        
+        // 작성자 정보 업데이트: 댓글 작성자만 가능 (프로필 이미지만 - 닉네임은 실시간 조회)
+        allow update: if isOwner(resource.data.authorId) && 
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['authorProfileImage', 'updatedAt']);
       }
+    }
+    
+    // 음악생활 댓글 컬렉션
+    match /musiclife_comments/{commentId} {
+      // 읽기: 모든 사용자가 조회 가능
+      allow read: if true;
+      
+      // 생성: 인증된 사용자만 댓글 작성 가능
+      allow create: if isAuthenticated() && 
+                       request.resource.data.authorId == request.auth.uid;
+      
+      // 수정/삭제: 댓글 작성자만 가능
+      allow update, delete: if isOwner(resource.data.authorId);
+      
+      // 작성자 정보 업데이트: 댓글 작성자만 가능 (프로필 이미지만 - 닉네임은 실시간 조회)
+      allow update: if isOwner(resource.data.authorId) && 
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['authorProfileImage', 'updatedAt']);
+    }
+    
+    // 상품 댓글 컬렉션
+    match /comments/{commentId} {
+      // 읽기: 모든 사용자가 조회 가능
+      allow read: if true;
+      
+      // 생성: 인증된 사용자만 댓글 작성 가능
+      allow create: if isAuthenticated() && 
+                       request.resource.data.authorId == request.auth.uid;
+      
+      // 수정/삭제: 댓글 작성자만 가능
+      allow update, delete: if isOwner(resource.data.authorId);
+      
+      // 작성자 정보 업데이트: 댓글 작성자만 가능 (프로필 이미지만 - 닉네임은 실시간 조회)
+      allow update: if isOwner(resource.data.authorId) && 
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['authorProfileImage', 'updatedAt']);
+    }
+    
+    // 게시글 데이터 유효성 검사
+    function validateMusicLifePost() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['title', 'content', 'authorId']) &&
+             data.title is string &&
+             data.title.size() >= 1 && data.title.size() <= 100 &&
+             data.content is string &&
+             data.content.size() >= 1 && data.content.size() <= 5000 &&
+             data.authorId == request.auth.uid;
     }
     
     // 관리자 전용 컬렉션

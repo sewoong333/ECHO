@@ -38,6 +38,11 @@ export default function ProductRegister() {
   const [detailAddress, setDetailAddress] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
+  const [selectedRegion, setSelectedRegion] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [addressType, setAddressType] = useState("road"); // road, dong
+  const [roadAddress, setRoadAddress] = useState("");
+  const [dongAddress, setDongAddress] = useState("");
   const [images, setImages] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -46,7 +51,31 @@ export default function ProductRegister() {
   const { user } = useContext(UserContext);
   const { addToast } = useToast();
 
-  // 카카오 주소 검색 함수
+  // 지역 데이터
+  const regions = [
+    { value: "서울", label: "서울특별시", districts: ["강남구", "강동구", "강북구", "강서구", "관악구", "광진구", "구로구", "금천구", "노원구", "도봉구", "동대문구", "동작구", "마포구", "서대문구", "서초구", "성동구", "성북구", "송파구", "양천구", "영등포구", "용산구", "은평구", "종로구", "중구", "중랑구"] },
+    { value: "부산", label: "부산광역시", districts: ["중구", "서구", "동구", "영도구", "부산진구", "동래구", "남구", "북구", "해운대구", "사하구", "금정구", "강서구", "연제구", "수영구", "사상구", "기장군"] },
+    { value: "인천", label: "인천광역시", districts: ["중구", "동구", "미추홀구", "연수구", "남동구", "부평구", "계양구", "서구", "강화군", "옹진군"] },
+    { value: "대구", label: "대구광역시", districts: ["중구", "동구", "서구", "남구", "북구", "수성구", "달서구", "달성군"] },
+    { value: "대전", label: "대전광역시", districts: ["동구", "중구", "서구", "유성구", "대덕구"] },
+    { value: "광주", label: "광주광역시", districts: ["동구", "서구", "남구", "북구", "광산구"] },
+    { value: "울산", label: "울산광역시", districts: ["중구", "남구", "동구", "북구", "울주군"] },
+    { value: "세종", label: "세종특별자치시", districts: ["세종시"] },
+    { value: "경기", label: "경기도", districts: ["수원시", "성남시", "의정부시", "안양시", "부천시", "광명시", "평택시", "과천시", "오산시", "시흥시", "군포시", "의왕시", "하남시", "용인시", "파주시", "이천시", "안성시", "김포시", "화성시", "광주시", "여주시", "양평군", "고양시", "의정부시", "동두천시", "가평군", "연천군"] },
+    { value: "강원", label: "강원도", districts: ["춘천시", "원주시", "강릉시", "동해시", "태백시", "속초시", "삼척시", "홍천군", "횡성군", "영월군", "평창군", "정선군", "철원군", "화천군", "양구군", "인제군", "고성군", "양양군"] },
+    { value: "충북", label: "충청북도", districts: ["청주시", "충주시", "제천시", "보은군", "옥천군", "영동군", "증평군", "진천군", "괴산군", "음성군", "단양군"] },
+    { value: "충남", label: "충청남도", districts: ["천안시", "공주시", "보령시", "아산시", "서산시", "논산시", "계룡시", "당진시", "금산군", "부여군", "서천군", "청양군", "홍성군", "예산군", "태안군"] },
+    { value: "전북", label: "전라북도", districts: ["전주시", "군산시", "익산시", "정읍시", "남원시", "김제시", "완주군", "진안군", "무주군", "장수군", "임실군", "순창군", "고창군", "부안군"] },
+    { value: "전남", label: "전라남도", districts: ["목포시", "여수시", "순천시", "나주시", "광양시", "담양군", "곡성군", "구례군", "고흥군", "보성군", "화순군", "장흥군", "강진군", "해남군", "영암군", "무안군", "함평군", "영광군", "장성군", "완도군", "진도군", "신안군"] },
+    { value: "경북", label: "경상북도", districts: ["포항시", "경주시", "김천시", "안동시", "구미시", "영주시", "영천시", "상주시", "문경시", "경산시", "군위군", "의성군", "청송군", "영양군", "영덕군", "청도군", "고령군", "성주군", "칠곡군", "예천군", "봉화군", "울진군", "울릉군"] },
+    { value: "경남", label: "경상남도", districts: ["창원시", "진주시", "통영시", "사천시", "김해시", "밀양시", "거제시", "양산시", "의령군", "함안군", "창녕군", "고성군", "남해군", "하동군", "산청군", "함양군", "거창군", "합천군"] },
+    { value: "제주", label: "제주특별자치도", districts: ["제주시", "서귀포시"] }
+  ];
+
+  // 선택된 지역의 구/군 목록
+  const availableDistricts = regions.find(r => r.value === selectedRegion)?.districts || [];
+
+  // 주소 검색 함수 (카카오 지도 API)
   const searchAddress = () => {
     if (!window.kakao || !window.kakao.maps) {
       addToast("지도 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.", "warning");
@@ -56,17 +85,20 @@ export default function ProductRegister() {
     window.kakao.maps.load(() => {
       const geocoder = new window.kakao.maps.services.Geocoder();
       
-      if (!location.trim()) {
+      const searchQuery = addressType === "road" ? roadAddress : dongAddress;
+      
+      if (!searchQuery.trim()) {
         addToast("주소를 입력해주세요.", "warning");
         return;
       }
 
-      geocoder.addressSearch(location, (result, status) => {
+      geocoder.addressSearch(searchQuery, (result, status) => {
         if (status === window.kakao.maps.services.Status.OK) {
           const coords = result[0];
           setLatitude(coords.y);
           setLongitude(coords.x);
           setDetailAddress(coords.address_name);
+          setLocation(`${selectedRegion} ${selectedDistrict}`);
           addToast("주소가 확인되었습니다.", "success");
         } else {
           addToast("주소를 찾을 수 없습니다. 다시 입력해주세요.", "error");
@@ -127,31 +159,55 @@ export default function ProductRegister() {
     try {
       if (!user?.uid) throw new Error("로그인이 필요합니다.");
       
+      console.log("🔄 상품 등록 시작:", { title, price, category, user: user.uid });
+      
       // 이미지 업로드
       const imageUrls = [];
-      for (const file of images) {
-        const result = await imageService.uploadProductImage(file, user.uid);
-        imageUrls.push(result.url);
+      if (images.length > 0) {
+        console.log("📸 이미지 업로드 시작:", images.length, "개");
+        for (const file of images) {
+          const result = await imageService.uploadProductImage(file, user.uid);
+          imageUrls.push(result.url);
+          console.log("✅ 이미지 업로드 완료:", result.url);
+        }
       }
       
-      // 상품 데이터 저장
-      await productService.createProduct({
-        title,
+      // 상품 데이터 준비 (Firebase 서비스와 호환되도록 수정)
+      const productData = {
+        title: title.trim(),
         price: Number(price),
-        description,
+        description: description.trim(),
         category,
         condition,
-        location,
-        detailAddress,
+        region: location.split(' ')[0] || location, // 지역 추출
+        district: location.split(' ')[1] || '', // 구/군 추출
+        fullLocation: location,
+        detailAddress: detailAddress || location,
         latitude: parseFloat(latitude) || null,
         longitude: parseFloat(longitude) || null,
         images: imageUrls,
-        createdAt: new Date(),
         sellerId: user.uid,
+        sellerNickname: user.nickname || user.displayName || "사용자",
         status: "active",
-        views: 0,
-        likes: 0
-      }, user.uid);
+        viewCount: 0,
+        likeCount: 0,
+        chatCount: 0,
+        isDeliveryAvailable: false,
+        deliveryFee: 0,
+        preferredTransactionType: "direct",
+        isPriceNegotiable: false,
+        tags: [],
+        searchKeywords: [title.toLowerCase(), category.toLowerCase()],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        lastBumpedAt: new Date()
+      };
+      
+      console.log("📦 저장할 상품 데이터:", productData);
+      
+      // 상품 데이터 저장
+      const result = await productService.createProduct(productData, user.uid);
+      console.log("✅ 상품 등록 성공:", result);
       
       setSuccess(true);
       addToast("상품이 성공적으로 등록되었습니다!", "success");
@@ -159,7 +215,12 @@ export default function ProductRegister() {
         navigate("/");
       }, 1500);
     } catch (err) {
-      console.error("상품 등록 실패:", err);
+      console.error("❌ 상품 등록 실패:", err);
+      console.error("❌ 에러 상세:", {
+        message: err.message,
+        code: err.code,
+        stack: err.stack
+      });
       addToast("상품 등록 실패: " + err.message, "error");
     } finally {
       setLoading(false);
@@ -234,16 +295,84 @@ export default function ProductRegister() {
           
           <InputGroup>
             <Label>거래 지역 *</Label>
+            
+            {/* 지역 선택 */}
+            <AddressSection>
+              <AddressRow>
+                <AddressLabel>시/도</AddressLabel>
+                <Select 
+                  value={selectedRegion} 
+                  onChange={e => {
+                    setSelectedRegion(e.target.value);
+                    setSelectedDistrict("");
+                  }}
+                >
+                  <option value="">시/도를 선택하세요</option>
+                  {regions.map(region => (
+                    <option key={region.value} value={region.value}>
+                      {region.label}
+                    </option>
+                  ))}
+                </Select>
+              </AddressRow>
+              
+              <AddressRow>
+                <AddressLabel>구/군</AddressLabel>
+                <Select 
+                  value={selectedDistrict} 
+                  onChange={e => setSelectedDistrict(e.target.value)}
+                  disabled={!selectedRegion}
+                >
+                  <option value="">구/군을 선택하세요</option>
+                  {availableDistricts.map(district => (
+                    <option key={district} value={district}>
+                      {district}
+                    </option>
+                  ))}
+                </Select>
+              </AddressRow>
+            </AddressSection>
+
+            {/* 주소 타입 선택 */}
+            <AddressTypeSection>
+              <AddressTypeLabel>주소 입력 방식</AddressTypeLabel>
+              <AddressTypeButtons>
+                <AddressTypeButton 
+                  active={addressType === "road"}
+                  onClick={() => setAddressType("road")}
+                >
+                  도로명 주소
+                </AddressTypeButton>
+                <AddressTypeButton 
+                  active={addressType === "dong"}
+                  onClick={() => setAddressType("dong")}
+                >
+                  동/지번 주소
+                </AddressTypeButton>
+              </AddressTypeButtons>
+            </AddressTypeSection>
+
+            {/* 주소 입력 */}
             <AddressInputContainer>
               <Input 
-                value={location} 
-                onChange={e => setLocation(e.target.value)} 
-                placeholder="예: 서울 강남구 논현동" 
+                value={addressType === "road" ? roadAddress : dongAddress}
+                onChange={e => {
+                  if (addressType === "road") {
+                    setRoadAddress(e.target.value);
+                  } else {
+                    setDongAddress(e.target.value);
+                  }
+                }}
+                placeholder={addressType === "road" 
+                  ? "예: 테헤란로 123" 
+                  : "예: 논현동 123-45"
+                }
               />
               <SearchAddressButton type="button" onClick={searchAddress}>
                 주소 검색
               </SearchAddressButton>
             </AddressInputContainer>
+            
             {detailAddress && (
               <AddressResult>
                 📍 {detailAddress}
@@ -614,4 +743,56 @@ const CoordInfo = styled.div`
   margin-top: 4px;
   font-size: 12px;
   color: #6c757d;
+`;
+
+const AddressSection = styled.div`
+  margin-bottom: 16px;
+`;
+
+const AddressRow = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 12px;
+`;
+
+const AddressLabel = styled.label`
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  min-width: 60px;
+`;
+
+const AddressTypeSection = styled.div`
+  margin-bottom: 16px;
+`;
+
+const AddressTypeLabel = styled.label`
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8px;
+`;
+
+const AddressTypeButtons = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
+const AddressTypeButton = styled.button`
+  padding: 8px 16px;
+  border: 2px solid ${props => props.active ? '#2ed8b6' : '#e9ecef'};
+  background: ${props => props.active ? '#2ed8b6' : 'white'};
+  color: ${props => props.active ? 'white' : '#666'};
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    border-color: #2ed8b6;
+    background: ${props => props.active ? '#26c4a8' : '#f0fffe'};
+  }
 `;

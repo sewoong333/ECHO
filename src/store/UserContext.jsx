@@ -469,6 +469,141 @@ export function UserProvider({ children }) {
     }
   };
 
+  // 사용자가 작성한 모든 게시글의 작성자 정보 업데이트 (정규화된 버전)
+  const updateUserPostsInfo = async (userId, updates) => {
+    try {
+      console.log('🔄 사용자 게시글 작성자 정보 업데이트 중...', { userId, updates });
+      
+      // 표준 업데이트 데이터 준비
+      const standardUpdates = {
+        nickname: updates.nickname || updates.displayName || updates.name,
+        profileImage: updates.profileImage || updates.photoURL || updates.avatar,
+        bio: updates.bio || updates.description || updates.about,
+        email: updates.email,
+        isVerified: updates.isVerified,
+        mannerScore: updates.mannerScore,
+      };
+      
+      let updatedCount = 0;
+      
+      // 1. 음악생활 게시글 업데이트
+      console.log('📝 음악생활 게시글 작성자 정보 업데이트 중...');
+      const musiclifeQuery = query(
+        collection(db, "musiclife_posts"),
+        where("authorId", "==", userId)
+      );
+      const musiclifeSnapshot = await getDocs(musiclifeQuery);
+      
+      for (const docSnapshot of musiclifeSnapshot.docs) {
+        const updateData = {};
+        
+        // 닉네임은 실시간 조회하므로 게시글에 저장하지 않음
+        // if (standardUpdates.nickname) updateData.authorNickname = standardUpdates.nickname;
+        if (standardUpdates.profileImage) updateData.authorProfileImage = standardUpdates.profileImage;
+        if (standardUpdates.bio) updateData.authorBio = standardUpdates.bio;
+        if (standardUpdates.email) updateData.authorEmail = standardUpdates.email;
+        if (standardUpdates.isVerified !== undefined) updateData.authorVerified = standardUpdates.isVerified;
+        if (standardUpdates.mannerScore !== undefined) updateData.authorMannerScore = standardUpdates.mannerScore;
+        
+        if (Object.keys(updateData).length > 0) {
+          updateData.updatedAt = serverTimestamp();
+          await updateDoc(doc(db, "musiclife_posts", docSnapshot.id), updateData);
+          updatedCount++;
+          console.log(`   ✅ 음악생활 게시글 ${docSnapshot.id} 업데이트`);
+        }
+      }
+      
+      // 2. 상품 게시글 업데이트
+      console.log('🛍️ 상품 게시글 판매자 정보 업데이트 중...');
+      const productQuery = query(
+        collection(db, "products"),
+        where("sellerId", "==", userId)
+      );
+      const productSnapshot = await getDocs(productQuery);
+      
+      for (const docSnapshot of productSnapshot.docs) {
+        const updateData = {};
+        
+        // 닉네임은 실시간 조회하므로 게시글에 저장하지 않음
+        // if (standardUpdates.nickname) updateData.sellerNickname = standardUpdates.nickname;
+        if (standardUpdates.profileImage) updateData.sellerProfileImage = standardUpdates.profileImage;
+        if (standardUpdates.bio) updateData.sellerBio = standardUpdates.bio;
+        if (standardUpdates.email) updateData.sellerEmail = standardUpdates.email;
+        if (standardUpdates.isVerified !== undefined) updateData.sellerVerified = standardUpdates.isVerified;
+        if (standardUpdates.mannerScore !== undefined) updateData.sellerMannerScore = standardUpdates.mannerScore;
+        
+        if (Object.keys(updateData).length > 0) {
+          updateData.updatedAt = serverTimestamp();
+          await updateDoc(doc(db, "products", docSnapshot.id), updateData);
+          updatedCount++;
+          console.log(`   ✅ 상품 ${docSnapshot.id} 업데이트`);
+        }
+      }
+      
+      // 3. 음악생활 댓글 작성자 정보 업데이트
+      console.log('💬 음악생활 댓글 작성자 정보 업데이트 중...');
+      const musiclifeCommentQuery = query(
+        collection(db, "musiclife_comments"),
+        where("authorId", "==", userId)
+      );
+      const musiclifeCommentSnapshot = await getDocs(musiclifeCommentQuery);
+      
+      for (const docSnapshot of musiclifeCommentSnapshot.docs) {
+        const updateData = {};
+        
+        // 닉네임은 실시간 조회하므로 게시글에 저장하지 않음
+        // if (standardUpdates.nickname) updateData.authorNickname = standardUpdates.nickname;
+        if (standardUpdates.profileImage) updateData.authorProfileImage = standardUpdates.profileImage;
+        if (standardUpdates.bio) updateData.authorBio = standardUpdates.bio;
+        if (standardUpdates.email) updateData.authorEmail = standardUpdates.email;
+        if (standardUpdates.isVerified !== undefined) updateData.authorVerified = standardUpdates.isVerified;
+        if (standardUpdates.mannerScore !== undefined) updateData.authorMannerScore = standardUpdates.mannerScore;
+        
+        if (Object.keys(updateData).length > 0) {
+          updateData.updatedAt = serverTimestamp();
+          await updateDoc(doc(db, "musiclife_comments", docSnapshot.id), updateData);
+          updatedCount++;
+          console.log(`   ✅ 음악생활 댓글 ${docSnapshot.id} 업데이트`);
+        }
+      }
+      
+      // 4. 일반 댓글 작성자 정보 업데이트 (상품 댓글 등)
+      console.log('💬 일반 댓글 작성자 정보 업데이트 중...');
+      const commentQuery = query(
+        collection(db, "comments"),
+        where("authorId", "==", userId)
+      );
+      const commentSnapshot = await getDocs(commentQuery);
+      
+      for (const docSnapshot of commentSnapshot.docs) {
+        const updateData = {};
+        
+        // 닉네임은 실시간 조회하므로 게시글에 저장하지 않음
+        // if (standardUpdates.nickname) updateData.authorNickname = standardUpdates.nickname;
+        if (standardUpdates.profileImage) updateData.authorProfileImage = standardUpdates.profileImage;
+        if (standardUpdates.bio) updateData.authorBio = standardUpdates.bio;
+        if (standardUpdates.email) updateData.authorEmail = standardUpdates.email;
+        if (standardUpdates.isVerified !== undefined) updateData.authorVerified = standardUpdates.isVerified;
+        if (standardUpdates.mannerScore !== undefined) updateData.authorMannerScore = standardUpdates.mannerScore;
+        
+        if (Object.keys(updateData).length > 0) {
+          updateData.updatedAt = serverTimestamp();
+          await updateDoc(doc(db, "comments", docSnapshot.id), updateData);
+          updatedCount++;
+          console.log(`   ✅ 일반 댓글 ${docSnapshot.id} 업데이트`);
+        }
+      }
+      
+      console.log(`✅ 총 ${updatedCount}개 게시글/댓글 작성자 정보 업데이트 완료`);
+      return updatedCount;
+      
+    } catch (error) {
+      console.error('❌ 게시글 작성자 정보 업데이트 실패:', error);
+      // 에러가 발생해도 프로필 업데이트는 계속 진행
+      return 0;
+    }
+  };
+
   // 프로필 업데이트
   const updateUserProfile = async (updates) => {
     try {
@@ -512,6 +647,19 @@ export function UserProvider({ children }) {
         ...sanitizedUpdates,
         updatedAt: serverTimestamp(),
       });
+      
+      // 사용자가 작성한 모든 게시글의 작성자 정보도 업데이트 (실시간 조회를 위해 캐시 제거)
+      if (sanitizedUpdates.nickname || sanitizedUpdates.profileImage || sanitizedUpdates.bio || 
+          sanitizedUpdates.email || sanitizedUpdates.isVerified || sanitizedUpdates.mannerScore) {
+        console.log('🔄 프로필 변경으로 인한 게시글 정보 동기화 시작...');
+        const updatedCount = await updateUserPostsInfo(user.uid, sanitizedUpdates);
+        console.log(`✅ ${updatedCount}개 게시글/댓글 정보 동기화 완료`);
+        
+        // 사용자 정보 캐시 무효화 (실시간 반영을 위해)
+        if (typeof window !== 'undefined' && window.invalidateUserCache) {
+          window.invalidateUserCache(user.uid);
+        }
+      }
       
       // 로컬 상태 업데이트
       setUser(prev => ({ ...prev, ...sanitizedUpdates }));
@@ -646,17 +794,139 @@ export function UserProvider({ children }) {
     }
   };
 
-  // 사용자 정보 조회
+  // 사용자 정보 조회 (개선된 버전)
   const getUserInfo = async (userId) => {
     try {
-      const userDoc = await getDoc(doc(db, "users", userId));
-      if (userDoc.exists()) {
-        return { id: userId, ...userDoc.data() };
+      if (!userId) {
+        console.warn('⚠️ 사용자 ID가 제공되지 않았습니다.');
+        return null;
       }
-      return null;
+
+      console.log(`🔍 사용자 정보 조회 시작: ${userId}`);
+
+      // 1. 먼저 문서 ID로 직접 조회 시도 (표준 방식)
+      try {
+        const userDoc = await getDoc(doc(db, "users", userId));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          console.log(`✅ 문서 ID로 사용자 정보 조회 성공: ${userData.nickname || '닉네임 없음'}`);
+          return { 
+            id: userId, 
+            ...userData,
+            // 표준 필드명 보장
+            nickname: userData.nickname || userData.displayName || userData.name || '사용자',
+            profileImage: userData.profileImage || userData.photoURL || userData.avatar || '',
+            bio: userData.bio || userData.description || userData.about || '',
+            email: userData.email || '',
+            isVerified: userData.isVerified || false,
+            mannerScore: userData.mannerScore || 100,
+            transactionCount: userData.transactionCount || 0,
+            reviewCount: userData.reviewCount || 0,
+            createdAt: userData.createdAt,
+            lastLoginAt: userData.lastLoginAt,
+          };
+        }
+      } catch (docError) {
+        console.warn(`⚠️ 문서 ID 조회 실패: ${docError.message}`);
+      }
+      
+      // 2. 문서 ID로 찾지 못한 경우, uid 필드로 조회 시도 (가상 계정용)
+      try {
+        console.log(`🔍 uid 필드로 조회 시도: ${userId}`);
+        const uidQuery = query(
+          collection(db, "users"),
+          where("uid", "==", userId)
+        );
+        const uidSnapshot = await getDocs(uidQuery);
+        
+        if (!uidSnapshot.empty) {
+          const userData = uidSnapshot.docs[0].data();
+          console.log(`✅ uid 필드로 사용자 정보 찾음: ${userData.nickname || '닉네임 없음'}`);
+          return { 
+            id: uidSnapshot.docs[0].id, 
+            ...userData,
+            // 표준 필드명 보장
+            nickname: userData.nickname || userData.displayName || userData.name || '사용자',
+            profileImage: userData.profileImage || userData.photoURL || userData.avatar || '',
+            bio: userData.bio || userData.description || userData.about || '',
+            email: userData.email || '',
+            isVerified: userData.isVerified || false,
+            mannerScore: userData.mannerScore || 100,
+            transactionCount: userData.transactionCount || 0,
+            reviewCount: userData.reviewCount || 0,
+            createdAt: userData.createdAt,
+            lastLoginAt: userData.lastLoginAt,
+          };
+        }
+      } catch (uidError) {
+        console.warn(`⚠️ uid 필드 조회 실패: ${uidError.message}`);
+      }
+      
+      // 3. 이메일로 조회 시도 (최후의 수단)
+      if (userId.includes('@')) {
+        try {
+          console.log(`🔍 이메일로 사용자 조회 시도: ${userId}`);
+          const emailQuery = query(
+            collection(db, "users"),
+            where("email", "==", userId)
+          );
+          const emailSnapshot = await getDocs(emailQuery);
+          
+          if (!emailSnapshot.empty) {
+            const userData = emailSnapshot.docs[0].data();
+            console.log(`✅ 이메일로 사용자 정보 찾음: ${userData.nickname || '닉네임 없음'}`);
+            return { 
+              id: emailSnapshot.docs[0].id, 
+              ...userData,
+              // 표준 필드명 보장
+              nickname: userData.nickname || userData.displayName || userData.name || '사용자',
+              profileImage: userData.profileImage || userData.photoURL || userData.avatar || '',
+              bio: userData.bio || userData.description || userData.about || '',
+              email: userData.email || '',
+              isVerified: userData.isVerified || false,
+              mannerScore: userData.mannerScore || 100,
+              transactionCount: userData.transactionCount || 0,
+              reviewCount: userData.reviewCount || 0,
+              createdAt: userData.createdAt,
+              lastLoginAt: userData.lastLoginAt,
+            };
+          }
+        } catch (emailError) {
+          console.warn(`⚠️ 이메일 조회 실패: ${emailError.message}`);
+        }
+      }
+      
+      // 4. 모든 방법이 실패한 경우, 기본 사용자 정보 반환
+      console.warn(`⚠️ 사용자 정보를 찾을 수 없음: ${userId}`);
+      return {
+        id: userId,
+        nickname: '익명',
+        profileImage: '',
+        bio: '',
+        email: '',
+        isVerified: false,
+        mannerScore: 100,
+        transactionCount: 0,
+        reviewCount: 0,
+        createdAt: null,
+        lastLoginAt: null,
+      };
     } catch (error) {
       console.error("❌ 사용자 정보 조회 실패:", error);
-      throw error;
+      // 에러가 발생해도 기본 사용자 정보 반환
+      return {
+        id: userId,
+        nickname: '익명',
+        profileImage: '',
+        bio: '',
+        email: '',
+        isVerified: false,
+        mannerScore: 100,
+        transactionCount: 0,
+        reviewCount: 0,
+        createdAt: null,
+        lastLoginAt: null,
+      };
     }
   };
 

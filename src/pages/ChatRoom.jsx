@@ -5,6 +5,7 @@ import { ChatContext } from "../store/ChatContext";
 import { UserContext } from "../store/UserContext";
 import { ProductContext } from "../store/ProductContext";
 import notificationService from "../utils/notificationService";
+import UserDisplay from "../components/UserDisplay";
 import {
   FaArrowLeft,
   FaEllipsisV,
@@ -18,6 +19,7 @@ import {
   FaMapMarkerAlt,
   FaUser,
   FaShoppingCart,
+  FaComments,
   FaClock,
   FaCheckCircle,
   FaInfo,
@@ -162,6 +164,69 @@ const ProductPrice = styled.div`
 const ProductStatus = styled.div`
   font-size: 12px;
   color: #666;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+// 음악생활 게시글 카드 스타일
+const MusicLifeCard = styled.div`
+  margin: 70px 20px 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
+`;
+
+const MusicLifeInfo = styled.div`
+  display: flex;
+  padding: 16px;
+  gap: 12px;
+  align-items: center;
+`;
+
+const MusicLifeIcon = styled.div`
+  font-size: 24px;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  backdrop-filter: blur(10px);
+`;
+
+const MusicLifeDetails = styled.div`
+  flex: 1;
+  color: white;
+`;
+
+const MusicLifeTitle = styled.div`
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const MusicLifeType = styled.div`
+  font-size: 12px;
+  opacity: 0.9;
+  margin-bottom: 4px;
+`;
+
+const MusicLifeStatus = styled.div`
+  font-size: 12px;
+  opacity: 0.8;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -762,26 +827,49 @@ export default function ChatRoom() {
       </Header>
 
       {productInfo && (
-        <ProductCard onClick={() => navigate(`/product/${productInfo.id}`)}>
-          <ProductInfo>
-            {productInfo.images?.[0] && (
-              <ProductImage 
-                src={productInfo.images[0]} 
-                alt={productInfo.title}
-              />
-            )}
-            <ProductDetails>
-              <ProductTitle>{productInfo.title}</ProductTitle>
-              <ProductPrice>
-                {productInfo.price?.toLocaleString()}원
-              </ProductPrice>
-              <ProductStatus>
-                <FaMapMarkerAlt />
-                {productInfo.status === 'active' ? '판매중' : '판매완료'}
-              </ProductStatus>
-            </ProductDetails>
-          </ProductInfo>
-        </ProductCard>
+        <>
+          {productInfo.id.startsWith('musiclife-') ? (
+            // 음악생활 게시글 카드
+            <MusicLifeCard onClick={() => {
+              const musiclifeId = productInfo.id.replace('musiclife-', '');
+              navigate(`/musiclife/${musiclifeId}`);
+            }}>
+              <MusicLifeInfo>
+                <MusicLifeIcon>🎵</MusicLifeIcon>
+                <MusicLifeDetails>
+                  <MusicLifeTitle>{productInfo.title}</MusicLifeTitle>
+                  <MusicLifeType>음악생활 게시글</MusicLifeType>
+                  <MusicLifeStatus>
+                    <FaComments />
+                    토론/소통
+                  </MusicLifeStatus>
+                </MusicLifeDetails>
+              </MusicLifeInfo>
+            </MusicLifeCard>
+          ) : (
+            // 일반 상품 카드
+            <ProductCard onClick={() => navigate(`/product/${productInfo.id}`)}>
+              <ProductInfo>
+                {productInfo.images?.[0] && (
+                  <ProductImage 
+                    src={productInfo.images[0]} 
+                    alt={productInfo.title}
+                  />
+                )}
+                <ProductDetails>
+                  <ProductTitle>{productInfo.title}</ProductTitle>
+                  <ProductPrice>
+                    {productInfo.price?.toLocaleString()}원
+                  </ProductPrice>
+                  <ProductStatus>
+                    <FaMapMarkerAlt />
+                    {productInfo.status === 'active' ? '판매중' : '판매완료'}
+                  </ProductStatus>
+                </ProductDetails>
+              </ProductInfo>
+            </ProductCard>
+          )}
+        </>
       )}
 
       <MessagesContainer>

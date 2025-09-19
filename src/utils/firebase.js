@@ -932,32 +932,10 @@ export const musiclifeService = {
       commentCount: 0,
     });
   },
-  async getPosts() {
-    try {
-      const q = query(musiclifeCollection, orderBy("createdAt", "desc"));
-      const snap = await getDocs(q);
-      const posts = snap.docs.map(doc => {
-        const data = doc.data();
-        return { 
-          id: doc.id, 
-          ...data,
-          // createdAt이 Timestamp 객체인 경우 Date로 변환
-          createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt,
-          updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt
-        };
-      });
-      
-      console.log('📝 실제 음악생활 게시글:', posts.length, '개');
-      console.log('📝 게시글 목록:', posts.map(p => p.title));
-      
-      // 실제 게시글이 있으면 그대로 반환
-      if (posts.length > 0) {
-        return posts;
-      }
-      
-      // 실제 게시글이 없을 때만 샘플 데이터 제공 (초기 사용자 경험을 위해)
-      console.log('📝 초기 사용자 경험을 위한 샘플 게시글 제공');
-      return [
+  
+  // 안정적인 샘플 게시글 데이터 (항상 보장)
+  getSamplePosts() {
+        return [
           {
             id: "sample-post-1",
             title: "🎸 첫 번째 기타 연주 후기",
@@ -965,7 +943,7 @@ export const musiclifeService = {
 
 처음엔 손가락이 아프고 코드 잡는 게 어려웠지만, 계속 연습하니까 조금씩 소리가 나더라고요.
 
-특히 C코드에서 G코드로 넘어가는 부분이 제일 어려웠는데, 유튜브 강의를 보면서 천천히 따라하니까 이제 조금은 할 수 있게 됐어요!                                                                                          
+특히 C코드에서 G코드로 넘어가는 부분이 제일 어려웠는데, 유튜브 강의를 보면서 천천히 따라하니까 이제 조금은 할 수 있게 됐어요!
 
 다음 목표는 스트럼 패턴을 익혀서 간단한 노래라도 쳐보는 거예요. 
 
@@ -985,7 +963,7 @@ export const musiclifeService = {
 
 처음엔 건반 위치도 모르고 악보 읽는 것도 어려웠는데, 지금은 간단한 곡 정도는 칠 수 있게 됐어요!
 
-요즘 연습하고 있는 곡은 '캐논 변주곡'인데, 왼손 반주가 정말 어려워요 ㅠㅠ 그래도 매일 조금씩 연습하니까 실력이 늘고 있는 걸 느껴요.                                                                                     
+요즘 연습하고 있는 곡은 '캐논 변주곡'인데, 왼손 반주가 정말 어려워요 ㅠㅠ 그래도 매일 조금씩 연습하니까 실력이 늘고 있는 걸 느껴요.
 
 온라인 강의도 많이 도움이 되지만, 역시 직접 손으로 치면서 익히는 게 제일 중요한 것 같아요.
 
@@ -1003,7 +981,7 @@ export const musiclifeService = {
             title: "🥁 드럼 레슨 시작했어요!",
             content: `드럼을 배우고 싶다고 생각만 하다가 드디어 레슨을 시작했어요!
 
-첫 날엔 스틱 잡는 법부터 배웠는데, 생각보다 어렵더라고요. 팔의 힘을 빼고 손목을 사용해서 쳐야 한다는데 익숙해지는데 시간이 좀 걸릴 것 같아요.                                                                          
+첫 날엔 스틱 잡는 법부터 배웠는데, 생각보다 어렵더라고요. 팔의 힘을 빼고 손목을 사용해서 쳐야 한다는데 익숙해지는데 시간이 좀 걸릴 것 같아요.
 
 그래도 간단한 8비트 패턴 정도는 칠 수 있게 됐어요! 킥, 스네어, 하이햇 조합이 생각보다 재밌더라고요.
 
@@ -1019,9 +997,109 @@ export const musiclifeService = {
             category: "lesson"
           }
         ];
+  },
+
+  async getPosts() {
+    try {
+      // 실제 게시글 조회
+      const q = query(musiclifeCollection, orderBy("createdAt", "desc"));
+      const snap = await getDocs(q);
+      const realPosts = snap.docs.map(doc => {
+        const data = doc.data();
+        return { 
+          id: doc.id, 
+          ...data,
+          // createdAt이 Timestamp 객체인 경우 Date로 변환
+          createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt,
+          updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt
+        };
+      });
+      
+      console.log('📝 실제 음악생활 게시글:', realPosts.length, '개');
+      console.log('📝 게시글 목록:', realPosts.map(p => p.title));
+      
+      // 샘플 게시글 가져오기
+      const samplePosts = this.getSamplePosts();
+      
+      // 실제 게시글과 샘플 게시글을 합쳐서 반환 (항상 게시글이 있도록 보장)
+      const allPosts = [...realPosts, ...samplePosts];
+      
+      console.log('📝 총 게시글 수:', allPosts.length, '개 (실제:', realPosts.length, '개 + 샘플:', samplePosts.length, '개)');
+      
+      return allPosts;
     } catch (error) {
       console.error('음악생활 게시글 로딩 오류:', error);
-      return [];
+      // 에러가 발생해도 샘플 게시글은 반환
+      console.log('⚠️ 에러 발생, 샘플 게시글만 반환');
+      return this.getSamplePosts();
+    }
+  },
+
+  // 백업용 샘플 게시글을 Firestore에 저장
+  async createBackupPosts() {
+    try {
+      console.log('🔄 백업용 샘플 게시글 생성 시작...');
+      
+      const samplePosts = this.getSamplePosts();
+      const createdPosts = [];
+      
+      for (const postData of samplePosts) {
+        // 이미 존재하는지 확인
+        const existingQuery = query(
+          musiclifeCollection, 
+          where('title', '==', postData.title),
+          where('authorId', '==', postData.authorId)
+        );
+        const existingSnap = await getDocs(existingQuery);
+        
+        if (existingSnap.empty) {
+          const docRef = await addDoc(musiclifeCollection, {
+            ...postData,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            isBackup: true // 백업 게시글임을 표시
+          });
+          createdPosts.push(docRef.id);
+          console.log(`✅ 백업 게시글 생성: ${postData.title}`);
+        } else {
+          console.log(`⏭️ 이미 존재하는 게시글: ${postData.title}`);
+        }
+      }
+      
+      console.log('🎉 백업용 샘플 게시글 생성 완료:', createdPosts.length, '개');
+      return createdPosts;
+    } catch (error) {
+      console.error('❌ 백업용 샘플 게시글 생성 실패:', error);
+      throw error;
+    }
+  },
+
+  // 게시글 상태 모니터링
+  async checkPostStatus() {
+    try {
+      const q = query(musiclifeCollection, orderBy("createdAt", "desc"));
+      const snap = await getDocs(q);
+      const posts = snap.docs.map(doc => ({
+        id: doc.id,
+        title: doc.data().title,
+        createdAt: doc.data().createdAt?.toDate ? doc.data().createdAt.toDate() : doc.data().createdAt,
+        isBackup: doc.data().isBackup || false
+      }));
+      
+      console.log('📊 음악생활 게시글 상태:');
+      console.log(`- 총 게시글 수: ${posts.length}개`);
+      console.log(`- 백업 게시글 수: ${posts.filter(p => p.isBackup).length}개`);
+      console.log(`- 실제 게시글 수: ${posts.filter(p => !p.isBackup).length}개`);
+      
+      return {
+        total: posts.length,
+        backup: posts.filter(p => p.isBackup).length,
+        real: posts.filter(p => !p.isBackup).length,
+        posts: posts
+      };
+    } catch (error) {
+      console.error('❌ 게시글 상태 확인 실패:', error);
+      return { total: 0, backup: 0, real: 0, posts: [] };
     }
   },
   

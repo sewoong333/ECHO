@@ -6,6 +6,7 @@ import { UserContext } from "../store/UserContext";
 import { ChatContext } from "../store/ChatContext";
 import { useToast } from "../store/ToastContext";
 import { productService } from "../utils/firebase";
+import UserDisplay from "../components/UserDisplay";
 import {
   FaHeart,
   FaRegHeart,
@@ -1218,23 +1219,19 @@ export default function ProductDetail() {
       <ContentSection>
         <SellerSection>
           <SellerHeader onClick={() => navigate(`/user/${product.sellerId}`)}>
-            <SellerAvatar imageUrl={product.sellerProfileImage}>
-              {!product.sellerProfileImage && (product.sellerNickname?.[0] || '?')}
-            </SellerAvatar>
-            <SellerInfo>
-              <SellerName>
-                {product.sellerNickname || '익명'}
-                {product.sellerVerified && (
-                  <VerifiedBadge>
-                    <FaCheckCircle />
-                  </VerifiedBadge>
-                )}
-              </SellerName>
-              <SellerLocation>
-                <FaMapMarkerAlt />
-                {product.region} {product.district}
-              </SellerLocation>
-            </SellerInfo>
+            <UserDisplay 
+              userId={product.sellerId}
+              size="48px"
+              showBio={false}
+              showVerified={true}
+              maxWidth="200px"
+              gap="12px"
+              fallbackText="판매자"
+            />
+            <SellerLocation>
+              <FaMapMarkerAlt />
+              {product.region} {product.district}
+            </SellerLocation>
             <MannerScore>
               <FaStar />
               {product.sellerMannerScore || 100}점

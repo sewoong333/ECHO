@@ -237,6 +237,11 @@ export function ChatProvider({ children }) {
       setLoading(true);
       console.log('🔄 채팅방 생성/조회 시작:', { productId, sellerId, buyerId });
 
+      // 필수 값 검증
+      if (!productId || !sellerId || !buyerId) {
+        throw new Error(`필수 값이 누락되었습니다: productId=${productId}, sellerId=${sellerId}, buyerId=${buyerId}`);
+      }
+
       // 기존 채팅방 확인 (더 안전한 방식)
       const existingRoomQuery = query(
         collection(db, "chatRooms"),
@@ -281,7 +286,9 @@ export function ChatProvider({ children }) {
         sellerId,
         buyerId,
         sellerInfo: sellerInfo?.nickname,
-        buyerInfo: buyerInfo?.nickname
+        buyerInfo: buyerInfo?.nickname,
+        sellerProfileImage: sellerInfo?.profileImage,
+        buyerProfileImage: buyerInfo?.profileImage
       });
 
       // 새 채팅방 생성
