@@ -264,7 +264,7 @@ export default function Login() {
   console.log('URL search params:', window.location.search);
   
   const { user, loginWithEmail, loginWithKakao, logout } = useContext(UserContext);
-  const { addToast } = useToast();
+  const { addToast, showDetailedError, showDetailedWarning } = useToast();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -398,7 +398,7 @@ export default function Login() {
               );
               console.log('💡 사용자에게 기존 계정 사용 안내');
             } else {
-              addToast("카카오 로그인 중 오류가 발생했습니다.", "error");
+              showDetailedError(error, "카카오 로그인");
             }
             
             // URL에서 에러 파라미터 제거
@@ -470,14 +470,14 @@ export default function Login() {
 
     switch (error.code) {
       case "auth/popup-blocked":
-        addToast("팝업이 차단되었습니다. 브라우저 설정을 확인해주세요.", "error");
+        showDetailedError(new Error("팝업이 차단되었습니다"), "구글 로그인");
         break;
       case "auth/cancelled-popup-request":
       case "auth/popup-closed-by-user":
         console.log("Login popup was cancelled by user");
         break;
       case "auth/unauthorized-domain":
-        addToast("현재 도메인에서 구글 로그인이 허용되지 않습니다.", "error");
+        showDetailedError(new Error("현재 도메인에서 구글 로그인이 허용되지 않습니다"), "구글 로그인");
         break;
       case "auth/operation-not-allowed":
         addToast("구글 로그인이 비활성화되어 있습니다. 관리자에게 문의해주세요.", "error");

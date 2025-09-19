@@ -103,6 +103,7 @@ const Message = styled.div`
   color: #6b7280;
   font-size: 13px;
   line-height: 1.4;
+  white-space: pre-line;
 `;
 
 const CloseButton = styled.button`

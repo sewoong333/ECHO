@@ -49,7 +49,7 @@ export default function ProductRegister() {
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
-  const { addToast } = useToast();
+  const { addToast, showDetailedError, showDetailedWarning } = useToast();
 
   // 지역 데이터
   const regions = [
@@ -152,7 +152,7 @@ export default function ProductRegister() {
     
     const errorMsg = validateForm();
     if (errorMsg) {
-      addToast(errorMsg, "warning");
+      showDetailedWarning(errorMsg, "상품 등록");
       return;
     }
 
@@ -235,19 +235,8 @@ export default function ProductRegister() {
         cause: err.cause
       });
       
-      // 더 구체적인 에러 메시지 제공
-      let errorMessage = "상품 등록에 실패했습니다.";
-      if (err.message.includes("permission")) {
-        errorMessage = "권한이 없습니다. 로그인 상태를 확인해주세요.";
-      } else if (err.message.includes("network")) {
-        errorMessage = "네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
-      } else if (err.message.includes("quota")) {
-        errorMessage = "서버 용량이 부족합니다. 잠시 후 다시 시도해주세요.";
-      } else {
-        errorMessage = `상품 등록 실패: ${err.message}`;
-      }
-      
-      addToast(errorMessage, "error");
+      // 개선된 에러 메시지와 해결 방법 제공
+      showDetailedError(err, "상품 등록");
     } finally {
       setLoading(false);
     }
