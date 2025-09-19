@@ -92,7 +92,7 @@ service cloud.firestore {
         
         // 상태 검증
         data.condition is string &&
-        data.condition in ['excellent', 'good', 'fair', 'poor'] &&
+        data.condition in ['new', 'like-new', 'good', 'fair', 'poor'] &&
         
         // 상품 상태 검증
         data.status is string &&

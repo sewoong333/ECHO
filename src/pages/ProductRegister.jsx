@@ -141,7 +141,8 @@ export default function ProductRegister() {
     if (description.length < 10) return "상품 설명을 10글자 이상 입력해주세요.";
     if (!category) return "카테고리를 선택해주세요.";
     if (!condition) return "상품 상태를 선택해주세요.";
-    if (!location.trim()) return "거래 지역을 입력해주세요.";
+    if (!selectedRegion || !selectedDistrict) return "거래 지역을 선택해주세요.";
+    if (!detailAddress.trim()) return "상세 주소를 입력해주세요.";
     return null;
   };
 
@@ -159,7 +160,16 @@ export default function ProductRegister() {
     try {
       if (!user?.uid) throw new Error("로그인이 필요합니다.");
       
-      console.log("🔄 상품 등록 시작:", { title, price, category, user: user.uid });
+      console.log("🔄 상품 등록 시작:", { 
+        title, 
+        price, 
+        category, 
+        condition,
+        selectedRegion,
+        selectedDistrict,
+        detailAddress,
+        user: user.uid 
+      });
       
       // 이미지 업로드
       const imageUrls = [];
@@ -173,16 +183,17 @@ export default function ProductRegister() {
       }
       
       // 상품 데이터 준비 (Firebase 서비스와 호환되도록 수정)
+      const fullLocation = `${selectedRegion} ${selectedDistrict}`;
       const productData = {
         title: title.trim(),
         price: Number(price),
         description: description.trim(),
         category,
         condition,
-        region: location.split(' ')[0] || location, // 지역 추출
-        district: location.split(' ')[1] || '', // 구/군 추출
-        fullLocation: location,
-        detailAddress: detailAddress || location,
+        region: selectedRegion,
+        district: selectedDistrict,
+        fullLocation: fullLocation,
+        detailAddress: detailAddress || fullLocation,
         latitude: parseFloat(latitude) || null,
         longitude: parseFloat(longitude) || null,
         images: imageUrls,
@@ -219,9 +230,24 @@ export default function ProductRegister() {
       console.error("❌ 에러 상세:", {
         message: err.message,
         code: err.code,
-        stack: err.stack
+        stack: err.stack,
+        name: err.name,
+        cause: err.cause
       });
-      addToast("상품 등록 실패: " + err.message, "error");
+      
+      // 더 구체적인 에러 메시지 제공
+      let errorMessage = "상품 등록에 실패했습니다.";
+      if (err.message.includes("permission")) {
+        errorMessage = "권한이 없습니다. 로그인 상태를 확인해주세요.";
+      } else if (err.message.includes("network")) {
+        errorMessage = "네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+      } else if (err.message.includes("quota")) {
+        errorMessage = "서버 용량이 부족합니다. 잠시 후 다시 시도해주세요.";
+      } else {
+        errorMessage = `상품 등록 실패: ${err.message}`;
+      }
+      
+      addToast(errorMessage, "error");
     } finally {
       setLoading(false);
     }
