@@ -7,6 +7,7 @@ import { ChatContext } from "../store/ChatContext";
 import { useToast } from "../store/ToastContext";
 import { productService } from "../utils/firebase";
 import UserDisplay from "../components/UserDisplay";
+import SEOHead from "../components/SEOHead";
 import {
   FaHeart,
   FaRegHeart,
@@ -1079,8 +1080,52 @@ export default function ProductDetail() {
     .filter(p => p.category === product.category && p.id !== product.id)
     .slice(0, 4);
 
+  // SEO 최적화를 위한 메타 데이터 생성
+  const seoTitle = product ? `${product.title} | ${product.category} 중고악기 거래 - ECHO` : '상품 상세 | ECHO 중고악기거래';
+  const seoDescription = product ? 
+    `${product.title} - ${product.category} 중고악기 거래. ${product.condition} 상태, ${product.price?.toLocaleString()}원. ${product.fullLocation}에서 거래 가능. ECHO에서 안전하게 거래하세요.` : 
+    '중고악기 거래 상세 정보를 확인하세요. ECHO에서 안전하고 신뢰할 수 있는 악기 거래를 경험해보세요.';
+  const seoKeywords = product ? 
+    `${product.title}, ${product.category}, 중고악기, 악기거래, ${product.brand || ''}, ${product.model || ''}, ${product.fullLocation}, ECHO` : 
+    '중고악기, 악기거래, 기타, 피아노, 드럼, 바이올린, 색소폰, 관악기, ECHO';
+  
+  const structuredData = product ? {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.title,
+    "description": product.description,
+    "category": product.category,
+    "brand": product.brand ? { "@type": "Brand", "name": product.brand } : undefined,
+    "model": product.model,
+    "condition": product.condition,
+    "offers": {
+      "@type": "Offer",
+      "price": product.price,
+      "priceCurrency": "KRW",
+      "availability": product.status === 'active' ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "seller": {
+        "@type": "Person",
+        "name": product.sellerNickname
+      }
+    },
+    "image": product.images,
+    "location": {
+      "@type": "Place",
+      "name": product.fullLocation
+    }
+  } : null;
+
   return (
     <Container>
+      <SEOHead
+        title={seoTitle}
+        description={seoDescription}
+        keywords={seoKeywords}
+        image={product?.images?.[0]}
+        url={`https://echo-5385e.web.app/product/${productId}`}
+        type="product"
+        structuredData={structuredData}
+      />
       <Header>
         <HeaderLeft>
           <BackButton onClick={() => navigate(-1)}>

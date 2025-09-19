@@ -9,6 +9,7 @@ import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import TopBar from "../components/TopBar";
 import SimpleMap from "../components/SimpleMap";
+import SEOHead from "../components/SEOHead";
 import { ProductContext } from "../store/ProductContext";
 import { UserContext } from "../store/UserContext";
 import { INSTRUMENT_CATEGORIES, REGIONS } from "../utils/firebase";
@@ -1279,6 +1280,25 @@ export default function Home() {
 
   return (
     <>
+      <SEOHead
+        title="중고악기거래 ECHO | 기타 피아노 드럼 바이올린 색소폰 악기판매 구매"
+        description="국내 최대 중고악기 거래 플랫폼 ECHO. 기타, 피아노, 드럼, 바이올린, 색소폰, 관악기 등 모든 악기를 안전하게 거래하세요. 실시간 채팅, 찜하기, 매너점수로 신뢰할 수 있는 거래 환경을 제공합니다."
+        keywords="중고악기, 악기거래, 기타판매, 피아노판매, 드럼판매, 바이올린판매, 색소폰판매, 관악기판매, 악기구매, 악기렌탈, 음악악기, 뮤직악기, 악기커뮤니티, 악기중고거래, 악기거래사이트, 악기마켓, 악기플랫폼"
+        url="https://echo-5385e.web.app/"
+        type="website"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "ECHO 중고악기거래",
+          "url": "https://echo-5385e.web.app/",
+          "description": "국내 최대 중고악기 거래 플랫폼",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://echo-5385e.web.app/?search={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        }}
+      />
     <Container className="main-content">
       <TopBar />
       

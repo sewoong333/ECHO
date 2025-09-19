@@ -6,6 +6,7 @@ import { UserContext } from "../store/UserContext";
 import { ChatContext } from "../store/ChatContext";
 import TopBar from "../components/TopBar";
 import UserDisplay from "../components/UserDisplay";
+import SEOHead from "../components/SEOHead";
 import {
   FaArrowLeft,
   FaEye,
@@ -592,8 +593,48 @@ export default function MusicLifeDetail() {
     );
   }
 
+  // SEO 최적화를 위한 메타 데이터 생성
+  const seoTitle = post ? `${post.title} | 음악 라이프 - ECHO` : '음악 라이프 | ECHO';
+  const seoDescription = post ? 
+    `${post.title} - ${post.content?.substring(0, 150)}... 음악인들의 이야기를 공유하고 소통하세요. ECHO 음악 라이프에서 만나보세요.` : 
+    '음악인들의 이야기를 공유하고 소통하는 공간. ECHO 음악 라이프에서 다양한 음악 이야기를 만나보세요.';
+  const seoKeywords = post ? 
+    `${post.title}, 음악라이프, 음악이야기, 음악인, 음악커뮤니티, 악기이야기, 음악경험, ECHO` : 
+    '음악라이프, 음악이야기, 음악인, 음악커뮤니티, 악기이야기, 음악경험, ECHO';
+  
+  const structuredData = post ? {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "description": post.content,
+    "author": {
+      "@type": "Person",
+      "name": post.authorNickname || "익명"
+    },
+    "datePublished": post.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+    "dateModified": post.updatedAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+    "publisher": {
+      "@type": "Organization",
+      "name": "ECHO",
+      "url": "https://echo-5385e.web.app"
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `https://echo-5385e.web.app/music-life/${postId}`
+    }
+  } : null;
+
   return (
     <Container>
+      <SEOHead
+        title={seoTitle}
+        description={seoDescription}
+        keywords={seoKeywords}
+        image={post?.images?.[0]}
+        url={`https://echo-5385e.web.app/music-life/${postId}`}
+        type="article"
+        structuredData={structuredData}
+      />
       <TopBar />
       <ContentWrapper>
         <BackButton onClick={() => navigate('/musiclife')}>

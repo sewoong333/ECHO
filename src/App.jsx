@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import AppRouter from "./routes/AppRouter";
 import BottomNav from "./components/BottomNav";
 import Toast from "./components/Toast";
@@ -84,8 +85,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <ToastProvider>
-      <AppContent />
-    </ToastProvider>
+    <HelmetProvider>
+      <ToastProvider>
+        <AppContent />
+      </ToastProvider>
+    </HelmetProvider>
   );
 }
