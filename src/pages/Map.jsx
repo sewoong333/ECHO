@@ -68,17 +68,54 @@ export default function MapPage() {
           const products = productsSnapshot.docs.map(doc => {
             const data = doc.data();
             
-            // coordinates 필드가 있으면 사용, 없으면 기존 방식 사용
+            // 실제 주소 정보 활용
             if (data.coordinates && data.coordinates.lat && data.coordinates.lng) {
+              // 이미 좌표가 있으면 사용
               data.latitude = data.coordinates.lat;
               data.longitude = data.coordinates.lng;
               data.address = data.coordinates.address || data.address;
-            } else if (!data.latitude || !data.longitude) {
-              // 좌표가 없으면 서울 주소 추가
-              data.latitude = 37.5665 + (Math.random() - 0.5) * 0.1; // 서울 중심에서 약간씩 랜덤
-              data.longitude = 126.9780 + (Math.random() - 0.5) * 0.1;
-              data.location = data.location || "서울특별시";
-              data.detailAddress = data.detailAddress || "서울특별시 중구";
+            } else if (data.latitude && data.longitude) {
+              // 기존 좌표 필드 사용
+              console.log('📍 기존 좌표 사용:', data.latitude, data.longitude);
+            } else if (data.address || data.location || data.detailAddress) {
+              // 주소 정보가 있으면 좌표 변환 시도
+              const addressToSearch = data.detailAddress || data.address || data.location;
+              console.log('📍 주소 정보 발견:', addressToSearch);
+              
+              // 카카오맵 주소 검색 API를 사용하여 좌표 변환
+              try {
+                const geocoder = new kakao.maps.services.Geocoder();
+                geocoder.addressSearch(addressToSearch, (result, status) => {
+                  if (status === kakao.maps.services.Status.OK) {
+                    data.latitude = parseFloat(result[0].y);
+                    data.longitude = parseFloat(result[0].x);
+                    console.log('✅ 주소 좌표 변환 성공:', data.latitude, data.longitude);
+                  } else {
+                    console.log('❌ 주소 좌표 변환 실패, 기본 위치 사용');
+                    // 변환 실패시 서울 중심에서 약간씩 분산
+                    const baseLat = 37.5665;
+                    const baseLng = 126.9780;
+                    const randomOffset = (Math.random() - 0.5) * 0.05;
+                    data.latitude = baseLat + randomOffset;
+                    data.longitude = baseLng + randomOffset;
+                  }
+                });
+              } catch (error) {
+                console.log('❌ 주소 검색 API 오류:', error);
+                // API 오류시 서울 중심에서 약간씩 분산
+                const baseLat = 37.5665;
+                const baseLng = 126.9780;
+                const randomOffset = (Math.random() - 0.5) * 0.05;
+                data.latitude = baseLat + randomOffset;
+                data.longitude = baseLng + randomOffset;
+              }
+            } else {
+              // 주소 정보가 전혀 없으면 서울 중심에 배치
+              console.log('📍 주소 정보 없음, 서울 중심에 배치');
+              data.latitude = 37.5665;
+              data.longitude = 126.9780;
+              data.location = "서울특별시";
+              data.detailAddress = "서울특별시 중구";
             }
             
             return {
@@ -188,13 +225,57 @@ export default function MapPage() {
           
           const musiclife = musiclifeSnapshot.docs.map(doc => {
             const data = doc.data();
-            // 주소가 없으면 서울 주소 추가
-            if (!data.latitude || !data.longitude) {
-              data.latitude = 37.5665 + (Math.random() - 0.5) * 0.1; // 서울 중심에서 약간씩 랜덤
-              data.longitude = 126.9780 + (Math.random() - 0.5) * 0.1;
-              data.location = data.location || "서울특별시";
-              data.detailAddress = data.detailAddress || "서울특별시 중구";
+            
+            // 실제 주소 정보 활용
+            if (data.coordinates && data.coordinates.lat && data.coordinates.lng) {
+              // 이미 좌표가 있으면 사용
+              data.latitude = data.coordinates.lat;
+              data.longitude = data.coordinates.lng;
+              data.address = data.coordinates.address || data.address;
+            } else if (data.latitude && data.longitude) {
+              // 기존 좌표 필드 사용
+              console.log('📍 음악생활 기존 좌표 사용:', data.latitude, data.longitude);
+            } else if (data.address || data.location || data.detailAddress) {
+              // 주소 정보가 있으면 좌표 변환 시도
+              const addressToSearch = data.detailAddress || data.address || data.location;
+              console.log('📍 음악생활 주소 정보 발견:', addressToSearch);
+              
+              // 카카오맵 주소 검색 API를 사용하여 좌표 변환
+              try {
+                const geocoder = new kakao.maps.services.Geocoder();
+                geocoder.addressSearch(addressToSearch, (result, status) => {
+                  if (status === kakao.maps.services.Status.OK) {
+                    data.latitude = parseFloat(result[0].y);
+                    data.longitude = parseFloat(result[0].x);
+                    console.log('✅ 음악생활 주소 좌표 변환 성공:', data.latitude, data.longitude);
+                  } else {
+                    console.log('❌ 음악생활 주소 좌표 변환 실패, 기본 위치 사용');
+                    // 변환 실패시 서울 중심에서 약간씩 분산
+                    const baseLat = 37.5665;
+                    const baseLng = 126.9780;
+                    const randomOffset = (Math.random() - 0.5) * 0.05;
+                    data.latitude = baseLat + randomOffset;
+                    data.longitude = baseLng + randomOffset;
+                  }
+                });
+              } catch (error) {
+                console.log('❌ 음악생활 주소 검색 API 오류:', error);
+                // API 오류시 서울 중심에서 약간씩 분산
+                const baseLat = 37.5665;
+                const baseLng = 126.9780;
+                const randomOffset = (Math.random() - 0.5) * 0.05;
+                data.latitude = baseLat + randomOffset;
+                data.longitude = baseLng + randomOffset;
+              }
+            } else {
+              // 주소 정보가 전혀 없으면 서울 중심에 배치
+              console.log('📍 음악생활 주소 정보 없음, 서울 중심에 배치');
+              data.latitude = 37.5665;
+              data.longitude = 126.9780;
+              data.location = "서울특별시";
+              data.detailAddress = "서울특별시 중구";
             }
+            
             return {
               id: doc.id,
               type: "musiclife",
