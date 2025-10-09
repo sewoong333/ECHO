@@ -275,6 +275,47 @@ const ToggleButton = styled.button`
     transform: scale(1.1);
   }
 `;
+
+const DamageStatusArea = styled.div`
+  min-height: 120px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  padding: 15px;
+  margin: 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const DamageCardFixed = styled.div`
+  width: 100%;
+  background: ${props => {
+    if (props.$type === 'critical') return 'rgba(244, 67, 54, 0.1)';
+    if (props.$type === 'danger') return 'rgba(255, 152, 0, 0.1)';
+    if (props.$type === 'warning') return 'rgba(255, 193, 7, 0.1)';
+    return 'rgba(76, 175, 80, 0.1)';
+  }};
+  border: 2px solid ${props => {
+    if (props.$type === 'critical') return '#F44336';
+    if (props.$type === 'danger') return '#FF9800';
+    if (props.$type === 'warning') return '#FFC107';
+    return '#4CAF50';
+  }};
+  border-radius: 12px;
+  padding: 15px;
+  animation: fadeIn 0.5s ease-out;
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+`;
+
+const EmptyDamageArea = styled.div`
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 14px;
+  text-align: center;
+`;
 const TunerRow = styled.div`
   width: 100%;
   display: flex;
@@ -583,6 +624,7 @@ export default function BassTuner() {
   const [volumeLevel, setVolumeLevel] = useState(0);
   const [damageDetection, setDamageDetection] = useState(true); // 손상 감지 온오프
   const [showSuccess, setShowSuccess] = useState(false); // 성공 표시
+  const [lastDamageCheck, setLastDamageCheck] = useState(null); // 마지막 손상 체크 결과
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
   const sourceRef = useRef(null);
@@ -620,23 +662,20 @@ export default function BassTuner() {
           const diffValue = getDiffHz(freq, BASS_NOTES[selected].freq);
           setDiff(diffValue);
           
-          // 튜닝 성공 체크
+          // 튜닝 성공 체크 및 손상 분석
           if (Math.abs(diffValue) < 1) {
             setShowSuccess(true);
             setTimeout(() => setShowSuccess(false), 2000);
-          }
-          
-          // 고급 베이스 손상 분석 (온오프 기능)
-          if (damageDetection) {
-            const healthAnalysis = analyzeAudioHealth(buf, audioContext.sampleRate, freq, BASS_NOTES[selected].freq, rms);
-            setSafetyWarning(healthAnalysis);
-          } else {
-            setSafetyWarning(null);
+            
+            // 튜닝 완료 시에만 손상 분석 수행 (온오프 기능)
+            if (damageDetection) {
+              const healthAnalysis = analyzeAudioHealth(buf, audioContext.sampleRate, freq, BASS_NOTES[selected].freq, rms);
+              setLastDamageCheck(healthAnalysis);
+            }
           }
         } else {
           setPitch(null);
           setDiff(null);
-          setSafetyWarning(null);
         }
         rafRef.current = requestAnimationFrame(detect);
       };
@@ -659,31 +698,6 @@ export default function BassTuner() {
     <Wrapper>
       <TopBar />
       
-      {/* 베이스 손상 상태 표시기 */}
-      {safetyWarning?.damageLevel && (
-        <DamageIndicator level={safetyWarning.damageLevel}>
-          {safetyWarning.damageLevel === 'severe' && '🚨 심각'}
-          {safetyWarning.damageLevel === 'high' && '⚠️ 위험'}
-          {safetyWarning.damageLevel === 'medium' && '⚠️ 주의'}
-          {safetyWarning.damageLevel === 'low' && 'ℹ️ 확인'}
-        </DamageIndicator>
-      )}
-      
-      {/* 안전 경고 알림 */}
-      {safetyWarning && (
-        <SafetyAlert type={safetyWarning.type}>
-          <SafetyTitle>
-            <FaExclamationTriangle />
-            {safetyWarning.title}
-          </SafetyTitle>
-          <SafetyMessage>{safetyWarning.message}</SafetyMessage>
-          <SafetyAction>{safetyWarning.action}</SafetyAction>
-          {safetyWarning.details && (
-            <SafetyDetails>분석 결과: {safetyWarning.details}</SafetyDetails>
-          )}
-        </SafetyAlert>
-      )}
-      
       {/* 볼륨 레벨 표시기 */}
       <VolumeIndicator>
         <VolumeLevel level={volumeLevel} />
@@ -702,6 +716,29 @@ export default function BassTuner() {
           {damageDetection ? <FaToggleOn /> : <FaToggleOff />}
         </ToggleButton>
       </DamageToggle>
+      
+      {/* 고정된 손상 상태 영역 - 튜닝 완료 시에만 표시 */}
+      {damageDetection && (
+        <DamageStatusArea>
+          {lastDamageCheck ? (
+            <DamageCardFixed $type={lastDamageCheck.type}>
+              <SafetyTitle>
+                <FaExclamationTriangle />
+                {lastDamageCheck.title}
+              </SafetyTitle>
+              <SafetyMessage>{lastDamageCheck.message}</SafetyMessage>
+              <SafetyAction>{lastDamageCheck.action}</SafetyAction>
+              {lastDamageCheck.details && (
+                <SafetyDetails>분석 결과: {lastDamageCheck.details}</SafetyDetails>
+              )}
+            </DamageCardFixed>
+          ) : (
+            <EmptyDamageArea>
+              튜닝 완료 시 악기 상태를 확인합니다
+            </EmptyDamageArea>
+          )}
+        </DamageStatusArea>
+      )}
       
       <Frame>
         {/* 상단 드롭다운 */}
