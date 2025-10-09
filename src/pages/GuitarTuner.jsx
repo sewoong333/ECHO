@@ -477,7 +477,7 @@ const GaugeBox = styled.div`
 `;
 const NoteName = styled.div`
   font-size: 32px;
-  font-weight: 800;
+    font-weight: 800;
   color: ${ECHO_ACCENT};
   letter-spacing: 2px;
   margin-bottom: 2px;
@@ -494,12 +494,16 @@ const PitchRow = styled.div`
   justify-content: center;
   margin-top: 18px;
   margin-bottom: 2px;
+  min-height: 50px;
+  width: 100%;
 `;
 const PitchNum = styled.span`
   font-size: 38px;
   font-weight: 900;
   color: ${ECHO_COLOR};
   line-height: 1;
+  min-width: 120px;
+  text-align: center;
 `;
 const PitchHz = styled.span`
   font-size: 22px;
@@ -717,16 +721,16 @@ export default function GuitarTuner() {
   useEffect(() => {
     let stopped = false;
     async function listen() {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const audioContext = new (window.AudioContext ||
         window.webkitAudioContext)();
-      audioContextRef.current = audioContext;
-      const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 2048;
-      analyserRef.current = analyser;
-      const source = audioContext.createMediaStreamSource(stream);
-      source.connect(analyser);
-      sourceRef.current = source;
+        audioContextRef.current = audioContext;
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 2048;
+        analyserRef.current = analyser;
+        const source = audioContext.createMediaStreamSource(stream);
+        source.connect(analyser);
+        sourceRef.current = source;
       const buf = new Float32Array(analyser.fftSize);
       const detect = () => {
         if (stopped) return;
@@ -741,10 +745,10 @@ export default function GuitarTuner() {
         setVolumeLevel(rms);
         
         const freq = autoCorrelate(buf, audioContext.sampleRate);
-        if (freq > 0) {
-          setPitch(freq);
-          const diffValue = getDiffHz(freq, GUITAR_NOTES[selected].freq);
-          setDiff(diffValue);
+          if (freq > 0) {
+            setPitch(freq);
+            const diffValue = getDiffHz(freq, GUITAR_NOTES[selected].freq);
+            setDiff(diffValue);
           
           // 튜닝 성공 체크 및 손상 분석
           if (Math.abs(diffValue) < 1) {
@@ -757,10 +761,10 @@ export default function GuitarTuner() {
               setLastDamageCheck(healthAnalysis);
             }
           }
-        } else {
-          setPitch(null);
-          setDiff(null);
-        }
+          } else {
+            setPitch(null);
+            setDiff(null);
+          }
         rafRef.current = requestAnimationFrame(detect);
       };
       detect();
@@ -785,7 +789,7 @@ export default function GuitarTuner() {
       <VolumeIndicator>
         <VolumeLevel level={volumeLevel} />
       </VolumeIndicator>
-      
+
       <Frame>
         <TopRow>
           <Pill>
@@ -797,7 +801,7 @@ export default function GuitarTuner() {
         <TunerRow>
           <StringCol>
             {GUITAR_NOTES.map((n, i) => (
-              <StringBtn
+              <StringBtn 
                 key={n.name}
                 $active={i === selected}
                 onClick={() => setSelected(i)}

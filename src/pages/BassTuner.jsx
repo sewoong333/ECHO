@@ -415,12 +415,16 @@ const PitchRow = styled.div`
   justify-content: center;
   margin-top: 18px;
   margin-bottom: 2px;
+  min-height: 50px;
+  width: 100%;
 `;
 const PitchNum = styled.span`
   font-size: 38px;
   font-weight: 900;
   color: ${ECHO_COLOR};
   line-height: 1;
+  min-width: 120px;
+  text-align: center;
 `;
 const PitchHz = styled.span`
   font-size: 22px;
@@ -817,9 +821,9 @@ export default function BassTuner() {
                 {/* 바늘 - 헤르츠에 따라 부드럽게 움직이고 색상 변경 */}
                 <g
                   style={{
-                    transform: `rotate(${Math.max(-100, Math.min(100, diff || 0)) * 0.9}deg)`,
+                    transform: `rotate(${Math.max(-60, Math.min(60, (diff || 0) * 0.5))}deg)`,
                     transformOrigin: "170px 150px",
-                    transition: "transform 0.1s linear",
+                    transition: "transform 0.3s ease-out",
                   }}
                 >
                   {/* 직선 침 */}
