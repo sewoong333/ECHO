@@ -258,7 +258,7 @@ const DamageSection = styled.div`
   flex-direction: column;
   gap: 15px;
   margin: 20px;
-  margin-bottom: 250px;
+  margin-bottom: 200px;
 `;
 
 const DamageToggle = styled.div`
