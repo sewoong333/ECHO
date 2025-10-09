@@ -70,12 +70,14 @@ export function UserProvider({ children }) {
 
     const setupAuthListeners = async () => {
       try {
-        // 초기화 시 카카오 로그인 상태 확인
-        const savedKakaoUser = await kakaoAuthService.checkSavedKakaoLogin();
-        if (savedKakaoUser) {
-          console.log('🔄 저장된 카카오 로그인 상태로 복원');
-          loginWithKakao(savedKakaoUser);
-          return;
+        // 초기화 시 카카오 로그인 상태 확인 (함수가 있는 경우에만)
+        if (kakaoAuthService && typeof kakaoAuthService.checkSavedKakaoLogin === 'function') {
+          const savedKakaoUser = await kakaoAuthService.checkSavedKakaoLogin();
+          if (savedKakaoUser) {
+            console.log('🔄 저장된 카카오 로그인 상태로 복원');
+            loginWithKakao(savedKakaoUser);
+            return;
+          }
         }
       } catch (error) {
         console.warn('⚠️ 초기 카카오 로그인 확인 실패:', error);
