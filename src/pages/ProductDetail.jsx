@@ -635,11 +635,11 @@ const ModalCloseButton = styled.button`
   background: rgba(0, 0, 0, 0.7);
   border: 2px solid rgba(255, 255, 255, 0.3);
   color: white;
-  font-size: 20px;
+  font-size: 24px;
   cursor: pointer;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   z-index: 1001;
   transition: all 0.3s ease;
   display: flex;
@@ -662,8 +662,8 @@ const ModalCloseButton = styled.button`
   /* X 아이콘 스타일 */
   svg {
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
   }
 `;
 
@@ -704,11 +704,11 @@ const SlideButton = styled.button`
   background: rgba(0, 0, 0, 0.7);
   border: 2px solid rgba(255, 255, 255, 0.3);
   color: white;
-  font-size: 18px;
+  font-size: 20px;
   cursor: pointer;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   z-index: 1001;
   transition: all 0.3s ease;
   display: flex;
@@ -741,8 +741,8 @@ const SlideButton = styled.button`
   /* 화살표 아이콘 스타일 */
   svg {
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
   }
 `;
 
