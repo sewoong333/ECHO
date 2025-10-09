@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import styled from "styled-components";
 import TopBar from "../components/TopBar";
-import { FaExclamationTriangle } from "react-icons/fa";
+import { FaExclamationTriangle, FaCheckCircle, FaToggleOn, FaToggleOff } from "react-icons/fa";
 
 const ECHO_COLOR = "#2ed8b6";
 const ECHO_ACCENT = "#1976d2";
@@ -232,6 +232,48 @@ const PillSub = styled.div`
   font-weight: 500;
   margin-top: 2px;
   text-align: center;
+`;
+
+// 성공 표시와 손상 감지 온오프를 위한 새로운 컴포넌트들
+const SuccessIndicator = styled.div`
+  display: ${props => props.$show ? 'flex' : 'none'};
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(76, 175, 80, 0.2);
+  border: 2px solid #4CAF50;
+  border-radius: 15px;
+  padding: 15px;
+  margin: 20px 0;
+  animation: pulse 1s ease-in-out;
+  
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+`;
+
+const DamageToggle = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 15px;
+  margin: 20px 0;
+`;
+
+const ToggleButton = styled.button`
+  background: none;
+  border: none;
+  color: ${props => props.$active ? ECHO_COLOR : '#ccc'};
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.1);
+  }
 `;
 const TunerRow = styled.div`
   width: 100%;
@@ -539,6 +581,8 @@ export default function BassTuner() {
   const [selected, setSelected] = useState(0); // 0: G2, 1: D2, 2: A1, 3: E1
   const [safetyWarning, setSafetyWarning] = useState(null);
   const [volumeLevel, setVolumeLevel] = useState(0);
+  const [damageDetection, setDamageDetection] = useState(true); // 손상 감지 온오프
+  const [showSuccess, setShowSuccess] = useState(false); // 성공 표시
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
   const sourceRef = useRef(null);
@@ -576,9 +620,19 @@ export default function BassTuner() {
           const diffValue = getDiffHz(freq, BASS_NOTES[selected].freq);
           setDiff(diffValue);
           
-          // 고급 베이스 손상 분석
-          const healthAnalysis = analyzeAudioHealth(buf, audioContext.sampleRate, freq, BASS_NOTES[selected].freq, rms);
-          setSafetyWarning(healthAnalysis);
+          // 튜닝 성공 체크
+          if (Math.abs(diffValue) < 1) {
+            setShowSuccess(true);
+            setTimeout(() => setShowSuccess(false), 2000);
+          }
+          
+          // 고급 베이스 손상 분석 (온오프 기능)
+          if (damageDetection) {
+            const healthAnalysis = analyzeAudioHealth(buf, audioContext.sampleRate, freq, BASS_NOTES[selected].freq, rms);
+            setSafetyWarning(healthAnalysis);
+          } else {
+            setSafetyWarning(null);
+          }
         } else {
           setPitch(null);
           setDiff(null);
@@ -634,6 +688,20 @@ export default function BassTuner() {
       <VolumeIndicator>
         <VolumeLevel level={volumeLevel} />
       </VolumeIndicator>
+      
+      {/* 손상 감지 온오프 토글 */}
+      <DamageToggle>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <FaExclamationTriangle />
+          손상 감지
+        </div>
+        <ToggleButton
+          $active={damageDetection}
+          onClick={() => setDamageDetection(!damageDetection)}
+        >
+          {damageDetection ? <FaToggleOn /> : <FaToggleOff />}
+        </ToggleButton>
+      </DamageToggle>
       
       <Frame>
         {/* 상단 드롭다운 */}
@@ -822,6 +890,12 @@ export default function BassTuner() {
             >
               {pitch ? getAdvice(diff) : "소리를 들려주세요"}
             </div>
+            
+            {/* 성공 표시 */}
+            <SuccessIndicator $show={showSuccess}>
+              <FaCheckCircle size={24} color="#4CAF50" />
+              <span>튜닝 완료!</span>
+            </SuccessIndicator>
           </GaugeWrap>
         </TunerRow>
         <StandardText>

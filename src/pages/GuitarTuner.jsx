@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import styled from "styled-components";
 import TopBar from "../components/TopBar";
-import { FaExclamationTriangle } from "react-icons/fa";
+import { FaExclamationTriangle, FaCheckCircle, FaToggleOn, FaToggleOff } from "react-icons/fa";
 
 const ECHO_COLOR = "#2ed8b6";
 const ECHO_ACCENT = "#1976d2";
@@ -237,6 +237,96 @@ const PillSub = styled.div`
   font-weight: 500;
   margin-top: 2px;
   text-align: center;
+`;
+
+// 침과 성공 표시를 위한 새로운 컴포넌트들
+const NeedleContainer = styled.div`
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 20px auto;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const Needle = styled.div`
+  position: absolute;
+  width: 3px;
+  height: 80px;
+  background: linear-gradient(to bottom, #ff6b6b, #ff8e8e);
+  border-radius: 2px;
+  transform-origin: bottom center;
+  transform: rotate(${props => props.$angle}deg);
+  box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+  transition: transform 0.3s ease;
+  z-index: 2;
+`;
+
+const NeedleTip = styled.div`
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 8px solid #ff6b6b;
+`;
+
+const CenterDot = styled.div`
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  z-index: 3;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+`;
+
+const SuccessIndicator = styled.div`
+  display: ${props => props.$show ? 'flex' : 'none'};
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(76, 175, 80, 0.2);
+  border: 2px solid #4CAF50;
+  border-radius: 15px;
+  padding: 15px;
+  margin: 20px 0;
+  animation: pulse 1s ease-in-out;
+  
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+`;
+
+const DamageToggle = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 15px;
+  margin: 20px 0;
+`;
+
+const ToggleButton = styled.button`
+  background: none;
+  border: none;
+  color: ${props => props.$active ? ECHO_COLOR : '#ccc'};
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.1);
+  }
 `;
 const TuningSelect = styled.div`
   background: ${ECHO_ACCENT};
@@ -569,6 +659,8 @@ export default function GuitarTuner() {
   const [selected, setSelected] = useState(0); // 0: 1번줄(E4)
   const [safetyWarning, setSafetyWarning] = useState(null);
   const [volumeLevel, setVolumeLevel] = useState(0);
+  const [damageDetection, setDamageDetection] = useState(true); // 손상 감지 온오프
+  const [showSuccess, setShowSuccess] = useState(false); // 성공 표시
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
   const sourceRef = useRef(null);
@@ -606,9 +698,19 @@ export default function GuitarTuner() {
           const diffValue = getDiffHz(freq, GUITAR_NOTES[selected].freq);
           setDiff(diffValue);
           
-          // 고급 악기 손상 분석
-          const healthAnalysis = analyzeAudioHealth(buf, audioContext.sampleRate, freq, GUITAR_NOTES[selected].freq, rms);
-          setSafetyWarning(healthAnalysis);
+          // 튜닝 성공 체크
+          if (Math.abs(diffValue) < 1) {
+            setShowSuccess(true);
+            setTimeout(() => setShowSuccess(false), 2000);
+          }
+          
+          // 고급 악기 손상 분석 (온오프 기능)
+          if (damageDetection) {
+            const healthAnalysis = analyzeAudioHealth(buf, audioContext.sampleRate, freq, GUITAR_NOTES[selected].freq, rms);
+            setSafetyWarning(healthAnalysis);
+          } else {
+            setSafetyWarning(null);
+          }
         } else {
           setPitch(null);
           setDiff(null);
@@ -663,6 +765,20 @@ export default function GuitarTuner() {
       <VolumeIndicator>
         <VolumeLevel level={volumeLevel} />
       </VolumeIndicator>
+      
+      {/* 손상 감지 온오프 토글 */}
+      <DamageToggle>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <FaExclamationTriangle />
+          손상 감지
+        </div>
+        <ToggleButton
+          $active={damageDetection}
+          onClick={() => setDamageDetection(!damageDetection)}
+        >
+          {damageDetection ? <FaToggleOn /> : <FaToggleOff />}
+        </ToggleButton>
+      </DamageToggle>
       
       <Frame>
         <TopRow>
@@ -824,6 +940,12 @@ export default function GuitarTuner() {
               <PitchHz>Hz</PitchHz>
             </PitchRow>
             <Advice>{getAdvice(diff)}</Advice>
+            
+            {/* 성공 표시 */}
+            <SuccessIndicator $show={showSuccess}>
+              <FaCheckCircle size={24} color="#4CAF50" />
+              <span>튜닝 완료!</span>
+            </SuccessIndicator>
           </GaugeWrap>
         </TunerRow>
         <StandardText>

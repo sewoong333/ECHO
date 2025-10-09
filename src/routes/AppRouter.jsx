@@ -21,8 +21,8 @@ const MusicLifeWrite = lazy(() => import("../pages/MusicLifeWrite"));
 // MapPage는 이미 위에서 import됨
 const ChatList = lazy(() => import("../pages/ChatList"));
 const AddProduct = lazy(() => import("../pages/AddProduct"));
-const GuitarTuner = lazy(() => import("../pages/GuitarTunerNew"));
-const BassTuner = lazy(() => import("../pages/BassTunerNew"));
+const GuitarTuner = lazy(() => import("../pages/GuitarTuner"));
+const BassTuner = lazy(() => import("../pages/BassTuner"));
 const SalesHistory = lazy(() => import("../pages/SalesHistory"));
 const SoldHistory = lazy(() => import("../pages/SoldHistory"));
 const BuyingHistory = lazy(() => import("../pages/BuyingHistory"));
