@@ -310,7 +310,7 @@ const DamageSection = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin: 0px;
+  margin: -20px;
   margin-bottom: 200px;
 `;
 
