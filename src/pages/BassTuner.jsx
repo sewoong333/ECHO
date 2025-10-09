@@ -751,9 +751,7 @@ export default function BassTuner() {
                     marginTop: 1,
                   }}
                 >
-                  {n.name.match(/₁|₂/)
-                    ? n.name.match(/₁|₂/)[0].replace("₁", "₁").replace("₂", "₂")
-                    : ""}
+                  {i + 1}
                 </span>
               </StringBtn>
             ))}
@@ -794,7 +792,7 @@ export default function BassTuner() {
                     opacity="0.22"
                   />
                 )}
-                {/* 눈금선/숫자 */}
+                {/* 눈금선만 표시 (숫자 제거) */}
                 {[...Array(11)].map((_, i) => {
                   const val = -100 + i * 20;
                   const angle = (val / 200) * 180;
@@ -804,34 +802,23 @@ export default function BassTuner() {
                   const x2 = 170 + 140 * Math.cos(rad);
                   const y2 = 150 + 140 * Math.sin(rad);
                   return (
-                    <g key={val}>
-                      <line
-                        x1={x1}
-                        y1={y1}
-                        x2={x2}
-                        y2={y2}
-                        stroke={val === 0 ? "#1976d2" : "#b0b3b8"}
-                        strokeWidth={val === 0 ? 4 : 2}
-                      />
-                      <text
-                        x={170 + 105 * Math.cos(rad)}
-                        y={150 + 105 * Math.sin(rad) + 7}
-                        textAnchor="middle"
-                        fontSize="18"
-                        fontWeight={val === 0 ? 700 : 400}
-                        fill={val === 0 ? "#222" : "#b0b3b8"}
-                      >
-                        {val}
-                      </text>
-                    </g>
+                    <line
+                      key={val}
+                      x1={x1}
+                      y1={y1}
+                      x2={x2}
+                      y2={y2}
+                      stroke={val === 0 ? "#1976d2" : "#b0b3b8"}
+                      strokeWidth={val === 0 ? 4 : 2}
+                    />
                   );
                 })}
                 {/* 바늘 - 헤르츠에 따라 부드럽게 움직이고 색상 변경 */}
                 <g
                   style={{
-                    transform: `rotate(${Math.max(-60, Math.min(60, (diff || 0) * 0.5))}deg)`,
+                    transform: `rotate(${Math.max(-100, Math.min(100, diff || 0)) * 0.9}deg)`,
                     transformOrigin: "170px 150px",
-                    transition: "transform 0.3s ease-out",
+                    transition: "transform 0.1s linear",
                   }}
                 >
                   {/* 직선 침 */}
