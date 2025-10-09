@@ -29,6 +29,47 @@ const CATEGORY_ICONS = {
   free: "💬"
 };
 
+// 주소 표시용 함수 (마커 오버레이와 팝업 카드에서 공통 사용)
+const getDisplayAddress = (post) => {
+  // 우선순위 1: region과 district 조합
+  if (post.region && post.district) {
+    const regionShort = post.region.replace('특별시', '').replace('광역시', '').replace('특별자치시', '').replace('도', '').replace('특별자치도', '');
+    return `${regionShort} ${post.district}`;
+  }
+  
+  // 우선순위 2: fullLocation 사용
+  if (post.fullLocation) {
+    const parts = post.fullLocation.split(' ');
+    if (parts.length >= 2) {
+      const regionShort = parts[0].replace('특별시', '').replace('광역시', '').replace('특별자치시', '').replace('도', '').replace('특별자치도', '');
+      return `${regionShort} ${parts[1]}`;
+    }
+    return post.fullLocation;
+  }
+  
+  // 우선순위 3: detailAddress 사용
+  if (post.detailAddress) {
+    const parts = post.detailAddress.split(' ');
+    if (parts.length >= 2) {
+      const regionShort = parts[0].replace('특별시', '').replace('광역시', '').replace('특별자치시', '').replace('도', '').replace('특별자치도', '');
+      return parts.slice(1).join(' ');
+    }
+    return post.detailAddress;
+  }
+  
+  // 우선순위 4: location 사용 (레거시)
+  if (post.location) {
+    const parts = post.location.split(' ');
+    if (parts.length >= 2) {
+      return parts[1];
+    }
+    return post.location;
+  }
+  
+  // 기본값
+  return "위치 정보 없음";
+};
+
 // 주소별 실제 좌표 매핑
 const getAddressCoordinates = (address) => {
   const addressMap = {
@@ -976,34 +1017,8 @@ export default function MapPage() {
       
       const title = post.title?.substring(0, 12) + (post.title?.length > 12 ? '...' : '');
       
-      // 지역 정보 추출 (등록 시 입력한 주소 정보 우선 사용)
-      let locationText = '';
-      
-      if (post.region && post.district) {
-        // region과 district를 조합 (예: "경기 부천시", "서울 강남구")
-        const regionShort = post.region.replace('특별시', '').replace('광역시', '').replace('특별자치시', '').replace('도', '').replace('특별자치도', '');
-        locationText = `${regionShort} ${post.district}`;
-      } else if (post.fullLocation) {
-        // fullLocation 사용 (예: "경기도 부천시")
-        const parts = post.fullLocation.split(' ');
-        if (parts.length >= 2) {
-          const regionShort = parts[0].replace('특별시', '').replace('광역시', '').replace('특별자치시', '').replace('도', '').replace('특별자치도', '');
-          locationText = `${regionShort} ${parts[1]}`;
-        }
-      } else if (post.detailAddress) {
-        // "서울특별시 중구 명동" -> "중구 명동"
-        const parts = post.detailAddress.split(' ');
-        if (parts.length >= 2) {
-          const regionShort = parts[0].replace('특별시', '').replace('광역시', '').replace('특별자치시', '').replace('도', '').replace('특별자치도', '');
-          locationText = parts.slice(1).join(' ').substring(0, 10);
-        }
-      } else if (post.location) {
-        // "서울특별시 중구" -> "중구"
-        const parts = post.location.split(' ');
-        if (parts.length >= 2) {
-          locationText = parts[1].substring(0, 8);
-        }
-      }
+      // 지역 정보 추출 (공통 함수 사용)
+      const locationText = getDisplayAddress(post);
       
       overlayContent.innerHTML = `
         <div style="display: flex; flex-direction: column; gap: 4px; align-items: center;">
@@ -1225,7 +1240,7 @@ export default function MapPage() {
             <PostTitle>{selectedPost.title}</PostTitle>
             
             <PostMeta>
-              <span>📍 {selectedPost.detailAddress || selectedPost.location}</span>
+              <span>📍 {getDisplayAddress(selectedPost)}</span>
               <span>👤 {selectedPost.sellerNickname || selectedPost.authorName}</span>
               {selectedPost.price && (
                 <span>💰 {Number(selectedPost.price).toLocaleString()}원</span>
