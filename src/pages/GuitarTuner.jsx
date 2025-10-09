@@ -967,10 +967,6 @@ export default function GuitarTuner() {
             </SuccessIndicator>
           </GaugeWrap>
         </TunerRow>
-        <StandardText>
-          표준튜닝: E₄(329.6) - B₃(246.9) - G₃(196.0) - D₃(146.8) - A₂(110.0) -
-          E₂(82.4)
-        </StandardText>
       </Frame>
       
       {/* 손상 감지 온오프 토글 */}

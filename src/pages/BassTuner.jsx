@@ -916,9 +916,6 @@ export default function BassTuner() {
             </SuccessIndicator>
           </GaugeWrap>
         </TunerRow>
-        <StandardText>
-          표준튜닝: G₂(98.0) - D₂(73.4) - A₁(55.0) - E₁(41.2)
-        </StandardText>
       </Frame>
       
       {/* 손상 감지 온오프 토글 */}
