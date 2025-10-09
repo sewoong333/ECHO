@@ -770,9 +770,6 @@ export default function MapPage() {
         cursor: pointer;
         transition: all 0.2s;
         user-select: none;
-        position: relative;
-        bottom: 50px;
-        transform: translateX(-50%);
         min-width: 140px;
         text-align: center;
         max-width: 200px;
@@ -809,13 +806,13 @@ export default function MapPage() {
       
       // 오버레이에 hover 효과
       overlayContent.addEventListener('mouseenter', function() {
-        overlayContent.style.transform = 'translateX(-50%) scale(1.05)';
+        overlayContent.style.transform = 'scale(1.05)';
         overlayContent.style.borderWidth = '3px';
         overlayContent.style.zIndex = '1000';
       });
       
       overlayContent.addEventListener('mouseleave', function() {
-        overlayContent.style.transform = 'translateX(-50%) scale(1)';
+        overlayContent.style.transform = 'scale(1)';
         overlayContent.style.borderWidth = '2px';
       });
       
@@ -824,11 +821,12 @@ export default function MapPage() {
         setSelectedPost(post);
       });
 
-      // 커스텀 오버레이 생성
+      // 커스텀 오버레이 생성 (마커 바로 위에 붙여서 표시)
       var customOverlay = new kakao.maps.CustomOverlay({
         position: markerPosition,
         content: overlayContent,
-        yAnchor: 1,
+        yAnchor: 0, // 마커 위쪽에 붙여서 표시
+        xAnchor: 0.5, // 가운데 정렬
         zIndex: 2
       });
 
