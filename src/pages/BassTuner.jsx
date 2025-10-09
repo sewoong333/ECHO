@@ -850,26 +850,51 @@ export default function BassTuner() {
                   style={{
                     transform: `rotate(${Math.max(-100, Math.min(100, diff || 0)) * 0.9}deg)`,
                     transformOrigin: "170px 150px",
+                    transition: "transform 0.3s ease",
                   }}
                 >
+                  {/* 바늘 몸체 */}
                   <rect
                     x="167"
                     y="150"
                     width="6"
                     height="-70"
                     rx="3"
-                    fill="#222"
-                    filter="url(#shadow)"
+                    fill={Math.abs(diff || 0) < 1 ? "#4CAF50" : Math.abs(diff || 0) < 5 ? "#FF9800" : "#F44336"}
+                    style={{
+                      filter: "drop-shadow(0 0 8px rgba(0,0,0,0.3))",
+                      transition: "fill 0.3s ease",
+                    }}
                   />
+                  {/* 바늘 끝 삼각형 */}
+                  <path
+                    d="M 170 80 L 162 90 L 178 90 Z"
+                    fill={Math.abs(diff || 0) < 1 ? "#4CAF50" : Math.abs(diff || 0) < 5 ? "#FF9800" : "#F44336"}
+                    style={{
+                      transition: "fill 0.3s ease",
+                    }}
+                  />
+                  {/* 중심점 */}
                   <circle
                     cx="170"
                     cy="150"
                     r="16"
                     fill="#fff"
-                    stroke="#222"
+                    stroke={Math.abs(diff || 0) < 1 ? "#4CAF50" : Math.abs(diff || 0) < 5 ? "#FF9800" : "#F44336"}
                     strokeWidth="5"
+                    style={{
+                      transition: "stroke 0.3s ease",
+                    }}
                   />
-                  <circle cx="170" cy="150" r="9" fill="#222" />
+                  <circle 
+                    cx="170" 
+                    cy="150" 
+                    r="9" 
+                    fill={Math.abs(diff || 0) < 1 ? "#4CAF50" : Math.abs(diff || 0) < 5 ? "#FF9800" : "#F44336"}
+                    style={{
+                      transition: "fill 0.3s ease",
+                    }}
+                  />
                 </g>
               </svg>
               {/* 음표/기준주파수 */}
