@@ -67,6 +67,8 @@ const getAddressCoordinates = (address) => {
     "경기도 의정부시": { lat: 37.7381, lng: 127.0472 },
     "경기도 안양시": { lat: 37.3943, lng: 126.9568 },
     "경기도 부천시": { lat: 37.5036, lng: 126.7660 },
+    "경기 부천시": { lat: 37.5036, lng: 126.7660 },
+    "부천시": { lat: 37.5036, lng: 126.7660 },
     "경기도 광명시": { lat: 37.4772, lng: 126.8663 },
     "경기도 평택시": { lat: 36.9909, lng: 127.0856 },
     "경기도 과천시": { lat: 37.4292, lng: 126.9882 },
@@ -345,32 +347,46 @@ export default function MapPage() {
           const products = productsSnapshot.docs.map(doc => {
             const data = doc.data();
             
-            // 실제 주소 정보 활용
-            if (data.coordinates && data.coordinates.lat && data.coordinates.lng) {
-              // 이미 좌표가 있으면 사용
-              data.latitude = data.coordinates.lat;
-              data.longitude = data.coordinates.lng;
-              data.address = data.coordinates.address || data.address;
-            } else if (data.latitude && data.longitude) {
-              // 기존 좌표 필드 사용
-              console.log('📍 기존 좌표 사용:', data.latitude, data.longitude);
-            } else if (data.address || data.location || data.detailAddress) {
-              // 주소 정보가 있으면 좌표 변환 시도
-              const addressToSearch = data.detailAddress || data.address || data.location;
-              console.log('📍 주소 정보 발견:', addressToSearch);
+            // 우선순위 1: 등록 시 저장된 좌표 사용
+            if (data.latitude && data.longitude) {
+              console.log('📍 등록된 좌표 사용:', data.title, data.latitude, data.longitude);
+              // 주소는 detailAddress > fullLocation > region+district 순으로 사용
+              data.address = data.detailAddress || data.fullLocation || (data.region && data.district ? `${data.region} ${data.district}` : "");
+            } 
+            // 우선순위 2: region과 district 정보로 좌표 변환
+            else if (data.region && data.district) {
+              // region과 district를 조합하여 정확한 주소 생성
+              const fullAddress = `${data.region} ${data.district}`;
+              console.log('📍 주소로 좌표 변환:', data.title, fullAddress);
               
-              // 주소 기반 좌표 설정 (실제 주소에 맞는 좌표)
+              const addressCoordinates = getAddressCoordinates(fullAddress);
+              data.latitude = addressCoordinates.lat;
+              data.longitude = addressCoordinates.lng;
+              data.address = data.detailAddress || fullAddress;
+            }
+            // 우선순위 3: detailAddress만 있는 경우
+            else if (data.detailAddress) {
+              console.log('📍 상세주소로 좌표 변환:', data.title, data.detailAddress);
+              const addressCoordinates = getAddressCoordinates(data.detailAddress);
+              data.latitude = addressCoordinates.lat;
+              data.longitude = addressCoordinates.lng;
+              data.address = data.detailAddress;
+            }
+            // 우선순위 4: 기존 주소 필드 사용 (레거시)
+            else if (data.address || data.location) {
+              const addressToSearch = data.address || data.location;
+              console.log('📍 레거시 주소 사용:', data.title, addressToSearch);
               const addressCoordinates = getAddressCoordinates(addressToSearch);
               data.latitude = addressCoordinates.lat;
               data.longitude = addressCoordinates.lng;
               data.address = addressToSearch;
-            } else {
-              // 주소 정보가 전혀 없으면 서울 중심에 배치
-              console.log('📍 주소 정보 없음, 서울 중심에 배치');
+            }
+            // 마지막: 주소 정보가 전혀 없으면 서울 중심에 배치
+            else {
+              console.log('⚠️ 주소 정보 없음, 기본 위치 사용:', data.title);
               data.latitude = 37.5665;
               data.longitude = 126.9780;
-              data.location = "서울특별시";
-              data.detailAddress = "서울특별시 중구";
+              data.address = "서울특별시";
             }
             
             return {
@@ -960,20 +976,32 @@ export default function MapPage() {
       
       const title = post.title?.substring(0, 12) + (post.title?.length > 12 ? '...' : '');
       
-      // 지역 정보 추출 (00구00동 형태)
+      // 지역 정보 추출 (등록 시 입력한 주소 정보 우선 사용)
       let locationText = '';
       
-      if (post.detailAddress) {
+      if (post.region && post.district) {
+        // region과 district를 조합 (예: "경기 부천시", "서울 강남구")
+        const regionShort = post.region.replace('특별시', '').replace('광역시', '').replace('특별자치시', '').replace('도', '').replace('특별자치도', '');
+        locationText = `${regionShort} ${post.district}`;
+      } else if (post.fullLocation) {
+        // fullLocation 사용 (예: "경기도 부천시")
+        const parts = post.fullLocation.split(' ');
+        if (parts.length >= 2) {
+          const regionShort = parts[0].replace('특별시', '').replace('광역시', '').replace('특별자치시', '').replace('도', '').replace('특별자치도', '');
+          locationText = `${regionShort} ${parts[1]}`;
+        }
+      } else if (post.detailAddress) {
         // "서울특별시 중구 명동" -> "중구 명동"
         const parts = post.detailAddress.split(' ');
         if (parts.length >= 2) {
-          locationText = parts.slice(1).join(' ').substring(0, 8);
+          const regionShort = parts[0].replace('특별시', '').replace('광역시', '').replace('특별자치시', '').replace('도', '').replace('특별자치도', '');
+          locationText = parts.slice(1).join(' ').substring(0, 10);
         }
       } else if (post.location) {
         // "서울특별시 중구" -> "중구"
         const parts = post.location.split(' ');
         if (parts.length >= 2) {
-          locationText = parts[1].substring(0, 6);
+          locationText = parts[1].substring(0, 8);
         }
       }
       
