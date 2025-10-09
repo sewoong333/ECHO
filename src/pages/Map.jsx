@@ -773,19 +773,15 @@ export default function MapPage() {
         position: relative;
         bottom: 50px;
         transform: translateX(-50%);
-        min-width: 120px;
+        min-width: 140px;
         text-align: center;
+        max-width: 200px;
       `;
       
       const title = post.title?.substring(0, 12) + (post.title?.length > 12 ? '...' : '');
       
       // 지역 정보 추출 (00구00동 형태)
       let locationText = '';
-      console.log('📍 지역 정보 추출:', { 
-        detailAddress: post.detailAddress, 
-        location: post.location,
-        title: post.title 
-      });
       
       if (post.detailAddress) {
         // "서울특별시 중구 명동" -> "중구 명동"
@@ -801,15 +797,13 @@ export default function MapPage() {
         }
       }
       
-      console.log('📍 추출된 지역 정보:', locationText);
-      
       overlayContent.innerHTML = `
-        <div style="display: flex; flex-direction: column; gap: 3px; align-items: center;">
-          <div style="display: flex; align-items: center; gap: 4px;">
+        <div style="display: flex; flex-direction: column; gap: 4px; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 4px; justify-content: center;">
             <span style="font-size: 14px;">${icon}</span>
-            <span style="font-weight: 600;">${title}</span>
+            <span style="font-weight: 600; font-size: 12px;">${title}</span>
           </div>
-          ${locationText ? `<div style="font-size: 10px; color: #666; background: #f8f9fa; padding: 2px 6px; border-radius: 8px; border: 1px solid #e9ecef;">${locationText}</div>` : ''}
+          ${locationText ? `<div style="font-size: 10px; color: #666; background: #f8f9fa; padding: 2px 8px; border-radius: 10px; border: 1px solid #e9ecef; font-weight: 500;">${locationText}</div>` : ''}
         </div>
       `;
       
