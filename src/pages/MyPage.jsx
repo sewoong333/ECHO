@@ -35,6 +35,7 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  padding-bottom: 80px; /* 하단 네비게이션 공간 확보 */
 `;
 
 const ProfileSection = styled.div`
@@ -281,7 +282,7 @@ const ChevronRight = styled.div`
 `;
 
 const LogoutButton = styled.button`
-  width: 100%;
+  width: calc(100% - 40px);
   padding: 16px;
   background: #f44336;
   color: white;
@@ -290,12 +291,12 @@ const LogoutButton = styled.button`
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
-  margin: 20px;
-  margin-top: 0;
+  margin: 20px auto;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  max-width: 480px;
   
   &:hover {
     background: #d32f2f;

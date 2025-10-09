@@ -194,10 +194,12 @@ export default function SalesHistory() {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchSalesHistory = async (retryCount = 0) => {
       try {
+        setError(null);
         console.log("📦 판매내역 로딩 시작...", {
           userId: user.uid,
           isLoggedIn: user.isLoggedIn,
@@ -263,9 +265,10 @@ export default function SalesHistory() {
           return;
         }
         
-        // 모든 재시도가 실패한 경우 빈 배열로 설정
+        // 에러 상태 설정
+        setError(err.message || '데이터를 불러오는데 실패했습니다.');
         setList([]);
-        console.log("❌ 모든 재시도 실패 - 빈 목록 표시");
+        console.log("❌ 모든 재시도 실패 - 에러 상태 설정");
       } finally {
         setLoading(false);
       }
@@ -297,6 +300,45 @@ export default function SalesHistory() {
       <Wrapper>
         <TopBar />
         <div style={{ textAlign: "center", padding: "40px 0" }}>로딩중...</div>
+      </Wrapper>
+    );
+  }
+
+  if (error) {
+    return (
+      <Wrapper>
+        <TopBar />
+        <div style={{ 
+          textAlign: "center", 
+          padding: "40px 20px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "16px"
+        }}>
+          <div style={{ fontSize: "48px" }}>⚠️</div>
+          <div style={{ fontSize: "18px", fontWeight: "600", color: "#333" }}>
+            문제가 발생했습니다
+          </div>
+          <div style={{ fontSize: "14px", color: "#666", marginBottom: "20px" }}>
+            {error}
+          </div>
+          <button 
+            onClick={() => window.location.reload()}
+            style={{
+              background: "#2ed8b6",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              padding: "12px 24px",
+              fontSize: "16px",
+              fontWeight: "600",
+              cursor: "pointer"
+            }}
+          >
+            다시 시도
+          </button>
+        </div>
       </Wrapper>
     );
   }
