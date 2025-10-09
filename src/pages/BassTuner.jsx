@@ -668,16 +668,16 @@ export default function BassTuner() {
           const diffValue = getDiffHz(freq, BASS_NOTES[selected].freq);
           setDiff(diffValue);
           
-          // 튜닝 성공 체크 및 손상 분석
+          // 튜닝 성공 체크
           if (Math.abs(diffValue) < 1) {
             setShowSuccess(true);
             setTimeout(() => setShowSuccess(false), 2000);
-            
-            // 튜닝 완료 시에만 손상 분석 수행 (온오프 기능)
-            if (damageDetection) {
-              const healthAnalysis = analyzeAudioHealth(buf, audioContext.sampleRate, freq, BASS_NOTES[selected].freq, rms);
-              setLastDamageCheck(healthAnalysis);
-            }
+          }
+          
+          // 손상 분석 (활성화된 경우에만)
+          if (damageDetection) {
+            const healthAnalysis = analyzeAudioHealth(buf, audioContext.sampleRate, freq, BASS_NOTES[selected].freq, rms);
+            setLastDamageCheck(healthAnalysis);
           }
         } else {
           setPitch(null);
