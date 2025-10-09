@@ -253,6 +253,17 @@ const SuccessIndicator = styled.div`
   }
 `;
 
+const DamageSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin: 20px 20px 150px 20px;
+  max-width: 600px;
+  width: calc(100% - 40px);
+  margin-left: auto;
+  margin-right: auto;
+`;
+
 const DamageToggle = styled.div`
   display: flex;
   align-items: center;
@@ -260,7 +271,6 @@ const DamageToggle = styled.div`
   background: rgba(255, 255, 255, 0.1);
   border-radius: 15px;
   padding: 15px;
-  margin: 20px 0;
 `;
 
 const ToggleButton = styled.button`
@@ -281,7 +291,6 @@ const DamageStatusArea = styled.div`
   background: rgba(255, 255, 255, 0.05);
   border-radius: 15px;
   padding: 15px;
-  margin: 20px 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -918,42 +927,45 @@ export default function BassTuner() {
         </TunerRow>
       </Frame>
       
-      {/* 손상 감지 온오프 토글 */}
-      <DamageToggle>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <FaExclamationTriangle />
-          손상 감지
-        </div>
-        <ToggleButton
-          $active={damageDetection}
-          onClick={() => setDamageDetection(!damageDetection)}
-        >
-          {damageDetection ? <FaToggleOn /> : <FaToggleOff />}
-        </ToggleButton>
-      </DamageToggle>
-      
-      {/* 고정된 손상 상태 영역 - 튜닝 완료 시에만 표시 */}
-      {damageDetection && (
-        <DamageStatusArea>
-          {lastDamageCheck ? (
-            <DamageCardFixed $type={lastDamageCheck.type}>
-              <SafetyTitle>
-                <FaExclamationTriangle />
-                {lastDamageCheck.title}
-              </SafetyTitle>
-              <SafetyMessage>{lastDamageCheck.message}</SafetyMessage>
-              <SafetyAction>{lastDamageCheck.action}</SafetyAction>
-              {lastDamageCheck.details && (
-                <SafetyDetails>분석 결과: {lastDamageCheck.details}</SafetyDetails>
-              )}
-            </DamageCardFixed>
-          ) : (
-            <EmptyDamageArea>
-              튜닝 완료 시 악기 상태를 확인합니다
-            </EmptyDamageArea>
-          )}
-        </DamageStatusArea>
-      )}
+      {/* 손상 감지 섹션 - 상하 정렬 */}
+      <DamageSection>
+        {/* 손상 감지 온오프 토글 */}
+        <DamageToggle>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <FaExclamationTriangle />
+            손상 감지
+          </div>
+          <ToggleButton
+            $active={damageDetection}
+            onClick={() => setDamageDetection(!damageDetection)}
+          >
+            {damageDetection ? <FaToggleOn /> : <FaToggleOff />}
+          </ToggleButton>
+        </DamageToggle>
+        
+        {/* 고정된 손상 상태 영역 - 튜닝 완료 시에만 표시 */}
+        {damageDetection && (
+          <DamageStatusArea>
+            {lastDamageCheck ? (
+              <DamageCardFixed $type={lastDamageCheck.type}>
+                <SafetyTitle>
+                  <FaExclamationTriangle />
+                  {lastDamageCheck.title}
+                </SafetyTitle>
+                <SafetyMessage>{lastDamageCheck.message}</SafetyMessage>
+                <SafetyAction>{lastDamageCheck.action}</SafetyAction>
+                {lastDamageCheck.details && (
+                  <SafetyDetails>분석 결과: {lastDamageCheck.details}</SafetyDetails>
+                )}
+              </DamageCardFixed>
+            ) : (
+              <EmptyDamageArea>
+                튜닝 완료 시 악기 상태를 확인합니다
+              </EmptyDamageArea>
+            )}
+          </DamageStatusArea>
+        )}
+      </DamageSection>
       
       {/* 헤드 일러스트 (간단 SVG) - 하단 중앙 고정 */}
       <HeadSVGWrap>
