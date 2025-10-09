@@ -256,7 +256,7 @@ const SuccessIndicator = styled.div`
 const DamageSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 8px;
   margin: 20px;
   margin-bottom: 200px;
 `;
