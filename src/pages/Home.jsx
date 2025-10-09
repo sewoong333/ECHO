@@ -1188,7 +1188,7 @@ export default function Home() {
     localStorage.removeItem('recentSearches');
   };
 
-  // 인기 상품 계산 (조회수 + 찜하기 수 + 댓글 수 기준)
+  // 인기 상품 계산 (조회수 + 관심물건 수 + 댓글 수 기준)
   const getPopularProducts = () => {
     return products
       .filter(product => product.status === 'active')
@@ -1214,7 +1214,7 @@ export default function Home() {
       .slice(0, 8);
   };
 
-  // 추천 상품 (사용자의 찜한 상품 기반)
+  // 추천 상품 (사용자의 관심물건 기반)
   const getRecommendedProducts = () => {
     if (!user.isLoggedIn) {
       // 로그인하지 않은 경우 인기 상품을 추천으로 표시
@@ -1225,11 +1225,11 @@ export default function Home() {
     const likedCategories = [...new Set(likedProducts.map(product => product.category))];
     
     if (likedCategories.length === 0) {
-      // 찜한 상품이 없으면 최근 조회한 상품의 카테고리 기반 (임시로 인기 상품)
+      // 관심물건이 없으면 최근 조회한 상품의 카테고리 기반 (임시로 인기 상품)
       return getPopularProducts().slice(0, 6);
     }
     
-    // 찜한 카테고리와 같은 카테고리의 상품들을 추천
+    // 관심물건 카테고리와 같은 카테고리의 상품들을 추천
     return products
       .filter(product => 
         product.status === 'active' &&

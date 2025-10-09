@@ -253,22 +253,22 @@ export function ProductProvider({ children }) {
           return;
         }
 
-        console.log("❤️ 찜한 상품 로드 중...", user.uid);
+        console.log("❤️ 관심물건 로드 중...", user.uid);
         
         // 현재 products에서 찜한 상품만 필터링
         const likedProducts = products.filter(product => product.isLikedByUser);
         setLikedProducts(likedProducts);
 
-        console.log("✅ 찜한 상품 로드 완료:", likedProducts.length, "개");
+        console.log("✅ 관심물건 로드 완료:", likedProducts.length, "개");
       } catch (err) {
-        console.error("❌ 찜한 상품 로드 실패:", err);
+        console.error("❌ 관심물건 로드 실패:", err);
         setLikedProducts([]);
       }
     },
     [user?.uid, products],
   );
 
-  // 사용자 로그인 시 찜한 상품 로드
+  // 사용자 로그인 시 관심물건 로드
   useEffect(() => {
     if (user?.uid && products.length > 0) {
       loadLikedProducts();
@@ -483,7 +483,7 @@ export function ProductProvider({ children }) {
     [user],
   );
 
-  // 찜하기/찜 해제
+  // 관심물건 추가/관심해제
   const toggleLike = useCallback(
     async (productId) => {
       try {
@@ -491,7 +491,7 @@ export function ProductProvider({ children }) {
           throw new Error("로그인이 필요합니다.");
         }
 
-        console.log("❤️ 찜하기 토글 중...", productId);
+        console.log("❤️ 관심물건 토글 중...", productId);
 
         const isLiked = await productService.toggleLike(productId, user.uid);
 
@@ -508,7 +508,7 @@ export function ProductProvider({ children }) {
           ),
         );
 
-        // 찜한 상품 목록 업데이트
+        // 관심물건 목록 업데이트
         if (isLiked) {
           const product = products.find((p) => p.id === productId);
           if (product) {
@@ -521,7 +521,7 @@ export function ProductProvider({ children }) {
           setLikedProducts((prev) => prev.filter((p) => p.id !== productId));
         }
 
-        // 찜하기 알림 (찜한 경우에만)
+        // 관심물건 알림 (관심물건 추가한 경우에만)
         if (isLiked) {
           const product = products.find((p) => p.id === productId);
           if (product && product.sellerId !== user.uid) {
@@ -530,17 +530,17 @@ export function ProductProvider({ children }) {
                 product.title,
                 user.nickname || '익명의 사용자'
               );
-              console.log("📢 찜하기 알림 전송:", product.title);
+              console.log("📢 관심물건 알림 전송:", product.title);
             } catch (notificationError) {
-              console.warn("찜하기 알림 전송 실패:", notificationError);
+              console.warn("관심물건 알림 전송 실패:", notificationError);
             }
           }
         }
 
-        console.log("✅ 찜하기 토글 완료:", isLiked ? "추가" : "제거");
+        console.log("✅ 관심물건 토글 완료:", isLiked ? "추가" : "관심해제");
         return isLiked;
       } catch (error) {
-        console.error("❌ 찜하기 실패:", error);
+        console.error("❌ 관심물건 토글 실패:", error);
         throw error;
       }
     },

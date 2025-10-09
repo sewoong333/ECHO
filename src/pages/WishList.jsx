@@ -222,7 +222,7 @@ export default function WishList() {
     // 사용자가 로그인했고 상품 로딩이 완료되면 로딩 해제
     if (!user.loading && products.length >= 0) {
       setLoading(false);
-      // 찜한 상품 로드
+      // 관심물건 로드
       if (user.uid) {
         loadLikedProducts();
       }
@@ -241,7 +241,7 @@ export default function WishList() {
     try {
       await toggleLike(productId);
     } catch (error) {
-      console.error('찜 해제 실패:', error);
+      console.error('관심해제 실패:', error);
     }
   };
 

@@ -95,10 +95,10 @@ export const notificationService = {
     });
   },
 
-  // 찜하기 알림
+  // 관심물건 알림
   showLikeNotification(productTitle, userName) {
-    return this.showNotification(`❤️ 새로운 찜`, {
-      body: `${userName}님이 "${productTitle}"를 찜했습니다`,
+    return this.showNotification(`❤️ 새로운 관심물건`, {
+      body: `${userName}님이 "${productTitle}"를 관심물건으로 추가했습니다`,
       icon: '/logo192.png',
       tag: 'like-notification',
     });
