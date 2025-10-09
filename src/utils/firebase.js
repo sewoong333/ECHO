@@ -742,10 +742,10 @@ export const productService = {
     try {
       console.log("🔍 사용자 상품 조회 시작:", userId);
       
+      // 임시로 orderBy 제거하여 인덱스 오류 방지
       const q = query(
         productsCollection,
-        where("sellerId", "==", userId),
-        orderBy("createdAt", "desc"),
+        where("sellerId", "==", userId)
       );
 
       const querySnapshot = await getDocs(q);
@@ -753,6 +753,13 @@ export const productService = {
         id: doc.id,
         ...doc.data(),
       }));
+      
+      // 클라이언트에서 날짜순 정렬
+      products.sort((a, b) => {
+        const timeA = a.createdAt?.toDate?.() || new Date(a.createdAt) || new Date(0);
+        const timeB = b.createdAt?.toDate?.() || new Date(b.createdAt) || new Date(0);
+        return timeB - timeA;
+      });
       
       console.log("✅ 사용자 상품 조회 완료:", products.length, "개");
       return products;
