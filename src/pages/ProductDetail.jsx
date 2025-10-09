@@ -678,6 +678,10 @@ const ModalImageSlider = styled.div`
   -webkit-transform: translateX(-${props => props.currentIndex * 100}vw) translateZ(0);
   will-change: transform;
   
+  /* 이미지가 정확히 가운데 정렬되도록 */
+  align-items: center;
+  justify-content: flex-start;
+  
   /* 모바일에서 터치 최적화 */
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
@@ -707,6 +711,11 @@ const ModalImage = styled.img`
   position: relative;
   z-index: 1;
   flex-shrink: 0;
+  
+  /* 각 이미지가 정확히 화면을 채우도록 */
+  display: block;
+  margin: 0;
+  padding: 0;
   
   &:active {
     cursor: grabbing;
