@@ -236,16 +236,19 @@ const PillSub = styled.div`
 
 // 성공 표시와 손상 감지 온오프를 위한 새로운 컴포넌트들
 const SuccessIndicator = styled.div`
-  display: ${props => props.$show ? 'flex' : 'none'};
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: rgba(76, 175, 80, 0.2);
-  border: 2px solid #4CAF50;
+  background: ${props => props.$show ? 'rgba(76, 175, 80, 0.2)' : 'transparent'};
+  border: 2px solid ${props => props.$show ? '#4CAF50' : 'transparent'};
   border-radius: 15px;
   padding: 15px;
   margin: 20px 0;
-  animation: pulse 1s ease-in-out;
+  min-height: 60px;
+  opacity: ${props => props.$show ? '1' : '0'};
+  transition: opacity 0.3s ease;
+  animation: ${props => props.$show ? 'pulse 1s ease-in-out' : 'none'};
   
   @keyframes pulse {
     0%, 100% { transform: scale(1); }
@@ -268,6 +271,7 @@ const DamageToggle = styled.div`
   background: rgba(255, 255, 255, 0.1);
   border-radius: 15px;
   padding: 15px;
+  min-height: 60px;
 `;
 
 const ToggleButton = styled.button`
@@ -440,6 +444,10 @@ const Advice = styled.div`
   margin-top: 2px;
   font-weight: 600;
   text-align: center;
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 const StandardText = styled.div`
   margin-top: 10px;
