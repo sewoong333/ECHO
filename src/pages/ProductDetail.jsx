@@ -664,8 +664,11 @@ const ModalCloseButton = styled.button`
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
     width: 24px;
     height: 24px;
-    display: block;
-    fill: currentColor;
+    display: block !important;
+    fill: white !important;
+    color: white !important;
+    stroke: white !important;
+    stroke-width: 2px;
   }
 `;
 
@@ -745,8 +748,11 @@ const SlideButton = styled.button`
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
     width: 24px;
     height: 24px;
-    display: block;
-    fill: currentColor;
+    display: block !important;
+    fill: white !important;
+    color: white !important;
+    stroke: white !important;
+    stroke-width: 2px;
   }
 `;
 
