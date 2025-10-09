@@ -264,15 +264,16 @@ export function ProductProvider({ children }) {
         const targetUserId = userId || user?.uid;
         if (!targetUserId) {
           console.log("❌ 사용자 UID가 없음");
+          setUserProducts([]);
           return;
         }
 
         console.log("👤 사용자 상품 로드 중...", targetUserId);
 
         const products = await productService.getUserProducts(targetUserId);
-        setUserProducts(products);
+        setUserProducts(products || []);
 
-        console.log("✅ 사용자 상품 로드 완료:", products.length, "개");
+        console.log("✅ 사용자 상품 로드 완료:", (products || []).length, "개");
       } catch (err) {
         console.error("❌ 사용자 상품 로드 실패:", err);
         setError(err.message);

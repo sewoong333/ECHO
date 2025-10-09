@@ -195,6 +195,18 @@ export default function SalesHistory() {
   const [filter, setFilter] = useState("all");
   const [error, setError] = useState(null);
 
+  // 에러 바운더리 추가
+  if (!user) {
+    return (
+      <Wrapper>
+        <TopBar />
+        <div style={{ textAlign: "center", padding: "40px 0" }}>
+          로그인이 필요합니다.
+        </div>
+      </Wrapper>
+    );
+  }
+
   useEffect(() => {
     const initializeSalesHistory = async () => {
       try {
@@ -236,7 +248,8 @@ export default function SalesHistory() {
     }
   }, [user.isLoggedIn, user.uid, user.loading, loadUserProducts]);
 
-  const filteredList = userProducts.filter((item) => {
+  const filteredList = (userProducts || []).filter((item) => {
+    if (!item) return false;
     if (filter === "all") return true;
     if (filter === "active") return !item.sold;
     if (filter === "sold") return item.sold;
