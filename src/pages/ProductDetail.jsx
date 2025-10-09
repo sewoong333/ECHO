@@ -726,6 +726,7 @@ const SlideButton = styled.button`
   justify-content: center !important;
   text-align: center !important;
   line-height: 1 !important;
+  vertical-align: middle !important;
   backdrop-filter: blur(8px) !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
   padding: 0 !important;
