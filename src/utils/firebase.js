@@ -28,6 +28,7 @@ import {
   increment,
   getDoc,
   limit,
+  Timestamp,
   startAfter,
 } from "firebase/firestore";
 import {
@@ -53,6 +54,18 @@ export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+
+// 안전한 타임스탬프 생성 함수 (미래 시간 오류 방지)
+const getSafeTimestamp = () => {
+  try {
+    // 현재 시간을 밀리초로 가져오고, Firebase 서버 시간과의 차이를 최소화
+    const now = Date.now();
+    return Timestamp.fromMillis(now);
+  } catch (error) {
+    console.warn('타임스탬프 생성 실패, serverTimestamp 사용:', error);
+    return serverTimestamp();
+  }
+};
 
 // 인증 지속성 설정 (앱 초기화 시 한 번만 실행)
 if (typeof window !== "undefined") {
@@ -270,7 +283,7 @@ export const productService = {
         throw new Error("로그인이 필요합니다.");
       }
 
-      const now = serverTimestamp();
+      const now = getSafeTimestamp();
       const product = {
         // 기본 정보 (XSS 방지를 위한 HTML 태그 제거)
         title: productData.title.trim().replace(/<[^>]*>/g, ''),
@@ -570,7 +583,7 @@ export const productService = {
           productId,
           userId: userId || 'anonymous',
           userAgent: navigator.userAgent,
-          timestamp: serverTimestamp(),
+          timestamp: getSafeTimestamp(),
           sessionId: viewKey
         });
         console.log('📝 조회 기록 저장 완료');
@@ -593,14 +606,14 @@ export const productService = {
         console.log('📝 조회수 동기화:', productData.viewCount || 0, '→', actualViewCount);
         await updateDoc(productRef, {
           viewCount: actualViewCount,
-          lastViewedAt: serverTimestamp(),
-          lastViewCountUpdate: serverTimestamp()
+          lastViewedAt: getSafeTimestamp(),
+          lastViewCountUpdate: getSafeTimestamp()
         });
       } else {
         // 정상적으로 1 증가
         await updateDoc(productRef, {
           viewCount: increment(1),
-          lastViewedAt: serverTimestamp(),
+          lastViewedAt: getSafeTimestamp(),
         });
       }
       
