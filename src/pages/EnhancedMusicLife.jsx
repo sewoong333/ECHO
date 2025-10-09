@@ -1,9 +1,11 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../store/UserContext";
 import PageErrorBoundary from "../components/PageErrorBoundary";
 import { useToast } from "../store/ToastContext";
+import { musiclifeService } from "../utils/firebase";
+import UserDisplay from "../components/UserDisplay";
 import {
   FaPlus,
   FaGuitar,
@@ -505,6 +507,26 @@ export default function EnhancedMusicLife() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [posts, setPosts] = useState([]);
   const [events] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Firebase에서 실제 음악생활 데이터 로드
+  useEffect(() => {
+    const loadMusicLifePosts = async () => {
+      try {
+        setLoading(true);
+        const musiclifePosts = await musiclifeService.getPosts();
+        console.log('🎵 음악생활 게시글 로드:', musiclifePosts.length, '개');
+        setPosts(musiclifePosts);
+      } catch (error) {
+        console.error('❌ 음악생활 게시글 로드 실패:', error);
+        setPosts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMusicLifePosts();
+  }, []);
 
   const tabs = [
     { id: 'all', label: '전체', icon: <FaMusic /> },
@@ -631,7 +653,13 @@ export default function EnhancedMusicLife() {
           </CommunitySection>
 
           {/* 포스트 목록 */}
-          {filteredPosts.length === 0 ? (
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '60px 20px', color: '#666' }}>
+              <FaMusic size={48} style={{ marginBottom: '16px', opacity: 0.5 }} />
+              <h3>게시글을 불러오는 중...</h3>
+              <p>잠시만 기다려주세요.</p>
+            </div>
+          ) : filteredPosts.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px 20px', color: '#666' }}>
               <FaSearch size={48} style={{ marginBottom: '16px', opacity: 0.5 }} />
               <h3>검색 결과가 없습니다</h3>
@@ -642,19 +670,22 @@ export default function EnhancedMusicLife() {
               <PostCard key={post.id}>
                 <PostHeader>
                   <UserInfo>
-                    <UserAvatar imageUrl={post.author.avatar}>
-                      {!post.author.avatar && post.author.name.charAt(0)}
-                    </UserAvatar>
-                    <UserDetails>
-                      <UserName>{post.author.name}</UserName>
-                      <PostMeta>
-                        <FaClock />
-                        {post.createdAt}
-                        <span>•</span>
-                        <FaEye />
-                        {post.stats.views}
-                      </PostMeta>
-                    </UserDetails>
+                    <UserDisplay 
+                      userId={post.authorId}
+                      size="32px"
+                      showBio={false}
+                      showVerified={true}
+                      maxWidth="200px"
+                      gap="8px"
+                      fallbackText="작성자"
+                    />
+                    <PostMeta>
+                      <FaClock />
+                      {post.createdAt}
+                      <span>•</span>
+                      <FaEye />
+                      {post.viewCount || 0}
+                    </PostMeta>
                     <CategoryBadge category={post.category}>
                       {getCategoryIcon(post.category)}
                       {categories.find(c => c.id === post.category)?.label}
