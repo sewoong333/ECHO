@@ -575,6 +575,22 @@ const ImageModal = styled.div`
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  
+  /* GPU 가속으로 부드러운 렌더링 */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  
+  /* 이미지 렌더링 최적화 */
+  image-rendering: auto;
+  -webkit-image-rendering: auto;
+  -moz-image-rendering: auto;
+  -ms-image-rendering: auto;
+  
+  /* 브라우저별 렌더링 최적화 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 `;
 
 const ModalImageContainer = styled.div`
@@ -596,6 +612,20 @@ const ModalImageContainer = styled.div`
   transform: translateZ(0);
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
+  
+  /* 이미지 렌더링 최적화 */
+  -webkit-perspective: 1000px;
+  perspective: 1000px;
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  
+  /* 브라우저별 렌더링 최적화 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
+  /* 이미지 품질 보장 */
+  image-rendering: auto;
+  -webkit-image-rendering: auto;
 `;
 
 const ModalCloseButton = styled.button`
@@ -605,7 +635,7 @@ const ModalCloseButton = styled.button`
   background: rgba(0, 0, 0, 0.7);
   border: 2px solid rgba(255, 255, 255, 0.3);
   color: white;
-  font-size: 20px;
+  font-size: 40px;
   cursor: pointer;
   border-radius: 50%;
   width: 56px;
@@ -632,6 +662,8 @@ const ModalCloseButton = styled.button`
   /* X 아이콘 스타일 */
   svg {
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    width: 28px;
+    height: 28px;
   }
 `;
 
@@ -668,17 +700,39 @@ const ModalImage = styled.img`
     cursor: grabbing;
   }
   
-  /* 이미지 로딩 최적화 */
+  /* 이미지 렌더링 최적화 - 깨짐 방지 */
+  image-rendering: auto;
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
-  image-rendering: pixelated;
-  image-rendering: auto;
+  -webkit-image-rendering: auto;
+  -moz-image-rendering: auto;
+  -ms-image-rendering: auto;
   
-  /* 모바일에서 이미지 깨짐 방지 */
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
+  /* GPU 가속으로 부드러운 렌더링 */
+  -webkit-transform: translateZ(0) scale(1);
+  transform: translateZ(0) scale(1);
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
+  -webkit-perspective: 1000px;
+  perspective: 1000px;
+  
+  /* 이미지 품질 보장 */
+  -webkit-filter: none;
+  filter: none;
+  
+  /* 모바일 최적화 */
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  
+  /* 이미지 스케일링 방지 */
+  max-width: 100vw;
+  max-height: 100vh;
+  min-width: auto;
+  min-height: auto;
+  
+  /* 브라우저별 렌더링 최적화 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 `;
 
 const ModalImageCounter = styled.div`
@@ -703,7 +757,7 @@ const SlideButton = styled.button`
   background: rgba(0, 0, 0, 0.7);
   border: 2px solid rgba(255, 255, 255, 0.3);
   color: white;
-  font-size: 18px;
+  font-size: 36px;
   cursor: pointer;
   border-radius: 50%;
   width: 56px;
@@ -740,6 +794,8 @@ const SlideButton = styled.button`
   /* 화살표 아이콘 스타일 */
   svg {
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    width: 24px;
+    height: 24px;
   }
 `;
 
