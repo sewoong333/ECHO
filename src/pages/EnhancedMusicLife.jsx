@@ -485,102 +485,7 @@ const getCategoryIcon = (category) => {
   return icons[category] || <FaMusic />;
 };
 
-// 더미 데이터
-const dummyPosts = [
-  {
-    id: 1,
-    type: 'video',
-    category: 'guitar',
-    title: '새로 산 Gibson Les Paul로 연주해봤어요!',
-    content: '오늘 새로 산 Gibson Les Paul Studio로 첫 연주를 해봤습니다. 음색이 정말 깔끔하고 좋네요!',
-    mediaUrl: '/api/placeholder/400/200',
-    thumbnail: '/api/placeholder/400/200',
-    tags: ['gibson', 'lespaul', '일렉기타', '연주'],
-    author: {
-      id: 'user1',
-      name: '기타리스트김',
-      avatar: null
-    },
-    stats: {
-      likes: 24,
-      comments: 8,
-      views: 156
-    },
-    createdAt: '2시간 전',
-    isLiked: false
-  },
-  {
-    id: 2,
-    type: 'image',
-    category: 'piano',
-    title: '집에서 피아노 연습 환경 꾸미기',
-    content: '드디어 집에 피아노 코너를 완성했어요! 야마하 디지털 피아노와 함께 연습하기 좋은 환경이 만들어졌습니다.',
-    mediaUrl: '/api/placeholder/400/200',
-    tags: ['피아노', '연습실', '야마하', '셋업'],
-    author: {
-      id: 'user2',
-      name: '피아노사랑',
-      avatar: null
-    },
-    stats: {
-      likes: 18,
-      comments: 12,
-      views: 89
-    },
-    createdAt: '4시간 전',
-    isLiked: true
-  },
-  {
-    id: 3,
-    type: 'text',
-    category: 'collaboration',
-    title: '홍대에서 밴드 멤버 구해요!',
-    content: '록밴드 베이시스트와 드러머를 구하고 있습니다. 매주 토요일 오후에 연습할 예정이고, 공연 목표로 하고 있어요. 관심 있으시면 연락주세요!',
-    tags: ['밴드', '베이시스트', '드러머', '홍대', '록음악'],
-    author: {
-      id: 'user3',
-      name: '록스타워너비',
-      avatar: null
-    },
-    stats: {
-      likes: 31,
-      comments: 15,
-      views: 203
-    },
-    createdAt: '6시간 전',
-    isLiked: false
-  }
-];
-
-const dummyEvents = [
-  {
-    id: 1,
-    title: '신촌 어쿠스틱 세션',
-    date: '2024.01.15',
-    location: '신촌 카페 뮤직',
-    participants: 8,
-    maxParticipants: 12,
-    type: 'acoustic'
-  },
-  {
-    id: 2,
-    title: '재즈 잼 세션',
-    date: '2024.01.18',
-    location: '이태원 재즈바',
-    participants: 5,
-    maxParticipants: 8,
-    type: 'jazz'
-  },
-  {
-    id: 3,
-    title: '클래식 앙상블 모임',
-    date: '2024.01.20',
-    location: '성북구 문화센터',
-    participants: 12,
-    maxParticipants: 15,
-    type: 'classical'
-  }
-];
+// 실제 데이터는 Firebase에서 가져옴
 
 export default function EnhancedMusicLife() {
   const navigate = useNavigate();
@@ -598,8 +503,8 @@ export default function EnhancedMusicLife() {
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [posts, setPosts] = useState(dummyPosts);
-  const [events] = useState(dummyEvents);
+  const [posts, setPosts] = useState([]);
+  const [events] = useState([]);
 
   const tabs = [
     { id: 'all', label: '전체', icon: <FaMusic /> },

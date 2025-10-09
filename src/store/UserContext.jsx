@@ -1049,40 +1049,10 @@ export function UserProvider({ children }) {
     }
   };
 
-  // 더미 유저 20명 생성
-  const dummyNicknames = [
-    "음악왕",
-    "기타소년",
-    "피아노소녀",
-    "드럼짱",
-    "베이스킹",
-    "색소폰러버",
-    "플룻마스터",
-    "신디장인",
-    "보컬리더",
-    "밴드캡틴",
-    "재즈러버",
-    "락스타",
-    "힙합보이",
-    "클래식걸",
-    "EDM매니아",
-    "트로트신",
-    "포크싱어",
-    "뮤지션A",
-    "뮤지션B",
-    "뮤지션C",
-  ];
-  const users = Array.from({ length: 20 }).map((_, i) => ({
-    nickname: dummyNicknames[i],
-    email: `user${i + 1}@test.com`,
-    password: `testpw${i + 1}`,
-  }));
-
   const value = {
     user,
     userProfile,
     authError,
-    users,
     loginWithGoogle,
     loginWithKakao,
     loginWithEmail,

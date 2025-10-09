@@ -484,27 +484,8 @@ export default function EchoShare() {
   // 옵션 설명
   const _optionDesc = OPTIONS.find((o) => o.key === selectedOption).desc;
 
-  // 후기 더미
-  const reviews = [
-    {
-      avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-      name: "김민수",
-      stars: 5,
-      text: "급매로 바로 팔아서 공간도 확보, 현금도 생겼어요!",
-    },
-    {
-      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-      name: "이수진",
-      stars: 5,
-      text: "위탁판매로 시세에 가깝게 팔 수 있어 만족!",
-    },
-    {
-      avatar: "https://randomuser.me/api/portraits/men/65.jpg",
-      name: "박지훈",
-      stars: 4,
-      text: "위탁임대로 매달 임대료가 들어와요!",
-    },
-  ];
+  // 실제 후기는 데이터베이스에서 가져옴
+  const reviews = [];
 
   const isCustomInstrument = instrument === "custom";
   const isCustomBrand = brand === "기타(직접입력)" || brand === "직접입력";

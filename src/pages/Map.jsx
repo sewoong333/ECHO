@@ -384,86 +384,6 @@ export default function MapPage() {
         } catch (error) {
           console.error("❌ 상품 데이터 로딩 실패:", error);
         }
-        
-        // Firebase에서 데이터가 없으면 데모 데이터 추가
-        if (allPosts.length === 0) {
-          console.log("📝 상품 데이터가 없어서 데모 데이터 추가");
-          const demoProducts = [
-            {
-              id: "demo1",
-              type: "product",
-              title: "어쿠스틱 기타 판매",
-              category: "guitar",
-              latitude: 37.5665,
-              longitude: 126.9780,
-              price: 150000,
-              sellerNickname: "기타마스터",
-              location: "서울특별시 중구",
-              detailAddress: "서울특별시 중구 명동"
-            },
-            {
-              id: "demo2", 
-              type: "product",
-              title: "야마하 피아노",
-              category: "keyboard",
-              latitude: 37.5651,
-              longitude: 126.9895,
-              price: 800000,
-              sellerNickname: "피아노선생",
-              location: "서울특별시 종로구",
-              detailAddress: "서울특별시 종로구 청계천"
-            },
-            {
-              id: "demo3",
-              type: "product", 
-              title: "드럼세트 풀옵션",
-              category: "drums",
-              latitude: 37.5707,
-              longitude: 126.9794,
-              price: 1200000,
-              sellerNickname: "드러머김",
-              location: "서울특별시 용산구",
-              detailAddress: "서울특별시 용산구 이태원동"
-            },
-            {
-              id: "demo4",
-              type: "product",
-              title: "베이스 기타",
-              category: "bass", 
-              latitude: 37.5640,
-              longitude: 126.9748,
-              price: 300000,
-              sellerNickname: "베이시스트",
-              location: "서울특별시 서대문구",
-              detailAddress: "서울특별시 서대문구 신촌동"
-            },
-            {
-              id: "demo5",
-              type: "product",
-              title: "일렉기타 판매",
-              category: "guitar",
-              latitude: 37.5580,
-              longitude: 126.9850,
-              price: 450000,
-              sellerNickname: "일렉기타리스트",
-              location: "서울특별시 강남구",
-              detailAddress: "서울특별시 강남구 역삼동"
-            },
-            {
-              id: "demo6",
-              type: "product",
-              title: "바이올린",
-              category: "violin",
-              latitude: 37.5720,
-              longitude: 126.9720,
-              price: 600000,
-              sellerNickname: "바이올리니스트",
-              location: "서울특별시 마포구",
-              detailAddress: "서울특별시 마포구 홍대동"
-            }
-          ];
-          allPosts.push(...demoProducts);
-        }
       }
 
       // 음악생활 게시글 가져오기
@@ -542,58 +462,6 @@ export default function MapPage() {
         } catch (error) {
           console.error("❌ 음악생활 데이터 로딩 실패:", error);
         }
-        
-        // Firebase에서 음악생활 데이터가 없으면 데모 데이터 추가
-        if (allPosts.length === musiclifeStartCount) {
-          console.log("📝 음악생활 데이터가 없어서 데모 데이터 추가");
-          const demoMusiclife = [
-            {
-              id: "demo_ml1", 
-              type: "musiclife",
-              title: "밴드 멤버 구합니다",
-              category: "collaboration",
-              latitude: 37.5600,
-              longitude: 126.9800,
-              authorName: "록밴드리더",
-              location: "서울특별시 중구",
-              detailAddress: "서울특별시 중구 을지로"
-            },
-            {
-              id: "demo_ml2",
-              type: "musiclife", 
-              title: "기타 레슨 해드려요",
-              category: "lesson",
-              latitude: 37.5680,
-              longitude: 126.9850,
-              authorName: "기타강사",
-              location: "서울특별시 종로구",
-              detailAddress: "서울특별시 종로구 인사동"
-            },
-            {
-              id: "demo_ml3",
-              type: "musiclife",
-              title: "버스킹 같이 하실분",
-              category: "performance", 
-              latitude: 37.5620,
-              longitude: 126.9720,
-              authorName: "버스킹러버",
-              location: "서울특별시 서대문구",
-              detailAddress: "서울특별시 서대문구 연세로"
-            },
-            {
-              id: "demo_ml4",
-              type: "musiclife",
-              title: "홍대 재즈바 공연",
-              category: "performance", 
-              latitude: 37.5560,
-              longitude: 126.9230,
-              authorName: "재즈피아니스트",
-              location: "서울특별시 마포구",
-              detailAddress: "서울특별시 마포구 홍대동"
-            }
-          ];
-          allPosts.push(...demoMusiclife);
-        }
       }
 
       console.log("📍 최종 로드된 게시글:", allPosts.length, "개");
@@ -610,28 +478,7 @@ export default function MapPage() {
       }
     } catch (error) {
       console.error("❌ 위치 기반 게시글 로딩 실패:", error);
-      // 전체 실패시 데모 데이터
-      const fallbackData = [
-        {
-          id: "fallback1",
-          type: "product", 
-          title: "어쿠스틱 기타",
-          category: "guitar",
-          latitude: 37.5665,
-          longitude: 126.9780,
-          price: 150000
-        },
-        {
-          id: "fallback2",
-          type: "musiclife", 
-          title: "밴드 멤버 모집",
-          category: "collaboration",
-          latitude: 37.5600,
-          longitude: 126.9800
-        }
-      ];
-      console.log("🚨 폴백 데이터 사용:", fallbackData.length, "개");
-      setPosts(fallbackData);
+      setPosts([]);
     } finally {
       setLoading(false);
     }
