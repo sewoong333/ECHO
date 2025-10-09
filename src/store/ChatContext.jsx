@@ -20,7 +20,11 @@ import {
 export const ChatContext = createContext();
 
 export function ChatProvider({ children }) {
-  const { user, getUserInfo } = useContext(UserContext);
+  // UserContext가 undefined일 수 있으므로 안전하게 처리
+  const userContext = useContext(UserContext);
+  const user = userContext?.user || { uid: null, isLoggedIn: false };
+  const getUserInfo = userContext?.getUserInfo || (() => Promise.resolve(null));
+  
   const [chatRooms, setChatRooms] = useState([]);
   const [messages, setMessages] = useState({});
   const [currentChat, setCurrentChat] = useState(null);

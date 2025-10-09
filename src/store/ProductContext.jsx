@@ -40,7 +40,9 @@ export function ProductProvider({ children }) {
   const [userProducts, setUserProducts] = useState([]);
   const [likedProducts, setLikedProducts] = useState([]);
 
-  const { user } = useContext(UserContext);
+  // UserContext가 undefined일 수 있으므로 안전하게 처리
+  const userContext = useContext(UserContext);
+  const user = userContext?.user || { uid: null, isLoggedIn: false };
 
   // 필터링 및 정렬 적용 함수
   const applyFiltersAndSort = useCallback((productList, currentFilters) => {
