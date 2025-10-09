@@ -96,13 +96,6 @@ const BulkProductUpload = ({ onClose, onSuccess }) => {
 
   // 대량 업로드 실행
   const handleBulkUpload = async () => {
-    try {
-      // 관리자 권한 확인
-      requireAdmin(user, '대량 상품 등록');
-    } catch (error) {
-      addToast(error.message, 'error');
-      return;
-    }
 
     if (!user?.uid) {
       addToast('로그인이 필요합니다.', 'error');

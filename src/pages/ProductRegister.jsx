@@ -267,12 +267,10 @@ export default function ProductRegister() {
             <h1>상품 등록</h1>
             <p>판매하실 악기 정보를 입력해주세요</p>
           </HeaderText>
-          {(isAdmin(user) || process.env.NODE_ENV === 'development') && (
-            <BulkUploadButton onClick={() => setShowBulkUpload(true)}>
-              <FiUpload size={16} />
-              대량 등록
-            </BulkUploadButton>
-          )}
+          <BulkUploadButton onClick={() => setShowBulkUpload(true)}>
+            <FiUpload size={16} />
+            대량 등록
+          </BulkUploadButton>
         </HeaderContent>
       </Header>
       
