@@ -45,12 +45,13 @@ export default function MapPage() {
   const [mapType, setMapType] = useState("ROADMAP"); // ROADMAP, SATELLITE, TRAFFIC
   const [locationPermission, setLocationPermission] = useState(null); // null, granted, denied
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [isMapReady, setIsMapReady] = useState(false); // 지도 초기화 완료 상태
   const navigate = useNavigate();
 
   // Firebase에서 좌표가 있는 게시글들 가져오기
   const fetchPostsWithLocation = async () => {
     try {
-      setLoading(true);
+      console.log("🔍 게시글 데이터 로딩 시작, 필터:", filter);
       const allPosts = [];
 
       // 상품 게시글 가져오기
@@ -62,6 +63,8 @@ export default function MapPage() {
             orderBy("createdAt", "desc")
           );
           const productsSnapshot = await getDocs(productsQuery);
+          console.log("📦 Firebase 상품 데이터:", productsSnapshot.docs.length, "개");
+          
           const products = productsSnapshot.docs.map(doc => {
             const data = doc.data();
             
@@ -85,9 +88,14 @@ export default function MapPage() {
             };
           });
           allPosts.push(...products);
+          console.log("✅ 상품 데이터 처리 완료:", products.length, "개");
         } catch (error) {
-          console.log("상품 데이터 로딩 실패, 데모 데이터 사용");
-          // 데모 데이터 추가 (더 많은 마커)
+          console.error("❌ 상품 데이터 로딩 실패:", error);
+        }
+        
+        // Firebase에서 데이터가 없으면 데모 데이터 추가
+        if (allPosts.length === 0) {
+          console.log("📝 상품 데이터가 없어서 데모 데이터 추가");
           const demoProducts = [
             {
               id: "demo1",
@@ -162,6 +170,7 @@ export default function MapPage() {
 
       // 음악생활 게시글 가져오기
       if (filter === "all" || filter === "musiclife") {
+        const musiclifeStartCount = allPosts.length;
         try {
           // 모든 음악생활 글 가져오기 (주소가 없는 것도 포함)
           const musiclifeQuery = query(
@@ -169,6 +178,8 @@ export default function MapPage() {
             orderBy("createdAt", "desc")
           );
           const musiclifeSnapshot = await getDocs(musiclifeQuery);
+          console.log("🎵 Firebase 음악생활 데이터:", musiclifeSnapshot.docs.length, "개");
+          
           const musiclife = musiclifeSnapshot.docs.map(doc => {
             const data = doc.data();
             // 주소가 없으면 서울 주소 추가
@@ -185,12 +196,17 @@ export default function MapPage() {
             };
           });
           allPosts.push(...musiclife);
+          console.log("✅ 음악생활 데이터 처리 완료:", musiclife.length, "개");
         } catch (error) {
-          console.log("음악생활 데이터 로딩 실패, 데모 데이터 사용");
-          // 데모 데이터 추가
+          console.error("❌ 음악생활 데이터 로딩 실패:", error);
+        }
+        
+        // Firebase에서 음악생활 데이터가 없으면 데모 데이터 추가
+        if (allPosts.length === musiclifeStartCount) {
+          console.log("📝 음악생활 데이터가 없어서 데모 데이터 추가");
           const demoMusiclife = [
             {
-              id: "demo5", 
+              id: "demo_ml1", 
               type: "musiclife",
               title: "밴드 멤버 구합니다",
               category: "collaboration",
@@ -199,7 +215,7 @@ export default function MapPage() {
               authorName: "록밴드리더"
             },
             {
-              id: "demo6",
+              id: "demo_ml2",
               type: "musiclife", 
               title: "기타 레슨 해드려요",
               category: "lesson",
@@ -208,32 +224,64 @@ export default function MapPage() {
               authorName: "기타강사"
             },
             {
-              id: "demo7",
+              id: "demo_ml3",
               type: "musiclife",
               title: "버스킹 같이 하실분",
               category: "performance", 
               latitude: 37.5620,
               longitude: 126.9720,
               authorName: "버스킹러버"
+            },
+            {
+              id: "demo_ml4",
+              type: "musiclife",
+              title: "홍대 재즈바 공연",
+              category: "performance", 
+              latitude: 37.5560,
+              longitude: 126.9230,
+              authorName: "재즈피아니스트"
             }
           ];
           allPosts.push(...demoMusiclife);
         }
       }
 
-      console.log("📍 로드된 게시글:", allPosts.length, "개");
+      console.log("📍 최종 로드된 게시글:", allPosts.length, "개");
+      console.log("📊 게시글 타입별 분류:", {
+        products: allPosts.filter(p => p.type === 'product').length,
+        musiclife: allPosts.filter(p => p.type === 'musiclife').length
+      });
       setPosts(allPosts);
+      
+      // 데이터 로딩 후 지도가 준비되어 있으면 바로 마커 표시
+      if (map.current && allPosts.length > 0) {
+        console.log("🎯 데이터 로딩 완료, 마커 표시 시작");
+        setTimeout(() => addMarkersToMap(), 100);
+      }
     } catch (error) {
-      console.error("위치 기반 게시글 로딩 실패:", error);
-      // 데모 데이터라도 보여주기
-      setPosts([{
-        id: "demo1",
-        type: "product", 
-        title: "데모 상품",
-        category: "guitar",
-        latitude: 37.5665,
-        longitude: 126.9780
-      }]);
+      console.error("❌ 위치 기반 게시글 로딩 실패:", error);
+      // 전체 실패시 데모 데이터
+      const fallbackData = [
+        {
+          id: "fallback1",
+          type: "product", 
+          title: "어쿠스틱 기타",
+          category: "guitar",
+          latitude: 37.5665,
+          longitude: 126.9780,
+          price: 150000
+        },
+        {
+          id: "fallback2",
+          type: "musiclife", 
+          title: "밴드 멤버 모집",
+          category: "collaboration",
+          latitude: 37.5600,
+          longitude: 126.9800
+        }
+      ];
+      console.log("🚨 폴백 데이터 사용:", fallbackData.length, "개");
+      setPosts(fallbackData);
     } finally {
       setLoading(false);
     }
@@ -637,30 +685,26 @@ export default function MapPage() {
       console.log("✅ 카카오맵 생성 성공 (기본: 일반지도)");
       
       setLoading(false);
+      setIsMapReady(true); // 지도 준비 완료 상태 설정
 
-      // 게시글이 있으면 마커 추가 (지도 초기화 완료 후)
-      setTimeout(() => {
-        if (posts.length > 0) {
-          console.log('🎯 지도 초기화 후 마커 표시:', posts.length);
-          addMarkersToMap();
-        }
-      }, 500);
+      console.log("✅ 지도 초기화 완료, isMapReady = true");
     } catch (error) {
       console.error("❌ 지도 생성 실패:", error);
       setLoading(false);
     }
   };
 
-  // 지도에 마커 추가 (공식 가이드 방식)
+  // 지도에 마커 추가 (제목이 항상 표시되는 커스텀 오버레이 방식)
   const addMarkersToMap = () => {
     if (!map.current) {
       console.log('❌ 지도가 준비되지 않음');
       return;
     }
     
-    // 기존 마커들 제거
-    markers.current.forEach(marker => {
-      marker.setMap(null);
+    // 기존 마커들과 오버레이 제거
+    markers.current.forEach(item => {
+      if (item.marker) item.marker.setMap(null);
+      if (item.overlay) item.overlay.setMap(null);
     });
     markers.current = [];
     
@@ -684,47 +728,105 @@ export default function MapPage() {
     filteredPosts.forEach(post => {
       if (!post.latitude || !post.longitude) return;
 
-      // 마커 위치 설정 (공식 가이드 방식)
+      // 마커 위치 설정
       var markerPosition = new kakao.maps.LatLng(post.latitude, post.longitude);
       
-      // 기본 마커 생성
+      // 기본 마커 생성 (작은 핀 아이콘)
+      const icon = CATEGORY_ICONS[post.category] || "📍";
       var marker = new kakao.maps.Marker({
-        position: markerPosition
+        position: markerPosition,
+        zIndex: 1
       });
 
       // 지도에 마커 표시
       marker.setMap(map.current);
-      markers.current.push(marker);
 
-      // 인포윈도우 내용 생성
-      const icon = CATEGORY_ICONS[post.category] || "📍";
-      var infowindow = new kakao.maps.InfoWindow({
-        content: `<div style="
-          padding: 8px 12px;
-          font-size: 12px;
-          background: white;
-          border-radius: 8px;
-          border: 1px solid #ddd;
-          min-width: 150px;
-        ">
-          <div style="font-weight: 600; color: #333; margin-bottom: 4px;">
-            ${icon} ${post.title?.substring(0, 20)}${post.title?.length > 20 ? '...' : ''}
+      // 마커 위에 항상 표시되는 제목 오버레이 생성
+      const overlayContent = document.createElement('div');
+      overlayContent.style.cssText = `
+        padding: 8px 12px;
+        background: white;
+        border: 2px solid ${post.type === 'product' ? '#2ed8b6' : '#6f42c1'};
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #333;
+        white-space: nowrap;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        cursor: pointer;
+        transition: all 0.2s;
+        user-select: none;
+        position: relative;
+        bottom: 50px;
+        transform: translateX(-50%);
+        min-width: 120px;
+        text-align: center;
+      `;
+      
+      const title = post.title?.substring(0, 12) + (post.title?.length > 12 ? '...' : '');
+      
+      // 지역 정보 추출 (00구00동 형태)
+      let locationText = '';
+      if (post.detailAddress) {
+        // "서울특별시 중구 명동" -> "중구 명동"
+        const parts = post.detailAddress.split(' ');
+        if (parts.length >= 2) {
+          locationText = parts.slice(1).join(' ').substring(0, 8);
+        }
+      } else if (post.location) {
+        // "서울특별시 중구" -> "중구"
+        const parts = post.location.split(' ');
+        if (parts.length >= 2) {
+          locationText = parts[1].substring(0, 6);
+        }
+      }
+      
+      overlayContent.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <span style="font-size: 14px;">${icon}</span>
+            <span style="font-weight: 600;">${title}</span>
           </div>
-          <div style="color: #666; font-size: 11px;">
-            ${post.type === 'product' ? '💰 악기거래' : '🎵 음악생활'}
-            ${post.price ? ` · ${Number(post.price).toLocaleString()}원` : ''}
-          </div>
-        </div>`
+          ${locationText ? `<div style="font-size: 10px; color: #666; text-align: center;">${locationText}</div>` : ''}
+        </div>
+      `;
+      
+      // 오버레이에 hover 효과
+      overlayContent.addEventListener('mouseenter', function() {
+        overlayContent.style.transform = 'translateX(-50%) scale(1.05)';
+        overlayContent.style.borderWidth = '3px';
+        overlayContent.style.zIndex = '1000';
+      });
+      
+      overlayContent.addEventListener('mouseleave', function() {
+        overlayContent.style.transform = 'translateX(-50%) scale(1)';
+        overlayContent.style.borderWidth = '2px';
+      });
+      
+      // 클릭 시 상세 정보 표시
+      overlayContent.addEventListener('click', function() {
+        setSelectedPost(post);
       });
 
-      // 마커 클릭시 인포윈도우 표시
-      kakao.maps.event.addListener(marker, 'click', function() {
-        infowindow.open(map.current, marker);
-        setSelectedPost(post);
+      // 커스텀 오버레이 생성
+      var customOverlay = new kakao.maps.CustomOverlay({
+        position: markerPosition,
+        content: overlayContent,
+        yAnchor: 1,
+        zIndex: 2
+      });
+
+      customOverlay.setMap(map.current);
+      
+      // 마커와 오버레이를 함께 저장
+      markers.current.push({
+        marker: marker,
+        overlay: customOverlay,
+        post: post
       });
     });
     
-    console.log('✅ 마커 추가 완료:', markers.current.length, '개');
+    console.log('✅ 마커 + 제목 오버레이 추가 완료:', markers.current.length, '개');
   };
 
   useEffect(() => {
@@ -734,11 +836,15 @@ export default function MapPage() {
 
   // 지도와 게시글이 모두 준비되면 마커 표시
   useEffect(() => {
-    if (map.current && posts.length > 0) {
+    console.log('🔄 마커 표시 체크:', { isMapReady, postsCount: posts.length, filter });
+    if (isMapReady && posts.length > 0) {
       console.log('🎯 지도와 게시글 준비됨, 마커 자동 표시:', posts.length);
-      addMarkersToMap();
+      // 약간의 지연을 두고 마커 표시 (DOM 렌더링 완료 대기)
+      setTimeout(() => {
+        addMarkersToMap();
+      }, 100);
     }
-  }, [map.current, posts, filter]);
+  }, [isMapReady, posts, filter]);
 
   useEffect(() => {
     console.log("🚀 카카오맵 초기화 시작");
@@ -911,8 +1017,12 @@ export default function MapPage() {
       {/* 범례 */}
       <Legend>
         <LegendTitle>🗺️ 지도 가이드</LegendTitle>
-        <LegendItem>📍 마커를 클릭하면 상세정보를 볼 수 있어요</LegendItem>
-        <LegendItem>🎸 악기거래  🎵 음악생활</LegendItem>
+        <LegendItem>📍 마커 위의 제목을 클릭하면 상세정보를 볼 수 있어요</LegendItem>
+        <LegendItem>
+          <span style={{ color: '#2ed8b6', fontWeight: '600' }}>녹색 태그</span> = 악기거래 · 
+          <span style={{ color: '#6f42c1', fontWeight: '600', marginLeft: '6px' }}>보라색 태그</span> = 음악생활
+        </LegendItem>
+        <LegendItem>🎸 기타 · 🥁 드럼 · 🎹 키보드 · 🎤 공연 · 📚 레슨</LegendItem>
       </Legend>
     </Container>
   );
