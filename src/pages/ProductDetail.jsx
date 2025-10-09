@@ -585,25 +585,53 @@ const ModalImageContainer = styled.div`
   align-items: center;
   justify-content: center;
   touch-action: pan-y;
+  overflow: hidden;
+  
+  /* 모바일에서 터치 스크롤 최적화 */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  
+  /* GPU 가속으로 부드러운 애니메이션 */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 `;
 
 const ModalCloseButton = styled.button`
   position: absolute;
   top: 20px;
   right: 20px;
-  background: rgba(0, 0, 0, 0.5);
-  border: none;
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   color: white;
-  font-size: 24px;
+  font-size: 20px;
   cursor: pointer;
   border-radius: 50%;
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   z-index: 1001;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   
   &:hover {
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(255, 0, 0, 0.8);
+    border-color: rgba(255, 255, 255, 0.6);
+    transform: scale(1.1);
+    box-shadow: 0 6px 24px rgba(255, 0, 0, 0.4);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+  
+  /* X 아이콘 스타일 */
+  svg {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
   }
 `;
 
@@ -612,18 +640,45 @@ const ModalImageSlider = styled.div`
   width: ${props => props.imageCount * 100}vw;
   height: 100vh;
   transform: translateX(-${props => props.currentIndex * 100}vw);
-  transition: transform 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* GPU 가속으로 부드러운 애니메이션 */
+  -webkit-transform: translateX(-${props => props.currentIndex * 100}vw) translateZ(0);
+  will-change: transform;
+  
+  /* 모바일에서 터치 최적화 */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 `;
 
 const ModalImage = styled.img`
   width: 100vw;
   height: 100vh;
   object-fit: contain;
+  object-position: center;
   cursor: grab;
+  user-select: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
   
   &:active {
     cursor: grabbing;
   }
+  
+  /* 이미지 로딩 최적화 */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: auto;
+  
+  /* 모바일에서 이미지 깨짐 방지 */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 `;
 
 const ModalImageCounter = styled.div`
@@ -645,33 +700,47 @@ const SlideButton = styled.button`
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
-  color: #333;
-  font-size: 24px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  font-size: 18px;
   cursor: pointer;
   border-radius: 50%;
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   z-index: 1001;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  
+  ${props => props.direction === 'left' ? 'left: 20px;' : 'right: 20px;'}
   
   &:hover {
-    background: rgba(255, 255, 255, 1);
+    background: rgba(0, 0, 0, 0.9);
+    border-color: rgba(255, 255, 255, 0.6);
     transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+  }
+  
+  &:active {
+    transform: translateY(-50%) scale(0.95);
   }
   
   &:disabled {
-    opacity: 0.4;
+    opacity: 0.3;
     cursor: not-allowed;
-    transform: translateY(-50%) scale(0.9);
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.1);
   }
   
-  ${props => props.direction === 'left' ? 'left: 20px;' : 'right: 20px;'}
+  /* 화살표 아이콘 스타일 */
+  svg {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
 `;
 
 // 옵션 메뉴 스타일
