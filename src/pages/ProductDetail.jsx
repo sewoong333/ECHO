@@ -638,8 +638,8 @@ const ModalCloseButton = styled.button`
   font-size: 40px;
   cursor: pointer;
   border-radius: 50%;
-  width: 56px;
-  height: 56px;
+  width: 80px;
+  height: 80px;
   z-index: 1001;
   transition: all 0.3s ease;
   display: flex;
@@ -662,8 +662,8 @@ const ModalCloseButton = styled.button`
   /* X 아이콘 스타일 */
   svg {
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-    width: 28px;
-    height: 28px;
+    width: 40px;
+    height: 40px;
   }
 `;
 
