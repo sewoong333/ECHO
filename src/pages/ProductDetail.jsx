@@ -629,14 +629,14 @@ const ModalImageContainer = styled.div`
 `;
 
 const ModalCloseButton = styled.button`
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: rgba(0, 0, 0, 0.7);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  font-size: 20px;
-  cursor: pointer;
+  position: absolute !important;
+  top: 20px !important;
+  right: 20px !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
+  font-size: 20px !important;
+  cursor: pointer !important;
   border-radius: 50% !important;
   width: 40px !important;
   height: 40px !important;
@@ -645,35 +645,28 @@ const ModalCloseButton = styled.button`
   max-width: 40px !important;
   max-height: 40px !important;
   aspect-ratio: 1/1 !important;
-  z-index: 1001;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  z-index: 1001 !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  backdrop-filter: blur(8px) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+  flex-basis: auto !important;
   
   &:hover {
-    background: rgba(255, 0, 0, 0.8);
-    border-color: rgba(255, 255, 255, 0.6);
-    transform: scale(1.1);
-    box-shadow: 0 6px 24px rgba(255, 0, 0, 0.4);
+    background: rgba(255, 0, 0, 0.8) !important;
+    border-color: rgba(255, 255, 255, 0.6) !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 6px 24px rgba(255, 0, 0, 0.4) !important;
   }
   
   &:active {
-    transform: scale(0.95);
-  }
-  
-  /* X 아이콘 스타일 */
-  svg {
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-    width: 24px;
-    height: 24px;
-    display: block !important;
-    fill: white !important;
-    color: white !important;
-    stroke: white !important;
-    stroke-width: 2px;
+    transform: scale(0.95) !important;
   }
 `;
 
@@ -708,14 +701,14 @@ const ModalImageCounter = styled.div`
 `;
 
 const SlideButton = styled.button`
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.7);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  font-size: 30px;
-  cursor: pointer;
+  position: absolute !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
+  font-size: 30px !important;
+  cursor: pointer !important;
   border-radius: 50% !important;
   width: 40px !important;
   height: 40px !important;
@@ -724,45 +717,38 @@ const SlideButton = styled.button`
   max-width: 40px !important;
   max-height: 40px !important;
   aspect-ratio: 1/1 !important;
-  z-index: 1001;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  z-index: 1001 !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  backdrop-filter: blur(8px) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+  flex-basis: auto !important;
   
-  ${props => props.direction === 'left' ? 'left: 20px;' : 'right: 20px;'}
+  ${props => props.direction === 'left' ? 'left: 20px !important;' : 'right: 20px !important;'}
   
   &:hover {
-    background: rgba(0, 0, 0, 0.9);
-    border-color: rgba(255, 255, 255, 0.6);
-    transform: translateY(-50%) scale(1.1);
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.9) !important;
+    border-color: rgba(255, 255, 255, 0.6) !important;
+    transform: translateY(-50%) scale(1.1) !important;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4) !important;
   }
   
   &:active {
-    transform: translateY(-50%) scale(0.95);
+    transform: translateY(-50%) scale(0.95) !important;
   }
   
   &:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-    transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.3);
-    border-color: rgba(255, 255, 255, 0.1);
-  }
-  
-  /* 화살표 아이콘 스타일 */
-  svg {
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-    width: 24px;
-    height: 24px;
-    display: block !important;
-    fill: white !important;
-    color: white !important;
-    stroke: white !important;
-    stroke-width: 2px;
+    opacity: 0.3 !important;
+    cursor: not-allowed !important;
+    transform: translateY(-50%) !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
   }
 `;
 
