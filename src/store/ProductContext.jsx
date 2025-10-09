@@ -200,15 +200,15 @@ export function ProductProvider({ children }) {
 
     console.log("👂 실시간 상품 구독 시작... (초기 데이터:", products.length, "개)");
 
-    const unsubscribe = subscriptionService.subscribeToProducts(
-      (realtimeProducts) => {
-        console.log("🔄 실시간 업데이트:", realtimeProducts.length, "개");
-        
-        // 실시간 데이터를 직접 사용
-        setProducts(realtimeProducts);
-      },
-      filters,
-    );
+        const unsubscribe = subscriptionService.subscribeToProducts(
+          (realtimeProducts) => {
+            console.log("🔄 실시간 업데이트:", realtimeProducts.length, "개");
+            
+            // 실시간 데이터를 직접 사용
+            setProducts(realtimeProducts);
+          },
+          { ...filters, userId: user?.uid },
+        );
 
     return () => {
       console.log("👋 실시간 구독 해제");
@@ -243,7 +243,7 @@ export function ProductProvider({ children }) {
     [user],
   );
 
-  // 찜한 상품 로드
+  // 관심물건 로드 (데이터베이스에서 직접)
   const loadLikedProducts = useCallback(
     async () => {
       try {
@@ -253,10 +253,10 @@ export function ProductProvider({ children }) {
           return;
         }
 
-        console.log("❤️ 관심물건 로드 중...", user.uid);
+        console.log("❤️ 관심물건 데이터베이스에서 로드 중...", user.uid);
         
-        // 현재 products에서 찜한 상품만 필터링
-        const likedProducts = products.filter(product => product.isLikedByUser);
+        // 데이터베이스에서 직접 관심물건 로드
+        const likedProducts = await productService.getLikedProducts(user.uid);
         setLikedProducts(likedProducts);
 
         console.log("✅ 관심물건 로드 완료:", likedProducts.length, "개");
@@ -265,15 +265,15 @@ export function ProductProvider({ children }) {
         setLikedProducts([]);
       }
     },
-    [user?.uid, products],
+    [user?.uid],
   );
 
   // 사용자 로그인 시 관심물건 로드
   useEffect(() => {
-    if (user?.uid && products.length > 0) {
+    if (user?.uid) {
       loadLikedProducts();
     }
-  }, [user?.uid, products, loadLikedProducts]);
+  }, [user?.uid, loadLikedProducts]);
 
   // 상품 등록
   const addProduct = useCallback(

@@ -220,14 +220,14 @@ export default function WishList() {
 
   useEffect(() => {
     // 사용자가 로그인했고 상품 로딩이 완료되면 로딩 해제
-    if (!user.loading && products.length >= 0) {
+    if (!user.loading) {
       setLoading(false);
       // 관심물건 로드
       if (user.uid) {
         loadLikedProducts();
       }
     }
-  }, [user.loading, products, user.uid, loadLikedProducts]);
+  }, [user.loading, user.uid, loadLikedProducts]);
 
   // 로그인하지 않은 경우 로그인 페이지로 이동
   useEffect(() => {

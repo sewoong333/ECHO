@@ -824,6 +824,75 @@ export const productService = {
       throw error;
     }
   },
+
+  // 사용자의 관심물건 목록 가져오기
+  async getLikedProducts(userId) {
+    try {
+      if (!userId) {
+        return [];
+      }
+
+      console.log("❤️ 관심물건 데이터베이스에서 로드 중...", userId);
+      
+      const userLikesRef = collection(db, "users", userId, "likes");
+      const likesSnapshot = await getDocs(userLikesRef);
+      
+      if (likesSnapshot.empty) {
+        console.log("📭 관심물건이 없습니다.");
+        return [];
+      }
+
+      const likedProductIds = likesSnapshot.docs.map(doc => doc.data().productId);
+      console.log("📋 관심물건 ID 목록:", likedProductIds);
+
+      // 관심물건 상품 정보 가져오기
+      const likedProducts = [];
+      for (const productId of likedProductIds) {
+        try {
+          const productRef = doc(db, "products", productId);
+          const productSnap = await getDoc(productRef);
+          
+          if (productSnap.exists()) {
+            const productData = productSnap.data();
+            likedProducts.push({
+              id: productId,
+              ...productData,
+              isLikedByUser: true
+            });
+          }
+        } catch (error) {
+          console.warn(`상품 ${productId} 로드 실패:`, error);
+        }
+      }
+
+      console.log("✅ 관심물건 로드 완료:", likedProducts.length, "개");
+      return likedProducts;
+    } catch (error) {
+      console.error("❌ 관심물건 로드 실패:", error);
+      return [];
+    }
+  },
+
+  // 사용자의 관심물건 ID 목록만 가져오기 (빠른 조회용)
+  async getLikedProductIds(userId) {
+    try {
+      if (!userId) {
+        return [];
+      }
+
+      const userLikesRef = collection(db, "users", userId, "likes");
+      const likesSnapshot = await getDocs(userLikesRef);
+      
+      if (likesSnapshot.empty) {
+        return [];
+      }
+
+      return likesSnapshot.docs.map(doc => doc.data().productId);
+    } catch (error) {
+      console.error("❌ 관심물건 ID 로드 실패:", error);
+      return [];
+    }
+  },
 };
 
 // 이미지 서비스 개선
@@ -1013,14 +1082,30 @@ export const subscriptionService = {
         q = query(q, where("price", "<=", parseInt(filters.priceMax)));
       }
 
-      return onSnapshot(q, (snapshot) => {
+      return onSnapshot(q, async (snapshot) => {
         const products = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
         
         console.log("📦 실시간 상품 업데이트:", products.length, "개");
-        callback(products);
+        
+        // 사용자 로그인 상태에 따라 관심물건 정보 추가
+        if (filters.userId) {
+          try {
+            const likedProductIds = await getLikedProductIds(filters.userId);
+            const productsWithLikeStatus = products.map(product => ({
+              ...product,
+              isLikedByUser: likedProductIds.includes(product.id)
+            }));
+            callback(productsWithLikeStatus);
+          } catch (error) {
+            console.warn("관심물건 상태 로드 실패:", error);
+            callback(products);
+          }
+        } else {
+          callback(products);
+        }
       }, (error) => {
         console.error("❌ 실시간 구독 오류:", error);
         // 오류 발생 시 빈 배열 반환
