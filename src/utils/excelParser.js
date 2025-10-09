@@ -3,6 +3,8 @@
  * xlsx 라이브러리가 없어도 기본 JavaScript로 Excel 파일을 읽을 수 있는 방법을 제공
  */
 
+import { enhanceBulkProductsWithDescriptions } from './descriptionGenerator';
+
 // CSV 파일을 파싱하는 함수 (Excel에서 CSV로 저장된 파일용)
 export function parseCSV(csvText) {
   const lines = csvText.split('\n');
@@ -75,13 +77,13 @@ export function validateExcelData(data) {
 
 // 상품 데이터 변환 함수
 export function transformProductData(rawData, user) {
-  return rawData.map(row => {
+  const transformedData = rawData.map(row => {
     const price = parseInt(row.price.toString().replace(/[^0-9]/g, ''));
     
     return {
       title: row.title.toString().trim(),
       price: price,
-      description: row.description.toString().trim(),
+      description: row.description?.toString().trim() || '', // 설명이 없으면 빈 문자열
       category: row.category.toString().trim().toLowerCase(),
       condition: row.condition.toString().trim().toLowerCase(),
       region: row.region?.toString().trim() || '서울',
@@ -108,6 +110,9 @@ export function transformProductData(rawData, user) {
       lastBumpedAt: new Date()
     };
   });
+  
+  // 자동 설명 생성 적용
+  return enhanceBulkProductsWithDescriptions(transformedData);
 }
 
 // Excel 템플릿 데이터 생성

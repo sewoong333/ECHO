@@ -326,12 +326,23 @@ const BulkProductUpload = ({ onClose, onSuccess }) => {
                   <li><strong>price</strong> - 가격 (필수, 숫자만)</li>
                   <li><strong>category</strong> - 카테고리 (필수)</li>
                   <li><strong>condition</strong> - 상품 상태 (필수)</li>
-                  <li><strong>description</strong> - 상품 설명 (필수)</li>
+                  <li><strong>description</strong> - 상품 설명 (선택, 자동 생성됨)</li>
                   <li><strong>region</strong> - 시/도 (선택)</li>
                   <li><strong>district</strong> - 구/군 (선택)</li>
                   <li><strong>detailAddress</strong> - 상세 주소 (선택)</li>
                   <li><strong>image_folder</strong> - 이미지 폴더명 (선택)</li>
                 </ColumnList>
+                
+                <AutoDescriptionInfo>
+                  <h4>🤖 자동 설명 생성</h4>
+                  <p>상품 설명이 비어있거나 짧은 경우, AI가 자동으로 적절한 설명을 생성합니다:</p>
+                  <ul>
+                    <li>상품명, 카테고리, 상태, 가격을 분석하여 맞춤 설명 생성</li>
+                    <li>브랜드별, 모델별 특성 반영</li>
+                    <li>가격대별 적절한 설명 제공</li>
+                    <li>기존 설명이 20글자 이상인 경우 그대로 유지</li>
+                  </ul>
+                </AutoDescriptionInfo>
               </FileInfo>
             </StepContent>
           )}
@@ -359,6 +370,7 @@ const BulkProductUpload = ({ onClose, onSuccess }) => {
                       <th>가격</th>
                       <th>카테고리</th>
                       <th>상태</th>
+                      <th>설명</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -368,11 +380,24 @@ const BulkProductUpload = ({ onClose, onSuccess }) => {
                         <td>{row.price?.toLocaleString()}원</td>
                         <td>{row.category}</td>
                         <td>{row.condition}</td>
+                        <td style={{ maxWidth: '200px', fontSize: '12px' }}>
+                          {row.description ? (
+                            <span title={row.description}>
+                              {row.description.length > 50 
+                                ? `${row.description.substring(0, 50)}...` 
+                                : row.description}
+                            </span>
+                          ) : (
+                            <span style={{ color: '#999', fontStyle: 'italic' }}>
+                              자동 생성됨
+                            </span>
+                          )}
+                        </td>
                       </tr>
                     ))}
                     {parsedData.length > 5 && (
                       <tr>
-                        <td colSpan="4" style={{ textAlign: 'center', fontStyle: 'italic' }}>
+                        <td colSpan="5" style={{ textAlign: 'center', fontStyle: 'italic' }}>
                           ... 및 {parsedData.length - 5}개 더
                         </td>
                       </tr>
@@ -868,6 +893,40 @@ const SuccessIcon = styled.div`
   display: flex;
   justify-content: center;
   color: #2ed8b6;
+`;
+
+const AutoDescriptionInfo = styled.div`
+  background: #f0f8ff;
+  border: 1px solid #b3d9ff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+  
+  h4 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0066cc;
+  }
+  
+  p {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    color: #666;
+    line-height: 1.4;
+  }
+  
+  ul {
+    margin: 0;
+    padding-left: 16px;
+    
+    li {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+  }
 `;
 
 export default BulkProductUpload;
