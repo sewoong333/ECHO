@@ -681,6 +681,13 @@ const ModalImageSlider = styled.div`
   /* 모바일에서 터치 최적화 */
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+  
+  /* 이미지 겹침 방지 */
+  position: relative;
+  z-index: 1;
+  
+  /* 각 이미지가 독립적으로 렌더링되도록 */
+  isolation: isolate;
 `;
 
 const ModalImage = styled.img`
@@ -695,6 +702,11 @@ const ModalImage = styled.img`
   -moz-user-drag: none;
   -o-user-drag: none;
   user-drag: none;
+  
+  /* 이미지 겹침 방지 */
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
   
   &:active {
     cursor: grabbing;
@@ -733,6 +745,9 @@ const ModalImage = styled.img`
   /* 브라우저별 렌더링 최적화 */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  
+  /* 각 이미지가 독립적으로 렌더링되도록 */
+  isolation: isolate;
 `;
 
 const ModalImageCounter = styled.div`
@@ -760,8 +775,8 @@ const SlideButton = styled.button`
   font-size: 36px;
   cursor: pointer;
   border-radius: 50%;
-  width: 56px;
-  height: 56px;
+  width: 80px;
+  height: 80px;
   z-index: 1001;
   transition: all 0.3s ease;
   display: flex;
@@ -794,8 +809,8 @@ const SlideButton = styled.button`
   /* 화살표 아이콘 스타일 */
   svg {
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-    width: 24px;
-    height: 24px;
+    width: 40px;
+    height: 40px;
   }
 `;
 
