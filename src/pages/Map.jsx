@@ -106,7 +106,8 @@ export default function MapPage() {
               longitude: 126.9780,
               price: 150000,
               sellerNickname: "기타마스터",
-              location: "서울특별시 중구"
+              location: "서울특별시 중구",
+              detailAddress: "서울특별시 중구 명동"
             },
             {
               id: "demo2", 
@@ -117,7 +118,8 @@ export default function MapPage() {
               longitude: 126.9895,
               price: 800000,
               sellerNickname: "피아노선생",
-              location: "서울특별시 종로구"
+              location: "서울특별시 종로구",
+              detailAddress: "서울특별시 종로구 청계천"
             },
             {
               id: "demo3",
@@ -128,7 +130,8 @@ export default function MapPage() {
               longitude: 126.9794,
               price: 1200000,
               sellerNickname: "드러머김",
-              location: "서울특별시 용산구"
+              location: "서울특별시 용산구",
+              detailAddress: "서울특별시 용산구 이태원동"
             },
             {
               id: "demo4",
@@ -139,7 +142,8 @@ export default function MapPage() {
               longitude: 126.9748,
               price: 300000,
               sellerNickname: "베이시스트",
-              location: "서울특별시 서대문구"
+              location: "서울특별시 서대문구",
+              detailAddress: "서울특별시 서대문구 신촌동"
             },
             {
               id: "demo5",
@@ -150,7 +154,8 @@ export default function MapPage() {
               longitude: 126.9850,
               price: 450000,
               sellerNickname: "일렉기타리스트",
-              location: "서울특별시 강남구"
+              location: "서울특별시 강남구",
+              detailAddress: "서울특별시 강남구 역삼동"
             },
             {
               id: "demo6",
@@ -161,7 +166,8 @@ export default function MapPage() {
               longitude: 126.9720,
               price: 600000,
               sellerNickname: "바이올리니스트",
-              location: "서울특별시 마포구"
+              location: "서울특별시 마포구",
+              detailAddress: "서울특별시 마포구 홍대동"
             }
           ];
           allPosts.push(...demoProducts);
@@ -212,7 +218,9 @@ export default function MapPage() {
               category: "collaboration",
               latitude: 37.5600,
               longitude: 126.9800,
-              authorName: "록밴드리더"
+              authorName: "록밴드리더",
+              location: "서울특별시 중구",
+              detailAddress: "서울특별시 중구 을지로"
             },
             {
               id: "demo_ml2",
@@ -221,7 +229,9 @@ export default function MapPage() {
               category: "lesson",
               latitude: 37.5680,
               longitude: 126.9850,
-              authorName: "기타강사"
+              authorName: "기타강사",
+              location: "서울특별시 종로구",
+              detailAddress: "서울특별시 종로구 인사동"
             },
             {
               id: "demo_ml3",
@@ -230,7 +240,9 @@ export default function MapPage() {
               category: "performance", 
               latitude: 37.5620,
               longitude: 126.9720,
-              authorName: "버스킹러버"
+              authorName: "버스킹러버",
+              location: "서울특별시 서대문구",
+              detailAddress: "서울특별시 서대문구 연세로"
             },
             {
               id: "demo_ml4",
@@ -239,7 +251,9 @@ export default function MapPage() {
               category: "performance", 
               latitude: 37.5560,
               longitude: 126.9230,
-              authorName: "재즈피아니스트"
+              authorName: "재즈피아니스트",
+              location: "서울특별시 마포구",
+              detailAddress: "서울특별시 마포구 홍대동"
             }
           ];
           allPosts.push(...demoMusiclife);
@@ -767,6 +781,12 @@ export default function MapPage() {
       
       // 지역 정보 추출 (00구00동 형태)
       let locationText = '';
+      console.log('📍 지역 정보 추출:', { 
+        detailAddress: post.detailAddress, 
+        location: post.location,
+        title: post.title 
+      });
+      
       if (post.detailAddress) {
         // "서울특별시 중구 명동" -> "중구 명동"
         const parts = post.detailAddress.split(' ');
@@ -781,13 +801,15 @@ export default function MapPage() {
         }
       }
       
+      console.log('📍 추출된 지역 정보:', locationText);
+      
       overlayContent.innerHTML = `
-        <div style="display: flex; flex-direction: column; gap: 2px;">
+        <div style="display: flex; flex-direction: column; gap: 3px; align-items: center;">
           <div style="display: flex; align-items: center; gap: 4px;">
             <span style="font-size: 14px;">${icon}</span>
             <span style="font-weight: 600;">${title}</span>
           </div>
-          ${locationText ? `<div style="font-size: 10px; color: #666; text-align: center;">${locationText}</div>` : ''}
+          ${locationText ? `<div style="font-size: 10px; color: #666; background: #f8f9fa; padding: 2px 6px; border-radius: 8px; border: 1px solid #e9ecef;">${locationText}</div>` : ''}
         </div>
       `;
       
