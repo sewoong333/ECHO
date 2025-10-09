@@ -310,11 +310,8 @@ const DamageSection = styled.div`
   display: flex;
   flex-direction: column;
   gap: 15px;
-  margin: 20px 20px 150px 20px;
-  max-width: 600px;
-  width: calc(100% - 40px);
-  margin-left: auto;
-  margin-right: auto;
+  margin: 20px;
+  margin-bottom: 250px;
 `;
 
 const DamageToggle = styled.div`
