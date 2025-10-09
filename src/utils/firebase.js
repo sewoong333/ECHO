@@ -986,15 +986,31 @@ export const userService = {
 export const subscriptionService = {
   subscribeToProducts(callback, filters = {}) {
     try {
+      console.log("🔄 실시간 구독 시작, 필터:", filters);
+      
       let q = query(
         productsCollection,
         where("status", "==", PRODUCT_STATUS.ACTIVE),
         orderBy("createdAt", "desc"),
-        limit(20),
+        limit(50), // 더 많은 상품을 가져와서 필터링
       );
 
-      if (filters.category) {
+      // 카테고리 필터 적용
+      if (filters.category && filters.category !== "") {
         q = query(q, where("category", "==", filters.category));
+      }
+
+      // 지역 필터 적용
+      if (filters.region && filters.region !== "") {
+        q = query(q, where("region", "==", filters.region));
+      }
+
+      // 가격 필터 적용
+      if (filters.priceMin && filters.priceMin > 0) {
+        q = query(q, where("price", ">=", parseInt(filters.priceMin)));
+      }
+      if (filters.priceMax && filters.priceMax > 0) {
+        q = query(q, where("price", "<=", parseInt(filters.priceMax)));
       }
 
       return onSnapshot(q, (snapshot) => {
@@ -1002,10 +1018,18 @@ export const subscriptionService = {
           id: doc.id,
           ...doc.data(),
         }));
+        
+        console.log("📦 실시간 상품 업데이트:", products.length, "개");
         callback(products);
+      }, (error) => {
+        console.error("❌ 실시간 구독 오류:", error);
+        // 오류 발생 시 빈 배열 반환
+        callback([]);
       });
     } catch (error) {
-      console.error("실시간 구독 실패:", error);
+      console.error("❌ 실시간 구독 설정 실패:", error);
+      // 오류 발생 시 빈 배열 반환
+      callback([]);
       throw error;
     }
   },
