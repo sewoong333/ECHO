@@ -650,6 +650,8 @@ const ModalCloseButton = styled.button`
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  text-align: center !important;
+  line-height: 1 !important;
   backdrop-filter: blur(8px) !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
   padding: 0 !important;
@@ -722,6 +724,8 @@ const SlideButton = styled.button`
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  text-align: center !important;
+  line-height: 1 !important;
   backdrop-filter: blur(8px) !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
   padding: 0 !important;
