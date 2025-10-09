@@ -25,6 +25,11 @@ export function isAdmin(user) {
     return false;
   }
 
+  // 개발 환경에서는 모든 로그인 사용자를 관리자로 처리
+  if (process.env.NODE_ENV === 'development') {
+    return true;
+  }
+
   // 이메일로 관리자 확인
   if (user.email && ADMIN_EMAILS.includes(user.email.toLowerCase())) {
     return true;
