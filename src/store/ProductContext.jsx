@@ -160,6 +160,13 @@ export function ProductProvider({ children }) {
     loadProducts(true);
   }, []); // 빈 배열로 앱 시작 시 한 번만 실행
 
+  // 사용자 로그인 시 찜한 상품 로드
+  useEffect(() => {
+    if (user?.uid && products.length > 0) {
+      loadLikedProducts();
+    }
+  }, [user?.uid, products, loadLikedProducts]);
+
   // 필터 변경 시 상품 목록 새로고침 (검색어는 제외)
   useEffect(() => {
     console.log("🔧 필터 변경 - 상품 다시 로드");
@@ -241,6 +248,31 @@ export function ProductProvider({ children }) {
       }
     },
     [user],
+  );
+
+  // 찜한 상품 로드
+  const loadLikedProducts = useCallback(
+    async () => {
+      try {
+        if (!user?.uid) {
+          console.log("❌ 사용자 UID가 없음");
+          setLikedProducts([]);
+          return;
+        }
+
+        console.log("❤️ 찜한 상품 로드 중...", user.uid);
+        
+        // 현재 products에서 찜한 상품만 필터링
+        const likedProducts = products.filter(product => product.isLikedByUser);
+        setLikedProducts(likedProducts);
+
+        console.log("✅ 찜한 상품 로드 완료:", likedProducts.length, "개");
+      } catch (err) {
+        console.error("❌ 찜한 상품 로드 실패:", err);
+        setLikedProducts([]);
+      }
+    },
+    [user?.uid, products],
   );
 
   // 상품 등록
@@ -640,6 +672,7 @@ export function ProductProvider({ children }) {
 
     // 사용자별 데이터
     loadUserProducts,
+    loadLikedProducts,
 
     // 유틸리티
     getCategoryStats,

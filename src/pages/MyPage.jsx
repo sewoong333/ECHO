@@ -396,7 +396,7 @@ export default function MyPage() {
     },
     {
       icon: <FaHeart />,
-      text: '관심목록',
+      text: '관심물건',
       path: '/wishlist',
       badge: user.favoriteCount,
     },

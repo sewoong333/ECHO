@@ -215,18 +215,19 @@ const LoadingContainer = styled.div`
 export default function WishList() {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
-  const { products, toggleLike } = useContext(ProductContext);
+  const { products, likedProducts, toggleLike, loadLikedProducts } = useContext(ProductContext);
   const [loading, setLoading] = useState(true);
-
-  // 찜한 상품들 필터링
-  const likedProducts = products.filter(product => product.isLikedByUser);
 
   useEffect(() => {
     // 사용자가 로그인했고 상품 로딩이 완료되면 로딩 해제
     if (!user.loading && products.length >= 0) {
       setLoading(false);
+      // 찜한 상품 로드
+      if (user.uid) {
+        loadLikedProducts();
+      }
     }
-  }, [user.loading, products]);
+  }, [user.loading, products, user.uid, loadLikedProducts]);
 
   // 로그인하지 않은 경우 로그인 페이지로 이동
   useEffect(() => {
@@ -269,7 +270,7 @@ export default function WishList() {
           <BackButton onClick={() => navigate(-1)}>
             <FaArrowLeft />
           </BackButton>
-          <Title>찜한 상품</Title>
+          <Title>관심물건</Title>
           <div />
         </Header>
         <LoadingContainer>
@@ -286,7 +287,7 @@ export default function WishList() {
           <BackButton onClick={() => navigate(-1)}>
             <FaArrowLeft />
           </BackButton>
-          <Title>찜한 상품</Title>
+          <Title>관심물건</Title>
           <div />
         </Header>
         <Content>
@@ -294,7 +295,7 @@ export default function WishList() {
             <EmptyIcon>
               <FaRegHeart />
             </EmptyIcon>
-            <EmptyTitle>찜한 상품이 없어요</EmptyTitle>
+            <EmptyTitle>관심물건이 없어요</EmptyTitle>
             <EmptyDescription>
               마음에 드는 악기를 찾아서<br />
               하트 버튼을 눌러보세요!
