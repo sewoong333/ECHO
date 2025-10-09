@@ -812,19 +812,57 @@ export function UserProvider({ children }) {
         if (userDoc.exists()) {
           const userData = userDoc.data();
           console.log(`✅ 문서 ID로 사용자 정보 조회 성공: ${userData.nickname || '닉네임 없음'}`);
+          
+          // 통일된 스키마로 반환
           return { 
+            uid: userId,
             id: userId, 
             ...userData,
-            // 표준 필드명 보장
+            // 기본 정보 (표준 필드명 보장)
             nickname: userData.nickname || userData.displayName || userData.name || '사용자',
             profileImage: userData.profileImage || userData.photoURL || userData.avatar || '',
-            bio: userData.bio || userData.description || userData.about || '',
+            bio: userData.bio || userData.description || userData.about || userData.introduction || '',
             email: userData.email || '',
+            
+            // 위치 정보
+            region: userData.region || '',
+            district: userData.district || '',
+            fullLocation: userData.fullLocation || 
+                         (userData.region && userData.district 
+                           ? `${userData.region} ${userData.district}` 
+                           : userData.location || ''),
+            
+            // 인증 및 상태
             isVerified: userData.isVerified || false,
+            isBusiness: userData.isBusiness || false,
+            isActive: userData.isActive !== undefined ? userData.isActive : true,
+            
+            // 신뢰도 및 통계
             mannerScore: userData.mannerScore || 100,
-            transactionCount: userData.transactionCount || 0,
+            rating: userData.rating || 0,
+            totalRating: userData.totalRating || 0,
             reviewCount: userData.reviewCount || 0,
+            
+            // 거래 통계
+            transactionCount: userData.transactionCount || 0,
+            totalSales: userData.totalSales || 0,
+            totalPurchases: userData.totalPurchases || 0,
+            productCount: userData.productCount || 0,
+            likeCount: userData.likeCount || 0,
+            favoriteCount: userData.favoriteCount || 0,
+            
+            // 소셜
+            followerCount: userData.followerCount || 0,
+            followingCount: userData.followingCount || 0,
+            
+            // 전화번호
+            phoneNumber: userData.phoneNumber || '',
+            isPhoneVerified: userData.isPhoneVerified || false,
+            
+            // 시간 정보
             createdAt: userData.createdAt,
+            updatedAt: userData.updatedAt,
+            lastActiveAt: userData.lastActiveAt,
             lastLoginAt: userData.lastLoginAt,
           };
         }
@@ -843,20 +881,44 @@ export function UserProvider({ children }) {
         
         if (!uidSnapshot.empty) {
           const userData = uidSnapshot.docs[0].data();
+          const docId = uidSnapshot.docs[0].id;
           console.log(`✅ uid 필드로 사용자 정보 찾음: ${userData.nickname || '닉네임 없음'}`);
+          
+          // 통일된 스키마로 반환 (같은 구조 사용)
           return { 
-            id: uidSnapshot.docs[0].id, 
+            uid: docId,
+            id: docId,
             ...userData,
-            // 표준 필드명 보장
             nickname: userData.nickname || userData.displayName || userData.name || '사용자',
             profileImage: userData.profileImage || userData.photoURL || userData.avatar || '',
-            bio: userData.bio || userData.description || userData.about || '',
+            bio: userData.bio || userData.description || userData.about || userData.introduction || '',
             email: userData.email || '',
+            region: userData.region || '',
+            district: userData.district || '',
+            fullLocation: userData.fullLocation || 
+                         (userData.region && userData.district 
+                           ? `${userData.region} ${userData.district}` 
+                           : userData.location || ''),
             isVerified: userData.isVerified || false,
+            isBusiness: userData.isBusiness || false,
+            isActive: userData.isActive !== undefined ? userData.isActive : true,
             mannerScore: userData.mannerScore || 100,
-            transactionCount: userData.transactionCount || 0,
+            rating: userData.rating || 0,
+            totalRating: userData.totalRating || 0,
             reviewCount: userData.reviewCount || 0,
+            transactionCount: userData.transactionCount || 0,
+            totalSales: userData.totalSales || 0,
+            totalPurchases: userData.totalPurchases || 0,
+            productCount: userData.productCount || 0,
+            likeCount: userData.likeCount || 0,
+            favoriteCount: userData.favoriteCount || 0,
+            followerCount: userData.followerCount || 0,
+            followingCount: userData.followingCount || 0,
+            phoneNumber: userData.phoneNumber || '',
+            isPhoneVerified: userData.isPhoneVerified || false,
             createdAt: userData.createdAt,
+            updatedAt: userData.updatedAt,
+            lastActiveAt: userData.lastActiveAt,
             lastLoginAt: userData.lastLoginAt,
           };
         }
@@ -864,69 +926,73 @@ export function UserProvider({ children }) {
         console.warn(`⚠️ uid 필드 조회 실패: ${uidError.message}`);
       }
       
-      // 3. 이메일로 조회 시도 (최후의 수단)
-      if (userId.includes('@')) {
-        try {
-          console.log(`🔍 이메일로 사용자 조회 시도: ${userId}`);
-          const emailQuery = query(
-            collection(db, "users"),
-            where("email", "==", userId)
-          );
-          const emailSnapshot = await getDocs(emailQuery);
-          
-          if (!emailSnapshot.empty) {
-            const userData = emailSnapshot.docs[0].data();
-            console.log(`✅ 이메일로 사용자 정보 찾음: ${userData.nickname || '닉네임 없음'}`);
-            return { 
-              id: emailSnapshot.docs[0].id, 
-              ...userData,
-              // 표준 필드명 보장
-              nickname: userData.nickname || userData.displayName || userData.name || '사용자',
-              profileImage: userData.profileImage || userData.photoURL || userData.avatar || '',
-              bio: userData.bio || userData.description || userData.about || '',
-              email: userData.email || '',
-              isVerified: userData.isVerified || false,
-              mannerScore: userData.mannerScore || 100,
-              transactionCount: userData.transactionCount || 0,
-              reviewCount: userData.reviewCount || 0,
-              createdAt: userData.createdAt,
-              lastLoginAt: userData.lastLoginAt,
-            };
-          }
-        } catch (emailError) {
-          console.warn(`⚠️ 이메일 조회 실패: ${emailError.message}`);
-        }
-      }
-      
-      // 4. 모든 방법이 실패한 경우, 기본 사용자 정보 반환
+      // 3. 모든 방법이 실패한 경우, 기본 사용자 정보 반환
       console.warn(`⚠️ 사용자 정보를 찾을 수 없음: ${userId}`);
       return {
+        uid: userId,
         id: userId,
         nickname: '익명',
         profileImage: '',
         bio: '',
         email: '',
+        region: '',
+        district: '',
+        fullLocation: '',
         isVerified: false,
+        isBusiness: false,
+        isActive: true,
         mannerScore: 100,
-        transactionCount: 0,
+        rating: 0,
+        totalRating: 0,
         reviewCount: 0,
+        transactionCount: 0,
+        totalSales: 0,
+        totalPurchases: 0,
+        productCount: 0,
+        likeCount: 0,
+        favoriteCount: 0,
+        followerCount: 0,
+        followingCount: 0,
+        phoneNumber: '',
+        isPhoneVerified: false,
         createdAt: null,
+        updatedAt: null,
+        lastActiveAt: null,
         lastLoginAt: null,
       };
     } catch (error) {
       console.error("❌ 사용자 정보 조회 실패:", error);
-      // 에러가 발생해도 기본 사용자 정보 반환
+      // 에러가 발생해도 통일된 기본 사용자 정보 반환
       return {
+        uid: userId,
         id: userId,
         nickname: '익명',
         profileImage: '',
         bio: '',
         email: '',
+        region: '',
+        district: '',
+        fullLocation: '',
         isVerified: false,
+        isBusiness: false,
+        isActive: true,
         mannerScore: 100,
-        transactionCount: 0,
+        rating: 0,
+        totalRating: 0,
         reviewCount: 0,
+        transactionCount: 0,
+        totalSales: 0,
+        totalPurchases: 0,
+        productCount: 0,
+        likeCount: 0,
+        favoriteCount: 0,
+        followerCount: 0,
+        followingCount: 0,
+        phoneNumber: '',
+        isPhoneVerified: false,
         createdAt: null,
+        updatedAt: null,
+        lastActiveAt: null,
         lastLoginAt: null,
       };
     }

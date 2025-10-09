@@ -1004,31 +1004,66 @@ export const userService = {
   async createOrUpdateUserProfile(userId, userData) {
     try {
       const userRef = doc(db, "users", userId);
+      
+      // 통일된 스키마에 맞춰 데이터 구성
       const profileData = {
+        // 기본 정보
+        uid: userId,
         nickname: userData.nickname || "",
         email: userData.email || "",
         profileImage: userData.profileImage || "",
-        location: userData.location || "",
-        introduction: userData.introduction || "",
+        bio: userData.bio || userData.introduction || "",
 
-        totalSales: 0,
-        totalPurchases: 0,
-        totalRating: 0,
-        reviewCount: 0,
+        // 위치 정보 (통일된 형식)
+        region: userData.region || "",
+        district: userData.district || "",
+        fullLocation: userData.fullLocation || 
+                     (userData.region && userData.district 
+                       ? `${userData.region} ${userData.district}` 
+                       : userData.location || ""),
 
-        productCount: 0,
-        likeCount: 0,
+        // 인증 및 상태
+        isVerified: userData.isVerified || false,
+        isBusiness: userData.isBusiness || false,
+        isActive: true,
 
-        isEmailNotificationEnabled: true,
-        isPushNotificationEnabled: true,
-        isLocationPublic: true,
+        // 신뢰도 및 통계
+        mannerScore: userData.mannerScore || 100,
+        rating: userData.rating || 0,
+        totalRating: userData.totalRating || 0,
+        reviewCount: userData.reviewCount || 0,
 
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        lastActiveAt: serverTimestamp(),
+        // 거래 통계
+        transactionCount: userData.transactionCount || 0,
+        totalSales: userData.totalSales || 0,
+        totalPurchases: userData.totalPurchases || 0,
+        productCount: userData.productCount || 0,
+        likeCount: userData.likeCount || 0,
+        favoriteCount: userData.favoriteCount || 0,
+
+        // 소셜
+        followerCount: userData.followerCount || 0,
+        followingCount: userData.followingCount || 0,
+
+        // 알림 설정
+        isEmailNotificationEnabled: userData.isEmailNotificationEnabled !== undefined 
+          ? userData.isEmailNotificationEnabled : true,
+        isPushNotificationEnabled: userData.isPushNotificationEnabled !== undefined 
+          ? userData.isPushNotificationEnabled : true,
+        isLocationPublic: userData.isLocationPublic !== undefined 
+          ? userData.isLocationPublic : true,
+
+        // 전화번호
+        phoneNumber: userData.phoneNumber || "",
+        isPhoneVerified: userData.isPhoneVerified || false,
+
+        // 시간 정보
+        createdAt: userData.createdAt || getSafeTimestamp(),
+        updatedAt: getSafeTimestamp(),
+        lastActiveAt: getSafeTimestamp(),
       };
 
-      await updateDoc(userRef, profileData, { merge: true });
+      await setDoc(userRef, profileData, { merge: true });
       return profileData;
     } catch (error) {
       console.error("사용자 프로필 생성/업데이트 실패:", error);
@@ -1039,13 +1074,76 @@ export const userService = {
   async updateUserRating(userId, rating) {
     try {
       const userRef = doc(db, "users", userId);
+      const userDoc = await getDoc(userRef);
+      
+      if (!userDoc.exists()) {
+        throw new Error("사용자를 찾을 수 없습니다.");
+      }
+
+      const userData = userDoc.data();
+      const newReviewCount = (userData.reviewCount || 0) + 1;
+      const newTotalRating = (userData.totalRating || 0) + rating;
+      const newRating = newTotalRating / newReviewCount;
+
       await updateDoc(userRef, {
-        totalRating: increment(rating),
-        reviewCount: increment(1),
-        updatedAt: serverTimestamp(),
+        totalRating: newTotalRating,
+        reviewCount: newReviewCount,
+        rating: newRating,
+        updatedAt: getSafeTimestamp(),
       });
+
+      return { rating: newRating, reviewCount: newReviewCount };
     } catch (error) {
       console.error("사용자 신뢰도 업데이트 실패:", error);
+      throw error;
+    }
+  },
+
+  async getUserProfile(userId) {
+    try {
+      if (!userId) {
+        throw new Error("사용자 ID가 필요합니다.");
+      }
+
+      const userRef = doc(db, "users", userId);
+      const userDoc = await getDoc(userRef);
+
+      if (!userDoc.exists()) {
+        return null;
+      }
+
+      return {
+        uid: userId,
+        ...userDoc.data(),
+      };
+    } catch (error) {
+      console.error("사용자 프로필 조회 실패:", error);
+      throw error;
+    }
+  },
+
+  async updateUserProfile(userId, updateData) {
+    try {
+      const userRef = doc(db, "users", userId);
+      
+      const updates = {
+        ...updateData,
+        updatedAt: getSafeTimestamp(),
+      };
+
+      // fullLocation 자동 업데이트
+      if (updateData.region || updateData.district) {
+        const userDoc = await getDoc(userRef);
+        const currentData = userDoc.data() || {};
+        const region = updateData.region || currentData.region || '';
+        const district = updateData.district || currentData.district || '';
+        updates.fullLocation = `${region} ${district}`.trim();
+      }
+
+      await updateDoc(userRef, updates);
+      return updates;
+    } catch (error) {
+      console.error("사용자 프로필 업데이트 실패:", error);
       throw error;
     }
   },

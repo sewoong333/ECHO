@@ -471,10 +471,10 @@ export default function MyPage() {
               )}
             </ProfileName>
             
-            {user.address && (
+            {(user.region || user.district || user.fullLocation) && (
               <UserLocation>
                 <FaMapMarkerAlt />
-                {user.region} {user.district}
+                {user.fullLocation || `${user.region} ${user.district}`.trim()}
               </UserLocation>
             )}
             
