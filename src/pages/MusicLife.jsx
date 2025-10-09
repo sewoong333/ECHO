@@ -160,12 +160,8 @@ export default function MusicLife() {
                 </CategoryBadge>
                 <PostMeta>
                   <MetaItem>
-                    <UserDisplay 
-                      userId={post.authorId}
-                      size="16px"
-                      maxWidth="120px"
-                      fallbackText="작성자"
-                    />
+                    <FiUser size={12} />
+                    <span>{post.authorNickname || post.authorName || "작성자"}</span>
                   </MetaItem>
                   <MetaItem>
                     <FiCalendar size={12} />

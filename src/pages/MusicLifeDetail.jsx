@@ -151,6 +151,12 @@ const AuthorBio = styled.div`
   line-height: 1.4;
 `;
 
+const AuthorEmail = styled.div`
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 2px;
+`;
+
 const MetaItem = styled.div`
   display: flex;
   align-items: center;
@@ -646,15 +652,15 @@ export default function MusicLifeDetail() {
           
           <PostMeta>
             <AuthorInfo>
-              <UserDisplay 
-                userId={post.authorId}
-                size="48px"
-                showBio={true}
-                showVerified={true}
-                maxWidth="200px"
-                gap="12px"
-                fallbackText="작성자"
-              />
+              <AuthorAvatar imageUrl={post.authorProfileImage}>
+                {!post.authorProfileImage && (post.authorNickname || post.authorName || "작성자").charAt(0)}
+              </AuthorAvatar>
+              <AuthorDetails>
+                <AuthorName>{post.authorNickname || post.authorName || "작성자"}</AuthorName>
+                {post.authorEmail && (
+                  <AuthorEmail>{post.authorEmail}</AuthorEmail>
+                )}
+              </AuthorDetails>
             </AuthorInfo>
             <MetaItem>
               <FaClock /> {formatTime(post.createdAt)}

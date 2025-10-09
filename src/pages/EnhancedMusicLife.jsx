@@ -670,22 +670,19 @@ export default function EnhancedMusicLife() {
               <PostCard key={post.id}>
                 <PostHeader>
                   <UserInfo>
-                    <UserDisplay 
-                      userId={post.authorId}
-                      size="32px"
-                      showBio={false}
-                      showVerified={true}
-                      maxWidth="200px"
-                      gap="8px"
-                      fallbackText="작성자"
-                    />
-                    <PostMeta>
-                      <FaClock />
-                      {post.createdAt}
-                      <span>•</span>
-                      <FaEye />
-                      {post.viewCount || 0}
-                    </PostMeta>
+                    <UserAvatar imageUrl={post.authorProfileImage}>
+                      {!post.authorProfileImage && (post.authorNickname || post.authorName || "작성자").charAt(0)}
+                    </UserAvatar>
+                    <UserDetails>
+                      <UserName>{post.authorNickname || post.authorName || "작성자"}</UserName>
+                      <PostMeta>
+                        <FaClock />
+                        {post.createdAt}
+                        <span>•</span>
+                        <FaEye />
+                        {post.viewCount || 0}
+                      </PostMeta>
+                    </UserDetails>
                     <CategoryBadge category={post.category}>
                       {getCategoryIcon(post.category)}
                       {categories.find(c => c.id === post.category)?.label}
