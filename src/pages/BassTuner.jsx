@@ -6,10 +6,10 @@ import { FaExclamationTriangle, FaCheckCircle, FaToggleOn, FaToggleOff } from "r
 const ECHO_COLOR = "#2ed8b6";
 const ECHO_ACCENT = "#1976d2";
 const BASS_NOTES = [
-  { name: "G₂", freq: 98.0, label: "1번줄 (G2)" },
+  { name: "G₂", freq: 98.00, label: "1번줄 (G2)" },
   { name: "D₂", freq: 73.42, label: "2번줄 (D2)" },
-  { name: "A₁", freq: 55.0, label: "3번줄 (A1)" },
-  { name: "E₁", freq: 41.2, label: "4번줄 (E1)" },
+  { name: "A₁", freq: 55.00, label: "3번줄 (A1)" },
+  { name: "E₁", freq: 41.20, label: "4번줄 (E1)" },
 ];
 
 function getDiffHz(freq, target) {
