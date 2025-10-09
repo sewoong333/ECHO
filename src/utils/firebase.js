@@ -78,17 +78,25 @@ if (typeof window !== "undefined") {
     });
 }
 
-// 오프라인 지속성 설정
-if (typeof window !== "undefined") {
+// 오프라인 지속성 설정 (중복 초기화 방지)
+let persistenceEnabled = false;
+if (typeof window !== "undefined" && !persistenceEnabled) {
   enableIndexedDbPersistence(db, {
     synchronizeTabs: true,
-  }).catch((err) => {
+  })
+  .then(() => {
+    persistenceEnabled = true;
+    console.log("✅ Firestore 지속성 설정 완료");
+  })
+  .catch((err) => {
     if (err.code === "failed-precondition") {
       console.warn(
         "Multiple tabs open, persistence can only be enabled in one tab at a time.",
       );
     } else if (err.code === "unimplemented") {
       console.warn("The current browser does not support persistence.");
+    } else {
+      console.warn("Firestore persistence 설정 실패:", err);
     }
   });
 }
