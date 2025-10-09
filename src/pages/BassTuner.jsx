@@ -703,43 +703,6 @@ export default function BassTuner() {
         <VolumeLevel level={volumeLevel} />
       </VolumeIndicator>
       
-      {/* 손상 감지 온오프 토글 */}
-      <DamageToggle>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <FaExclamationTriangle />
-          손상 감지
-        </div>
-        <ToggleButton
-          $active={damageDetection}
-          onClick={() => setDamageDetection(!damageDetection)}
-        >
-          {damageDetection ? <FaToggleOn /> : <FaToggleOff />}
-        </ToggleButton>
-      </DamageToggle>
-      
-      {/* 고정된 손상 상태 영역 - 튜닝 완료 시에만 표시 */}
-      {damageDetection && (
-        <DamageStatusArea>
-          {lastDamageCheck ? (
-            <DamageCardFixed $type={lastDamageCheck.type}>
-              <SafetyTitle>
-                <FaExclamationTriangle />
-                {lastDamageCheck.title}
-              </SafetyTitle>
-              <SafetyMessage>{lastDamageCheck.message}</SafetyMessage>
-              <SafetyAction>{lastDamageCheck.action}</SafetyAction>
-              {lastDamageCheck.details && (
-                <SafetyDetails>분석 결과: {lastDamageCheck.details}</SafetyDetails>
-              )}
-            </DamageCardFixed>
-          ) : (
-            <EmptyDamageArea>
-              튜닝 완료 시 악기 상태를 확인합니다
-            </EmptyDamageArea>
-          )}
-        </DamageStatusArea>
-      )}
-      
       <Frame>
         {/* 상단 드롭다운 */}
         <TopRow>
@@ -845,33 +808,26 @@ export default function BassTuner() {
                     </g>
                   );
                 })}
-                {/* 바늘 */}
+                {/* 바늘 - 헤르츠에 따라 부드럽게 움직이고 색상 변경 */}
                 <g
                   style={{
                     transform: `rotate(${Math.max(-100, Math.min(100, diff || 0)) * 0.9}deg)`,
                     transformOrigin: "170px 150px",
-                    transition: "transform 0.3s ease",
+                    transition: "transform 0.1s linear",
                   }}
                 >
-                  {/* 바늘 몸체 */}
-                  <rect
-                    x="167"
-                    y="150"
-                    width="6"
-                    height="-70"
-                    rx="3"
-                    fill={Math.abs(diff || 0) < 1 ? "#4CAF50" : Math.abs(diff || 0) < 5 ? "#FF9800" : "#F44336"}
+                  {/* 직선 침 */}
+                  <line
+                    x1="170"
+                    y1="150"
+                    x2="170"
+                    y2="75"
+                    stroke={Math.abs(diff || 0) < 1 ? "#4CAF50" : Math.abs(diff || 0) < 5 ? "#FF9800" : "#F44336"}
+                    strokeWidth="4"
+                    strokeLinecap="round"
                     style={{
                       filter: "drop-shadow(0 0 8px rgba(0,0,0,0.3))",
-                      transition: "fill 0.3s ease",
-                    }}
-                  />
-                  {/* 바늘 끝 삼각형 */}
-                  <path
-                    d="M 170 80 L 162 90 L 178 90 Z"
-                    fill={Math.abs(diff || 0) < 1 ? "#4CAF50" : Math.abs(diff || 0) < 5 ? "#FF9800" : "#F44336"}
-                    style={{
-                      transition: "fill 0.3s ease",
+                      transition: "stroke 0.2s ease",
                     }}
                   />
                   {/* 중심점 */}
@@ -883,7 +839,7 @@ export default function BassTuner() {
                     stroke={Math.abs(diff || 0) < 1 ? "#4CAF50" : Math.abs(diff || 0) < 5 ? "#FF9800" : "#F44336"}
                     strokeWidth="5"
                     style={{
-                      transition: "stroke 0.3s ease",
+                      transition: "stroke 0.2s ease",
                     }}
                   />
                   <circle 
@@ -892,7 +848,7 @@ export default function BassTuner() {
                     r="9" 
                     fill={Math.abs(diff || 0) < 1 ? "#4CAF50" : Math.abs(diff || 0) < 5 ? "#FF9800" : "#F44336"}
                     style={{
-                      transition: "fill 0.3s ease",
+                      transition: "fill 0.2s ease",
                     }}
                   />
                 </g>
@@ -964,6 +920,44 @@ export default function BassTuner() {
           표준튜닝: G₂(98.0) - D₂(73.4) - A₁(55.0) - E₁(41.2)
         </StandardText>
       </Frame>
+      
+      {/* 손상 감지 온오프 토글 */}
+      <DamageToggle>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <FaExclamationTriangle />
+          손상 감지
+        </div>
+        <ToggleButton
+          $active={damageDetection}
+          onClick={() => setDamageDetection(!damageDetection)}
+        >
+          {damageDetection ? <FaToggleOn /> : <FaToggleOff />}
+        </ToggleButton>
+      </DamageToggle>
+      
+      {/* 고정된 손상 상태 영역 - 튜닝 완료 시에만 표시 */}
+      {damageDetection && (
+        <DamageStatusArea>
+          {lastDamageCheck ? (
+            <DamageCardFixed $type={lastDamageCheck.type}>
+              <SafetyTitle>
+                <FaExclamationTriangle />
+                {lastDamageCheck.title}
+              </SafetyTitle>
+              <SafetyMessage>{lastDamageCheck.message}</SafetyMessage>
+              <SafetyAction>{lastDamageCheck.action}</SafetyAction>
+              {lastDamageCheck.details && (
+                <SafetyDetails>분석 결과: {lastDamageCheck.details}</SafetyDetails>
+              )}
+            </DamageCardFixed>
+          ) : (
+            <EmptyDamageArea>
+              튜닝 완료 시 악기 상태를 확인합니다
+            </EmptyDamageArea>
+          )}
+        </DamageStatusArea>
+      )}
+      
       {/* 헤드 일러스트 (간단 SVG) - 하단 중앙 고정 */}
       <HeadSVGWrap>
         <svg width="180" height="180" viewBox="0 0 180 180">
