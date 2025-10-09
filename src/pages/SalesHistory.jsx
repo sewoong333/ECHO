@@ -327,7 +327,19 @@ export default function SalesHistory() {
           fontSize: "12px",
           fontFamily: "monospace"
         }}>
-          Debug Info: UserID={user.uid}, LoggedIn={user.isLoggedIn.toString()}, Loading={user.loading.toString()}, UserProductsLength={userProducts.length}
+          <div>Debug Info:</div>
+          <div>UserID: {user.uid}</div>
+          <div>LoggedIn: {user.isLoggedIn.toString()}</div>
+          <div>Loading: {user.loading.toString()}</div>
+          <div>UserProductsLength: {userProducts.length}</div>
+          <div>FilteredListLength: {filteredList.length}</div>
+          <div>Filter: {filter}</div>
+          {userProducts.length > 0 && (
+            <div>
+              <div>First Product: {userProducts[0]?.title}</div>
+              <div>First Product Sold: {userProducts[0]?.sold?.toString()}</div>
+            </div>
+          )}
         </div>
       )}
       
