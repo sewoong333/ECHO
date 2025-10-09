@@ -170,7 +170,7 @@ function SalesHistoryNew() {
   const [filter, setFilter] = useState("all");
   const [error, setError] = useState(null);
 
-  // 사용자 인증 체크
+  // 사용자 인증 체크 - hooks 이후에 실행
   if (!user || !user.uid) {
     return (
       <Wrapper>
