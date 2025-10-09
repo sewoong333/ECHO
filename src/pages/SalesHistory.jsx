@@ -190,21 +190,19 @@ const FilterBtn = styled.button`
 export default function SalesHistory() {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
-  const { likes, chatRooms } = useContext(ProductContext);
-  const [list, setList] = useState([]);
+  const { userProducts, loadUserProducts, likes, chatRooms } = useContext(ProductContext);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchSalesHistory = async (retryCount = 0) => {
+    const initializeSalesHistory = async () => {
       try {
         setError(null);
-        console.log("📦 판매내역 로딩 시작...", {
+        console.log("📦 판매내역 초기화 시작...", {
           userId: user.uid,
           isLoggedIn: user.isLoggedIn,
-          loading: user.loading,
-          retry: retryCount
+          loading: user.loading
         });
 
         if (!user.uid) {
@@ -213,69 +211,19 @@ export default function SalesHistory() {
           return;
         }
 
-        // 더 안정적인 쿼리 (orderBy 제거하여 인덱스 문제 방지)
-        const q = query(
-          collection(db, "products"),
-          where("sellerId", "==", user.uid)
-        );
-        
-        console.log("🔍 Firebase 쿼리 실행 (안정화 버전)...");
-        
-        // 타임아웃을 추가하여 긴 연결 방지
-        const queryPromise = getDocs(q);
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Query timeout')), 10000)
-        );
-        
-        const querySnapshot = await Promise.race([queryPromise, timeoutPromise]);
-        console.log(`📊 Firebase 결과: ${querySnapshot.docs.length}개 상품 발견`);
-        
-        const salesList = querySnapshot.docs.map((doc) => {
-          const data = doc.data();
-          console.log("📝 상품 데이터:", {
-            id: doc.id,
-            title: data.title,
-            sellerId: data.sellerId,
-            createdAt: data.createdAt
-          });
-          return {
-            id: doc.id,
-            ...data,
-          };
-        });
-
-        // 클라이언트에서 날짜순으로 수동 정렬
-        salesList.sort((a, b) => {
-          const timeA = a.createdAt?.toDate?.() || new Date(a.createdAt) || new Date(0);
-          const timeB = b.createdAt?.toDate?.() || new Date(b.createdAt) || new Date(0);
-          return timeB - timeA;
-        });
-        
-        setList(salesList);
-        console.log("✅ 판매내역 로딩 완료:", salesList.length, "개 상품");
+        // ProductContext의 loadUserProducts 사용
+        await loadUserProducts();
+        console.log("✅ 사용자 상품 로드 완료");
       } catch (err) {
-        console.error("❌ 판매내역 불러오기 실패:", err);
-        
-        // 네트워크 오류나 타임아웃인 경우 재시도
-        if (retryCount < 2 && (err.code === 'unavailable' || err.message === 'Query timeout' || err.code === 'failed-precondition')) {
-          console.log(`🔄 재시도 ${retryCount + 1}/3 ...`);
-          setTimeout(() => {
-            fetchSalesHistory(retryCount + 1);
-          }, 1000 * (retryCount + 1)); // 점진적 백오프
-          return;
-        }
-        
-        // 에러 상태 설정
+        console.error("❌ 판매내역 초기화 실패:", err);
         setError(err.message || '데이터를 불러오는데 실패했습니다.');
-        setList([]);
-        console.log("❌ 모든 재시도 실패 - 에러 상태 설정");
       } finally {
         setLoading(false);
       }
     };
 
     if (user.isLoggedIn && user.uid && !user.loading) {
-      fetchSalesHistory();
+      initializeSalesHistory();
     } else {
       console.log("⏳ 사용자 로딩 대기 중...", {
         isLoggedIn: user.isLoggedIn,
@@ -286,9 +234,9 @@ export default function SalesHistory() {
         setLoading(false);
       }
     }
-  }, [user.isLoggedIn, user.uid, user.loading]);
+  }, [user.isLoggedIn, user.uid, user.loading, loadUserProducts]);
 
-  const filteredList = list.filter((item) => {
+  const filteredList = userProducts.filter((item) => {
     if (filter === "all") return true;
     if (filter === "active") return !item.sold;
     if (filter === "sold") return item.sold;
@@ -379,7 +327,7 @@ export default function SalesHistory() {
           fontSize: "12px",
           fontFamily: "monospace"
         }}>
-          Debug Info: UserID={user.uid}, LoggedIn={user.isLoggedIn.toString()}, Loading={user.loading.toString()}, ListLength={list.length}
+          Debug Info: UserID={user.uid}, LoggedIn={user.isLoggedIn.toString()}, Loading={user.loading.toString()}, UserProductsLength={userProducts.length}
         </div>
       )}
       
