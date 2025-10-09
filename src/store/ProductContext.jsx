@@ -262,7 +262,10 @@ export function ProductProvider({ children }) {
     async (userId = null) => {
       try {
         const targetUserId = userId || user?.uid;
-        if (!targetUserId) return;
+        if (!targetUserId) {
+          console.log("❌ 사용자 UID가 없음");
+          return;
+        }
 
         console.log("👤 사용자 상품 로드 중...", targetUserId);
 
@@ -273,6 +276,8 @@ export function ProductProvider({ children }) {
       } catch (err) {
         console.error("❌ 사용자 상품 로드 실패:", err);
         setError(err.message);
+        // 에러 발생 시 빈 배열로 설정
+        setUserProducts([]);
       }
     },
     [user],

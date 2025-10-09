@@ -737,23 +737,27 @@ export const productService = {
     }
   },
 
-  // 사용자별 상품 조회
-  async getUserProducts(userId, status = PRODUCT_STATUS.ACTIVE) {
+  // 사용자별 상품 조회 (모든 상태의 상품 포함)
+  async getUserProducts(userId) {
     try {
+      console.log("🔍 사용자 상품 조회 시작:", userId);
+      
       const q = query(
         productsCollection,
         where("sellerId", "==", userId),
-        where("status", "==", status),
         orderBy("createdAt", "desc"),
       );
 
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map((doc) => ({
+      const products = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
+      
+      console.log("✅ 사용자 상품 조회 완료:", products.length, "개");
+      return products;
     } catch (error) {
-      console.error("사용자 상품 조회 실패:", error);
+      console.error("❌ 사용자 상품 조회 실패:", error);
       throw error;
     }
   },

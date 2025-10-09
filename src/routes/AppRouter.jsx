@@ -30,6 +30,9 @@ const EchoShare = lazy(() => import("../pages/EchoShare"));
 const WishList = lazy(() => import("../pages/WishList"));
 const PhoneRegister = lazy(() => import("../pages/PhoneRegister"));
 const ProfileEdit = lazy(() => import("../pages/ProfileEdit"));
+const BusinessAccount = lazy(() => import("../pages/BusinessAccount"));
+const PrivacyPolicy = lazy(() => import("../pages/PrivacyPolicy"));
+const Following = lazy(() => import("../pages/Following"));
 
 // Loading component
 const LoadingContainer = styled.div`
@@ -101,6 +104,9 @@ export default function AppRouter() {
         <Route path="/wishlist" element={<WishList />} />
         <Route path="/profile/phone" element={<PhoneRegister />} />
         <Route path="/profile/edit" element={<ProfileEdit />} />
+        <Route path="/business" element={<BusinessAccount />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/following" element={<Following />} />
       </Routes>
     </Suspense>
   );
