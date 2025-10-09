@@ -527,7 +527,7 @@ export const productService = {
     }
   },
 
-  // 조회수 증가 (중복 방지)
+  // 조회수 증가 (개선된 버전 - 실제 조회 기록 기반)
   async incrementViewCount(productId, userId = null) {
     try {
       console.log('🚀 조회수 증가 함수 시작:', { productId, userId: userId || 'anonymous' });
@@ -536,7 +536,7 @@ export const productService = {
       const viewKey = `viewed_${productId}_${userId || 'anonymous'}`;
       const lastViewTime = sessionStorage.getItem(viewKey);
       
-      // 1분 이내 중복 조회 방지 (10분에서 1분으로 단축하여 테스트 용이하게)
+      // 1분 이내 중복 조회 방지
       if (lastViewTime) {
         const timeDiff = Date.now() - parseInt(lastViewTime);
         if (timeDiff < 1 * 60 * 1000) { // 1분
@@ -563,33 +563,106 @@ export const productService = {
         return;
       }
       
-      console.log('💫 Firestore 조회수 업데이트 시작...');
-      await updateDoc(productRef, {
-        viewCount: increment(1),
-        lastViewedAt: serverTimestamp(),
-      });
+      // 조회 기록 저장 (실제 조회 기록 기반)
+      try {
+        const viewLogRef = collection(db, 'viewLogs');
+        await addDoc(viewLogRef, {
+          productId,
+          userId: userId || 'anonymous',
+          userAgent: navigator.userAgent,
+          timestamp: serverTimestamp(),
+          sessionId: viewKey
+        });
+        console.log('📝 조회 기록 저장 완료');
+      } catch (error) {
+        console.log('⚠️ 조회 기록 저장 실패 (계속 진행):', error);
+      }
+      
+      // 실제 조회 기록 기반으로 조회수 계산
+      const viewLogsQuery = query(
+        collection(db, 'viewLogs'),
+        where('productId', '==', productId)
+      );
+      const viewLogsSnapshot = await getDocs(viewLogsQuery);
+      const actualViewCount = viewLogsSnapshot.docs.length;
+      
+      console.log('📊 실제 조회 기록 수:', actualViewCount);
+      
+      // 실제 조회수와 저장된 조회수가 다르면 동기화
+      if (actualViewCount !== (productData.viewCount || 0)) {
+        console.log('📝 조회수 동기화:', productData.viewCount || 0, '→', actualViewCount);
+        await updateDoc(productRef, {
+          viewCount: actualViewCount,
+          lastViewedAt: serverTimestamp(),
+          lastViewCountUpdate: serverTimestamp()
+        });
+      } else {
+        // 정상적으로 1 증가
+        await updateDoc(productRef, {
+          viewCount: increment(1),
+          lastViewedAt: serverTimestamp(),
+        });
+      }
       
       // 세션에 조회 기록 저장
       sessionStorage.setItem(viewKey, Date.now().toString());
       
-      console.log('✅ 조회수 증가 완료:', productId, '→', (productData.viewCount || 0) + 1);
+      console.log('✅ 조회수 증가 완료:', productId, '→', actualViewCount);
     } catch (error) {
       console.error("❌ 조회수 증가 실패:", error);
       console.error("❌ 에러 상세:", error.message, error.code);
     }
   },
 
-  // 채팅 수 증가
+  // 채팅 수 증가 (개선된 버전)
   async incrementChatCount(productId) {
     try {
+      console.log('🚀 채팅 수 증가 시작:', productId);
+      
       const productRef = doc(db, "products", productId);
-      await updateDoc(productRef, {
-        chatCount: increment(1),
-        lastChatAt: serverTimestamp(),
-      });
-      console.log('채팅 수 증가 완료:', productId);
+      
+      // 상품 존재 확인
+      const productSnap = await getDoc(productRef);
+      if (!productSnap.exists()) {
+        console.log('❌ 상품을 찾을 수 없습니다:', productId);
+        return;
+      }
+      
+      // 현재 채팅수 확인
+      const currentData = productSnap.data();
+      const currentChatCount = currentData.chatCount || 0;
+      
+      console.log('📊 현재 채팅수:', currentChatCount);
+      
+      // 실제 채팅방 수 계산
+      const chatRoomsQuery = query(
+        collection(db, 'chatRooms'),
+        where('productId', '==', productId)
+      );
+      const chatRoomsSnapshot = await getDocs(chatRoomsQuery);
+      const actualChatCount = chatRoomsSnapshot.docs.length;
+      
+      console.log('📊 실제 채팅방 수:', actualChatCount);
+      
+      // 실제 채팅방 수와 저장된 채팅수가 다르면 업데이트
+      if (actualChatCount !== currentChatCount) {
+        console.log('📝 채팅수 동기화:', currentChatCount, '→', actualChatCount);
+        await updateDoc(productRef, {
+          chatCount: actualChatCount,
+          lastChatAt: serverTimestamp(),
+          lastChatCountUpdate: serverTimestamp()
+        });
+      } else {
+        // 정상적으로 1 증가
+        await updateDoc(productRef, {
+          chatCount: increment(1),
+          lastChatAt: serverTimestamp(),
+        });
+      }
+      
+      console.log('✅ 채팅 수 증가 완료:', productId);
     } catch (error) {
-      console.error("채팅 수 증가 실패:", error);
+      console.error("❌ 채팅 수 증가 실패:", error);
       throw error;
     }
   },

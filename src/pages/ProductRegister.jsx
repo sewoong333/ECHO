@@ -5,7 +5,9 @@ import { useNavigate } from "react-router-dom";
 import { UserContext } from "../store/UserContext";
 import { useToast } from "../store/ToastContext";
 import TopBar from "../components/TopBar";
-import { FiCamera, FiX, FiCheck } from "react-icons/fi";
+import BulkProductUpload from "../components/BulkProductUpload";
+import { isAdmin } from "../utils/adminUtils";
+import { FiCamera, FiX, FiCheck, FiUpload } from "react-icons/fi";
 
 const categories = [
   { value: "guitar", label: "기타" },
@@ -47,6 +49,7 @@ export default function ProductRegister() {
   const [previewUrls, setPreviewUrls] = useState([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [showBulkUpload, setShowBulkUpload] = useState(false);
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
   const { addToast, showDetailedError, showDetailedWarning } = useToast();
@@ -259,8 +262,18 @@ export default function ProductRegister() {
     <Container>
       <TopBar />
       <Header>
-        <h1>상품 등록</h1>
-        <p>판매하실 악기 정보를 입력해주세요</p>
+        <HeaderContent>
+          <HeaderText>
+            <h1>상품 등록</h1>
+            <p>판매하실 악기 정보를 입력해주세요</p>
+          </HeaderText>
+          {(isAdmin(user) || process.env.NODE_ENV === 'development') && (
+            <BulkUploadButton onClick={() => setShowBulkUpload(true)}>
+              <FiUpload size={16} />
+              대량 등록
+            </BulkUploadButton>
+          )}
+        </HeaderContent>
       </Header>
       
       <Form onSubmit={handleSubmit}>
@@ -450,6 +463,19 @@ export default function ProductRegister() {
           {loading ? "등록 중..." : "상품 등록하기"}
         </SubmitButton>
       </Form>
+
+      {showBulkUpload && (
+        <BulkProductUpload
+          onClose={() => setShowBulkUpload(false)}
+          onSuccess={(products) => {
+            setShowBulkUpload(false);
+            addToast(`${products.length}개 상품이 성공적으로 등록되었습니다!`, "success");
+            setTimeout(() => {
+              navigate("/");
+            }, 1500);
+          }}
+        />
+      )}
     </Container>
   );
 }
@@ -465,7 +491,18 @@ const Header = styled.div`
   background: white;
   padding: 24px;
   border-bottom: 1px solid #eee;
-  text-align: center;
+`;
+
+const HeaderContent = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 640px;
+  margin: 0 auto;
+`;
+
+const HeaderText = styled.div`
+  text-align: left;
   
   h1 {
     font-size: 24px;
@@ -477,6 +514,26 @@ const Header = styled.div`
   p {
     color: #666;
     font-size: 14px;
+    margin: 0;
+  }
+`;
+
+const BulkUploadButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #2ed8b6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  
+  &:hover {
+    background: #26c4a8;
   }
 `;
 
