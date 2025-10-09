@@ -162,7 +162,7 @@ const MoreBtn = styled(ActionBtn)`
   justify-content: center;
 `;
 
-export default function SalesHistory() {
+function SalesHistoryNew() {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
   const { userProducts, loadUserProducts } = useContext(ProductContext);
@@ -361,3 +361,5 @@ export default function SalesHistory() {
     </Wrapper>
   );
 }
+
+export default SalesHistoryNew;

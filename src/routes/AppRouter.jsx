@@ -23,7 +23,7 @@ const ChatList = lazy(() => import("../pages/ChatList"));
 const AddProduct = lazy(() => import("../pages/AddProduct"));
 const GuitarTuner = lazy(() => import("../pages/GuitarTuner"));
 const BassTuner = lazy(() => import("../pages/BassTuner"));
-const SalesHistory = lazy(() => import("../pages/SalesHistory"));
+const SalesHistory = lazy(() => import("../pages/SalesHistoryNew"));
 const SoldHistory = lazy(() => import("../pages/SoldHistory"));
 const BuyingHistory = lazy(() => import("../pages/BuyingHistory"));
 const EchoShare = lazy(() => import("../pages/EchoShare"));
