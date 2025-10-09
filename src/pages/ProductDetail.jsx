@@ -640,6 +640,10 @@ const ModalCloseButton = styled.button`
   border-radius: 50%;
   width: 40px;
   height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  max-height: 40px;
   z-index: 1001;
   transition: all 0.3s ease;
   display: flex;
@@ -714,6 +718,10 @@ const SlideButton = styled.button`
   border-radius: 50%;
   width: 40px;
   height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  max-height: 40px;
   z-index: 1001;
   transition: all 0.3s ease;
   display: flex;
