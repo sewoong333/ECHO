@@ -667,13 +667,6 @@ const ModalCloseButton = styled.button`
   }
 `;
 
-const ModalImageSlider = styled.div`
-  display: flex;
-  width: ${props => props.imageCount * 100}vw;
-  height: 100vh;
-  transform: translateX(-${props => props.currentIndex * 100}vw);
-  transition: transform 0.3s ease;
-`;
 
 const ModalImage = styled.img`
   width: 100vw;
@@ -1439,18 +1432,10 @@ export default function ProductDetail() {
             onTouchEnd={handleModalTouchEnd}
             onClick={(e) => e.stopPropagation()}
           >
-            <ModalImageSlider 
-              imageCount={images.length}
-              currentIndex={currentImageIndex}
-            >
-              {images.map((image, index) => (
-                <ModalImage 
-                  key={index}
-                  src={image} 
-                  alt={`상품 이미지 ${index + 1}`}
-                />
-              ))}
-            </ModalImageSlider>
+            <ModalImage 
+              src={images[currentImageIndex]} 
+              alt={`상품 이미지 ${currentImageIndex + 1}`}
+            />
             
             {/* 슬라이드 버튼들 */}
             {images.length > 1 && (
