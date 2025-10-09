@@ -672,26 +672,7 @@ const ModalImageSlider = styled.div`
   width: ${props => props.imageCount * 100}vw;
   height: 100vh;
   transform: translateX(-${props => props.currentIndex * 100}vw);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  /* GPU 가속으로 부드러운 애니메이션 */
-  -webkit-transform: translateX(-${props => props.currentIndex * 100}vw) translateZ(0);
-  will-change: transform;
-  
-  /* 이미지가 정확히 가운데 정렬되도록 */
-  align-items: center;
-  justify-content: flex-start;
-  
-  /* 모바일에서 터치 최적화 */
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  
-  /* 이미지 겹침 방지 */
-  position: relative;
-  z-index: 1;
-  
-  /* 각 이미지가 독립적으로 렌더링되도록 */
-  isolation: isolate;
+  transition: transform 0.3s ease;
 `;
 
 const ModalImage = styled.img`
@@ -701,62 +682,11 @@ const ModalImage = styled.img`
   object-position: center;
   cursor: grab;
   user-select: none;
-  -webkit-user-drag: none;
-  -khtml-user-drag: none;
-  -moz-user-drag: none;
-  -o-user-drag: none;
-  user-drag: none;
-  
-  /* 이미지 겹침 방지 */
-  position: relative;
-  z-index: 1;
   flex-shrink: 0;
-  
-  /* 각 이미지가 정확히 화면을 채우도록 */
-  display: block;
-  margin: 0;
-  padding: 0;
   
   &:active {
     cursor: grabbing;
   }
-  
-  /* 이미지 렌더링 최적화 - 깨짐 방지 */
-  image-rendering: auto;
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
-  -webkit-image-rendering: auto;
-  -moz-image-rendering: auto;
-  -ms-image-rendering: auto;
-  
-  /* GPU 가속으로 부드러운 렌더링 */
-  -webkit-transform: translateZ(0) scale(1);
-  transform: translateZ(0) scale(1);
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-  -webkit-perspective: 1000px;
-  perspective: 1000px;
-  
-  /* 이미지 품질 보장 */
-  -webkit-filter: none;
-  filter: none;
-  
-  /* 모바일 최적화 */
-  -webkit-touch-callout: none;
-  -webkit-tap-highlight-color: transparent;
-  
-  /* 이미지 스케일링 방지 */
-  max-width: 100vw;
-  max-height: 100vh;
-  min-width: auto;
-  min-height: auto;
-  
-  /* 브라우저별 렌더링 최적화 */
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  
-  /* 각 이미지가 독립적으로 렌더링되도록 */
-  isolation: isolate;
 `;
 
 const ModalImageCounter = styled.div`
