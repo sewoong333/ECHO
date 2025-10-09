@@ -170,20 +170,10 @@ function SalesHistoryNew() {
   const [filter, setFilter] = useState("all");
   const [error, setError] = useState(null);
 
-  // 사용자 인증 체크 - hooks 이후에 실행
-  if (!user || !user.uid) {
-    return (
-      <Wrapper>
-        <TopBar />
-        <div style={{ textAlign: "center", padding: "40px 0" }}>
-          로그인이 필요합니다.
-        </div>
-      </Wrapper>
-    );
-  }
-
   useEffect(() => {
     const loadData = async () => {
+      if (!user || !user.uid) return;
+      
       try {
         setError(null);
         setLoading(true);
@@ -200,7 +190,19 @@ function SalesHistoryNew() {
     };
 
     loadData();
-  }, [user.uid, loadUserProducts]);
+  }, [user?.uid, loadUserProducts]);
+
+  // 사용자 인증 체크 - hooks 이후에 실행
+  if (!user || !user.uid) {
+    return (
+      <Wrapper>
+        <TopBar />
+        <div style={{ textAlign: "center", padding: "40px 0" }}>
+          로그인이 필요합니다.
+        </div>
+      </Wrapper>
+    );
+  }
 
   const filteredList = (userProducts || []).filter((item) => {
     if (!item) return false;
