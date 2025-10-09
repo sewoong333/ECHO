@@ -1433,7 +1433,7 @@ export default function ProductDetail() {
       {isImageModalOpen && (
         <ImageModal onClick={() => setIsImageModalOpen(false)}>
           <ModalCloseButton onClick={() => setIsImageModalOpen(false)}>
-            <FaTimes />
+            ✕
           </ModalCloseButton>
           
           <ModalImageContainer
@@ -1455,7 +1455,7 @@ export default function ProductDetail() {
                   onClick={handlePrevImage}
                   disabled={currentImageIndex === 0}
                 >
-                  <FaChevronLeft />
+                  ‹
                 </SlideButton>
                 
                 <SlideButton 
@@ -1463,7 +1463,7 @@ export default function ProductDetail() {
                   onClick={handleNextImage}
                   disabled={currentImageIndex === images.length - 1}
                 >
-                  <FaChevronRight />
+                  ›
                 </SlideButton>
                 
                 <ModalImageCounter>
