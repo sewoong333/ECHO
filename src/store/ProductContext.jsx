@@ -160,13 +160,6 @@ export function ProductProvider({ children }) {
     loadProducts(true);
   }, []); // 빈 배열로 앱 시작 시 한 번만 실행
 
-  // 사용자 로그인 시 찜한 상품 로드
-  useEffect(() => {
-    if (user?.uid && products.length > 0) {
-      loadLikedProducts();
-    }
-  }, [user?.uid, products, loadLikedProducts]);
-
   // 필터 변경 시 상품 목록 새로고침 (검색어는 제외)
   useEffect(() => {
     console.log("🔧 필터 변경 - 상품 다시 로드");
@@ -274,6 +267,13 @@ export function ProductProvider({ children }) {
     },
     [user?.uid, products],
   );
+
+  // 사용자 로그인 시 찜한 상품 로드
+  useEffect(() => {
+    if (user?.uid && products.length > 0) {
+      loadLikedProducts();
+    }
+  }, [user?.uid, products, loadLikedProducts]);
 
   // 상품 등록
   const addProduct = useCallback(
