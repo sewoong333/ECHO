@@ -16,6 +16,7 @@ const BulkProductUpload = ({ onClose, onSuccess }) => {
   const [matchingType, setMatchingType] = useState('folder');
   const [parsedData, setParsedData] = useState([]);
   const [validationErrors, setValidationErrors] = useState([]);
+  const [validationWarnings, setValidationWarnings] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [step, setStep] = useState(1); // 1: 파일 선택, 2: 데이터 검토, 3: 업로드 완료
@@ -52,12 +53,16 @@ const BulkProductUpload = ({ onClose, onSuccess }) => {
       // 데이터 검증
       const validation = validateExcelData(data);
       
+      setValidationErrors(validation.errors || []);
+      setValidationWarnings(validation.warnings || []);
+      
       if (!validation.isValid) {
-        setValidationErrors(validation.errors);
         addToast(`${validation.errors.length}개의 오류가 발견되었습니다.`, 'warning');
       } else {
-        setValidationErrors([]);
         addToast(`${data.length}개의 상품 데이터를 성공적으로 읽었습니다.`, 'success');
+        if (validation.warnings && validation.warnings.length > 0) {
+          addToast(`${validation.warnings.length}개의 경고가 있습니다. 자동으로 수정되었습니다.`, 'info');
+        }
       }
 
       setParsedData(data);
@@ -198,6 +203,7 @@ const BulkProductUpload = ({ onClose, onSuccess }) => {
     setMatchingType('folder');
     setParsedData([]);
     setValidationErrors([]);
+    setValidationWarnings([]);
     setUploadProgress(0);
     setStep(1);
   };
@@ -343,6 +349,17 @@ const BulkProductUpload = ({ onClose, onSuccess }) => {
                     <li>기존 설명이 20글자 이상인 경우 그대로 유지</li>
                   </ul>
                 </AutoDescriptionInfo>
+
+                <KoreanSupportInfo>
+                  <h4>🇰🇷 한글 지원</h4>
+                  <p>한글로 입력해도 자동으로 영어로 변환됩니다:</p>
+                  <ul>
+                    <li><strong>카테고리:</strong> 기타 → guitar, 피아노 → piano, 드럼 → drum</li>
+                    <li><strong>상태:</strong> 최상 → excellent, 양호 → good, 보통 → fair</li>
+                    <li><strong>가격:</strong> 쉼표, 원화 표시 자동 제거 (1,500,000원 → 1500000)</li>
+                    <li><strong>설명:</strong> 짧은 설명은 자동으로 상세 설명 생성</li>
+                  </ul>
+                </KoreanSupportInfo>
               </FileInfo>
             </StepContent>
           )}
@@ -405,6 +422,20 @@ const BulkProductUpload = ({ onClose, onSuccess }) => {
                   </tbody>
                 </PreviewTable>
               </DataPreview>
+
+              {validationWarnings.length > 0 && (
+                <WarningSection>
+                  <WarningTitle>
+                    <FiAlertCircle size={16} />
+                    자동 수정된 항목 ({validationWarnings.length}개)
+                  </WarningTitle>
+                  <WarningList>
+                    {validationWarnings.map((warning, index) => (
+                      <WarningItem key={index}>{warning}</WarningItem>
+                    ))}
+                  </WarningList>
+                </WarningSection>
+              )}
 
               {validationErrors.length > 0 && (
                 <ErrorSection>
@@ -814,6 +845,37 @@ const PreviewTable = styled.table`
   }
 `;
 
+const WarningSection = styled.div`
+  background: #fffaf0;
+  border: 1px solid #fbd38d;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+`;
+
+const WarningTitle = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #d69e2e;
+  margin-bottom: 12px;
+`;
+
+const WarningList = styled.div`
+  max-height: 200px;
+  overflow-y: auto;
+`;
+
+const WarningItem = styled.div`
+  padding: 8px 12px;
+  background: white;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  font-size: 13px;
+  color: #d69e2e;
+`;
+
 const ErrorSection = styled.div`
   background: #fff5f5;
   border: 1px solid #fed7d7;
@@ -907,6 +969,40 @@ const AutoDescriptionInfo = styled.div`
     font-size: 14px;
     font-weight: 600;
     color: #0066cc;
+  }
+  
+  p {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    color: #666;
+    line-height: 1.4;
+  }
+  
+  ul {
+    margin: 0;
+    padding-left: 16px;
+    
+    li {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+  }
+`;
+
+const KoreanSupportInfo = styled.div`
+  background: #f0fff4;
+  border: 1px solid #9ae6b4;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+  
+  h4 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #38a169;
   }
   
   p {
