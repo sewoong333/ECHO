@@ -17,8 +17,8 @@ import {
 import { MdDragIndicator } from "react-icons/md";
 import { ProductContext } from "../store/ProductContext";
 import { UserContext } from "../store/UserContext";
-import { INSTRUMENT_CATEGORIES, REGIONS, auth, geocodeAddress } from "../utils/firebase";
-import { productSchema, ValidationError, sanitizers } from "../utils/dataValidator";
+import { INSTRUMENT_CATEGORIES, REGIONS, geocodeAddress } from "../utils/firebase";
+import { productSchema, ValidationError } from "../utils/dataValidator";
 
 const Container = styled.div`
   width: 100vw;

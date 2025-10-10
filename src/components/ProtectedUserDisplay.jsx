@@ -201,7 +201,7 @@ const ProtectedUserDisplay = ({
   ...props
 }) => {
   const { userInfo, loading, error } = useUserInfo(userId);
-  const { user: currentUser } = useAuth();
+  // const { user: currentUser } = useAuth();
   const [securityStatus, setSecurityStatus] = useState({
     isValid: true,
     isSuspicious: false,

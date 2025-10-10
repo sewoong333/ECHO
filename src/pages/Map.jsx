@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import TopBar from "../components/TopBar";
 import { ProductContext } from "../store/ProductContext";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { collection, query, getDocs, orderBy } from "firebase/firestore";
 import { db } from "../utils/firebase";
 import { useNavigate } from "react-router-dom";
 
@@ -51,8 +51,7 @@ const getDisplayAddress = (post) => {
   if (post.detailAddress) {
     const parts = post.detailAddress.split(' ');
     if (parts.length >= 2) {
-      const regionShort = parts[0].replace('특별시', '').replace('광역시', '').replace('특별자치시', '').replace('도', '').replace('특별자치도', '');
-      return parts.slice(1).join(' ');
+        return parts.slice(1).join(' ');
     }
     return post.detailAddress;
   }
@@ -998,8 +997,8 @@ export default function MapPage() {
       // 마커 위에 항상 표시되는 제목 오버레이 생성
       const overlayContent = document.createElement('div');
       overlayContent.style.cssText = `
-        padding: 8px 12px;
-        background: white;
+          padding: 8px 12px;
+          background: white;
         border: 2px solid ${post.type === 'product' ? '#2ed8b6' : '#6f42c1'};
         border-radius: 20px;
         font-size: 12px;
@@ -1027,7 +1026,7 @@ export default function MapPage() {
             <span style="font-weight: 600; font-size: 12px;">${title}</span>
           </div>
           ${locationText ? `<div style="font-size: 10px; color: #666; background: #f8f9fa; padding: 2px 8px; border-radius: 10px; border: 1px solid #e9ecef; font-weight: 500;">${locationText}</div>` : ''}
-        </div>
+          </div>
       `;
       
       // 오버레이에 hover 효과
@@ -1081,7 +1080,7 @@ export default function MapPage() {
       console.log('🎯 지도와 게시글 준비됨, 마커 자동 표시:', posts.length);
       // 약간의 지연을 두고 마커 표시 (DOM 렌더링 완료 대기)
       setTimeout(() => {
-        addMarkersToMap();
+      addMarkersToMap();
       }, 100);
     }
   }, [isMapReady, posts, filter]);

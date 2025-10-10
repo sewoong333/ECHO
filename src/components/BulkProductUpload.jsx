@@ -10,7 +10,7 @@ import { organizeImagesByFolder, processBulkProductImages, analyzeImageStructure
 
 const BulkProductUpload = ({ onClose, onSuccess }) => {
   const [file, setFile] = useState(null);
-  const [imageFiles, setImageFiles] = useState(null);
+  const [, setImageFiles] = useState(null);
   const [imageMap, setImageMap] = useState({});
   const [imageStructure, setImageStructure] = useState(null);
   const [matchingType, setMatchingType] = useState('folder');
