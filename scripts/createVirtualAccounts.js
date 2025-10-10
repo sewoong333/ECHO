@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, query, where, serverTimestamp, setDoc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, updateDoc, doc, query, serverTimestamp, setDoc } from 'firebase/firestore';
 
 // Firebase 설정
 const firebaseConfig = {

@@ -8,7 +8,7 @@
  */
 
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, doc, getDocs, updateDoc, query, where, writeBatch, getDoc, increment } from 'firebase/firestore';
+import { getFirestore, collection, doc, getDocs, writeBatch, getDoc } from 'firebase/firestore';
 import { getAuth, signInAnonymously } from 'firebase/auth';
 
 // Firebase 설정
