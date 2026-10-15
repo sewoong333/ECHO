@@ -30,13 +30,11 @@ function analyzeAudioHealth(buf, sampleRate, pitch, targetFreq, volume) {
   const freqRatio = pitch / targetFreq;
   
   // 1. 음향 신호 품질 분석
-  let rms = 0;
   let peakCount = 0;
   let irregularities = 0;
   
   // RMS와 peak 분석
   for (let i = 0; i < buf.length; i++) {
-    rms += buf[i] * buf[i];
     if (i > 0 && Math.abs(buf[i] - buf[i-1]) > 0.1) {
       irregularities++;
     }
@@ -44,7 +42,6 @@ function analyzeAudioHealth(buf, sampleRate, pitch, targetFreq, volume) {
       peakCount++;
     }
   }
-  rms = Math.sqrt(rms / buf.length);
   
   // 2. 하모닉 분석 (배음 구조로 줄 상태 판단)
   const harmonicRatio = analyzeHarmonics(buf, sampleRate, pitch);
@@ -638,7 +635,6 @@ export default function BassTuner() {
   const [pitch, setPitch] = useState(null);
   const [diff, setDiff] = useState(null);
   const [selected, setSelected] = useState(0); // 0: G2, 1: D2, 2: A1, 3: E1
-  const [safetyWarning, setSafetyWarning] = useState(null);
   const [volumeLevel, setVolumeLevel] = useState(0);
   const [damageDetection, setDamageDetection] = useState(true); // 손상 감지 온오프
   const [showSuccess, setShowSuccess] = useState(false); // 성공 표시

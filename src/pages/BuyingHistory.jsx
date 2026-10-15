@@ -8,7 +8,7 @@ import {
   FiHeart,
   FiMessageCircle,
 } from "react-icons/fi";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { collection, query, where, getDocs, getDoc, doc } from "firebase/firestore";
 import { db } from "../utils/firebase";
 import TopBar from "../components/TopBar";
 
@@ -157,18 +157,21 @@ export default function BuyingHistory() {
   useEffect(() => {
     const fetchBuyingHistory = async () => {
       try {
-        // 실제 구매 내역은 별도의 transactions 컬렉션에서 가져와야 하지만,
-        // 현재는 채팅 기록이나 관심 상품을 기준으로 구성
-        const q = query(
-          collection(db, "products"),
-          where("interestedUsers", "array-contains", user.uid),
-          orderBy("createdAt", "desc"),
-        );
-        const querySnapshot = await getDocs(q);
-        const buyingList = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        // 내가 구매자로 대화한 채팅방의 상품 = 구매 진행/문의 내역
+        const roomSnap = await getDocs(query(
+          collection(db, "chatRooms"),
+          where("participants", "array-contains", user.uid),
+        ));
+        const productIds = [...new Set(
+          roomSnap.docs
+            .map((d) => d.data())
+            .filter((r) => r.buyerId === user.uid && r.productId && !String(r.productId).startsWith("musiclife-"))
+            .map((r) => r.productId)
+        )];
+        const docs = await Promise.all(productIds.map((pid) => getDoc(doc(db, "products", pid))));
+        const buyingList = docs
+          .filter((d) => d.exists())
+          .map((d) => ({ id: d.id, ...d.data() }));
         setList(buyingList);
       } catch (err) {
         console.error("구매 내역 불러오기 실패:", err);
@@ -181,6 +184,8 @@ export default function BuyingHistory() {
 
     if (user.isLoggedIn && user.uid) {
       fetchBuyingHistory();
+    } else if (!user.loading) {
+      setLoading(false);
     }
   }, [user]);
 

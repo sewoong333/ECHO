@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage } from '../utils/firebase';
-import { useUser } from '../store/UserContext';
+import { UserContext } from '../store/UserContext';
+import { useToast } from '../store/ToastContext';
 import { designSystem2025 } from '../styles/designSystem2025';
-import { toast } from 'react-hot-toast';
 import { FiUpload, FiX, FiSave, FiArrowLeft } from 'react-icons/fi';
 
 const Container = styled.div`
@@ -323,20 +323,23 @@ const categories = [
   { value: 'wind', label: '관악기' },
   { value: 'string', label: '현악기' },
   { value: 'audio', label: '오디오 장비' },
-  { value: 'other', label: '기타' }
+  { value: 'other', label: '그 외·액세서리' }
 ];
 
 const conditions = [
-  { value: 'excellent', label: '최상' },
-  { value: 'good', label: '상' },
-  { value: 'fair', label: '중' },
-  { value: 'poor', label: '하' }
+  { value: 'new', label: '새 제품' },
+  { value: 'like-new', label: '거의 새 제품' },
+  { value: 'good', label: '양호' },
+  { value: 'fair', label: '보통' },
+  { value: 'poor', label: '수리 필요' }
 ];
 
 const ProductEdit = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
-  const { user } = useUser();
+  const { user } = useContext(UserContext);
+  const { showSuccess, showError } = useToast();
+  const toast = { success: showSuccess, error: showError };
 
   const [product, setProduct] = useState(null);
   const [formData, setFormData] = useState({
@@ -393,6 +396,8 @@ const ProductEdit = () => {
 
     if (productId && user?.uid) {
       fetchProduct();
+    } else if (user && !user.loading && !user.uid) {
+      navigate('/login');
     }
   }, [productId, user, navigate]);
 
@@ -515,7 +520,7 @@ const ProductEdit = () => {
       });
 
       toast.success('상품이 성공적으로 수정되었습니다');
-      navigate('/my-products');
+      navigate(`/product/${productId}`);
     } catch (error) {
       console.error('상품 수정 실패:', error);
       toast.error('상품 수정에 실패했습니다');

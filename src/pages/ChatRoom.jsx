@@ -4,7 +4,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ChatContext } from "../store/ChatContext";
 import { UserContext } from "../store/UserContext";
 import { ProductContext } from "../store/ProductContext";
-import notificationService from "../utils/notificationService";
 import UserDisplay from "../components/UserDisplay";
 import {
   FaArrowLeft,

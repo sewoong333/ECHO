@@ -215,7 +215,7 @@ const LoadingContainer = styled.div`
 export default function WishList() {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
-  const { products, likedProducts, toggleLike, loadLikedProducts } = useContext(ProductContext);
+  const { likedProducts, toggleLike, loadLikedProducts } = useContext(ProductContext);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

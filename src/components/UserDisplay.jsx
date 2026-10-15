@@ -136,7 +136,7 @@ const UserDisplay = ({
     return (
       <UserDisplayContainer gap={gap} className={className} {...props}>
         <UserAvatar size={size}>
-          ?
+          {fallbackText ? fallbackText.charAt(0).toUpperCase() : '?'}
         </UserAvatar>
         <UserInfo>
           <ErrorDisplay fontSize={`${parseInt(size) * 0.4}px`} maxWidth={maxWidth}>

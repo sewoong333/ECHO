@@ -52,6 +52,7 @@ export function isAdmin(user) {
  * @param {string} feature - 기능명
  * @returns {boolean} 접근 권한 여부
  */
+// eslint-disable-next-line no-unused-vars
 export function hasAdminAccess(user, feature = 'general') {
   return isAdmin(user);
 }

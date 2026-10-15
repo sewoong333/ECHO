@@ -143,24 +143,27 @@ export async function processBulkProductImages(products, imageMap, userId, match
     
     try {
       switch (matchingType) {
-        case 'folder':
+        case 'folder': {
           // 폴더명 기반 매칭
           const folderName = product.image_folder || `product_${i + 1}`;
           const folderImages = imageMap[folderName] || imageMap['default'] || [];
           matchedImages = folderImages;
           break;
+        }
           
-        case 'title':
+        case 'title': {
           // 상품명 기반 매칭
           const allImages = Object.values(imageMap).flat();
           matchedImages = matchImagesByTitle(product.title, allImages);
           break;
+        }
           
-        case 'order':
+        case 'order': {
           // 순서 기반 매칭
           const allImagesOrder = Object.values(imageMap).flat();
           matchedImages = matchImagesByOrder(i, 3, allImagesOrder); // 상품당 3장
           break;
+        }
           
         default:
           matchedImages = [];

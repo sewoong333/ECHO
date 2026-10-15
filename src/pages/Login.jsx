@@ -14,6 +14,10 @@ import {
 } from "firebase/auth";
 import { auth, googleProvider, kakaoAuthService } from "../utils/firebase";
 
+
+// 카카오 로그인은 Firebase 인증 토큰 발급 서버(커스텀 토큰)가 준비되기 전까지 비활성화.
+// 현재 구조로는 로그인한 것처럼 보이지만 상품 등록·글쓰기·채팅이 모두 권한 오류로 실패함.
+const KAKAO_LOGIN_ENABLED = false;
 const Container = styled.div`
   width: 100%;
   max-width: 400px;
@@ -264,7 +268,7 @@ export default function Login() {
   console.log('URL search params:', window.location.search);
   
   const { user, loginWithEmail, loginWithKakao, logout } = useContext(UserContext);
-  const { addToast, showDetailedError, showDetailedWarning } = useToast();
+  const { addToast, showDetailedError } = useToast();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -728,14 +732,16 @@ export default function Login() {
           Google로 로그인
         </SocialLoginButton>
 
-        <SocialLoginButton 
-          className="kakao" 
-          onClick={handleKakaoLogin}
-          disabled={isLoading}
-        >
-          <SiKakaotalk size={24} />
-          카카오로 로그인
-        </SocialLoginButton>
+        {KAKAO_LOGIN_ENABLED && (
+          <SocialLoginButton 
+            className="kakao" 
+            onClick={handleKakaoLogin}
+            disabled={isLoading}
+          >
+            <SiKakaotalk size={24} />
+            카카오로 로그인
+          </SocialLoginButton>
+        )}
         
         <div style={{ 
           textAlign: "center", 
@@ -819,11 +825,12 @@ export default function Login() {
 
       <SocialLoginButton 
         className="kakao" 
-        onClick={handleKakaoLogin}
-        disabled={isLoading}
+        onClick={KAKAO_LOGIN_ENABLED ? handleKakaoLogin : undefined}
+        disabled={!KAKAO_LOGIN_ENABLED || isLoading}
+        style={KAKAO_LOGIN_ENABLED ? undefined : { opacity: 0.5, cursor: 'not-allowed' }}
       >
         <SiKakaotalk size={24} />
-        카카오로 로그인
+        {KAKAO_LOGIN_ENABLED ? "카카오로 로그인" : "카카오로 로그인 (준비중)"}
       </SocialLoginButton>
 
       <SocialLoginButton 

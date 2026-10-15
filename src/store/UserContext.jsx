@@ -503,7 +503,6 @@ export function UserProvider({ children }) {
         // if (standardUpdates.nickname) updateData.authorNickname = standardUpdates.nickname;
         if (standardUpdates.profileImage) updateData.authorProfileImage = standardUpdates.profileImage;
         if (standardUpdates.bio) updateData.authorBio = standardUpdates.bio;
-        if (standardUpdates.email) updateData.authorEmail = standardUpdates.email;
         if (standardUpdates.isVerified !== undefined) updateData.authorVerified = standardUpdates.isVerified;
         if (standardUpdates.mannerScore !== undefined) updateData.authorMannerScore = standardUpdates.mannerScore;
         
@@ -557,7 +556,6 @@ export function UserProvider({ children }) {
         // if (standardUpdates.nickname) updateData.authorNickname = standardUpdates.nickname;
         if (standardUpdates.profileImage) updateData.authorProfileImage = standardUpdates.profileImage;
         if (standardUpdates.bio) updateData.authorBio = standardUpdates.bio;
-        if (standardUpdates.email) updateData.authorEmail = standardUpdates.email;
         if (standardUpdates.isVerified !== undefined) updateData.authorVerified = standardUpdates.isVerified;
         if (standardUpdates.mannerScore !== undefined) updateData.authorMannerScore = standardUpdates.mannerScore;
         
@@ -584,7 +582,6 @@ export function UserProvider({ children }) {
         // if (standardUpdates.nickname) updateData.authorNickname = standardUpdates.nickname;
         if (standardUpdates.profileImage) updateData.authorProfileImage = standardUpdates.profileImage;
         if (standardUpdates.bio) updateData.authorBio = standardUpdates.bio;
-        if (standardUpdates.email) updateData.authorEmail = standardUpdates.email;
         if (standardUpdates.isVerified !== undefined) updateData.authorVerified = standardUpdates.isVerified;
         if (standardUpdates.mannerScore !== undefined) updateData.authorMannerScore = standardUpdates.mannerScore;
         

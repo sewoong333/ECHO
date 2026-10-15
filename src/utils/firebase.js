@@ -8,7 +8,6 @@ import {
   RecaptchaVerifier,
   signInWithPhoneNumber,
   PhoneAuthProvider,
-  linkWithCredential
 } from "firebase/auth";
 import {
   getFirestore,
@@ -501,6 +500,7 @@ export const productService = {
 
       // 클라이언트 사이드 정렬
       switch (sortBy) {
+        case "price":
         case "price_low":
           products.sort((a, b) => a.price - b.price);
           break;
@@ -584,51 +584,15 @@ export const productService = {
         return;
       }
       
-      // 조회 기록 저장 (실제 조회 기록 기반)
-      try {
-        const viewLogRef = collection(db, 'viewLogs');
-        await addDoc(viewLogRef, {
-          productId,
-          userId: userId || 'anonymous',
-          userAgent: navigator.userAgent,
-          timestamp: getSafeTimestamp(),
-          sessionId: viewKey
-        });
-        console.log('📝 조회 기록 저장 완료');
-      } catch (error) {
-        console.log('⚠️ 조회 기록 저장 실패 (계속 진행):', error);
-      }
-      
-      // 실제 조회 기록 기반으로 조회수 계산
-      const viewLogsQuery = query(
-        collection(db, 'viewLogs'),
-        where('productId', '==', productId)
-      );
-      const viewLogsSnapshot = await getDocs(viewLogsQuery);
-      const actualViewCount = viewLogsSnapshot.docs.length;
-      
-      console.log('📊 실제 조회 기록 수:', actualViewCount);
-      
-      // 실제 조회수와 저장된 조회수가 다르면 동기화
-      if (actualViewCount !== (productData.viewCount || 0)) {
-        console.log('📝 조회수 동기화:', productData.viewCount || 0, '→', actualViewCount);
-        await updateDoc(productRef, {
-          viewCount: actualViewCount,
-          lastViewedAt: getSafeTimestamp(),
-          lastViewCountUpdate: getSafeTimestamp()
-        });
-      } else {
-        // 정상적으로 1 증가
-        await updateDoc(productRef, {
-          viewCount: increment(1),
-          lastViewedAt: getSafeTimestamp(),
-        });
-      }
+      // 세션당 1회만 증가 (viewKey로 중복 방지). 보안 규칙은 viewCount +1만 허용
+      await updateDoc(productRef, {
+        viewCount: increment(1),
+      });
       
       // 세션에 조회 기록 저장
       sessionStorage.setItem(viewKey, Date.now().toString());
       
-      console.log('✅ 조회수 증가 완료:', productId, '→', actualViewCount);
+      console.log('✅ 조회수 증가 완료:', productId);
     } catch (error) {
       console.error("❌ 조회수 증가 실패:", error);
       console.error("❌ 에러 상세:", error.message, error.code);
@@ -649,37 +613,10 @@ export const productService = {
         return;
       }
       
-      // 현재 채팅수 확인
-      const currentData = productSnap.data();
-      const currentChatCount = currentData.chatCount || 0;
-      
-      console.log('📊 현재 채팅수:', currentChatCount);
-      
-      // 실제 채팅방 수 계산
-      const chatRoomsQuery = query(
-        collection(db, 'chatRooms'),
-        where('productId', '==', productId)
-      );
-      const chatRoomsSnapshot = await getDocs(chatRoomsQuery);
-      const actualChatCount = chatRoomsSnapshot.docs.length;
-      
-      console.log('📊 실제 채팅방 수:', actualChatCount);
-      
-      // 실제 채팅방 수와 저장된 채팅수가 다르면 업데이트
-      if (actualChatCount !== currentChatCount) {
-        console.log('📝 채팅수 동기화:', currentChatCount, '→', actualChatCount);
-        await updateDoc(productRef, {
-          chatCount: actualChatCount,
-          lastChatAt: serverTimestamp(),
-          lastChatCountUpdate: serverTimestamp()
-        });
-      } else {
-        // 정상적으로 1 증가
-        await updateDoc(productRef, {
-          chatCount: increment(1),
-          lastChatAt: serverTimestamp(),
-        });
-      }
+      // 새 채팅방이 생길 때만 호출됨 → 1 증가 (보안 규칙: 인증 사용자는 chatCount +1만 가능)
+      await updateDoc(productRef, {
+        chatCount: increment(1),
+      });
       
       console.log('✅ 채팅 수 증가 완료:', productId);
     } catch (error) {
@@ -1159,26 +1096,9 @@ export const subscriptionService = {
         productsCollection,
         where("status", "==", PRODUCT_STATUS.ACTIVE),
         orderBy("createdAt", "desc"),
-        limit(50), // 더 많은 상품을 가져와서 필터링
+        limit(200),
       );
-
-      // 카테고리 필터 적용
-      if (filters.category && filters.category !== "") {
-        q = query(q, where("category", "==", filters.category));
-      }
-
-      // 지역 필터 적용
-      if (filters.region && filters.region !== "") {
-        q = query(q, where("region", "==", filters.region));
-      }
-
-      // 가격 필터 적용
-      if (filters.priceMin && filters.priceMin > 0) {
-        q = query(q, where("price", ">=", parseInt(filters.priceMin)));
-      }
-      if (filters.priceMax && filters.priceMax > 0) {
-        q = query(q, where("price", "<=", parseInt(filters.priceMax)));
-      }
+      // 카테고리·지역·가격 필터는 클라이언트에서 적용 (복합 인덱스/범위 쿼리 오류 방지)
 
       return onSnapshot(q, async (snapshot) => {
         const products = snapshot.docs.map((doc) => ({
@@ -1191,7 +1111,7 @@ export const subscriptionService = {
         // 사용자 로그인 상태에 따라 관심물건 정보 추가
         if (filters.userId) {
           try {
-            const likedProductIds = await getLikedProductIds(filters.userId);
+            const likedProductIds = await productService.getLikedProductIds(filters.userId);
             const productsWithLikeStatus = products.map(product => ({
               ...product,
               isLikedByUser: likedProductIds.includes(product.id)
@@ -1327,23 +1247,11 @@ export const musiclifeService = {
         };
       });
       
-      console.log('📝 실제 음악생활 게시글:', realPosts.length, '개');
-      console.log('📝 게시글 목록:', realPosts.map(p => p.title));
-      
-      // 샘플 게시글 가져오기
-      const samplePosts = this.getSamplePosts();
-      
-      // 실제 게시글과 샘플 게시글을 합쳐서 반환 (항상 게시글이 있도록 보장)
-      const allPosts = [...realPosts, ...samplePosts];
-      
-      console.log('📝 총 게시글 수:', allPosts.length, '개 (실제:', realPosts.length, '개 + 샘플:', samplePosts.length, '개)');
-      
-      return allPosts;
+      // 관리자가 숨김 처리한 글(isHidden) 또는 삭제 상태 글은 노출하지 않음
+      return realPosts.filter(p => !p.isHidden && p.status !== 'deleted');
     } catch (error) {
       console.error('음악생활 게시글 로딩 오류:', error);
-      // 에러가 발생해도 샘플 게시글은 반환
-      console.log('⚠️ 에러 발생, 샘플 게시글만 반환');
-      return this.getSamplePosts();
+      return [];
     }
   },
 
@@ -1437,6 +1345,55 @@ export const musiclifeService = {
     }
   },
   
+  // 댓글 (musiclife_comments 컬렉션, postId로 연결)
+  async getComments(postId) {
+    try {
+      const q = query(collection(db, "musiclife_comments"), where("postId", "==", postId));
+      const snap = await getDocs(q);
+      const toMs = (v) => (v?.toMillis ? v.toMillis() : v ? new Date(v).getTime() : 0);
+      return snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(c => !c.isDeleted)
+        .sort((a, b) => toMs(a.createdAt) - toMs(b.createdAt));
+    } catch (error) {
+      console.error("댓글 조회 오류:", error);
+      return [];
+    }
+  },
+
+  async addComment(postId, data) {
+    const content = (data.content || "").trim().replace(/<[^>]*>/g, "");
+    if (!content) throw new Error("댓글 내용을 입력해주세요.");
+    const ref = await addDoc(collection(db, "musiclife_comments"), {
+      postId,
+      content: content.slice(0, 1000),
+      authorId: data.authorId,
+      authorName: data.authorName || "",
+      authorNickname: data.authorNickname || data.authorName || "",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    try {
+      await updateDoc(doc(musiclifeCollection, postId), { commentCount: increment(1) });
+    } catch (e) {
+      console.warn("댓글 수 업데이트 실패:", e.code);
+    }
+    return ref.id;
+  },
+
+  async deleteComment(postId, commentId) {
+    await deleteDoc(doc(db, "musiclife_comments", commentId));
+    try {
+      await updateDoc(doc(musiclifeCollection, postId), { commentCount: increment(-1) });
+    } catch (e) {
+      console.warn("댓글 수 업데이트 실패:", e.code);
+    }
+  },
+
+  async deletePost(postId) {
+    await deleteDoc(doc(musiclifeCollection, postId));
+  },
+
   async updateViewCount(id) {
     try {
       const docRef = doc(musiclifeCollection, id);
@@ -1458,7 +1415,7 @@ export const phoneAuthService = {
     if (!this.recaptchaVerifier) {
       this.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
         size: 'invisible',
-        callback: (response) => {
+        callback: () => {
           console.log('reCAPTCHA 인증 완료');
         },
         'expired-callback': () => {

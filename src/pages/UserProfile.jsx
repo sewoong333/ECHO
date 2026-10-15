@@ -5,6 +5,8 @@ import { UserContext } from "../store/UserContext";
 import PageErrorBoundary from "../components/PageErrorBoundary";
 import { useToast } from "../store/ToastContext";
 import { reviewService } from "../utils/reviewService";
+import { db } from "../utils/firebase";
+import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 // import { transactionService } from "../utils/transactionService";
 import {
   FaArrowLeft,
@@ -35,6 +37,63 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   overflow-x: hidden;
+`;
+
+const SellerGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+`;
+
+const SellerItem = styled.button`
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+`;
+
+const SellerThumb = styled.div`
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f1f5f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  img { width: 100%; height: 100%; object-fit: cover; }
+`;
+
+const SellerBadge = styled.span`
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+`;
+
+const SellerTitle = styled.div`
+  font-size: 14px;
+  color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const SellerPrice = styled.div`
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
 `;
 
 const Inner = styled.div`
@@ -410,15 +469,9 @@ export default function UserProfile() {
   const { userId } = useParams();
   const { showError } = useToast();
   
-  // Context 에러 처리
-  try {
-    const context = useContext(UserContext);
-    const _currentUser = context?.user || { isLoggedIn: false, loading: false };
-  } catch (error) {
-    console.error('UserContext 연결 실패:', error);
-    const _currentUser = { isLoggedIn: false, loading: false };
-  }
-  
+  const { user: currentUser } = useContext(UserContext) || {};
+  const [sellerProducts, setSellerProducts] = useState([]);
+
   const [userProfile, setUserProfile] = useState(null);
   const [trustStats, setTrustStats] = useState(null);
   const [recentReviews, setRecentReviews] = useState([]);
@@ -434,24 +487,55 @@ export default function UserProfile() {
     try {
       setLoading(true);
       
-      // 병렬로 데이터 로드
-      const [stats, reviews] = await Promise.all([
-        reviewService.getUserTrustStats(userId),
-        reviewService.getUserReviews(userId, 'received', 10)
+      // 병렬로 데이터 로드 (후기 조회 실패해도 프로필은 표시)
+      const [stats, reviews, productSnap] = await Promise.all([
+        reviewService.getUserTrustStats(userId).catch(() => null),
+        reviewService.getUserReviews(userId, 'received', 10).catch(() => []),
+        getDocs(query(collection(db, 'products'), where('sellerId', '==', userId)))
       ]);
-      
-      setTrustStats(stats);
-      setRecentReviews(reviews);
-      
-      // 사용자 기본 정보 (여기서는 stats에서 가져옴, 실제로는 userService에서)
-      setUserProfile({
+
+      const safeStats = stats || {
+        mannerScore: 36.5, reviewCount: 0, totalReviews: 0, recommendedReviews: 0,
+        rating: 0, ratingDistribution: {}, popularTags: []
+      };
+      setTrustStats(safeStats);
+      setRecentReviews(reviews || []);
+
+      const toDate = (v) => (v?.toDate ? v.toDate() : v ? new Date(v) : null);
+      const products = productSnap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(p => p.status === 'active' || p.status === 'reserved' || p.status === 'sold')
+        .sort((a, b) => (toDate(b.createdAt) || 0) - (toDate(a.createdAt) || 0));
+      setSellerProducts(products);
+
+      // 공개 정보: 상품 문서에 저장된 판매자 정보 → 로그인 상태면 users 문서로 보강
+      const first = products[0] || {};
+      let profile = {
         id: userId,
-        nickname: `사용자${userId.slice(-4)}`,
-        profileImage: null,
-        location: '서울시 강남구',
-        joinDate: '2024-01-01',
-        isVerified: stats.reviewCount >= 5
-      });
+        nickname: first.sellerNickname || '에코 사용자',
+        profileImage: first.sellerProfileImage || null,
+        location: first.fullLocation || [first.region, first.district].filter(Boolean).join(' ') || '지역 미설정',
+        joinDate: products.length ? toDate(products[products.length - 1].createdAt) : null,
+        isVerified: (safeStats.reviewCount || 0) >= 5
+      };
+      if (currentUser?.uid) {
+        try {
+          const userSnap = await getDoc(doc(db, 'users', userId));
+          if (userSnap.exists()) {
+            const u = userSnap.data();
+            profile = {
+              ...profile,
+              nickname: u.nickname || profile.nickname,
+              profileImage: u.profileImage || u.photoURL || profile.profileImage,
+              location: [u.region, u.district].filter(Boolean).join(' ') || profile.location,
+              joinDate: toDate(u.createdAt) || profile.joinDate
+            };
+          }
+        } catch (e) {
+          console.warn('사용자 문서 조회 실패(공개 정보로 표시):', e.code);
+        }
+      }
+      setUserProfile(profile);
       
     } catch (error) {
       console.error('사용자 프로필 로드 실패:', error);
@@ -470,6 +554,7 @@ export default function UserProfile() {
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('ko-KR', {
       year: 'numeric',
@@ -535,9 +620,13 @@ export default function UserProfile() {
             <ProfileInfo>
               <FaMapMarkerAlt />
               {userProfile.location}
-              <span style={{ margin: '0 8px' }}>•</span>
-              <FaCalendar />
-              {formatDate(userProfile.joinDate)} 가입
+              {userProfile.joinDate && (
+                <>
+                  <span style={{ margin: '0 8px' }}>•</span>
+                  <FaCalendar />
+                  {formatDate(userProfile.joinDate)} 가입
+                </>
+              )}
             </ProfileInfo>
 
             {/* 매너점수 */}
@@ -669,6 +758,35 @@ export default function UserProfile() {
                 <FaComments size={32} />
                 <h4>아직 받은 후기가 없습니다</h4>
                 <p>거래를 완료하면 상대방이 후기를 남길 수 있습니다.</p>
+              </EmptyState>
+            )}
+          </SectionCard>
+
+          {/* 판매 상품 */}
+          <SectionCard>
+            <SectionTitle>
+              <FaTag />
+              판매 상품 {sellerProducts.length > 0 && `(${sellerProducts.length})`}
+            </SectionTitle>
+            {sellerProducts.length > 0 ? (
+              <SellerGrid>
+                {sellerProducts.map((p) => (
+                  <SellerItem key={p.id} onClick={() => navigate(`/product/${p.id}`)}>
+                    <SellerThumb>
+                      {p.images?.[0] ? <img src={p.images[0]} alt={p.title} loading="lazy" /> : <span>🎵</span>}
+                      {p.status !== 'active' && (
+                        <SellerBadge>{p.status === 'sold' ? '거래완료' : '예약중'}</SellerBadge>
+                      )}
+                    </SellerThumb>
+                    <SellerTitle>{p.title}</SellerTitle>
+                    <SellerPrice>{Number(p.price || 0).toLocaleString()}원</SellerPrice>
+                  </SellerItem>
+                ))}
+              </SellerGrid>
+            ) : (
+              <EmptyState>
+                <FaTag size={32} />
+                <h4>판매 중인 상품이 없습니다</h4>
               </EmptyState>
             )}
           </SectionCard>

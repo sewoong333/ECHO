@@ -4,7 +4,8 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 
 export default [
-  { ignores: ['dist'] },
+  // scripts/ 는 과거 일회성 운영 스크립트(가짜 키 포함)라 린트 대상에서 제외. 시드는 seed/ 폴더 사용
+  { ignores: ['dist', 'scripts/**'] },
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {
@@ -12,6 +13,7 @@ export default [
       globals: {
         ...globals.browser,
         process: 'readonly',
+        kakao: 'readonly',
       },
       parserOptions: {
         ecmaVersion: 'latest',
@@ -35,7 +37,7 @@ export default [
   },
   // Node.js files configuration
   {
-    files: ['api/**/*.js', 'scripts/**/*.js'],
+    files: ['api/**/*.js', 'seed/**/*.{js,mjs,cjs}'],
     languageOptions: {
       globals: globals.node,
     },

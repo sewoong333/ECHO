@@ -24,8 +24,6 @@ import {
   FaEye,
   FaAward,
 } from "react-icons/fa";
-import { collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "../utils/firebase";
 
 const Container = styled.div`
   width: 100vw;
