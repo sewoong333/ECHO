@@ -17,7 +17,8 @@
     "seed:preview": "node seed/seed-dummy.mjs --key ./serviceAccountKey.json",
     "seed:apply": "node seed/seed-dummy.mjs --key ./serviceAccountKey.json --apply",
     "seed:remove": "node seed/seed-dummy.mjs --key ./serviceAccountKey.json --remove",
-    "deploy:firebase": "npm run build && firebase deploy --only hosting,firestore:rules,firestore:indexes"
+    "deploy:firebase": "npm run build && firebase deploy --only hosting,firestore:rules,firestore:indexes",
+    "test": "node --test seed/seed-data.test.mjs"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",

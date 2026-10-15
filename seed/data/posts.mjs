@@ -3,7 +3,7 @@
 // comments: [작성자 key, 내용, 글 작성 후 몇 시간 뒤]
 export const posts = [
   {
-    author: "hongdae_band", hoursAgo: 3, category: "collaboration",
+    author: "hongdae_band", hoursAgo: 9, category: "collaboration",
     title: "[홍대] 4인 밴드 베이스 구합니다 (주1회 일요일)",
     content: `안녕하세요 홍대 쪽에서 합주하는 직장인 밴드입니다.
 현재 보컬(겸 기타), 기타, 드럼 있고 베이스님 한 분 모셔요.
@@ -22,7 +22,7 @@ export const posts = [
     ],
   },
   {
-    author: "weekend_gt", hoursAgo: 8, category: "gear-review",
+    author: "weekend_gt", hoursAgo: 29, category: "gear-review",
     title: "멕펜 플레이어2 스트랫 6개월 써본 후기",
     content: `중고로 팔려고 올려두긴 했는데 쓰면서 느낀 점 남겨봅니다.
 
@@ -46,7 +46,7 @@ export const posts = [
     ],
   },
   {
-    author: "piano_ssam", hoursAgo: 15, category: "lesson",
+    author: "piano_ssam", hoursAgo: 52, category: "lesson",
     title: "성인 피아노 처음 시작하시는 분들께 (레슨하면서 느낀 점)",
     content: `노원에서 성인 레슨 6년째 하고 있어요. 상담 오시는 분들이 자주 물어보시는 것만 정리해볼게요.
 

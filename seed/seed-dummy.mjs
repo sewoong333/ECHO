@@ -10,7 +10,7 @@
 // 서비스 계정 키: Firebase 콘솔 > 프로젝트 설정 > 서비스 계정 > 새 비공개 키 생성
 // 키 파일은 절대 깃에 올리지 마세요 (.gitignore에 serviceAccountKey*.json 등록됨)
 
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { initializeApp, cert, applicationDefault } from "firebase-admin/app";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import { users } from "./data/users.mjs";
@@ -226,7 +226,19 @@ async function main() {
     return;
   }
 
-  const credential = keyPath ? cert(JSON.parse(readFileSync(keyPath, "utf8"))) : applicationDefault();
+  if (keyPath && !existsSync(keyPath)) {
+    console.error(`\n서비스 계정 키 파일을 찾을 수 없습니다: ${keyPath}`);
+    console.error("  Firebase 콘솔 > 프로젝트 설정 > 서비스 계정 > '새 비공개 키 생성'으로 받은 파일을");
+    console.error("  프로젝트 폴더(package.json 있는 곳)에 serviceAccountKey.json 이름으로 저장한 뒤 다시 실행하세요.\n");
+    process.exit(1);
+  }
+  let credential;
+  try {
+    credential = keyPath ? cert(JSON.parse(readFileSync(keyPath, "utf8"))) : applicationDefault();
+  } catch (e) {
+    console.error(`\n키 파일을 읽지 못했습니다 (${e.message}). 콘솔에서 받은 JSON 파일 그대로인지 확인하세요.\n`);
+    process.exit(1);
+  }
   initializeApp({ credential, projectId: PROJECT_ID });
   const db = getFirestore();
 
@@ -288,6 +300,11 @@ async function main() {
 }
 
 main().catch((e) => {
-  console.error("\n실패:", e.message);
+  const hint = /PERMISSION_DENIED|permission/i.test(e.message)
+    ? "\n  → 키의 서비스 계정에 Firestore 쓰기 권한이 없습니다. 콘솔에서 받은 firebase-adminsdk 키인지 확인하세요."
+    : /project|NOT_FOUND/i.test(e.message)
+      ? "\n  → 키 파일의 project_id가 echo-5385e 인지 확인하세요."
+      : "";
+  console.error("\n실패:", e.message + hint);
   process.exit(1);
 });
