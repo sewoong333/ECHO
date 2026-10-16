@@ -167,6 +167,7 @@ function getPriceDescription(price) {
  * @param {string} category - 카테고리
  * @returns {string} 맞춤 설명
  */
+// eslint-disable-next-line no-unused-vars
 function generateCustomDescription(title, category) {
   const titleLower = title.toLowerCase();
   

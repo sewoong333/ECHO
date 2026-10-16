@@ -250,7 +250,8 @@ export function ChatProvider({ children }) {
       const existingRoomQuery = query(
         collection(db, "chatRooms"),
         where("productId", "==", productId),
-        where("participants", "array-contains", sellerId)
+        // 보안 규칙상 본인(구매자)이 참여한 방만 조회 가능
+        where("participants", "array-contains", buyerId)
       );
 
       const existingRooms = await getDocs(existingRoomQuery);

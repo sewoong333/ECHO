@@ -118,7 +118,6 @@ export default function MusicLifeWrite() {
         authorName: user.nickname || user.displayName || "익명",
         authorNickname: user.nickname || user.displayName || "익명",
         authorProfileImage: user.profileImage || user.photoURL || "",
-        authorEmail: user.email || "",
         createdAt: new Date(),
         viewCount: 0,
         commentCount: 0,

@@ -85,6 +85,7 @@ export function ProductProvider({ children }) {
 
     // 정렬 적용
     switch (currentFilters.sortBy) {
+      case "price":
       case "price_low":
         filteredProducts.sort((a, b) => a.price - b.price);
         break;
@@ -195,8 +196,7 @@ export function ProductProvider({ children }) {
   // 실시간 데이터 구독 - 초기 로드 완료 후에만 활성화
   useEffect(() => {
     // 초기 로드가 완료되지 않았으면 구독하지 않음
-    if (loading && products.length === 0) {
-      console.log("⏳ 초기 로드 대기 중... 실시간 구독 연기");
+    if (loading) {
       return;
     }
 
@@ -206,8 +206,8 @@ export function ProductProvider({ children }) {
           (realtimeProducts) => {
             console.log("🔄 실시간 업데이트:", realtimeProducts.length, "개");
             
-            // 실시간 데이터를 직접 사용
-            setProducts(realtimeProducts);
+            // 현재 필터·검색어·정렬을 적용해서 반영
+            setProducts(applyFiltersAndSort(realtimeProducts, filters));
           },
           { ...filters, userId: user?.uid },
         );
@@ -216,7 +216,8 @@ export function ProductProvider({ children }) {
       console.log("👋 실시간 구독 해제");
       unsubscribe();
     };
-  }, [filters, loading, products.length]); // loading과 products.length도 의존성에 추가
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters, loading, user?.uid]);
 
   // 사용자별 상품 로드
   const loadUserProducts = useCallback(

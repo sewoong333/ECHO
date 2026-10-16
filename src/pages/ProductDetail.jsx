@@ -1082,10 +1082,12 @@ export default function ProductDetail() {
 
   const getConditionText = (condition) => {
     const conditions = {
+      'new': '새 제품',
+      'like-new': '거의 새 것',
       'excellent': '매우 좋음',
-      'good': '좋음',
-      'fair': '보통',
-      'poor': '나쁨'
+      'good': '양호',
+      'fair': '사용감 있음',
+      'poor': '수리 필요'
     };
     return conditions[condition] || condition;
   };
@@ -1164,9 +1166,11 @@ export default function ProductDetail() {
     .slice(0, 4);
 
   // SEO 최적화를 위한 메타 데이터 생성
-  const seoTitle = product ? `${product.title} | ${product.category} 중고악기 거래 - ECHO` : '상품 상세 | ECHO 중고악기거래';
+  const categoryLabels = { guitar: '기타·베이스', piano: '피아노·건반', drums: '드럼', wind: '관악기', string: '현악기', audio: '음향장비', other: '악기' };
+  const categoryLabel = categoryLabels[product?.category] || '악기';
+  const seoTitle = product ? `${product.title} | ${categoryLabel} 중고거래 - ECHO` : '상품 상세 | ECHO 중고악기거래';
   const seoDescription = product ? 
-    `${product.title} - ${product.category} 중고악기 거래. ${product.condition} 상태, ${product.price?.toLocaleString()}원. ${product.fullLocation}에서 거래 가능. ECHO에서 안전하게 거래하세요.` : 
+    `${product.title} - ${categoryLabel} 중고 거래. ${getConditionText(product.condition)} 상태, ${product.price?.toLocaleString()}원. ${product.fullLocation}에서 거래 가능. ECHO에서 안전하게 거래하세요.` : 
     '중고악기 거래 상세 정보를 확인하세요. ECHO에서 안전하고 신뢰할 수 있는 악기 거래를 경험해보세요.';
   const seoKeywords = product ? 
     `${product.title}, ${product.category}, 중고악기, 악기거래, ${product.brand || ''}, ${product.model || ''}, ${product.fullLocation}, ECHO` : 
@@ -1354,7 +1358,7 @@ export default function ProductDetail() {
               showVerified={true}
               maxWidth="200px"
               gap="12px"
-              fallbackText="판매자"
+              fallbackText={product.sellerNickname || "판매자"}
             />
             <SellerLocation>
               <FaMapMarkerAlt />

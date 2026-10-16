@@ -360,9 +360,9 @@ export default function MapPage() {
   const [posts, setPosts] = useState([]);
   const [selectedPost, setSelectedPost] = useState(null);
   const [filter, setFilter] = useState("all"); // all, products, musiclife
-  const [userLocation, setUserLocation] = useState(null);
+  const [, setUserLocation] = useState(null);
   const [mapType, setMapType] = useState("ROADMAP"); // ROADMAP, SATELLITE, TRAFFIC
-  const [locationPermission, setLocationPermission] = useState(null); // null, granted, denied
+  const [, setLocationPermission] = useState(null); // null, granted, denied
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [isMapReady, setIsMapReady] = useState(false); // 지도 초기화 완료 상태
   const navigate = useNavigate();
@@ -444,7 +444,6 @@ export default function MapPage() {
 
       // 음악생활 게시글 가져오기
       if (filter === "all" || filter === "musiclife") {
-        const musiclifeStartCount = allPosts.length;
         try {
           // 모든 음악생활 글 가져오기 (주소가 없는 것도 포함)
           const musiclifeQuery = query(

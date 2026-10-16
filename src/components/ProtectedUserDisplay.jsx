@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FaUser, FaCheckCircle, FaExclamationTriangle, FaLock } from 'react-icons/fa';
 import { useUserInfo } from '../hooks/useUserInfo';
-import { useAuth } from '../store/UserContext';
 
 /**
  * 보안이 강화된 사용자 정보 표시 컴포넌트

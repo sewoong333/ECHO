@@ -397,7 +397,11 @@ export default function MusicLifeDetail() {
         setLoading(true);
         const postData = await musiclifeService.getPost(id);
         setPost(postData);
-        setComments([]); // 댓글 기능은 현재 비활성화
+        if (postData) {
+          musiclifeService.updateViewCount(id);
+          const list = await musiclifeService.getComments(id);
+          setComments(list);
+        }
       } catch (error) {
         console.error('Failed to fetch data:', error);
       } finally {
@@ -438,7 +442,8 @@ export default function MusicLifeDetail() {
       await musiclifeService.addComment(id, {
         content: comment,
         authorId: user.uid,
-        authorName: user.nickname,
+        authorName: user.nickname || user.displayName || "사용자",
+        authorNickname: user.nickname || user.displayName || "사용자",
       });
       setComment("");
       const updatedComments = await musiclifeService.getComments(id);
@@ -657,9 +662,6 @@ export default function MusicLifeDetail() {
               </AuthorAvatar>
               <AuthorDetails>
                 <AuthorName>{post.authorNickname || post.authorName || "작성자"}</AuthorName>
-                {post.authorEmail && (
-                  <AuthorEmail>{post.authorEmail}</AuthorEmail>
-                )}
               </AuthorDetails>
             </AuthorInfo>
             <MetaItem>
@@ -739,7 +741,7 @@ export default function MusicLifeDetail() {
                         showVerified={false}
                         maxWidth="150px"
                         gap="8px"
-                        fallbackText="댓글 작성자"
+                        fallbackText={c.authorNickname || c.authorName || "댓글 작성자"}
                       />
                     </CommentAuthor>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

@@ -32,9 +32,9 @@ service cloud.firestore {
                data.nickname.size() >= 2 &&
                data.email is string &&
                data.email.matches('.*@.*\\..*') &&
-               // 닉네임에 특수문자나 위험한 패턴 차단
+               // 닉네임에 특수문자, 운영자 사칭 패턴 차단
                !data.nickname.matches('.*[<>"\'].*') &&
-               !data.nickname.matches('.*(admin|test|user\\d+|temp).*');
+               !data.nickname.lower().matches('^(admin|관리자|운영자|에코운영).*');
       }
       
       // 사용자의 찜 목록
@@ -56,13 +56,11 @@ service cloud.firestore {
       // 생성: 인증된 사용자만 상품 등록 가능
       allow create: if isAuthenticated() && validateProductData();
       
-      // 수정: 상품 소유자만 수정 가능 (단, likeCount 업데이트는 모든 인증된 사용자 허용)
+      // 수정: 상품 소유자 전체 수정 / 그 외 사용자는 카운터만 변경 가능
       allow update: if (isOwner(resource.data.sellerId) && validateProductUpdate()) ||
-                       (isAuthenticated() && isLikeCountUpdate());
-      
-      // 판매자 정보 업데이트: 상품 판매자만 가능 (프로필 이미지만 - 닉네임은 실시간 조회)
-      allow update: if isOwner(resource.data.sellerId) && 
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['sellerProfileImage', 'updatedAt']);
+                       (isAuthenticated() && isLikeCountUpdate()) ||
+                       isCounterIncrement('viewCount') ||
+                       (isAuthenticated() && isCounterIncrement('chatCount'));
       
       // 삭제: 상품 소유자만 삭제 가능 (실제로는 상태만 변경)
       allow delete: if isOwner(resource.data.sellerId);
@@ -128,6 +126,14 @@ service cloud.firestore {
                (oldStatus == 'deleted' && newStatus == 'active');
       }
       
+      // 특정 카운터 필드를 정확히 1만 올리는 변경인지 확인
+      function isCounterIncrement(field) {
+        let changed = request.resource.data.diff(resource.data).affectedKeys();
+        return changed.hasOnly([field]) &&
+               request.resource.data[field] is number &&
+               request.resource.data[field] == resource.data.get(field, 0) + 1;
+      }
+      
       // 찜하기 수 업데이트인지 확인
       function isLikeCountUpdate() {
         let data = request.resource.data;
@@ -141,14 +147,17 @@ service cloud.firestore {
       }
     }
     
-    // 채팅방 규칙 (임시로 완화)
+    // 채팅방 규칙: 참여자만 읽기/쓰기
     match /chatRooms/{chatRoomId} {
-      // 읽기/쓰기: 인증된 사용자만 (임시)
-      allow read, write: if isAuthenticated();
+      allow read, update, delete: if isAuthenticated() &&
+                                     request.auth.uid in resource.data.participants;
+      allow create: if isAuthenticated() &&
+                       request.auth.uid in request.resource.data.participants;
       
-      // 채팅 메시지
+      // 채팅 메시지: 방 참여자만
       match /messages/{messageId} {
-        allow read, write: if isAuthenticated();
+        allow read, write: if isAuthenticated() &&
+          request.auth.uid in get(/databases/$(database)/documents/chatRooms/$(chatRoomId)).data.participants;
       }
     }
     
@@ -197,8 +206,10 @@ service cloud.firestore {
     
     // 알림 규칙
     match /notifications/{notificationId} {
-      // 읽기/쓰기: 알림 수신자만 가능
-      allow read, write: if isOwner(resource.data.userId);
+      // 생성: 로그인 사용자가 다른 사용자에게 알림 생성 가능
+      allow create: if isAuthenticated();
+      // 읽기/수정/삭제: 알림 수신자만 가능
+      allow read, update, delete: if isOwner(resource.data.userId);
     }
     
     // 음악생활 게시글 규칙
@@ -212,9 +223,16 @@ service cloud.firestore {
       // 수정/삭제: 게시글 작성자만 가능
       allow update, delete: if isOwner(resource.data.authorId);
       
-      // 작성자 정보 업데이트: 게시글 작성자만 가능 (프로필 이미지, 자기소개만 - 닉네임은 실시간 조회)
-      allow update: if isOwner(resource.data.authorId) && 
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['authorProfileImage', 'authorBio', 'updatedAt']);
+      // 조회수 +1은 누구나, 댓글 수 ±1은 로그인 사용자
+      allow update: if postCounterChange('viewCount', 1) ||
+                       (isAuthenticated() && (postCounterChange('commentCount', 1) || postCounterChange('commentCount', -1)));
+      
+      function postCounterChange(field, delta) {
+        let changed = request.resource.data.diff(resource.data).affectedKeys();
+        return changed.hasOnly([field]) &&
+               request.resource.data[field] is number &&
+               request.resource.data[field] == resource.data.get(field, 0) + delta;
+      }
       
       // 음악생활 댓글 규칙
       match /comments/{commentId} {
@@ -241,7 +259,11 @@ service cloud.firestore {
       
       // 생성: 인증된 사용자만 댓글 작성 가능
       allow create: if isAuthenticated() && 
-                       request.resource.data.authorId == request.auth.uid;
+                       request.resource.data.authorId == request.auth.uid &&
+                       request.resource.data.postId is string &&
+                       request.resource.data.content is string &&
+                       request.resource.data.content.size() >= 1 &&
+                       request.resource.data.content.size() <= 1000;
       
       // 수정/삭제: 댓글 작성자만 가능
       allow update, delete: if isOwner(resource.data.authorId);

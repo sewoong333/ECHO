@@ -9,17 +9,15 @@ import BulkProductUpload from "../components/BulkProductUpload";
 import { isAdmin } from "../utils/adminUtils";
 import { FiCamera, FiX, FiCheck, FiUpload } from "react-icons/fi";
 
+// Firestore 규칙(firestore.rules)의 허용 카테고리와 반드시 일치해야 함
 const categories = [
-  { value: "guitar", label: "기타" },
-  { value: "bass", label: "베이스" },
-  { value: "drums", label: "드럼" },
-  { value: "keyboard", label: "키보드/피아노" },
-  { value: "violin", label: "바이올린" },
-  { value: "saxophone", label: "색소폰" },
-  { value: "amplifier", label: "앰프" },
-  { value: "effects", label: "이펙터" },
-  { value: "accessories", label: "액세서리" },
-  { value: "other", label: "기타" }
+  { value: "guitar", label: "기타·베이스" },
+  { value: "piano", label: "피아노·건반" },
+  { value: "drums", label: "드럼·타악기" },
+  { value: "wind", label: "관악기" },
+  { value: "string", label: "현악기" },
+  { value: "audio", label: "앰프·이펙터·음향장비" },
+  { value: "other", label: "그 외·액세서리" }
 ];
 
 const conditions = [
@@ -36,7 +34,6 @@ export default function ProductRegister() {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [condition, setCondition] = useState("");
-  const [location, setLocation] = useState("");
   const [detailAddress, setDetailAddress] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
@@ -101,7 +98,6 @@ export default function ProductRegister() {
           setLatitude(coords.y);
           setLongitude(coords.x);
           setDetailAddress(coords.address_name);
-          setLocation(`${selectedRegion} ${selectedDistrict}`);
           addToast("주소가 확인되었습니다.", "success");
         } else {
           addToast("주소를 찾을 수 없습니다. 다시 입력해주세요.", "error");

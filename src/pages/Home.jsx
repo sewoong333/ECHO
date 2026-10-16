@@ -1276,7 +1276,9 @@ export default function Home() {
     return null;
   };
 
-  const activeFilterCount = Object.values(filters).filter(v => v && v !== '').length;
+  // 정렬 기준과 검색어는 '필터'로 세지 않음
+  const activeFilterCount = ['category', 'region', 'priceMin', 'priceMax', 'condition']
+    .filter(key => filters[key] && filters[key] !== '').length;
 
   return (
     <>
@@ -1423,6 +1425,15 @@ export default function Home() {
             })}
           >
             관악기
+          </FilterChip>
+
+          <FilterChip
+            active={filters.category === 'string'}
+            onClick={() => updateFilters({ 
+              category: filters.category === 'string' ? '' : 'string' 
+            })}
+          >
+            현악기
           </FilterChip>
           
           <FilterChip
@@ -1588,7 +1599,7 @@ export default function Home() {
               <FilterGroup>
                 <FilterGroupTitle>상품 상태</FilterGroupTitle>
                 <FilterOptions>
-                  {['excellent', 'good', 'fair', 'poor'].map(condition => (
+                  {['like-new', 'good', 'fair', 'poor'].map(condition => (
                     <FilterOption
                       key={condition}
                       selected={tempFilters.condition === condition}
@@ -1597,10 +1608,10 @@ export default function Home() {
                         condition: prev.condition === condition ? '' : condition
                       }))}
                     >
-                      {condition === 'excellent' && '매우 좋음'}
-                      {condition === 'good' && '좋음'}
-                      {condition === 'fair' && '보통'}
-                      {condition === 'poor' && '나쁨'}
+                      {condition === 'like-new' && '거의 새 것'}
+                      {condition === 'good' && '양호'}
+                      {condition === 'fair' && '사용감 있음'}
+                      {condition === 'poor' && '수리 필요'}
                     </FilterOption>
                   ))}
                 </FilterOptions>

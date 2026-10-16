@@ -1,12 +1,11 @@
 import React, { Suspense, lazy } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate, Link } from "react-router-dom";
 import styled from 'styled-components';
 
 // Critical pages - loaded immediately
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import MapPage from "../pages/Map";
-import MapTest from "../pages/MapTest";
 
 // Non-critical pages - lazy loaded
 const Signup = lazy(() => import("../pages/Signup"));
@@ -20,7 +19,6 @@ const MusicLifeDetail = lazy(() => import("../pages/MusicLifeDetail"));
 const MusicLifeWrite = lazy(() => import("../pages/MusicLifeWrite"));
 // MapPage는 이미 위에서 import됨
 const ChatList = lazy(() => import("../pages/ChatList"));
-const AddProduct = lazy(() => import("../pages/AddProduct"));
 const GuitarTuner = lazy(() => import("../pages/GuitarTuner"));
 const BassTuner = lazy(() => import("../pages/BassTuner"));
 const SalesHistory = lazy(() => import("../pages/SalesHistoryNew"));
@@ -33,6 +31,8 @@ const ProfileEdit = lazy(() => import("../pages/ProfileEdit"));
 const BusinessAccount = lazy(() => import("../pages/BusinessAccount"));
 const PrivacyPolicy = lazy(() => import("../pages/PrivacyPolicy"));
 const Following = lazy(() => import("../pages/Following"));
+const ProductEdit = lazy(() => import("../pages/ProductEdit"));
+const UserProfile = lazy(() => import("../pages/UserProfile"));
 
 // Loading component
 const LoadingContainer = styled.div`
@@ -73,6 +73,16 @@ const PageLoader = () => (
   </LoadingContainer>
 );
 
+const NotFound = () => (
+  <LoadingContainer>
+    <div style={{ fontSize: 40, marginBottom: 12 }}>🎵</div>
+    <LoadingText style={{ fontSize: '1rem', marginBottom: 16 }}>
+      찾으시는 페이지가 없어요. 주소를 다시 확인해 주세요.
+    </LoadingText>
+    <Link to="/" style={{ color: 'var(--color-mint-main)', fontWeight: 600 }}>홈으로 가기</Link>
+  </LoadingContainer>
+);
+
 export default function AppRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
@@ -80,13 +90,15 @@ export default function AppRouter() {
         {/* Critical routes - no lazy loading */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/map-test" element={<MapTest />} />
         
         {/* Non-critical routes - lazy loaded */}
         <Route path="/signup" element={<Signup />} />
         <Route path="/set-location" element={<SetLocation />} />
         <Route path="/register" element={<ProductRegister />} />
         <Route path="/add" element={<ProductRegister />} />
+        <Route path="/product-register" element={<Navigate to="/register" replace />} />
+        <Route path="/edit-product/:productId" element={<ProductEdit />} />
+        <Route path="/user/:userId" element={<UserProfile />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/chat/:chatRoomId" element={<ChatRoom />} />
         <Route path="/chat" element={<ChatList />} />
@@ -94,6 +106,9 @@ export default function AppRouter() {
         <Route path="/mypage/sales" element={<SalesHistory />} />
         <Route path="/mypage/sold" element={<SoldHistory />} />
         <Route path="/mypage/buying" element={<BuyingHistory />} />
+        <Route path="/mypage/purchases" element={<Navigate to="/mypage/buying" replace />} />
+        <Route path="/mypage/reviews" element={<Navigate to="/mypage" replace />} />
+        <Route path="/my-products" element={<Navigate to="/mypage/sales" replace />} />
         <Route path="/musiclife" element={<MusicLife />} />
         <Route path="/musiclife/write" element={<MusicLifeWrite />} />
         <Route path="/musiclife/:id" element={<MusicLifeDetail />} />
@@ -107,6 +122,7 @@ export default function AppRouter() {
         <Route path="/business" element={<BusinessAccount />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/following" element={<Following />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
   );

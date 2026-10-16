@@ -46,8 +46,8 @@ export default function MusicLife() {
         console.log('🔍 카테고리 필터링:', selectedCategory);
         console.log('📝 필터링 전 게시글 카테고리들:', filteredPosts.map(p => ({ title: p.title, category: p.category })));
         filteredPosts = filteredPosts.filter(post => {
-          // category가 없거나 undefined인 경우도 포함 (기본값으로 처리)
-          return !post.category || post.category === selectedCategory;
+          // 카테고리가 없는 글은 자유게시판으로 취급
+          return (post.category || "free") === selectedCategory;
         });
         console.log('📝 필터링 후 게시글 수:', filteredPosts.length);
       }
@@ -90,7 +90,11 @@ export default function MusicLife() {
     const now = new Date();
     const diffInHours = (now - date) / (1000 * 60 * 60);
     
-    if (diffInHours < 24) {
+    if (diffInHours < 1 / 60) {
+      return "방금 전";
+    } else if (diffInHours < 1) {
+      return `${Math.floor(diffInHours * 60)}분 전`;
+    } else if (diffInHours < 24) {
       return `${Math.floor(diffInHours)}시간 전`;
     } else if (diffInHours < 24 * 7) {
       return `${Math.floor(diffInHours / 24)}일 전`;

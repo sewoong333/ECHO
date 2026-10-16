@@ -1,6 +1,5 @@
 import React from "react";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaShieldAlt, FaUser, FaDatabase, FaLock } from "react-icons/fa";
 import TopBar from "../components/TopBar";
 
@@ -100,7 +99,6 @@ const ContactText = styled.p`
 `;
 
 export default function PrivacyPolicy() {
-  const navigate = useNavigate();
 
   return (
     <Container>

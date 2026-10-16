@@ -8,7 +8,7 @@ import {
   FiHeart,
   FiMessageCircle,
 } from "react-icons/fi";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../utils/firebase";
 import TopBar from "../components/TopBar";
 
@@ -157,17 +157,17 @@ export default function SoldHistory() {
   useEffect(() => {
     const fetchSoldHistory = async () => {
       try {
+        // 상태(status)가 sold인 내 상품 (정렬은 클라이언트에서 처리 → 추가 인덱스 불필요)
         const q = query(
           collection(db, "products"),
           where("sellerId", "==", user.uid),
-          where("sold", "==", true),
-          orderBy("createdAt", "desc"),
         );
         const querySnapshot = await getDocs(q);
-        const soldList = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const toMs = (v) => (v?.toMillis ? v.toMillis() : v ? new Date(v).getTime() : 0);
+        const soldList = querySnapshot.docs
+          .map((doc) => ({ id: doc.id, ...doc.data() }))
+          .filter((p) => p.status === "sold" || p.sold === true)
+          .sort((a, b) => toMs(b.soldAt || b.updatedAt || b.createdAt) - toMs(a.soldAt || a.updatedAt || a.createdAt));
         setList(soldList);
       } catch (err) {
         console.error("판매완료 내역 불러오기 실패:", err);
@@ -178,6 +178,8 @@ export default function SoldHistory() {
 
     if (user.isLoggedIn && user.uid) {
       fetchSoldHistory();
+    } else if (!user.loading) {
+      setLoading(false);
     }
   }, [user]);
 
