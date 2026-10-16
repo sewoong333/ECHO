@@ -20,3 +20,14 @@
 - 같은 문서 ID로 덮어쓰기 때문에 여러 번 실행해도 중복으로 쌓이지 않습니다. 실행 시점 기준으로 "n시간 전" 글이 됩니다.
 - 사진은 Unsplash 무료 라이선스 이미지 링크입니다. 실제 판매자 사진처럼 보이게 하려면 직접 찍은 사진으로 바꾸는 걸 권장합니다.
 - 더미 판매자에게 채팅을 걸면 방은 만들어지지만 답장은 오지 않습니다.
+
+## 키 파일 없이 실행 (Google Cloud Shell)
+
+Firebase 콘솔에 로그인된 계정으로 https://shell.cloud.google.com 을 열고:
+
+```bash
+git clone --depth 1 https://github.com/sewoong333/ECHO echo && cd echo
+npm install --no-save firebase-admin
+node seed/seed-dummy.mjs --adc            # 미리보기
+node seed/seed-dummy.mjs --adc --apply    # 반영
+```

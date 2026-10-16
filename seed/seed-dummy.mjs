@@ -6,6 +6,7 @@
 //   node seed/seed-dummy.mjs --key ./serviceAccountKey.json --apply      # 더미 업로드 + 테스트글 숨김
 //   node seed/seed-dummy.mjs --key ./serviceAccountKey.json --remove     # 더미 전부 삭제 (isSeedData 문서만)
 //   node seed/seed-dummy.mjs --key ./serviceAccountKey.json --unhide     # 숨겼던 테스트글 원복
+//   node seed/seed-dummy.mjs --adc --apply   # Google Cloud Shell 등 로그인된 계정 권한(ADC)으로 실행
 //
 // 서비스 계정 키: Firebase 콘솔 > 프로젝트 설정 > 서비스 계정 > 새 비공개 키 생성
 // 키 파일은 절대 깃에 올리지 마세요 (.gitignore에 serviceAccountKey*.json 등록됨)
@@ -220,7 +221,7 @@ async function main() {
     `(판매중 ${productDocs.filter((p) => p.data.status === "active").length}), ` +
     `게시글 ${postDocs.length}개, 댓글 ${commentDocs.length}개`);
 
-  if (!keyPath && !process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+  if (!keyPath && !has("--adc") && !process.env.GOOGLE_APPLICATION_CREDENTIALS) {
     console.log("\n서비스 계정 키가 없어 데이터베이스에는 접속하지 않았습니다.");
     console.log("  예) node seed/seed-dummy.mjs --key ./serviceAccountKey.json --apply\n");
     return;
