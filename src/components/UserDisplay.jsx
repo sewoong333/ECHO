@@ -131,8 +131,8 @@ const UserDisplay = ({
     );
   }
 
-  // 에러 상태
-  if (error || !userInfo) {
+  // 에러 상태 (사용자 문서를 읽지 못해 기본값이 온 경우 포함 → 호출한 쪽이 넘긴 이름을 표시)
+  if (error || !userInfo || userInfo.isFallback) {
     return (
       <UserDisplayContainer gap={gap} className={className} {...props}>
         <UserAvatar size={size}>

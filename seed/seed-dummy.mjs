@@ -23,6 +23,8 @@ const has = (f) => args.includes(f);
 const keyPath = args.includes("--key") ? args[args.indexOf("--key") + 1] : null;
 const MODE = has("--remove") ? "remove" : has("--unhide") ? "unhide" : has("--apply") ? "apply" : "preview";
 const SKIP_HIDE = has("--no-hide");
+// --users-only: 판매자 프로필만 다시 씀 (상품·게시글의 조회수·댓글 등은 건드리지 않음)
+const USERS_ONLY = has("--users-only");
 
 const PROJECT_ID = "echo-5385e";
 const NOW = Date.now();
@@ -278,6 +280,12 @@ async function main() {
       ...hiddenM.map((d) => (b) => b.update(d.ref, { isHidden: false, hiddenReason: null })),
     ]);
     console.log(`\n숨김 해제: 상품 ${hiddenP.length}개, 게시글 ${hiddenM.length}개\n`);
+    return;
+  }
+
+  if (USERS_ONLY) {
+    await commitInChunks(db, userDocs.map((d) => (b) => b.set(db.collection("users").doc(d.id), d.data)));
+    console.log(`\n판매자 프로필 ${userDocs.length}명 갱신 완료\n`);
     return;
   }
 

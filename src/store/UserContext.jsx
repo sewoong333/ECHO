@@ -929,6 +929,7 @@ export function UserProvider({ children }) {
         uid: userId,
         id: userId,
         nickname: '익명',
+        isFallback: true, // 실제 사용자 문서를 읽지 못함 (비로그인 등)
         profileImage: '',
         bio: '',
         email: '',
@@ -964,6 +965,7 @@ export function UserProvider({ children }) {
         uid: userId,
         id: userId,
         nickname: '익명',
+        isFallback: true, // 실제 사용자 문서를 읽지 못함 (비로그인 등)
         profileImage: '',
         bio: '',
         email: '',
