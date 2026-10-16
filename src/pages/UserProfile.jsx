@@ -495,7 +495,7 @@ export default function UserProfile() {
       ]);
 
       const safeStats = stats || {
-        mannerScore: 36.5, reviewCount: 0, totalReviews: 0, recommendedReviews: 0,
+        mannerScore: 80, reviewCount: 0, totalReviews: 0, recommendedReviews: 0,
         rating: 0, ratingDistribution: {}, popularTags: []
       };
       setTrustStats(safeStats);
@@ -523,6 +523,10 @@ export default function UserProfile() {
           const userSnap = await getDoc(doc(db, 'users', userId));
           if (userSnap.exists()) {
             const u = userSnap.data();
+            // 후기가 아직 없으면 사용자 문서에 저장된 매너점수를 표시
+            if (typeof u.mannerScore === 'number' && !(stats && stats.reviewCount)) {
+              setTrustStats({ ...safeStats, mannerScore: u.mannerScore });
+            }
             profile = {
               ...profile,
               nickname: u.nickname || profile.nickname,
