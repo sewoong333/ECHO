@@ -57,7 +57,7 @@ const BackButton = styled.button`
   border: 1px solid rgba(46, 216, 182, 0.2);
   border-radius: 12px;
   padding: 12px 16px;
-  color: #2ed8b6;
+  color: #0b7a68;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -166,7 +166,7 @@ const MetaItem = styled.div`
   font-weight: 500;
 
   svg {
-    color: #2ed8b6;
+    color: #0b7a68;
   }
 `;
 
@@ -247,7 +247,7 @@ const CommentsTitle = styled.h2`
   gap: 8px;
 
   svg {
-    color: #2ed8b6;
+    color: #0b7a68;
   }
 `;
 
@@ -287,7 +287,7 @@ const CommentInput = styled.textarea`
 
 const SubmitButton = styled.button`
   background: linear-gradient(135deg, #2ed8b6 0%, #26c4a8 100%);
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 12px;
   padding: 12px 24px;
@@ -340,7 +340,7 @@ const CommentAuthor = styled.div`
   align-items: center;
   gap: 8px;
   font-weight: 600;
-  color: #2ed8b6;
+  color: #0b7a68;
 
   svg {
     color: #6b7280;

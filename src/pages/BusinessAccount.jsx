@@ -54,7 +54,7 @@ const Subtitle = styled.p`
 
 const ComingSoonBadge = styled.div`
   background: linear-gradient(135deg, #2ed8b6 0%, #26c4a8 100%);
-  color: white;
+  color: #06302a;
   padding: 8px 16px;
   border-radius: 20px;
   font-size: 14px;
@@ -103,7 +103,7 @@ const FeatureIcon = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #2ed8b6;
+  color: #0b7a68;
   font-size: 16px;
 `;
 
@@ -133,7 +133,7 @@ const NotificationText = styled.p`
 
 const BackButton = styled.button`
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 12px;
   padding: 12px 24px;

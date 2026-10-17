@@ -152,14 +152,14 @@ const ProfileName = styled.div`
 `;
 const ProfileEmail = styled.div`
   font-size: 15px;
-  color: #888;
+  color: #6b7280;
 `;
 const EditBtn = styled.button`
   position: absolute;
   right: 24px;
   top: 18px;
   background: #2ed8b6;
-  color: #fff;
+  color: #06302a;
   border: none;
   border-radius: 8px;
   font-size: 14px;
@@ -217,7 +217,7 @@ const ModalBtnRow = styled.div`
 `;
 const ModalBtn = styled.button`
   background: #2ed8b6;
-  color: #fff;
+  color: #06302a;
   border: none;
   border-radius: 8px;
   font-size: 15px;

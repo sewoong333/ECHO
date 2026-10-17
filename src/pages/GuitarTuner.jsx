@@ -4,6 +4,7 @@ import TopBar from "../components/TopBar";
 import { FaExclamationTriangle, FaCheckCircle, FaToggleOn, FaToggleOff } from "react-icons/fa";
 
 const ECHO_COLOR = "#2ed8b6";
+const ECHO_TEXT = "#0b7a68"; // 흰 배경 위 민트 글자용 (대비 5.2:1)
 const ECHO_ACCENT = "#1976d2";
 const GUITAR_NOTES = [
   { name: "E₄", freq: 329.63, label: "1번줄 (E4)" },
@@ -228,7 +229,7 @@ const PillArrow = styled.span`
 `;
 const PillSub = styled.div`
   font-size: 15px;
-  color: #e0e2e6;
+  color: #6b7280;
   font-weight: 500;
   margin-top: 2px;
   text-align: center;
@@ -325,7 +326,7 @@ const DamageToggle = styled.div`
 const ToggleButton = styled.button`
   background: none;
   border: none;
-  color: ${props => props.$active ? ECHO_COLOR : '#ccc'};
+  color: ${props => props.$active ? ECHO_TEXT : '#9ca3af'};
   font-size: 24px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -370,7 +371,7 @@ const DamageCardFixed = styled.div`
 `;
 
 const EmptyDamageArea = styled.div`
-  color: rgba(255, 255, 255, 0.3);
+  color: #6b7280;
   font-size: 14px;
   text-align: center;
 `;
@@ -499,14 +500,14 @@ const PitchRow = styled.div`
 const PitchNum = styled.span`
   font-size: 38px;
   font-weight: 900;
-  color: ${ECHO_COLOR};
+  color: ${ECHO_TEXT};
   line-height: 1;
   min-width: 120px;
   text-align: center;
 `;
 const PitchHz = styled.span`
   font-size: 22px;
-  color: #888;
+  color: #6b7280;
   font-weight: 600;
   margin-left: 4px;
   margin-bottom: 3px;
@@ -525,7 +526,7 @@ const Advice = styled.div`
 `;
 const StandardText = styled.div`
   margin-top: 10px;
-  color: #888;
+  color: #6b7280;
   font-size: 15px;
   font-weight: 500;
   text-align: center;

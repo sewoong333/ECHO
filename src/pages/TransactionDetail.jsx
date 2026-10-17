@@ -172,7 +172,7 @@ const StepIcon = styled.div`
   height: 40px;
   border-radius: 50%;
   background: ${props => props.active ? '#2ed8b6' : '#e0e0e0'};
-  color: ${props => props.active ? 'white' : '#999'};
+  color: ${props => props.active ? '#06302a' : '#6b7280'};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -183,7 +183,7 @@ const StepIcon = styled.div`
 
 const StepLabel = styled.div`
   font-size: 11px;
-  color: ${props => props.active ? '#2ed8b6' : '#999'};
+  color: ${props => props.active ? '#0b7a68' : '#6b7280'};
   font-weight: 500;
   text-align: center;
   white-space: nowrap;
@@ -263,7 +263,7 @@ const ProductTitle = styled.div`
 const ProductPrice = styled.div`
   font-size: 18px;
   font-weight: 700;
-  color: #2ed8b6;
+  color: #0b7a68;
   margin-bottom: 4px;
 `;
 
@@ -298,7 +298,7 @@ const ActionButton = styled.button`
   
   &.primary {
     background: #2ed8b6;
-    color: white;
+    color: #06302a;
     
     &:hover {
       background: #25b89a;
@@ -316,7 +316,7 @@ const ActionButton = styled.button`
   
   &.danger {
     background: #f44336;
-    color: white;
+    color: #06302a;
     
     &:hover {
       background: #da190b;
@@ -382,13 +382,13 @@ const HistoryNote = styled.div`
 
 const HistoryTime = styled.div`
   font-size: 12px;
-  color: #999;
+  color: #6b7280;
 `;
 
 const CopyButton = styled.button`
   background: none;
   border: none;
-  color: #2ed8b6;
+  color: #0b7a68;
   cursor: pointer;
   font-size: 12px;
   padding: 2px;
@@ -410,7 +410,7 @@ const LoadingState = styled.div`
   svg {
     animation: spin 1s linear infinite;
     margin-bottom: 16px;
-    color: #2ed8b6;
+    color: #0b7a68;
   }
   
   @keyframes spin {

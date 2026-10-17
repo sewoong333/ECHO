@@ -1257,7 +1257,7 @@ export default function MapPage() {
         <LegendTitle>🗺️ 지도 가이드</LegendTitle>
         <LegendItem>📍 마커 위의 제목을 클릭하면 상세정보를 볼 수 있어요</LegendItem>
         <LegendItem>
-          <span style={{ color: '#2ed8b6', fontWeight: '600' }}>녹색 태그</span> = 악기거래 · 
+          <span style={{ color: '#0b7a68', fontWeight: '600' }}>녹색 태그</span> = 악기거래 · 
           <span style={{ color: '#6f42c1', fontWeight: '600', marginLeft: '6px' }}>보라색 태그</span> = 음악생활
         </LegendItem>
         <LegendItem>🎸 기타 · 🥁 드럼 · 🎹 키보드 · 🎤 공연 · 📚 레슨</LegendItem>
@@ -1290,7 +1290,7 @@ const FilterButton = styled.button`
   border-radius: 20px;
   border: 1px solid ${props => props.active ? '#2ed8b6' : '#ddd'};
   background: ${props => props.active ? '#2ed8b6' : 'white'};
-  color: ${props => props.active ? 'white' : '#666'};
+  color: ${props => props.active ? '#06302a' : '#666'};
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -1298,7 +1298,7 @@ const FilterButton = styled.button`
 
   &:hover {
     border-color: #2ed8b6;
-    color: ${props => props.active ? 'white' : '#2ed8b6'};
+    color: ${props => props.active ? '#06302a' : '#0b7a68'};
   }
 `;
 
@@ -1486,7 +1486,7 @@ const CloseButton = styled.button`
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #999;
+  color: #6b7280;
   
   &:hover {
     color: #333;
@@ -1517,7 +1517,7 @@ const ViewButton = styled.button`
   width: 100%;
   padding: 12px;
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 8px;
   font-size: 14px;

@@ -51,7 +51,7 @@ const HeroBadgeRow = styled.div`
 
 const Badge = styled.span`
   background: #fff;
-  color: #2ed8b6;
+  color: #0b7a68;
   font-weight: 700;
   font-size: 0.98rem;
   border-radius: 12px;
@@ -76,7 +76,7 @@ const HeroTitle = styled.h1`
 
 const HeroSubtitle = styled.p`
   font-size: 1.13rem;
-  color: #f8fafc;
+  color: #06302a;
   font-weight: 500;
   text-align: center;
   margin-bottom: 1.2rem;
@@ -89,7 +89,7 @@ const CTAButton = styled.a`
   max-width: 360px;
   margin: 1.7rem auto 0 auto;
   background: #2ed8b6;
-  color: #fff;
+  color: #06302a;
   font-size: 1.23rem;
   font-weight: 900;
   text-align: center;
@@ -107,7 +107,7 @@ const CTAButton = styled.a`
     border 0.18s;
   &:active {
     background: #2ed8b6;
-    color: #fff;
+    color: #06302a;
     opacity: 0.9;
   }
   /* 호버 색상 변화 제거 */
@@ -141,7 +141,7 @@ const OptionCard = styled.button`
   max-width: 200px;
   background: ${({ active }) =>
     active ? "linear-gradient(90deg, #2ed8b6 60%, #26c4a8 100%)" : "#fff"};
-  color: ${({ active }) => (active ? "#fff" : "#1a4740")};
+  color: ${({ active }) => (active ? "#06302a" : "#1a4740")};
   border: 2px solid ${({ active }) => (active ? "#2ed8b6" : "#e9ecef")};
   border-radius: 18px;
   box-shadow: ${({ active }) =>
@@ -172,7 +172,7 @@ const OptionCard = styled.button`
 
 const OptionDesc = styled.div`
   font-size: 0.97rem;
-  color: #888;
+  color: #6b7280;
   margin-bottom: 1.1rem;
   text-align: left;
 `;
@@ -230,7 +230,7 @@ const Section = styled.section`
 const SectionTitle = styled.h2`
   font-size: 1.18rem;
   font-weight: 800;
-  color: #2ed8b6;
+  color: #0b7a68;
   margin-bottom: 0.7rem;
 `;
 
@@ -250,7 +250,7 @@ const TrustRow = styled.div`
 
 const TrustBadge = styled.div`
   background: #e0f7fa;
-  color: #2ed8b6;
+  color: #0b7a68;
   font-weight: 800;
   border-radius: 12px;
   padding: 0.7em 1.2em;
@@ -281,7 +281,7 @@ const StepNumber = styled.div`
   width: 2.1rem;
   height: 2.1rem;
   background: #2ed8b6;
-  color: #fff;
+  color: #06302a;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -332,7 +332,7 @@ const ReviewContent = styled.div`
 
 const ReviewUser = styled.div`
   font-size: 1.05rem;
-  color: #2ed8b6;
+  color: #0b7a68;
   font-weight: 900;
 `;
 
@@ -352,13 +352,13 @@ const FomoSection = styled(Section)`
 const FomoTitle = styled.h3`
   font-size: 1.13rem;
   font-weight: 800;
-  color: #2ed8b6;
+  color: #0b7a68;
   margin-bottom: 0.7rem;
 `;
 
 const FomoDesc = styled.p`
   font-size: 1.01rem;
-  color: #b26a00;
+  color: #92400e;
   margin-bottom: 0.2rem;
 `;
 
@@ -598,7 +598,7 @@ export default function EchoShare() {
             <br />
             내 악기, 지금 팔면 얼마? 빌리면 한 달에 얼마?
             <br />
-            <span style={{ color: "#2ed8b6", fontWeight: 700 }}>
+            <span style={{ color: "#0b7a68", fontWeight: 700 }}>
               지금 바로 확인!
             </span>
           </OptionDesc>
@@ -743,10 +743,10 @@ export default function EchoShare() {
           {showResult && apiResult && (
             <ResultBox>
               예상 시세:{" "}
-              <span style={{ color: "#2ed8b6", fontWeight: 800 }}>
+              <span style={{ color: "#0b7a68", fontWeight: 800 }}>
                 {apiResult.average.toLocaleString()}원
               </span>
-              <div style={{ fontSize: 13, color: "#888", marginTop: 4 }}>
+              <div style={{ fontSize: 13, color: "#6b7280", marginTop: 4 }}>
                 참고 거래 {apiResult.count}건
               </div>
             </ResultBox>
@@ -833,7 +833,7 @@ export default function EchoShare() {
             <b>내 악기 예상금액 확인</b> 후, 지금 검증받으면{" "}
             <b>첫 거래 수수료 0%</b> + <b>추가 보너스 지급</b>!<br />
             선착순 100명 한정,{" "}
-            <span style={{ color: "#2ed8b6" }}>지금 바로 확인하세요!</span>
+            <span style={{ color: "#0b7a68" }}>지금 바로 확인하세요!</span>
           </FomoDesc>
           <CTAButton href="/product-register">
             <span role="img" aria-label="등록">

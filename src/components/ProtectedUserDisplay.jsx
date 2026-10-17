@@ -130,7 +130,7 @@ const LoadingSpinner = styled.div`
 
 const ErrorDisplay = styled.div`
   font-size: ${props => props.fontSize || '14px'};
-  color: #999;
+  color: #6b7280;
   font-style: italic;
 `;
 

@@ -68,7 +68,7 @@ const Avatar = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #999;
+  color: #6b7280;
   font-weight: bold;
   font-size: 16px;
   border: 1px solid #f0f0f0;
@@ -139,7 +139,7 @@ const ProductInfo = styled.div`
 
 const LastMessage = styled.div`
   font-size: 14px;
-  color: var(--color-text-secondary, #999);
+  color: var(--color-text-secondary, #6b7280);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -151,17 +151,17 @@ const ChatMeta = styled.div`
   align-items: center;
   justify-content: space-between;
   font-size: 12px;
-  color: #999;
+  color: #6b7280;
 `;
 
 const TimeStamp = styled.div`
   font-size: 12px;
-  color: #999;
+  color: #6b7280;
 `;
 
 const UnreadBadge = styled.div`
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
   border-radius: 10px;
   padding: 2px 6px;
   font-size: 11px;
@@ -228,7 +228,7 @@ const SearchInput = styled.input`
   font-size: 14px;
   
   &::placeholder {
-    color: #999;
+    color: #6b7280;
   }
 `;
 
@@ -376,7 +376,7 @@ export default function ChatList() {
                   marginTop: '16px',
                   padding: '12px 24px',
                   background: '#2ed8b6',
-                  color: 'white',
+                  color: '#06302a',
                   border: 'none',
                   borderRadius: '12px',
                   cursor: 'pointer',

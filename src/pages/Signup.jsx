@@ -34,7 +34,7 @@ const Container = styled.div`
 const Logo = styled.div`
   font-size: 32px;
   font-weight: 800;
-  color: var(--color-mint-main);
+  color: #0b7a68;
   margin-bottom: 1em;
 `;
 
@@ -77,7 +77,7 @@ const Input = styled.input`
   }
 
   &::placeholder {
-    color: #999;
+    color: #6b7280;
   }
 `;
 
@@ -93,7 +93,7 @@ const Button = styled.button`
   width: 100%;
   height: 50px;
   background: ${(props) => (props.disabled ? "#ccc" : "var(--color-mint-main)")};
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 12px;
   font-size: 16px;
@@ -119,13 +119,13 @@ const VerifyButton = styled(Button)`
 `;
 
 const ErrorMessage = styled.div`
-  color: #2ed8b6;
+  color: #0b7a68;
   font-size: 14px;
   margin-top: 0.5em;
 `;
 
 const SuccessMessage = styled.div`
-  color: var(--color-mint-main);
+  color: #0b7a68;
   font-size: 14px;
   margin-top: 0.5em;
 `;

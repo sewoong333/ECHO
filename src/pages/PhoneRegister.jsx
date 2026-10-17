@@ -84,7 +84,7 @@ const Step = styled.div`
   height: 32px;
   border-radius: 50%;
   background: ${props => props.active ? '#2ed8b6' : '#e0e0e0'};
-  color: ${props => props.active ? 'white' : '#999'};
+  color: ${props => props.active ? '#06302a' : '#6b7280'};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -166,19 +166,19 @@ const Input = styled.input`
   }
   
   &::placeholder {
-    color: #aaa;
+    color: #6b7280;
   }
   
   &:disabled {
     background: #f5f5f5;
-    color: #999;
+    color: #6b7280;
   }
 `;
 
 const VerifyButton = styled.button`
   padding: 16px 20px;
   background: ${props => props.disabled ? '#e0e0e0' : '#2ed8b6'};
-  color: ${props => props.disabled ? '#999' : 'white'};
+  color: ${props => props.disabled ? '#6b7280' : '#06302a'};
   border: none;
   border-radius: 8px;
   font-size: 14px;
@@ -211,7 +211,7 @@ const CompleteButton = styled.button`
   width: 100%;
   padding: 16px;
   background: ${props => props.disabled ? '#e0e0e0' : 'linear-gradient(135deg, #2ed8b6 0%, #26c4a8 100%)'};
-  color: ${props => props.disabled ? '#999' : 'white'};
+  color: ${props => props.disabled ? '#6b7280' : '#06302a'};
   border: none;
   border-radius: 12px;
   font-size: 16px;

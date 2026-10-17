@@ -53,7 +53,7 @@ const Title = styled.div`
 `;
 const Dropdown = styled.span`
   font-size: 18px;
-  color: #888;
+  color: #6b7280;
   margin-left: 2px;
 `;
 const IconBtn = styled.button`
@@ -70,7 +70,7 @@ const IconBtn = styled.button`
   transition: all var(--transition-fast);
   
   &:hover {
-    color: var(--color-mint-main);
+    color: #0b7a68;
     background: var(--color-mint-accent);
   }
   
@@ -120,7 +120,7 @@ const LoginBtn = styled.button`
   margin-left: var(--space-md);
   padding: var(--space-sm) var(--space-lg);
   background: linear-gradient(135deg, var(--color-mint-main), var(--color-mint-dark));
-  color: var(--color-text-inverse);
+  color: #06302a;
   border: none;
   border-radius: var(--radius-lg);
   font-weight: 600;

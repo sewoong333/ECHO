@@ -90,7 +90,7 @@ const Location = styled.div`
   align-items: center;
   gap: 4px;
   font-size: 12px;
-  color: #999;
+  color: #6b7280;
   margin-top: 2px;
 `;
 

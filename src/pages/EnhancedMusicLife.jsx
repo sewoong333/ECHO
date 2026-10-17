@@ -82,7 +82,7 @@ const HeaderTitle = styled.h1`
 
 const AddButton = styled.button`
   background: linear-gradient(135deg, #2ed8b6, #25b89a);
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 50%;
   width: 40px;
@@ -117,7 +117,7 @@ const Tab = styled.button`
   background: none;
   font-size: 14px;
   font-weight: 600;
-  color: ${props => props.active ? '#2ed8b6' : '#666'};
+  color: ${props => props.active ? '#0b7a68' : '#666'};
   cursor: pointer;
   white-space: nowrap;
   position: relative;
@@ -136,7 +136,7 @@ const Tab = styled.button`
   }
   
   &:hover {
-    color: #2ed8b6;
+    color: #0b7a68;
   }
 `;
 
@@ -167,7 +167,7 @@ const SearchInput = styled.input`
   }
   
   &::placeholder {
-    color: #999;
+    color: #6b7280;
   }
 `;
 
@@ -186,7 +186,7 @@ const FilterChip = styled.button`
   border: 1px solid ${props => props.active ? '#2ed8b6' : '#e0e0e0'};
   border-radius: 16px;
   background: ${props => props.active ? '#2ed8b6' : 'white'};
-  color: ${props => props.active ? 'white' : '#666'};
+  color: ${props => props.active ? '#06302a' : '#666'};
   font-size: 12px;
   cursor: pointer;
   white-space: nowrap;
@@ -197,7 +197,7 @@ const FilterChip = styled.button`
   
   &:hover {
     border-color: #2ed8b6;
-    color: ${props => props.active ? 'white' : '#2ed8b6'};
+    color: ${props => props.active ? '#06302a' : '#0b7a68'};
   }
 `;
 
@@ -261,7 +261,7 @@ const UserName = styled.div`
 
 const PostMeta = styled.div`
   font-size: 12px;
-  color: #999;
+  color: #6b7280;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -366,13 +366,13 @@ const ActionButton = styled.button`
   display: flex;
   align-items: center;
   gap: 6px;
-  color: ${props => props.active ? '#2ed8b6' : '#666'};
+  color: ${props => props.active ? '#0b7a68' : '#666'};
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
   
   &:hover {
-    color: #2ed8b6;
+    color: #0b7a68;
   }
 `;
 
@@ -426,7 +426,7 @@ const EventInfo = styled.div`
 
 const EventParticipants = styled.div`
   font-size: 12px;
-  color: #2ed8b6;
+  color: #0b7a68;
   font-weight: 500;
 `;
 
@@ -439,7 +439,7 @@ const FAB = styled.button`
   border-radius: 50%;
   background: linear-gradient(135deg, #2ed8b6, #25b89a);
   border: none;
-  color: white;
+  color: #06302a;
   font-size: 24px;
   cursor: pointer;
   box-shadow: 0 8px 24px rgba(46, 216, 182, 0.4);

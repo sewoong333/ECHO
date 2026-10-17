@@ -49,7 +49,7 @@ export default function KeywordAlert() {
           style={{
             padding: "8px 16px",
             background: "#2ed8b6",
-            color: "#fff",
+            color: "#06302a",
             border: "none",
             borderRadius: 8,
             fontWeight: 700,
@@ -83,7 +83,7 @@ export default function KeywordAlert() {
                 marginRight: 10,
                 padding: "4px 12px",
                 background: k.enabled ? "#2ed8b6" : "#bbb",
-                color: "#fff",
+                color: "#06302a",
                 border: "none",
                 borderRadius: 8,
                 fontWeight: 700,
@@ -96,7 +96,7 @@ export default function KeywordAlert() {
               style={{
                 padding: "4px 12px",
                 background: "#2ed8b6",
-                color: "#fff",
+                color: "#06302a",
                 border: "none",
                 borderRadius: 8,
                 fontWeight: 700,

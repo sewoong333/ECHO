@@ -79,7 +79,7 @@ const NotFound = () => (
     <LoadingText style={{ fontSize: '1rem', marginBottom: 16 }}>
       찾으시는 페이지가 없어요. 주소를 다시 확인해 주세요.
     </LoadingText>
-    <Link to="/" style={{ color: 'var(--color-mint-main)', fontWeight: 600 }}>홈으로 가기</Link>
+    <Link to="/" style={{ color: '#0b7a68', fontWeight: 600 }}>홈으로 가기</Link>
   </LoadingContainer>
 );
 

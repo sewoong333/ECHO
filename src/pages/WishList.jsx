@@ -40,7 +40,7 @@ const BackButton = styled.button`
   padding: 8px;
   
   &:hover {
-    color: #2ed8b6;
+    color: #0b7a68;
   }
 `;
 
@@ -91,7 +91,7 @@ const EmptyDescription = styled.p`
 const ExploreButton = styled.button`
   padding: 12px 24px;
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 8px;
   font-size: 14px;
@@ -156,7 +156,7 @@ const ItemTitle = styled.h3`
 const ItemPrice = styled.div`
   font-size: 18px;
   font-weight: 700;
-  color: #2ed8b6;
+  color: #0b7a68;
   margin-bottom: 8px;
 `;
 
@@ -190,7 +190,7 @@ const ActionButton = styled.button`
   
   &:hover {
     border-color: #2ed8b6;
-    color: #2ed8b6;
+    color: #0b7a68;
   }
   
   &.remove {

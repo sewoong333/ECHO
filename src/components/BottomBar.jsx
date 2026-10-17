@@ -34,7 +34,7 @@ const MenuItem = styled(Link)`
   flex-direction: column;
   align-items: center;
   text-decoration: none;
-  color: ${(props) => (props.active ? "var(--color-mint-main)" : "#666")};
+  color: ${(props) => (props.active ? "#0b7a68" : "#666")};
   font-size: 0.8rem;
   min-width: 0;
   box-sizing: border-box;

@@ -363,11 +363,11 @@ export const reviewService = {
   
   // 매너점수 등급 계산
   getMannerGrade(score) {
-    if (score >= 90) return { grade: 'S', color: '#ff6b00', label: '최고 매너' };
-    if (score >= 80) return { grade: 'A', color: '#2ed8b6', label: '좋은 매너' };
-    if (score >= 70) return { grade: 'B', color: '#4caf50', label: '보통 매너' };
-    if (score >= 60) return { grade: 'C', color: '#ffc107', label: '주의 필요' };
-    return { grade: 'D', color: '#f44336', label: '개선 필요' };
+    if (score >= 90) return { grade: 'S', color: '#c2410c', label: '최고 매너' };
+    if (score >= 80) return { grade: 'A', color: '#0b7a68', label: '좋은 매너' };
+    if (score >= 70) return { grade: 'B', color: '#2e7d32', label: '보통 매너' };
+    if (score >= 60) return { grade: 'C', color: '#b45309', label: '주의 필요' };
+    return { grade: 'D', color: '#c62828', label: '개선 필요' };
   }
 };
 

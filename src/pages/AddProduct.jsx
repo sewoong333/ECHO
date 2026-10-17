@@ -79,7 +79,7 @@ const HeaderTitle = styled.h1`
 
 const CompleteButton = styled.button`
   background: ${props => props.disabled ? 'var(--color-bg-tertiary)' : 'linear-gradient(135deg, var(--color-mint-main) 0%, var(--color-mint-dark) 100%)'};
-  color: ${props => props.disabled ? 'var(--color-text-tertiary)' : 'var(--color-text-inverse)'};
+  color: ${props => props.disabled ? 'var(--color-text-tertiary)' : '#06302a'};
   border: none;
   border-radius: var(--radius-xl);
   padding: var(--space-lg) var(--space-xl);
@@ -141,7 +141,7 @@ const SectionTitle = styled.h3`
 `;
 
 const Required = styled.span`
-  color: #2ed8b6;
+  color: #0b7a68;
   font-size: 14px;
 `;
 
@@ -252,7 +252,7 @@ const Input = styled.input`
   }
   
   &::placeholder {
-    color: #aaa;
+    color: #6b7280;
   }
 `;
 
@@ -279,7 +279,7 @@ const TextArea = styled.textarea`
   }
   
   &::placeholder {
-    color: #aaa;
+    color: #6b7280;
   }
 `;
 
@@ -333,7 +333,7 @@ const ConditionButton = styled.button`
   border: 2px solid ${props => props.selected ? '#2ed8b6' : '#e0e0e0'};
   border-radius: 12px;
   background: ${props => props.selected ? '#f0fffe' : 'white'};
-  color: ${props => props.selected ? '#2ed8b6' : '#666'};
+  color: ${props => props.selected ? '#0b7a68' : '#666'};
   font-size: 15px;
   font-weight: 500;
   cursor: pointer;
@@ -348,7 +348,7 @@ const ConditionButton = styled.button`
   
   &:hover {
     border-color: #2ed8b6;
-    color: #2ed8b6;
+    color: #0b7a68;
     background: #f0fffe;
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(46, 216, 182, 0.15);
@@ -918,7 +918,7 @@ export default function AddProduct() {
                   style={{
                     padding: '8px 16px',
                     background: 'var(--color-mint-main)',
-                    color: 'white',
+                    color: '#06302a',
                     border: 'none',
                     borderRadius: '6px',
                     cursor: 'pointer',
@@ -960,7 +960,7 @@ export default function AddProduct() {
               onChange={(e) => handleInputChange('title', e.target.value)}
               maxLength={40}
             />
-            <div style={{ textAlign: 'right', fontSize: '12px', color: '#999', marginTop: '4px' }}>
+            <div style={{ textAlign: 'right', fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
               {formData.title.length}/40
             </div>
             {errors.title && (
@@ -1049,7 +1049,7 @@ export default function AddProduct() {
               maxLength={1000}
               rows={8}
             />
-            <div style={{ textAlign: 'right', fontSize: '12px', color: '#999', marginTop: '4px' }}>
+            <div style={{ textAlign: 'right', fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
               {formData.description.length}/1000
             </div>
             {errors.description && (

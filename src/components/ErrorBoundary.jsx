@@ -86,7 +86,7 @@ const ActionButton = styled.button`
   
   &.primary {
     background: var(--color-mint-main);
-    color: white;
+    color: #06302a;
     
     &:hover {
       background: var(--color-mint-dark);

@@ -138,7 +138,7 @@ const ProductTitle = styled.div`
 const ProductPrice = styled.div`
   font-size: 20px;
   font-weight: 700;
-  color: #2ed8b6;
+  color: #0b7a68;
   margin-bottom: 8px;
 `;
 
@@ -173,7 +173,7 @@ const ShippingIcon = styled.div`
   height: 40px;
   border-radius: 50%;
   background: ${props => props.selected ? '#2ed8b6' : '#f5f5f5'};
-  color: ${props => props.selected ? 'white' : '#666'};
+  color: ${props => props.selected ? '#06302a' : '#666'};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -200,7 +200,7 @@ const ShippingDescription = styled.div`
 const ShippingPrice = styled.div`
   font-size: 14px;
   font-weight: 600;
-  color: #2ed8b6;
+  color: #0b7a68;
 `;
 
 const AddressInput = styled.div`
@@ -256,14 +256,14 @@ const PaymentMethod = styled.div`
 
 const PaymentIcon = styled.div`
   font-size: 24px;
-  color: ${props => props.selected ? '#2ed8b6' : '#666'};
+  color: ${props => props.selected ? '#0b7a68' : '#666'};
   margin-bottom: 8px;
 `;
 
 const PaymentLabel = styled.div`
   font-size: 13px;
   font-weight: 600;
-  color: ${props => props.selected ? '#2ed8b6' : '#333'};
+  color: ${props => props.selected ? '#0b7a68' : '#333'};
   margin-bottom: 4px;
 `;
 
@@ -326,7 +326,7 @@ const PaymentButton = styled.button`
   width: 100%;
   padding: 16px;
   background: linear-gradient(135deg, #2ed8b6 0%, #25b89a 100%);
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 12px;
   font-size: 16px;
@@ -404,7 +404,7 @@ const RetryButton = styled.button`
 `;
 
 const TermsLink = styled.span`
-  color: #2ed8b6;
+  color: #0b7a68;
   text-decoration: underline;
   cursor: pointer;
   
@@ -908,7 +908,7 @@ export default function EnhancedPaymentModal({
               </PriceRow>
               <PriceRow>
                 <PriceLabel>총 결제금액</PriceLabel>
-                <PriceValue style={{ color: '#2ed8b6', fontSize: '18px' }}>
+                <PriceValue style={{ color: '#0b7a68', fontSize: '18px' }}>
                   ₩{formatPrice(totalAmount)}
                 </PriceValue>
               </PriceRow>

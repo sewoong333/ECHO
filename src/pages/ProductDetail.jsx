@@ -78,7 +78,7 @@ const BackButton = styled.button`
   padding: 8px;
   
   &:hover {
-    color: #2ed8b6;
+    color: #0b7a68;
   }
 `;
 
@@ -98,7 +98,7 @@ const IconButton = styled.button`
   padding: 8px;
   
   &:hover {
-    color: #2ed8b6;
+    color: #0b7a68;
   }
 `;
 
@@ -130,7 +130,7 @@ const LikeButton = styled.button`
   border-radius: 50%;
   border: 3px solid ${props => props.liked ? '#2ed8b6' : '#e0e0e0'};
   background: ${props => props.liked ? '#2ed8b6' : 'white'};
-  color: ${props => props.liked ? 'white' : '#e74c3c'};
+  color: ${props => props.liked ? '#06302a' : '#e74c3c'};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -143,7 +143,7 @@ const LikeButton = styled.button`
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(46, 216, 182, 0.3);
     border-color: #2ed8b6;
-    color: ${props => props.liked ? 'white' : '#2ed8b6'};
+    color: ${props => props.liked ? '#06302a' : '#0b7a68'};
   }
   
   &:active {
@@ -157,7 +157,7 @@ const ChatButton = styled.button`
   border-radius: 28px;
   border: none;
   background: linear-gradient(135deg, #2ed8b6 0%, #26c4a8 100%);
-  color: white;
+  color: #06302a;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -263,7 +263,7 @@ const ImagePlaceholder = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #999;
+  color: #6b7280;
   font-size: 48px;
 `;
 
@@ -327,7 +327,7 @@ const ProductMeta = styled.div`
 const ProductPrice = styled.div`
   font-size: 24px;
   font-weight: 700;
-  color: #2ed8b6;
+  color: #0b7a68;
   margin-bottom: 16px;
 `;
 
@@ -458,7 +458,7 @@ const MannerScore = styled.div`
   align-items: center;
   gap: 4px;
   font-size: 13px;
-  color: #2ed8b6;
+  color: #0b7a68;
   font-weight: 600;
 `;
 
@@ -539,7 +539,7 @@ const RelatedTitle = styled.div`
 const RelatedPrice = styled.div`
   font-size: 14px;
   font-weight: 600;
-  color: #2ed8b6;
+  color: #0b7a68;
 `;
 
 
@@ -1137,7 +1137,7 @@ export default function ProductDetail() {
           <FaExclamationTriangle size={48} color="#ddd" />
           <h3>상품을 찾을 수 없습니다</h3>
           <p>삭제되었거나 존재하지 않는 상품입니다.</p>
-          <p style={{fontSize: '12px', color: '#999', marginTop: '8px'}}>
+          <p style={{fontSize: '12px', color: '#6b7280', marginTop: '8px'}}>
             상품 ID: {id} | 로드된 상품 수: {products.length}
           </p>
           <button 
@@ -1146,7 +1146,7 @@ export default function ProductDetail() {
               marginTop: '16px',
               padding: '8px 16px',
               backgroundColor: '#2ed8b6',
-              color: 'white',
+              color: '#06302a',
               border: 'none',
               borderRadius: '8px',
               cursor: 'pointer'

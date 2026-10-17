@@ -72,7 +72,7 @@ const CameraButton = styled.button`
   border-radius: 50%;
   background: #2ed8b6;
   border: 3px solid white;
-  color: white;
+  color: #06302a;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -122,7 +122,7 @@ const Input = styled.input`
   }
   
   &::placeholder {
-    color: #999;
+    color: #6b7280;
   }
 `;
 
@@ -146,7 +146,7 @@ const TextArea = styled.textarea`
   }
   
   &::placeholder {
-    color: #999;
+    color: #6b7280;
   }
 `;
 
@@ -167,7 +167,7 @@ const SaveButton = styled.button`
   flex: 1;
   padding: 16px;
   background: linear-gradient(135deg, #2ed8b6 0%, #26c4a8 100%);
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 12px;
   font-size: 16px;

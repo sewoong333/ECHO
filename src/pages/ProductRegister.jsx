@@ -519,7 +519,7 @@ const BulkUploadButton = styled.button`
   align-items: center;
   gap: 8px;
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 6px;
   padding: 10px 16px;
@@ -582,7 +582,7 @@ const Input = styled.input`
   }
   
   &::placeholder {
-    color: #999;
+    color: #6b7280;
   }
 `;
 
@@ -616,13 +616,13 @@ const TextArea = styled.textarea`
   }
   
   &::placeholder {
-    color: #999;
+    color: #6b7280;
   }
 `;
 
 const CharCount = styled.div`
   font-size: 12px;
-  color: #999;
+  color: #6b7280;
   text-align: right;
   margin-top: 4px;
 `;
@@ -674,7 +674,7 @@ const ImageUpload = styled.div`
     small {
       margin-top: 4px;
       font-size: 12px;
-      color: #999;
+      color: #6b7280;
     }
   }
 `;
@@ -724,7 +724,7 @@ const MainBadge = styled.span`
   bottom: 4px;
   left: 4px;
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
   font-size: 10px;
   padding: 2px 6px;
   border-radius: 4px;
@@ -737,7 +737,7 @@ const SubmitButton = styled.button`
   display: block;
   padding: 16px 24px;
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 8px;
   font-size: 16px;
@@ -782,7 +782,7 @@ const AddressInputContainer = styled.div`
 
 const SearchAddressButton = styled.button`
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 8px;
   padding: 0 16px;
@@ -852,7 +852,7 @@ const AddressTypeButton = styled.button`
   padding: 8px 16px;
   border: 2px solid ${props => props.active ? '#2ed8b6' : '#e9ecef'};
   background: ${props => props.active ? '#2ed8b6' : 'white'};
-  color: ${props => props.active ? 'white' : '#666'};
+  color: ${props => props.active ? '#06302a' : '#666'};
   border-radius: 6px;
   font-size: 14px;
   font-weight: 500;
