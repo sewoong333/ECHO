@@ -88,7 +88,7 @@ const ContactInfo = styled.div`
 const ContactTitle = styled.h3`
   font-size: 16px;
   font-weight: 600;
-  color: #1976d2;
+  color: #0d47a1;
   margin-bottom: 8px;
 `;
 

@@ -53,7 +53,7 @@ const EmptyDescription = styled.p`
 const ExploreButton = styled.button`
   padding: 12px 24px;
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 8px;
   font-size: 14px;
@@ -130,7 +130,7 @@ const UserLocation = styled.div`
 
 const FollowButton = styled.button`
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 8px;
   padding: 8px 16px;

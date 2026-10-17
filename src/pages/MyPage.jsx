@@ -146,7 +146,7 @@ const PhoneNumber = styled.span`
 const PhoneNotRegistered = styled.button`
   background: none;
   border: none;
-  color: #2ed8b6;
+  color: #0b7a68;
   font-size: 14px;
   cursor: pointer;
   text-decoration: underline;
@@ -266,7 +266,7 @@ const MenuText = styled.div`
 
 const MenuBadge = styled.div`
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
   padding: 2px 8px;
   border-radius: 10px;
   font-size: 12px;
@@ -306,7 +306,7 @@ const EditButton = styled.button`
   top: 16px;
   right: 20px;
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 8px;
   padding: 8px 12px;

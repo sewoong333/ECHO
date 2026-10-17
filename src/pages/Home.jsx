@@ -221,7 +221,7 @@ const FilterChip = styled.button`
   border: 1px solid ${props => props.active ? 'var(--color-mint-main)' : '#e0e0e0'};
   border-radius: 16px;
   background: ${props => props.active ? 'var(--color-mint-main)' : 'white'};
-  color: ${props => props.active ? 'white' : '#666'};
+  color: ${props => props.active ? '#06302a' : '#666'};
   font-size: 12px;
   white-space: nowrap;
   cursor: pointer;
@@ -230,7 +230,7 @@ const FilterChip = styled.button`
 
   &:hover {
     /* 호버 테두리 색상 변화 제거 */
-    color: ${props => props.active ? 'white' : 'var(--color-mint-main)'};
+    color: ${props => props.active ? '#06302a' : '#0b7a68'};
   }
 `;
 
@@ -318,7 +318,7 @@ const FilterOption = styled.button`
   border: 1px solid ${props => props.selected ? 'var(--color-mint-main)' : '#e0e0e0'};
   border-radius: 20px;
   background: ${props => props.selected ? '#fff5f2' : 'white'};
-  color: ${props => props.selected ? 'var(--color-mint-main)' : '#666'};
+  color: ${props => props.selected ? '#0b7a68' : '#666'};
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
@@ -423,7 +423,7 @@ const SectionSubtitle = styled.p`
 const SeeMoreButton = styled.button`
   background: none;
   border: none;
-  color: #2ed8b6;
+  color: #0b7a68;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -503,7 +503,7 @@ const TrendingBadge = styled.div`
   align-items: center;
   gap: 4px;
   background: linear-gradient(135deg, #2ed8b6, #26c4a8);
-  color: white;
+  color: #06302a;
   font-size: 12px;
   font-weight: 600;
   padding: 4px 8px;
@@ -684,7 +684,7 @@ const ImagePlaceholder = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-mint-main);
+  color: #0b7a68;
   font-size: 28px;
   opacity: 0.6;
   transition: all var(--transition-normal);
@@ -749,7 +749,7 @@ const ProductMeta = styled.div`
 const ProductPrice = styled.div`
   font-size: var(--text-xl);
   font-weight: 700;
-  color: var(--color-mint-dark);
+  color: #0b7a68;
   margin-bottom: var(--space-1);
   letter-spacing: -0.03em;
   background: linear-gradient(135deg, 
@@ -786,7 +786,7 @@ const ProductStats = styled.div`
   font-weight: 500;
   
   svg {
-    color: var(--color-mint-light);
+    color: #0b7a68;
     transition: all var(--transition-fast);
   }
   
@@ -934,7 +934,7 @@ const FAB = styled.button`
   border-radius: 50% !important;
   background: linear-gradient(135deg, #2ed8b6 0%, #26c4a8 100%) !important;
   border: none !important;
-  color: white !important;
+  color: #06302a !important;
   font-size: 1.5rem !important;
   cursor: pointer !important;
   box-shadow: 0 8px 32px rgba(46, 216, 182, 0.3) !important;
@@ -1015,7 +1015,7 @@ const ErrorState = styled.div`
 
 const RetryButton = styled.button`
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 8px;
   padding: 12px 24px;
@@ -1031,7 +1031,7 @@ const RetryButton = styled.button`
 
 const EmptyButton = styled.button`
   background: var(--color-mint-main);
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 8px;
   padding: 12px 24px;
@@ -1357,7 +1357,7 @@ export default function Home() {
                       style={{ 
                         background: 'none', 
                         border: 'none', 
-                        color: '#999', 
+                        color: '#6b7280', 
                         fontSize: '12px',
                         cursor: 'pointer' 
                       }}
@@ -1646,7 +1646,7 @@ export default function Home() {
                     border: 'none',
                     borderRadius: '8px',
                     background: 'var(--color-mint-main)',
-                    color: 'white',
+                    color: '#06302a',
                     cursor: 'pointer',
                     fontWeight: '600'
                   }}

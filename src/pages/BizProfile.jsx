@@ -60,7 +60,7 @@ export default function BizProfile() {
         style={{
           padding: "10px 24px",
           background: "#2ed8b6",
-          color: "#fff",
+          color: "#06302a",
           border: "none",
           borderRadius: 8,
           fontWeight: 700,

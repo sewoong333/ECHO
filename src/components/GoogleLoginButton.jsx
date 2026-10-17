@@ -22,7 +22,7 @@ const GoogleLoginButton = ({ onLoginSuccess }) => {
         width: "100%",
         padding: "1em",
         background: "#2ed8b6",
-        color: "#fff",
+        color: "#06302a",
         border: "none",
         borderRadius: "8px",
         fontSize: "1.1em",

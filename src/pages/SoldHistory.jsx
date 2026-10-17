@@ -88,7 +88,7 @@ const ItemTitle = styled.div`
 
 const ItemMeta = styled.div`
   font-size: 14px;
-  color: #888;
+  color: #6b7280;
   margin-bottom: 2px;
 `;
 
@@ -128,7 +128,7 @@ const Stat = styled.div`
 const EmptyState = styled.div`
   text-align: center;
   padding: 80px 20px;
-  color: #999;
+  color: #6b7280;
 `;
 
 const EmptyIcon = styled.div`

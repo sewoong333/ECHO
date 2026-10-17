@@ -103,7 +103,7 @@ const FilterChip = styled.button`
   border: 1px solid ${props => props.active ? '#2ed8b6' : '#e0e0e0'};
   border-radius: 20px;
   background: ${props => props.active ? '#2ed8b6' : 'white'};
-  color: ${props => props.active ? 'white' : '#666'};
+  color: ${props => props.active ? '#06302a' : '#666'};
   font-size: 14px;
   cursor: pointer;
   white-space: nowrap;
@@ -111,7 +111,7 @@ const FilterChip = styled.button`
   
   &:hover {
     border-color: #2ed8b6;
-    color: ${props => props.active ? 'white' : '#2ed8b6'};
+    color: ${props => props.active ? '#06302a' : '#0b7a68'};
   }
 `;
 
@@ -187,7 +187,7 @@ const StatusBadge = styled.div`
 const ProductPrice = styled.div`
   font-size: 18px;
   font-weight: 700;
-  color: #2ed8b6;
+  color: #0b7a68;
   margin-bottom: 8px;
 `;
 

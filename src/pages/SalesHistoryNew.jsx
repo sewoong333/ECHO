@@ -110,7 +110,7 @@ const ItemTitle = styled.div`
 
 const ItemMeta = styled.div`
   font-size: 14px;
-  color: #888;
+  color: #6b7280;
   margin-bottom: 2px;
 `;
 
@@ -244,7 +244,7 @@ function SalesHistoryNew() {
             onClick={() => window.location.reload()}
             style={{
               background: "#2ed8b6",
-              color: "white",
+              color: "#06302a",
               border: "none",
               borderRadius: "8px",
               padding: "12px 24px",

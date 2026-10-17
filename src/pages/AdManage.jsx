@@ -49,7 +49,7 @@ export default function AdManage() {
             marginTop: 8,
             padding: "8px 18px",
             background: "#2ed8b6",
-            color: "#fff",
+            color: "#06302a",
             border: "none",
             borderRadius: 8,
             fontWeight: 700,
@@ -76,7 +76,7 @@ export default function AdManage() {
           <div style={{ fontWeight: 600, fontSize: 17, marginBottom: 6 }}>
             {a.title}
           </div>
-          <div style={{ color: "#888", marginBottom: 8 }}>{a.desc}</div>
+          <div style={{ color: "#6b7280", marginBottom: 8 }}>{a.desc}</div>
           <button
             onClick={() => handleDelete(a.id)}
             style={{
@@ -84,7 +84,7 @@ export default function AdManage() {
               top: 12,
               right: 12,
               background: "#2ed8b6",
-              color: "#fff",
+              color: "#06302a",
               border: "none",
               borderRadius: 6,
               padding: "4px 10px",

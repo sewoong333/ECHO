@@ -40,7 +40,7 @@ const CommentsTitle = styled.h3`
 `;
 
 const CommentCount = styled.span`
-  color: #2ed8b6;
+  color: #0b7a68;
   font-weight: 500;
 `;
 
@@ -66,7 +66,7 @@ const CommentTextarea = styled.textarea`
   }
 
   &::placeholder {
-    color: #999;
+    color: #6b7280;
   }
 `;
 
@@ -79,12 +79,12 @@ const CommentSubmitArea = styled.div`
 
 const CharCount = styled.span`
   font-size: 12px;
-  color: ${props => props.exceeded ? '#e74c3c' : '#999'};
+  color: ${props => props.exceeded ? '#e74c3c' : '#6b7280'};
 `;
 
 const SubmitButton = styled.button`
   background: ${props => props.disabled ? '#ccc' : '#2ed8b6'};
-  color: white;
+  color: #06302a;
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
@@ -149,13 +149,13 @@ const AuthorName = styled.span`
 
 const CommentTime = styled.span`
   font-size: 12px;
-  color: #999;
+  color: #6b7280;
   margin-left: 8px;
 `;
 
 const EditedBadge = styled.span`
   font-size: 11px;
-  color: #999;
+  color: #6b7280;
   background: #f0f0f0;
   padding: 2px 6px;
   border-radius: 4px;
@@ -169,7 +169,7 @@ const CommentActions = styled.div`
 const ActionButton = styled.button`
   background: none;
   border: none;
-  color: #999;
+  color: #6b7280;
   cursor: pointer;
   padding: 4px;
   border-radius: 4px;
@@ -238,7 +238,7 @@ const LikeButton = styled.button`
   align-items: center;
   gap: 4px;
   cursor: pointer;
-  color: ${props => props.liked ? '#e74c3c' : '#999'};
+  color: ${props => props.liked ? '#e74c3c' : '#6b7280'};
   font-size: 12px;
   padding: 4px 0;
   transition: color 0.2s;
@@ -255,13 +255,13 @@ const ReplyButton = styled.button`
   align-items: center;
   gap: 4px;
   cursor: pointer;
-  color: #999;
+  color: #6b7280;
   font-size: 12px;
   padding: 4px 0;
   transition: color 0.2s;
 
   &:hover {
-    color: #2ed8b6;
+    color: #0b7a68;
   }
 `;
 
@@ -303,7 +303,7 @@ const EditButton = styled.button`
 
 const SaveButton = styled(EditButton)`
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
 
   &:hover {
     background: #26c4a8;
@@ -708,7 +708,7 @@ const EnhancedComments = ({ postId, initialComments = [] }) => {
           <div style={{ 
             textAlign: 'center', 
             padding: '40px 0', 
-            color: '#999',
+            color: '#6b7280',
             fontSize: '14px'
           }}>
             아직 댓글이 없습니다. 첫 댓글을 작성해보세요! 💭

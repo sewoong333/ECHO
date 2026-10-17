@@ -405,7 +405,7 @@ const BulkProductUpload = ({ onClose, onSuccess }) => {
                                 : row.description}
                             </span>
                           ) : (
-                            <span style={{ color: '#999', fontStyle: 'italic' }}>
+                            <span style={{ color: '#6b7280', fontStyle: 'italic' }}>
                               자동 생성됨
                             </span>
                           )}
@@ -597,7 +597,7 @@ const TemplateButton = styled.button`
   align-items: center;
   gap: 8px;
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 6px;
   padding: 10px 16px;
@@ -774,7 +774,7 @@ const MatchingTypeButton = styled.button`
   padding: 8px 12px;
   border: 2px solid ${props => props.active ? '#2ed8b6' : '#e9ecef'};
   background: ${props => props.active ? '#2ed8b6' : 'white'};
-  color: ${props => props.active ? 'white' : '#666'};
+  color: ${props => props.active ? '#06302a' : '#666'};
   border-radius: 6px;
   font-size: 12px;
   font-weight: 500;
@@ -915,7 +915,7 @@ const ActionButtons = styled.div`
 
 const PrimaryButton = styled.button`
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 6px;
   padding: 12px 24px;
@@ -954,7 +954,7 @@ const SecondaryButton = styled.button`
 const SuccessIcon = styled.div`
   display: flex;
   justify-content: center;
-  color: #2ed8b6;
+  color: #0b7a68;
 `;
 
 const AutoDescriptionInfo = styled.div`

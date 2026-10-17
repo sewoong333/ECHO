@@ -84,7 +84,7 @@ const LoadingState = styled.div`
   svg {
     animation: spin 1s linear infinite;
     margin-bottom: 16px;
-    color: #2ed8b6;
+    color: #0b7a68;
   }
   
   @keyframes spin {
@@ -101,7 +101,7 @@ const LoadingText = styled.div`
 
 const LoadingSubText = styled.div`
   font-size: 14px;
-  color: #999;
+  color: #6b7280;
 `;
 
 const AnalysisResult = styled.div`
@@ -118,7 +118,7 @@ const AnalysisResult = styled.div`
 const PredictedPrice = styled.div`
   font-size: 32px;
   font-weight: 700;
-  color: #2ed8b6;
+  color: #0b7a68;
   margin-bottom: 8px;
 `;
 
@@ -189,7 +189,7 @@ const OptionTitle = styled.div`
 const OptionPrice = styled.div`
   font-size: 18px;
   font-weight: 700;
-  color: #2ed8b6;
+  color: #0b7a68;
 `;
 
 const OptionDescription = styled.div`
@@ -203,7 +203,7 @@ const OptionMeta = styled.div`
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: #999;
+  color: #6b7280;
 `;
 
 const MarketDataSection = styled.div`
@@ -236,7 +236,7 @@ const StatItem = styled.div`
 const StatValue = styled.div`
   font-size: 18px;
   font-weight: 700;
-  color: #2ed8b6;
+  color: #0b7a68;
   margin-bottom: 4px;
 `;
 
@@ -283,7 +283,7 @@ const ApplyButton = styled.button`
   width: 100%;
   padding: 16px;
   background: linear-gradient(135deg, #2ed8b6 0%, #25b89a 100%);
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 12px;
   font-size: 16px;
@@ -425,7 +425,7 @@ export default function PriceRecommendationModal({
                 style={{
                   padding: '8px 16px',
                   background: '#2ed8b6',
-                  color: 'white',
+                  color: '#06302a',
                   border: 'none',
                   borderRadius: '8px',
                   cursor: 'pointer'

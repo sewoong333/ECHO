@@ -382,7 +382,7 @@ const WriteButton = styled.button`
   align-items: center;
   gap: 6px;
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 20px;
   padding: 8px 16px;
@@ -426,7 +426,7 @@ const SearchInput = styled.input`
 
 const SearchButton = styled.button`
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 0 8px 8px 0;
   padding: 0 16px;
@@ -560,7 +560,7 @@ const StatItem = styled.div`
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #999;
+  color: #6b7280;
   font-size: 13px;
 `;
 
@@ -576,7 +576,7 @@ const EmptyMessage = styled.div`
 
 const EmptyButton = styled.button`
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 8px;
   padding: 12px 24px;
@@ -593,7 +593,7 @@ const LoadMoreButton = styled.button`
   display: block;
   margin: 20px auto;
   background: transparent;
-  color: #2ed8b6;
+  color: #0b7a68;
   border: 2px solid #2ed8b6;
   border-radius: 8px;
   padding: 12px 24px;
@@ -603,6 +603,6 @@ const LoadMoreButton = styled.button`
   
   &:hover {
     background: #2ed8b6;
-    color: white;
+    color: #06302a;
   }
 `;

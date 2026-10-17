@@ -76,7 +76,7 @@ export default function PurchaseHistory() {
           <div style={{ fontWeight: 600, fontSize: 17, marginBottom: 6 }}>
             {p.title}
           </div>
-          <div style={{ color: "#2ed8b6", fontWeight: 700 }}>{p.price}원</div>
+          <div style={{ color: "#0b7a68", fontWeight: 700 }}>{p.price}원</div>
         </div>
       ))}
     </div>

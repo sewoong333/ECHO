@@ -18,6 +18,9 @@ import { auth, googleProvider, kakaoAuthService } from "../utils/firebase";
 // 카카오 로그인은 Firebase 인증 토큰 발급 서버(커스텀 토큰)가 준비되기 전까지 비활성화.
 // 현재 구조로는 로그인한 것처럼 보이지만 상품 등록·글쓰기·채팅이 모두 권한 오류로 실패함.
 const KAKAO_LOGIN_ENABLED = false;
+
+// 준비중 버튼: 흐리게(투명도) 처리하면 글자가 안 보여서 회색 비활성 스타일로 표시
+const DISABLED_SOCIAL = { background: '#f1f3f5', color: '#4b5563', border: '1px solid #e5e7eb', cursor: 'not-allowed', opacity: 1 };
 const Container = styled.div`
   width: 100%;
   max-width: 400px;
@@ -47,7 +50,7 @@ const Container = styled.div`
 const Logo = styled.div`
   font-size: 2rem;
   font-weight: 800;
-  color: var(--color-mint-main);
+  color: #0b7a68;
   margin-bottom: var(--space-xl);
   background: linear-gradient(135deg, var(--color-mint-main), var(--color-mint-dark));
   -webkit-background-clip: text;
@@ -134,7 +137,7 @@ const LoginButton = styled.button`
   width: 100%;
   height: 50px;
   background: linear-gradient(135deg, var(--color-mint-main), var(--color-mint-dark));
-  color: var(--color-text-inverse);
+  color: #06302a;
   border: none;
   border-radius: var(--radius-xl);
   font-size: 1rem;
@@ -168,7 +171,7 @@ const Divider = styled.div`
   display: flex;
   align-items: center;
   margin: 2em 0;
-  color: #999;
+  color: #6b7280;
   font-size: 14px;
   box-sizing: border-box;
 
@@ -237,7 +240,7 @@ const SignupLink = styled.p`
   box-sizing: border-box;
 
   a {
-    color: var(--color-mint-main);
+    color: #0b7a68;
     text-decoration: none;
     font-weight: 600;
     margin-left: 0.5em;
@@ -712,7 +715,7 @@ export default function Login() {
           <div style={{ fontSize: "14px", color: "#666", marginBottom: "8px" }}>
             현재 <strong>{user.nickname}</strong>님으로 로그인 중입니다
           </div>
-          <div style={{ fontSize: "13px", color: "#888" }}>
+          <div style={{ fontSize: "13px", color: "#6b7280" }}>
             {user.providerId === 'kakao' ? '카카오' : '구글'} 계정 | {user.email}
           </div>
         </div>
@@ -827,7 +830,7 @@ export default function Login() {
         className="kakao" 
         onClick={KAKAO_LOGIN_ENABLED ? handleKakaoLogin : undefined}
         disabled={!KAKAO_LOGIN_ENABLED || isLoading}
-        style={KAKAO_LOGIN_ENABLED ? undefined : { opacity: 0.5, cursor: 'not-allowed' }}
+        style={KAKAO_LOGIN_ENABLED ? undefined : DISABLED_SOCIAL}
       >
         <SiKakaotalk size={24} />
         {KAKAO_LOGIN_ENABLED ? "카카오로 로그인" : "카카오로 로그인 (준비중)"}
@@ -836,7 +839,7 @@ export default function Login() {
       <SocialLoginButton 
         className="naver"
         disabled={true}
-        style={{ opacity: 0.5, cursor: 'not-allowed' }}
+        style={DISABLED_SOCIAL}
       >
         <FaN size={24} />
         네이버로 로그인 (준비중)

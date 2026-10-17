@@ -106,7 +106,7 @@ const ProductTitle = styled.div`
 const ProductPrice = styled.div`
   font-size: 16px;
   font-weight: 700;
-  color: #2ed8b6;
+  color: #0b7a68;
   margin-bottom: 4px;
 `;
 
@@ -185,14 +185,14 @@ const TagButton = styled.button`
   border: 1px solid ${props => props.selected ? '#2ed8b6' : '#e0e0e0'};
   border-radius: 20px;
   background: ${props => props.selected ? '#2ed8b6' : 'white'};
-  color: ${props => props.selected ? 'white' : '#666'};
+  color: ${props => props.selected ? '#06302a' : '#666'};
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   
   &:hover {
     border-color: #2ed8b6;
-    color: ${props => props.selected ? 'white' : '#2ed8b6'};
+    color: ${props => props.selected ? '#06302a' : '#0b7a68'};
   }
 `;
 
@@ -217,14 +217,14 @@ const CommentTextarea = styled.textarea`
   }
   
   &::placeholder {
-    color: #999;
+    color: #6b7280;
   }
 `;
 
 const CharacterCount = styled.div`
   text-align: right;
   font-size: 12px;
-  color: #999;
+  color: #6b7280;
   margin-top: 4px;
 `;
 
@@ -251,7 +251,7 @@ const SubmitButton = styled.button`
   width: 100%;
   padding: 16px;
   background: linear-gradient(135deg, #2ed8b6 0%, #25b89a 100%);
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 12px;
   font-size: 16px;

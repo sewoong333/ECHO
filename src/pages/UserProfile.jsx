@@ -169,7 +169,7 @@ const ProfileAvatar = styled.div`
   align-items: center;
   justify-content: center;
   margin: 0 auto 16px;
-  color: white;
+  color: #06302a;
   font-size: 32px;
   font-weight: 600;
   border: 3px solid white;
@@ -189,7 +189,7 @@ const ProfileName = styled.div`
 
 const VerifiedBadge = styled.div`
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
   border-radius: 50%;
   width: 24px;
   height: 24px;
@@ -249,7 +249,7 @@ const StatItem = styled.div`
 const StatNumber = styled.div`
   font-size: 20px;
   font-weight: 700;
-  color: #2ed8b6;
+  color: #0b7a68;
   margin-bottom: 4px;
 `;
 
@@ -359,7 +359,7 @@ const TagsGrid = styled.div`
 
 const PopularTag = styled.div`
   background: linear-gradient(135deg, #2ed8b6, #25b89a);
-  color: white;
+  color: #06302a;
   padding: 6px 12px;
   border-radius: 16px;
   font-size: 12px;
@@ -405,7 +405,7 @@ const ReviewerName = styled.div`
 
 const ReviewDate = styled.div`
   font-size: 12px;
-  color: #999;
+  color: #6b7280;
 `;
 
 const ReviewRating = styled.div`

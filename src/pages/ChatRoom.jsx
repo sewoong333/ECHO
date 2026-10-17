@@ -156,7 +156,7 @@ const ProductTitle = styled.div`
 const ProductPrice = styled.div`
   font-size: 16px;
   font-weight: 700;
-  color: #2ed8b6;
+  color: #0b7a68;
   margin-bottom: 4px;
 `;
 
@@ -300,7 +300,7 @@ const MessageBubble = styled.div`
   padding: 10px 14px;
   border-radius: 18px;
   background: ${props => props.isOwn ? '#2ed8b6' : 'white'};
-  color: ${props => props.isOwn ? 'white' : '#333'};
+  color: ${props => props.isOwn ? '#06302a' : '#333'};
   border: ${props => props.isOwn ? 'none' : '1px solid #e0e0e0'};
   word-wrap: break-word;
   position: relative;
@@ -324,13 +324,13 @@ const SystemMessage = styled.div`
 
 const MessageTime = styled.div`
   font-size: 10px;
-  color: #999;
+  color: #6b7280;
   margin: 0 4px;
 `;
 
 const MessageStatus = styled.div`
   font-size: 10px;
-  color: ${props => props.read ? '#4CAF50' : '#999'};
+  color: ${props => props.read ? '#4CAF50' : '#6b7280'};
   margin: 0 4px;
 `;
 
@@ -378,7 +378,7 @@ const ActionButton = styled.button`
   
   &.phone-share {
     background: linear-gradient(135deg, #2ed8b6, #26c4a8);
-    color: white;
+    color: #06302a;
     border: none;
     width: auto;
     padding: 8px 12px;
@@ -411,7 +411,7 @@ const MessageInput = styled.textarea`
   }
   
   &::placeholder {
-    color: #999;
+    color: #6b7280;
   }
 `;
 
@@ -421,7 +421,7 @@ const SendButton = styled.button`
   border-radius: 50%;
   background: ${props => props.disabled ? '#e0e0e0' : '#2ed8b6'};
   border: none;
-  color: white;
+  color: #06302a;
   cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
   display: flex;
   align-items: center;
@@ -533,7 +533,7 @@ const PhoneModalButton = styled.button`
   
   &.share {
     background: #2ed8b6;
-    color: white;
+    color: #06302a;
   }
   
   &:hover {
@@ -779,7 +779,7 @@ export default function ChatRoom() {
             style={{
               padding: '8px 16px',
               background: '#2ed8b6',
-              color: 'white',
+              color: '#06302a',
               border: 'none',
               borderRadius: '8px',
               cursor: 'pointer',

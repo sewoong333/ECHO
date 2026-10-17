@@ -369,7 +369,7 @@ const Input = styled.input`
   }
   
   &::placeholder {
-    color: #999;
+    color: #6b7280;
   }
 `;
 
@@ -404,14 +404,14 @@ const TextArea = styled.textarea`
   }
   
   &::placeholder {
-    color: #999;
+    color: #6b7280;
     line-height: 1.6;
   }
 `;
 
 const CharCount = styled.div`
   font-size: 12px;
-  color: #999;
+  color: #6b7280;
   text-align: right;
   margin-top: 4px;
 `;
@@ -450,7 +450,7 @@ const ImageUpload = styled.div`
     small {
       margin-top: 4px;
       font-size: 12px;
-      color: #999;
+      color: #6b7280;
     }
   }
 `;
@@ -522,7 +522,7 @@ const CancelButton = styled.button`
 const SubmitButton = styled.button`
   padding: 14px 24px;
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 8px;
   font-size: 16px;
@@ -567,7 +567,7 @@ const AddressInputContainer = styled.div`
 
 const SearchAddressButton = styled.button`
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
   border: none;
   border-radius: 8px;
   padding: 0 16px;

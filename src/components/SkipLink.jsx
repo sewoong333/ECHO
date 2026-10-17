@@ -16,7 +16,7 @@ const SkipLinkButton = styled.a`
   display: inline-block;
   padding: 8px 16px;
   background: #2ed8b6;
-  color: white;
+  color: #06302a;
   text-decoration: none;
   border-radius: 4px;
   font-weight: 600;

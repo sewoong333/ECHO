@@ -35,7 +35,7 @@ export default function ReservationManage() {
           <div style={{ fontWeight: 600, fontSize: 17, marginBottom: 6 }}>
             {r.title}
           </div>
-          <div style={{ color: "#888", marginBottom: 8 }}>상태: {r.status}</div>
+          <div style={{ color: "#6b7280", marginBottom: 8 }}>상태: {r.status}</div>
           <button
             onClick={() =>
               handleStatus(r.id, r.status === "대기" ? "완료" : "대기")
@@ -43,7 +43,7 @@ export default function ReservationManage() {
             style={{
               padding: "6px 16px",
               background: "#2ed8b6",
-              color: "#fff",
+              color: "#06302a",
               border: "none",
               borderRadius: 8,
               fontWeight: 700,

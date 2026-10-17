@@ -72,7 +72,7 @@ const Item = styled.button`
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: ${(props) => (props.$active ? "var(--color-mint-main)" : "var(--color-text-tertiary)")};
+  color: ${(props) => (props.$active ? "#0b7a68" : "var(--color-text-tertiary)")};
   font-size: var(--text-xs);
   font-weight: 600;
   cursor: pointer;
